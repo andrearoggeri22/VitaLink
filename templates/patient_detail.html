@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ patient.first_name }} {{ patient.last_name }} - {{ _('Healthcare Monitoring Platform') }}{% endblock %}
+{% block title %}{{ patient.first_name }} {{ patient.last_name }} - {{ _('VitaLink') }}{% endblock %}
 
 {% block content %}
 <div class="patient-header">
@@ -11,8 +11,8 @@
             {% if patient.gender %}
             <span class="badge bg-info text-dark me-2">{{ patient.gender }}</span>
             {% endif %}
-            <span class="me-2">DOB: {{ patient.date_of_birth.strftime('%Y-%m-%d') }}</span>
-            <span>Age: {{ (now.date() - patient.date_of_birth).days // 365 }}</span>
+            <span class="me-2">{{ _('DOB') }}: {{ patient.date_of_birth.strftime('%Y-%m-%d') }}</span>
+            <span>{{ _('Age') }}: {{ (now.date() - patient.date_of_birth).days // 365 }}</span>
         </div>
     </div>
     
