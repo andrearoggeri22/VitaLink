@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-04-21 17:20+0000\n"
+"POT-Creation-Date: 2025-04-21 17:35+0000\n"
 "PO-Revision-Date: 2025-04-21 17:20+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: it\n"
@@ -18,165 +18,209 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: templates/base.html:6
+#: templates/base.html:6 templates/dashboard.html:3 templates/login.html:3
+#: templates/register.html:3
 msgid "Healthcare Monitoring Platform"
 msgstr "Piattaforma di Monitoraggio Sanitario"
 
-#: templates/base.html:30
+#: templates/base.html:30 templates/login.html:12
 msgid "Healthcare Monitor"
 msgstr "Monitoraggio Sanitario"
 
-#: templates/base.html:44
+#: templates/base.html:44 templates/dashboard.html:3 templates/dashboard.html:7
 msgid "Dashboard"
 msgstr "Pannello di Controllo"
 
-#: templates/base.html:50
+#: templates/base.html:50 templates/dashboard.html:16
 msgid "Patients"
 msgstr "Pazienti"
 
-#: templates/base.html:56
+#: templates/base.html:56 templates/dashboard.html:62
 msgid "Audit Logs"
 msgstr "Registro Attività"
 
-#: templates/base.html:66
+#: templates/base.html:71
 msgid "Language"
 msgstr "Lingua"
 
-#: templates/base.html:88
+#: templates/base.html:94
 msgid "Profile"
 msgstr "Profilo"
 
-#: templates/base.html:94
+#: templates/base.html:100
 msgid "Logout"
 msgstr "Disconnetti"
 
-#: templates/base.html:126
+#: templates/base.html:132
 msgid "Healthcare Monitoring Platform. All rights reserved."
 msgstr "Piattaforma di Monitoraggio Sanitario. Tutti i diritti riservati."
 
+#: templates/dashboard.html:18
 msgid "Total patients under your care"
 msgstr "Pazienti totali in cura"
 
+#: templates/dashboard.html:27
 msgid "View all patients"
 msgstr "Visualizza tutti i pazienti"
 
+#: templates/dashboard.html:38
 msgid "Quick Actions"
 msgstr "Azioni Rapide"
 
+#: templates/dashboard.html:39
 msgid "Manage your patients and vital signs"
 msgstr "Gestisci i tuoi pazienti e segni vitali"
 
+#: templates/dashboard.html:48
 msgid "New Patient"
 msgstr "Nuovo Paziente"
 
+#: templates/dashboard.html:51
 msgid "Search Patients"
 msgstr "Cerca Pazienti"
 
+#: templates/dashboard.html:63
 msgid "Monitor changes and actions in the system"
 msgstr "Monitora modifiche e azioni nel sistema"
 
+#: templates/dashboard.html:72
 msgid "View activity logs"
 msgstr "Visualizza log attività"
 
+#: templates/dashboard.html:83
 msgid "System Status"
 msgstr "Stato del Sistema"
 
+#: templates/dashboard.html:84
 msgid "Active"
 msgstr "Attivo"
 
+#: templates/dashboard.html:85
 msgid "All systems operational"
 msgstr "Tutti i sistemi operativi"
 
+#: templates/dashboard.html:94
 msgid "Last updated"
 msgstr "Ultimo aggiornamento"
 
+#: templates/dashboard.html:107
 msgid "Recent Patients"
 msgstr "Pazienti Recenti"
 
+#: templates/dashboard.html:110
 msgid "View All"
 msgstr "Visualizza Tutti"
 
+#: templates/dashboard.html:118
 msgid "Name"
 msgstr "Nome"
 
+#: templates/dashboard.html:119
 msgid "ID"
 msgstr "ID"
 
+#: templates/dashboard.html:120
 msgid "Added"
 msgstr "Aggiunto"
 
+#: templates/dashboard.html:121
 msgid "Actions"
 msgstr "Azioni"
 
+#: templates/dashboard.html:142
 msgid "No patients added yet"
 msgstr "Nessun paziente aggiunto"
 
+#: templates/dashboard.html:158
 msgid "Recent Vital Signs"
 msgstr "Segni Vitali Recenti"
 
+#: templates/dashboard.html:166
 msgid "Patient"
 msgstr "Paziente"
 
+#: templates/dashboard.html:167
 msgid "Type"
 msgstr "Tipo"
 
+#: templates/dashboard.html:168
 msgid "Value"
 msgstr "Valore"
 
+#: templates/dashboard.html:169
 msgid "Time"
 msgstr "Ora"
 
+#: templates/dashboard.html:196
 msgid "No vital signs recorded yet"
 msgstr "Nessun segno vitale registrato"
 
+#: templates/login.html:3 templates/login.html:49
 msgid "Login"
 msgstr "Accedi"
 
-msgid "Register"
-msgstr "Registrati"
-
-msgid "Healthcare Monitoring Platform"
-msgstr "Piattaforma di Monitoraggio Sanitario"
-
-msgid "Healthcare Monitor"
-msgstr "Monitor Sanitario"
-
+#: templates/login.html:13
 msgid "Please login to access the platform"
 msgstr "Accedi per utilizzare la piattaforma"
 
+#: templates/login.html:30 templates/register.html:29
+msgid "Email address"
+msgstr ""
+
+#: templates/login.html:39 templates/register.html:51
+#, fuzzy
+msgid "Password"
+msgstr "Conferma Password"
+
+#: templates/login.html:57
 msgid "New doctor? Register here"
 msgstr "Nuovo medico? Registrati qui"
 
+#: templates/login.html:61
 msgid "This is a secure platform for healthcare professionals only."
 msgstr "Questa è una piattaforma sicura solo per professionisti sanitari."
 
+#: templates/login.html:62
 msgid "Unauthorized access is strictly prohibited."
 msgstr "L'accesso non autorizzato è severamente vietato."
 
+#: templates/register.html:3
+msgid "Register"
+msgstr "Registrati"
+
+#: templates/register.html:10
 msgid "Doctor Registration"
 msgstr "Registrazione Medico"
 
+#: templates/register.html:31
 msgid "We'll never share your email with anyone else."
 msgstr "Non condivideremo mai la tua email con nessun altro."
 
+#: templates/register.html:36
 msgid "First Name"
 msgstr "Nome"
 
+#: templates/register.html:40
 msgid "Last Name"
 msgstr "Cognome"
 
+#: templates/register.html:46
 msgid "Medical Specialty"
 msgstr "Specializzazione Medica"
 
+#: templates/register.html:56
 msgid "Confirm Password"
 msgstr "Conferma Password"
 
+#: templates/register.html:61
 msgid "Create Account"
 msgstr "Crea Account"
 
+#: templates/register.html:66
 msgid "Already have an account?"
 msgstr "Hai già un account?"
 
+#: templates/register.html:66
 msgid "Login here"
 msgstr "Accedi qui"
 

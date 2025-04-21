@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-04-21 17:20+0000\n"
+"POT-Creation-Date: 2025-04-21 17:35+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,39 +17,208 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: templates/base.html:6
+#: templates/base.html:6 templates/dashboard.html:3 templates/login.html:3
+#: templates/register.html:3
 msgid "Healthcare Monitoring Platform"
 msgstr ""
 
-#: templates/base.html:30
+#: templates/base.html:30 templates/login.html:12
 msgid "Healthcare Monitor"
 msgstr ""
 
-#: templates/base.html:44
+#: templates/base.html:44 templates/dashboard.html:3 templates/dashboard.html:7
 msgid "Dashboard"
 msgstr ""
 
-#: templates/base.html:50
+#: templates/base.html:50 templates/dashboard.html:16
 msgid "Patients"
 msgstr ""
 
-#: templates/base.html:56
+#: templates/base.html:56 templates/dashboard.html:62
 msgid "Audit Logs"
 msgstr ""
 
-#: templates/base.html:66
+#: templates/base.html:71
 msgid "Language"
 msgstr ""
 
-#: templates/base.html:88
+#: templates/base.html:94
 msgid "Profile"
 msgstr ""
 
-#: templates/base.html:94
+#: templates/base.html:100
 msgid "Logout"
 msgstr ""
 
-#: templates/base.html:126
+#: templates/base.html:132
 msgid "Healthcare Monitoring Platform. All rights reserved."
+msgstr ""
+
+#: templates/dashboard.html:18
+msgid "Total patients under your care"
+msgstr ""
+
+#: templates/dashboard.html:27
+msgid "View all patients"
+msgstr ""
+
+#: templates/dashboard.html:38
+msgid "Quick Actions"
+msgstr ""
+
+#: templates/dashboard.html:39
+msgid "Manage your patients and vital signs"
+msgstr ""
+
+#: templates/dashboard.html:48
+msgid "New Patient"
+msgstr ""
+
+#: templates/dashboard.html:51
+msgid "Search Patients"
+msgstr ""
+
+#: templates/dashboard.html:63
+msgid "Monitor changes and actions in the system"
+msgstr ""
+
+#: templates/dashboard.html:72
+msgid "View activity logs"
+msgstr ""
+
+#: templates/dashboard.html:83
+msgid "System Status"
+msgstr ""
+
+#: templates/dashboard.html:84
+msgid "Active"
+msgstr ""
+
+#: templates/dashboard.html:85
+msgid "All systems operational"
+msgstr ""
+
+#: templates/dashboard.html:94
+msgid "Last updated"
+msgstr ""
+
+#: templates/dashboard.html:107
+msgid "Recent Patients"
+msgstr ""
+
+#: templates/dashboard.html:110
+msgid "View All"
+msgstr ""
+
+#: templates/dashboard.html:118
+msgid "Name"
+msgstr ""
+
+#: templates/dashboard.html:119
+msgid "ID"
+msgstr ""
+
+#: templates/dashboard.html:120
+msgid "Added"
+msgstr ""
+
+#: templates/dashboard.html:121
+msgid "Actions"
+msgstr ""
+
+#: templates/dashboard.html:142
+msgid "No patients added yet"
+msgstr ""
+
+#: templates/dashboard.html:158
+msgid "Recent Vital Signs"
+msgstr ""
+
+#: templates/dashboard.html:166
+msgid "Patient"
+msgstr ""
+
+#: templates/dashboard.html:167
+msgid "Type"
+msgstr ""
+
+#: templates/dashboard.html:168
+msgid "Value"
+msgstr ""
+
+#: templates/dashboard.html:169
+msgid "Time"
+msgstr ""
+
+#: templates/dashboard.html:196
+msgid "No vital signs recorded yet"
+msgstr ""
+
+#: templates/login.html:3 templates/login.html:49
+msgid "Login"
+msgstr ""
+
+#: templates/login.html:13
+msgid "Please login to access the platform"
+msgstr ""
+
+#: templates/login.html:30 templates/register.html:29
+msgid "Email address"
+msgstr ""
+
+#: templates/login.html:39 templates/register.html:51
+msgid "Password"
+msgstr ""
+
+#: templates/login.html:57
+msgid "New doctor? Register here"
+msgstr ""
+
+#: templates/login.html:61
+msgid "This is a secure platform for healthcare professionals only."
+msgstr ""
+
+#: templates/login.html:62
+msgid "Unauthorized access is strictly prohibited."
+msgstr ""
+
+#: templates/register.html:3
+msgid "Register"
+msgstr ""
+
+#: templates/register.html:10
+msgid "Doctor Registration"
+msgstr ""
+
+#: templates/register.html:31
+msgid "We'll never share your email with anyone else."
+msgstr ""
+
+#: templates/register.html:36
+msgid "First Name"
+msgstr ""
+
+#: templates/register.html:40
+msgid "Last Name"
+msgstr ""
+
+#: templates/register.html:46
+msgid "Medical Specialty"
+msgstr ""
+
+#: templates/register.html:56
+msgid "Confirm Password"
+msgstr ""
+
+#: templates/register.html:61
+msgid "Create Account"
+msgstr ""
+
+#: templates/register.html:66
+msgid "Already have an account?"
+msgstr ""
+
+#: templates/register.html:66
+msgid "Login here"
 msgstr ""
 
