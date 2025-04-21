@@ -20,16 +20,16 @@ logger = logging.getLogger(__name__)
 # Registration form
 class RegistrationForm(FlaskForm):
     email = EmailField('Email', validators=[DataRequired(), Email()])
-    first_name = StringField('First Name', validators=[DataRequired(), Length(min=2, max=100)])
-    last_name = StringField('Last Name', validators=[DataRequired(), Length(min=2, max=100)])
-    specialty = StringField('Specialty')
+    first_name = StringField('Nome', validators=[DataRequired(), Length(min=2, max=100)])
+    last_name = StringField('Cognome', validators=[DataRequired(), Length(min=2, max=100)])
+    specialty = StringField('Specialità')
     password = PasswordField('Password', validators=[
         DataRequired(),
-        Length(min=8, message="Password must be at least 8 characters long")
+        Length(min=8, message="La password deve essere di almeno 8 caratteri")
     ])
-    confirm_password = PasswordField('Confirm Password', validators=[
+    confirm_password = PasswordField('Conferma Password', validators=[
         DataRequired(),
-        EqualTo('password', message="Passwords must match")
+        EqualTo('password', message="Le password devono corrispondere")
     ])
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
@@ -45,7 +45,7 @@ def register():
         # Check if email already exists
         existing_doctor = Doctor.query.filter_by(email=email).first()
         if existing_doctor:
-            flash('An account with this email already exists', 'danger')
+            flash(_('Un account con questa email esiste già'), 'danger')
             return render_template('register.html', form=form, now=datetime.now())
         
         # Check password strength
@@ -66,12 +66,12 @@ def register():
         try:
             db.session.add(doctor)
             db.session.commit()
-            flash('Registration successful! You can now log in.', 'success')
+            flash(_('Registrazione completata con successo! Ora puoi accedere.'), 'success')
             logger.info(f"New doctor registered: {email}")
             return redirect(url_for('auth.login'))
         except:
             db.session.rollback()
-            flash('An error occurred during registration. Please try again.', 'danger')
+            flash(_('Si è verificato un errore durante la registrazione. Riprova.'), 'danger')
     
     return render_template('register.html', form=form, now=datetime.now())
     
@@ -99,7 +99,7 @@ def login():
             logger.info(f"Doctor {doctor.id} logged in successfully")
             return redirect(url_for('views.dashboard'))
         else:
-            flash('Invalid email or password', 'danger')
+            flash(_('Email o password non validi'), 'danger')
             
     return render_template('login.html', now=datetime.now())
 
@@ -108,7 +108,7 @@ def login():
 def logout():
     logger.info(f"Doctor {current_user.id} logged out")
     logout_user()
-    flash('You have been logged out successfully', 'success')
+    flash(_('Sei stato disconnesso con successo'), 'success')
     return redirect(url_for('auth.login'))
 
 # API endpoints for JWT authentication
@@ -176,7 +176,7 @@ def doctor_required(f):
         # Flask-Login already ensures the user is authenticated
         # We just need to check if the user is a doctor
         if not hasattr(current_user, 'id'):
-            flash('Authentication required', 'danger')
+            flash(_('Autenticazione richiesta'), 'danger')
             return redirect(url_for('auth.login'))
         
         return f(*args, **kwargs)
