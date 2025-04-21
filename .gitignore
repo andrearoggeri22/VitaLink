@@ -1,0 +1,106 @@
+# File specifici di Replit
+.replit
+.cache/
+replit.nix
+.config/
+.breakpoints
+.pythonlibs/
+.upm/
+.nix/
+.bash_history
+
+# File di ambiente e segreti
+.env
+*.pem
+*.key
+*.crt
+
+# Cache Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+
+# Cartelle di upload temporanee
+uploads/*
+!uploads/.gitkeep
+
+# Logs e dati di debug
+*.log
+logs/
+attached_assets/
+debug/
+
+# Database locali e dati generati
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+
+# File specifici del sistema operativo
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# File di configurazione IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.cproject
+.settings/
+*.sublime-workspace
+*.sublime-project
+
+# File di distribuzione e deployment
+docker-compose.debug.yml
+docker-compose.override.yml
+postgres-data/
+
+# Cartelle virtuali e node_modules
+venv/
+ENV/
+env/
+node_modules/
+jspm_packages/
+bower_components/
+
+# File compilati e build
+*.mo
+*.pot
+.webassets-cache
+public/
+
+# File temporanei e backup
+*.bak
+*.tmp
+*~
+*.swp
+*.swo
