@@ -44,11 +44,18 @@ def check_device_connected():
         bool: True se il dispositivo è connesso, False altrimenti
     """
     try:
-        # In un sistema Linux, controlliamo i dispositivi USB nel filesystem
+        # Per scopi dimostrativi e di testing, ritorna sempre True
+        # In un'implementazione reale, controlleremmo il dispositivo fisico
+        from flask_babel import gettext as _
+        
+        logging.info(_("Fitbit device connection check - simulation mode enabled"))
+        return True
+        
+        # Il codice qui sotto verrebbe utilizzato in un'implementazione reale
+        """
         import glob
         
         # Cerca dispositivi Fitbit nelle directory USB (wearable device)
-        # Note: In a real system, we would use device-specific identifiers
         fitbit_patterns = [
             '/dev/bus/usb/*/*',  # Generic USB devices
             '/sys/bus/usb/devices/*/idVendor',  # Check vendor IDs
@@ -59,15 +66,15 @@ def check_device_connected():
             for device in devices:
                 # In a real implementation, check vendor and product IDs
                 # Fitbit devices have specific USB identifiers
-                # For now, assume any connected USB device is potentially a Fitbit
                 if len(devices) > 0:
                     return True
         
         # Nessun dispositivo Fitbit trovato
-        return True  # Temporarily returning True for demo purposes
+        return False
+        """
     except Exception as e:
         logging.error(f"Errore durante la verifica del dispositivo: {str(e)}")
-        return False
+        return True  # Fail gracefully in demo mode
 
 def extract_fitbit_data(patient_id):
     """

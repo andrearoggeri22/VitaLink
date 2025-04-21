@@ -4,6 +4,7 @@ from datetime import datetime
 from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify, send_file
 from flask_login import login_required, current_user
 from sqlalchemy.exc import SQLAlchemyError
+from flask_babel import gettext as _
 import copy
 
 from app import db
@@ -327,15 +328,15 @@ def patient_vitals(patient_id):
                 )
                 
                 if success:
-                    notification_status = " Abnormal value detected. Patient notification sent."
+                    notification_status = f" {_('Abnormal value detected')}. {_('Patient notification sent')}."
                     logger.info(f"Abnormal vital notification sent to patient {patient.id}")
                 else:
-                    notification_status = f" Abnormal value detected. Failed to send notification: {message}"
+                    notification_status = f" {_('Abnormal value detected')}. {_('Failed to send notification')}: {_(message)}"
                     logger.warning(f"Failed to send vital notification to patient {patient.id}: {message}")
             elif not is_normal:
-                notification_status = " Abnormal value detected (patient has no contact number for notifications)."
+                notification_status = f" {_('Abnormal value detected')} ({_('patient has no contact number for notifications')})."
             
-            flash(f'Vital sign recorded successfully.{notification_status}', 'success')
+            flash(f'{_("Vital sign recorded successfully")}.{notification_status}', 'success')
             logger.info(f"Doctor {current_user.id} added vital sign for patient {patient_id}")
             
         except ValueError:
