@@ -563,3 +563,11 @@ msgstr "Impossibile inviare la notifica"
 msgid "patient has no contact number for notifications"
 msgstr "il paziente non ha un numero di contatto per le notifiche"
 
+#: fitbit_integration.py
+msgid "Fitbit device connection check - simulation mode enabled"
+msgstr "Verifica connessione dispositivo Fitbit - modalità simulazione attivata"
+
+#: views.py
+msgid "Vital sign recorded successfully"
+msgstr "Parametro vitale registrato con successo"
+
