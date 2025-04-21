@@ -8,6 +8,7 @@ from flask_jwt_extended import create_access_token, create_refresh_token, jwt_re
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, EmailField
 from wtforms.validators import DataRequired, Email, EqualTo, Length
+from flask_babel import _
 
 from app import db
 from models import Doctor
