@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Healthcare Monitoring Platform{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">
+    <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+</h1>
+
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="card bg-gradient-primary text-white shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title mb-0">Patients</h6>
+                        <h2 class="my-2">{{ patient_count }}</h2>
+                        <p class="card-text mb-0">Total patients under your care</p>
+                    </div>
+                    <div>
+                        <i class="fas fa-users fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-transparent border-0">
+                <a href="{{ url_for('views.patients') }}" class="text-white text-decoration-none small">
+                    View all patients <i class="fas fa-arrow-right ms-1"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card bg-gradient-success text-white shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title mb-0">Quick Actions</h6>
+                        <p class="card-text mt-3 mb-2">Manage your patients and vital signs</p>
+                    </div>
+                    <div>
+                        <i class="fas fa-tasks fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-transparent border-0 d-flex justify-content-between">
+                <a href="{{ url_for('views.new_patient') }}" class="text-white text-decoration-none small">
+                    <i class="fas fa-plus-circle me-1"></i> New Patient
+                </a>
+                <a href="{{ url_for('views.patients') }}" class="text-white text-decoration-none small">
+                    <i class="fas fa-search me-1"></i> Search Patients
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card bg-gradient-warning text-white shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title mb-0">System Status</h6>
+                        <h2 class="my-2">Active</h2>
+                        <p class="card-text mb-0">All systems operational</p>
+                    </div>
+                    <div>
+                        <i class="fas fa-check-circle fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-transparent border-0">
+                <span class="text-white small">
+                    <i class="fas fa-clock me-1"></i> Last updated: {{ now.strftime('%Y-%m-%d %H:%M') }}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Patients -->
+<div class="row mb-4">
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-user-friends me-2"></i> Recent Patients
+                </h5>
+                <a href="{{ url_for('views.patients') }}" class="btn btn-sm btn-outline-primary">
+                    View All
+                </a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>ID</th>
+                                <th>Added</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if recent_patients %}
+                                {% for patient in recent_patients %}
+                                <tr>
+                                    <td>{{ patient.first_name }} {{ patient.last_name }}</td>
+                                    <td><span class="badge bg-secondary">{{ patient.uuid }}</span></td>
+                                    <td>{{ patient.created_at|format_datetime('%Y-%m-%d') }}</td>
+                                    <td>
+                                        <a href="{{ url_for('views.patient_detail', patient_id=patient.id) }}" 
+                                           class="btn btn-sm btn-outline-info">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-3">
+                                        <p class="text-muted mb-0">No patients added yet</p>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Vital Signs -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-heartbeat me-2"></i> Recent Vital Signs
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Patient</th>
+                                <th>Type</th>
+                                <th>Value</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if recent_vitals %}
+                                {% for vital in recent_vitals %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ url_for('views.patient_detail', patient_id=vital.patient_id) }}" 
+                                           class="text-decoration-none">
+                                            {{ vital.patient.first_name }} {{ vital.patient.last_name }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info text-dark">
+                                            {{ vital.type.value|replace('_', ' ')|title }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {{ vital.value }} {% if vital.unit %}{{ vital.unit }}{% endif %}
+                                    </td>
+                                    <td>{{ vital.recorded_at|format_datetime('%Y-%m-%d %H:%M') }}</td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-3">
+                                        <p class="text-muted mb-0">No vital signs recorded yet</p>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

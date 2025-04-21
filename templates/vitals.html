@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+
+{% block title %}Vital Signs - {{ patient.first_name }} {{ patient.last_name }} - Healthcare Monitoring Platform{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1>Vital Signs</h1>
+        <h5 class="text-muted">{{ patient.first_name }} {{ patient.last_name }}</h5>
+        <span class="badge bg-secondary patient-id">ID: {{ patient.uuid }}</span>
+    </div>
+    
+    <div>
+        <a href="{{ url_for('views.patient_detail', patient_id=patient.id) }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back to Patient
+        </a>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-lg-4 mb-4">
+        <!-- Add Vital Sign Form -->
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i> Add Vital Sign</h5>
+            </div>
+            <div class="card-body">
+                <form id="vitalsForm" method="post" action="{{ url_for('views.patient_vitals', patient_id=patient.id) }}" class="needs-validation" novalidate>
+                    <div class="mb-3">
+                        <label for="vitalType" class="form-label">Type <span class="text-danger">*</span></label>
+                        <select class="form-select" id="vitalType" name="type" required>
+                            <option value="" selected disabled>Select type</option>
+                            {% for type in vital_types %}
+                            <option value="{{ type }}">{{ type|replace('_', ' ')|title }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="invalid-feedback">Please select a vital sign type</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="vitalValue" class="form-label">Value <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="vitalValue" name="value" step="0.01" required>
+                        <div class="invalid-feedback">Please enter a value</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="vitalUnit" class="form-label">Unit</label>
+                        <input type="text" class="form-control" id="vitalUnit" name="unit">
+                        <div class="form-text">Unit will be auto-filled based on the selected type</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="vitalRecordedAt" class="form-label">Date & Time</label>
+                        <input type="datetime-local" class="form-control" id="vitalRecordedAt" name="recorded_at">
+                        <div class="form-text">If left empty, current date/time will be used</div>
+                    </div>
+                    
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i> Save Vital Sign
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-8 mb-4">
+        <!-- Vital Signs Filter Form -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-filter me-2"></i> Filter Vital Signs</h5>
+            </div>
+            <div class="card-body">
+                <form id="vitalsFilterForm" method="get" action="{{ url_for('views.patient_vitals', patient_id=patient.id) }}">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="startDate" class="form-label">Start Date</label>
+                            <input type="date" class="form-control" id="startDate" name="start_date" 
+                                   value="{{ request.args.get('start_date', '') }}">
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <label for="endDate" class="form-label">End Date</label>
+                            <input type="date" class="form-control" id="endDate" name="end_date" 
+                                   value="{{ request.args.get('end_date', '') }}">
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <label for="filterType" class="form-label">Type</label>
+                            <select class="form-select" id="filterType" name="type">
+                                <option value="">All Types</option>
+                                {% for type in vital_types %}
+                                <option value="{{ type }}" {% if request.args.get('type') == type %}selected{% endif %}>
+                                    {{ type|replace('_', ' ')|title }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-end mt-3">
+                        <a href="{{ url_for('views.patient_vitals', patient_id=patient.id) }}" class="btn btn-outline-secondary me-2">
+                            Clear Filters
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search me-1"></i> Apply Filters
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Vital Signs Visualization -->
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i> Vital Signs Trends</h5>
+            </div>
+            <div class="card-body">
+                <!-- Hidden data container for JavaScript -->
+                <div id="vitalsData" style="display: none;" data-vitals="{{ vitals_by_type|tojson }}"></div>
+                
+                <!-- Tabs for different vital sign types -->
+                <ul class="nav nav-tabs" id="vitalsChartTabs" role="tablist">
+                    {% for type in vitals_by_type %}
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link {% if loop.first %}active{% endif %}" 
+                                id="tab-{{ type }}" data-bs-toggle="tab" 
+                                data-bs-target="#chart-tab-{{ type }}" type="button" 
+                                role="tab" aria-controls="chart-tab-{{ type }}" 
+                                aria-selected="{% if loop.first %}true{% else %}false{% endif %}">
+                            {{ type|replace('_', ' ')|title }}
+                        </button>
+                    </li>
+                    {% endfor %}
+                </ul>
+                
+                <div class="tab-content" id="vitalsChartTabContent">
+                    {% for type in vitals_by_type %}
+                    <div class="tab-pane fade {% if loop.first %}show active{% endif %}" 
+                         id="chart-tab-{{ type }}" role="tabpanel" 
+                         aria-labelledby="tab-{{ type }}">
+                        
+                        <div class="vitals-chart-container">
+                            <canvas id="chart-{{ type }}"></canvas>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    {% if not vitals_by_type %}
+                    <div class="text-center py-5">
+                        <p class="text-muted mb-0">No vital signs data available for visualization</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Vital Signs History -->
+<div class="card shadow-sm">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-history me-2"></i> Vital Signs History</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Value</th>
+                        <th>Date & Time</th>
+                        <th>Source</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if vitals %}
+                        {% for vital in vitals %}
+                        <tr>
+                            <td>
+                                <span class="badge bg-info text-dark">
+                                    {{ vital.type.value|replace('_', ' ')|title }}
+                                </span>
+                            </td>
+                            <td>
+                                {{ vital.value }} {% if vital.unit %}{{ vital.unit }}{% endif %}
+                            </td>
+                            <td>{{ vital.recorded_at|format_datetime('%Y-%m-%d %H:%M') }}</td>
+                            <td>
+                                {% if vital.origin.value == 'manual' %}
+                                <span class="badge bg-secondary">Manual</span>
+                                {% else %}
+                                <span class="badge bg-primary">Device</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center py-3">
+                                <p class="text-muted mb-0">No vital signs data found</p>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/vitals.js') }}"></script>
+{% endblock %}
