@@ -126,7 +126,7 @@
             </div>
             <div class="card-body">
                 <!-- Hidden data container for JavaScript -->
-                <div id="vitalsData" style="display: none;" data-vitals="{{ vitals_by_type|tojson }}"></div>
+                <div id="vitalsData" style="display: none;" data-vitals="{{ vitals_by_type|tojson|safe }}"></div>
                 
                 <!-- Tabs for different vital sign types -->
                 <ul class="nav nav-tabs" id="vitalsChartTabs" role="tablist">
