@@ -19,4 +19,5 @@ dependencies = [
     "twilio>=9.5.2",
     "wtforms>=3.2.1",
     "reportlab>=4.4.0",
+    "flask-babel>=4.0.0",
 ]

@@ -59,6 +59,24 @@
                 </ul>
                 
                 <ul class="navbar-nav">
+                    <!-- Language Selector -->
+                    <li class="nav-item dropdown me-2">
+                        <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-globe me-1"></i> {{ _('Language') }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown">
+                            {% for code, name in config['LANGUAGES'].items() %}
+                            <li>
+                                <a class="dropdown-item {% if session.get('language') == code %}active{% endif %}" 
+                                   href="{{ url_for('language.change_language', lang_code=code, next=request.path) }}">
+                                    {{ name }}
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                    
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                            data-bs-toggle="dropdown" aria-expanded="false">
@@ -67,7 +85,7 @@
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                             <li>
                                 <a class="dropdown-item" href="{{ url_for('views.profile') }}">
-                                    <i class="fas fa-id-card me-1"></i> Profile
+                                    <i class="fas fa-id-card me-1"></i> {{ _('Profile') }}
                                 </a>
                             </li>
                             <li><hr class="dropdown-divider"></li>
