@@ -171,10 +171,6 @@ def save_fitbit_data(patient_id, data):
                             status=status
                         )
                     
-                    # Registra l'azione nell'audit log
-                    if current_user and hasattr(current_user, 'id'):
-                        log_vital_creation(current_user.id, vital)
-                    
                 except Exception as e:
                     errors.append(f"Errore nel salvataggio del parametro {data_type}: {str(e)}")
         
