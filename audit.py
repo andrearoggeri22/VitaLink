@@ -130,7 +130,7 @@ def get_audit_logs():
     # Render the audit logs template
     return render_template(
         'audit_logs.html',
-        logs=[log.to_dict() for log in logs],
+        logs=[log.to_dict() for log in logs],  # log.to_dict() già include doctor_name e patient_name
         patients=patients,
         doctors=doctors,
         request=request,
@@ -206,7 +206,7 @@ def get_audit_stats():
         db.func.count(AuditLog.id).label('access_count')
     ).join(Patient).filter(
         AuditLog.timestamp >= start_date,
-        AuditLog.patient_id.isnot(None)
+        AuditLog.patient_id != None  # Equivalente a "is not None"
     ).group_by(
         AuditLog.patient_id,
         Patient.first_name,
