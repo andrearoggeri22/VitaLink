@@ -379,18 +379,12 @@ def patient_vitals(patient_id):
     
     vitals = query.order_by(VitalSign.recorded_at.desc()).all()
     
-    # Organize vitals by type for plotting
+    # Get all vital sign types for tabs
     vitals_by_type = {}
-    for vital in patient.vital_signs.order_by(VitalSign.recorded_at).all():
+    for vital in patient.vital_signs.all():
         type_name = vital.type.value
         if type_name not in vitals_by_type:
-            vitals_by_type[type_name] = []
-        
-        vitals_by_type[type_name].append({
-            'value': vital.value,
-            'recorded_at': vital.recorded_at.isoformat(),
-            'unit': vital.unit
-        })
+            vitals_by_type[type_name] = True
     
     return render_template('vitals.html', 
                           patient=patient,
@@ -398,6 +392,59 @@ def patient_vitals(patient_id):
                           vitals_by_type=vitals_by_type,
                           vital_types=[type.value for type in VitalSignType],
                           now=datetime.now())
+                          
+@views_bp.route('/api/patients/<int:patient_id>/vitals')
+@login_required
+def api_patient_vitals(patient_id):
+    """API endpoint to get vital signs data in JSON format"""
+    patient = Patient.query.get_or_404(patient_id)
+    
+    # Check if the current doctor is associated with this patient
+    if patient not in current_user.patients.all():
+        return jsonify({'error': 'Not authorized'}), 403
+    
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    vital_type = request.args.get('type')
+    
+    query = patient.vital_signs
+    
+    if start_date:
+        try:
+            start_datetime = datetime.strptime(start_date, '%Y-%m-%d')
+            query = query.filter(VitalSign.recorded_at >= start_datetime)
+        except ValueError:
+            return jsonify({'error': 'Invalid start date format'}), 400
+    
+    if end_date:
+        try:
+            end_datetime = datetime.strptime(end_date, '%Y-%m-%d')
+            end_datetime = end_datetime.replace(hour=23, minute=59, second=59)
+            query = query.filter(VitalSign.recorded_at <= end_datetime)
+        except ValueError:
+            return jsonify({'error': 'Invalid end date format'}), 400
+    
+    if vital_type:
+        try:
+            vital_type_enum = VitalSignType(vital_type)
+            query = query.filter(VitalSign.type == vital_type_enum)
+        except ValueError:
+            return jsonify({'error': 'Invalid vital sign type'}), 400
+    
+    # Organize vitals by type for plotting
+    vitals_by_type = {}
+    for vital in query.order_by(VitalSign.recorded_at).all():
+        type_name = vital.type.value
+        if type_name not in vitals_by_type:
+            vitals_by_type[type_name] = []
+        
+        vitals_by_type[type_name].append({
+            'value': float(vital.value),
+            'recorded_at': vital.recorded_at.isoformat(),
+            'unit': vital.unit or get_vital_sign_unit(type_name)
+        })
+    
+    return jsonify(vitals_by_type)
 
 @views_bp.route('/patients/<int:patient_id>/notes', methods=['POST'])
 @login_required
