@@ -225,10 +225,11 @@ def delete_patient(patient_id):
             for note in patient.notes.all():
                 db.session.delete(note)
             
-            db.session.delete(patient)
-            
-            # Log complete patient deletion in the audit trail
+            # Log complete patient deletion in the audit trail before actually deleting
             log_patient_delete(current_user.id, patient)
+            
+            # Now delete the patient
+            db.session.delete(patient)
         else:
             # Log patient disassociation in the audit trail
             log_action(
