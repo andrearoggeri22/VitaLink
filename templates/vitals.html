@@ -125,8 +125,7 @@
                 <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i> {{ _('Vital Signs Trends') }}</h5>
             </div>
             <div class="card-body">
-                <!-- Hidden data container for JavaScript -->
-                <div id="vitalsData" style="display: none;" data-vitals="{{ vitals_by_type|tojson|safe }}"></div>
+                <!-- I dati vengono caricati dinamicamente tramite API -->
                 
                 <!-- Tabs for different vital sign types -->
                 <ul class="nav nav-tabs" id="vitalsChartTabs" role="tablist">
