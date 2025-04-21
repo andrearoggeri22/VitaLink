@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}{{ _('Healthcare Monitoring Platform') }}{% endblock %}</title>
+    <title>{% block title %}{{ _('VitaLink') }}{% endblock %}</title>
     
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
@@ -27,7 +27,7 @@
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="{{ url_for('views.index') }}">
                 <i class="fas fa-heartbeat me-2"></i>
-                <span>{{ _('Healthcare Monitor') }}</span>
+                <span>{{ _('VitaLink') }}</span>
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
@@ -129,7 +129,7 @@
     <footer class="bg-dark py-3 mt-auto">
         <div class="container text-center">
             <p class="text-muted mb-0">
-                &copy; {{ now.year }} {{ _('Healthcare Monitoring Platform. All rights reserved.') }}
+                &copy; {{ now.year }} {{ _('VitaLink. All rights reserved.') }}
             </p>
         </div>
     </footer>

@@ -20,12 +20,12 @@ msgstr ""
 
 #: templates/base.html:6 templates/dashboard.html:3 templates/login.html:3
 #: templates/register.html:3
-msgid "Healthcare Monitoring Platform"
-msgstr "Piattaforma di Monitoraggio Sanitario"
+msgid "VitaLink"
+msgstr "VitaLink"
 
 #: templates/base.html:30 templates/login.html:12
-msgid "Healthcare Monitor"
-msgstr "Monitoraggio Sanitario"
+msgid "VitaLink"
+msgstr "VitaLink"
 
 #: templates/base.html:44 templates/dashboard.html:3 templates/dashboard.html:7
 msgid "Dashboard"
@@ -52,8 +52,8 @@ msgid "Logout"
 msgstr "Disconnetti"
 
 #: templates/base.html:132
-msgid "Healthcare Monitoring Platform. All rights reserved."
-msgstr "Piattaforma di Monitoraggio Sanitario. Tutti i diritti riservati."
+msgid "VitaLink. All rights reserved."
+msgstr "VitaLink. Tutti i diritti riservati."
 
 #: templates/dashboard.html:18
 msgid "Total patients under your care"
