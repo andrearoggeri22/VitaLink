@@ -289,7 +289,7 @@ function createActionTypeChart(actionStats) {
         data: {
             labels: labels,
             datasets: [{
-                label: 'Number of Actions',
+                label: "{{ _('Number of Actions') }}",
                 data: counts,
                 backgroundColor: colors,
                 borderColor: colors.map(c => c.replace('0.7', '1')),
@@ -355,7 +355,7 @@ function createTimelineChart(timeline) {
         data: {
             labels: timeline.labels,
             datasets: [{
-                label: 'Number of Actions',
+                label: "{{ _('Number of Actions') }}",
                 data: timeline.counts,
                 fill: false,
                 borderColor: 'rgba(75, 192, 192, 1)',
