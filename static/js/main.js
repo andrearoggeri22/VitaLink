@@ -69,7 +69,11 @@ function formatDate(dateString, includeTime = true) {
         options.minute = '2-digit';
     }
     
-    return date.toLocaleDateString('en-US', options);
+    // Use the current language from HTML lang attribute, default to 'en-US'
+    const language = document.documentElement.lang || 'en';
+    const locale = language === 'it' ? 'it-IT' : 'en-US';
+    
+    return date.toLocaleDateString(locale, options);
 }
 
 /**
