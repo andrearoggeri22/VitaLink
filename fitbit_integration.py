@@ -45,8 +45,8 @@ def check_device_connected():
     """
     try:
         # Qui dovrebbe essere implementato il codice per verificare se un dispositivo Fitbit è connesso
-        # Per ora simula la presenza del dispositivo
-        return True
+        # Per ora simula che nessun dispositivo sia connesso
+        return False
     except Exception as e:
         logging.error(f"Errore durante la verifica del dispositivo: {str(e)}")
         return False
