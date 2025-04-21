@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if mode == 'new' %}
+        Add New Patient
+    {% elif mode == 'edit' %}
+        Edit Patient
+    {% else %}
+        Patients
+    {% endif %}
+    - Healthcare Monitoring Platform
+{% endblock %}
+
+{% block content %}
+{% if mode == 'new' %}
+    <!-- New Patient Form -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-user-plus me-2"></i> Add New Patient</h1>
+        <a href="{{ url_for('views.patients') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back to Patients
+        </a>
+    </div>
+    
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form id="patientForm" method="post" action="{{ url_for('views.new_patient') }}" class="needs-validation" novalidate>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="first_name" class="form-label">First Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="first_name" name="first_name" required>
+                        <div class="invalid-feedback">First name is required</div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="last_name" class="form-label">Last Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="last_name" name="last_name" required>
+                        <div class="invalid-feedback">Last name is required</div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="date_of_birth" class="form-label">Date of Birth <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" required>
+                        <div class="invalid-feedback">Date of birth is required</div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="gender" class="form-label">Gender</label>
+                        <select class="form-select" id="gender" name="gender">
+                            <option value="" selected>Select gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                            <option value="Prefer not to say">Prefer not to say</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="contact_number" class="form-label">Contact Number</label>
+                        <input type="tel" class="form-control" id="contact_number" name="contact_number">
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="address" class="form-label">Address</label>
+                    <textarea class="form-control" id="address" name="address" rows="3"></textarea>
+                </div>
+                
+                <div class="d-flex justify-content-end mt-4">
+                    <a href="{{ url_for('views.patients') }}" class="btn btn-outline-secondary me-2">Cancel</a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i> Save Patient
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% elif mode == 'edit' %}
+    <!-- Edit Patient Form -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-user-edit me-2"></i> Edit Patient</h1>
+        <a href="{{ url_for('views.patient_detail', patient_id=patient.id) }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back to Patient
+        </a>
+    </div>
+    
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form id="patientForm" method="post" action="{{ url_for('views.edit_patient', patient_id=patient.id) }}" class="needs-validation" novalidate>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="first_name" class="form-label">First Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="first_name" name="first_name" value="{{ patient.first_name }}" required>
+                        <div class="invalid-feedback">First name is required</div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="last_name" class="form-label">Last Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="last_name" name="last_name" value="{{ patient.last_name }}" required>
+                        <div class="invalid-feedback">Last name is required</div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="date_of_birth" class="form-label">Date of Birth <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" value="{{ patient.date_of_birth.strftime('%Y-%m-%d') }}" required>
+                        <div class="invalid-feedback">Date of birth is required</div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="gender" class="form-label">Gender</label>
+                        <select class="form-select" id="gender" name="gender">
+                            <option value="" {% if not patient.gender %}selected{% endif %}>Select gender</option>
+                            <option value="Male" {% if patient.gender == 'Male' %}selected{% endif %}>Male</option>
+                            <option value="Female" {% if patient.gender == 'Female' %}selected{% endif %}>Female</option>
+                            <option value="Other" {% if patient.gender == 'Other' %}selected{% endif %}>Other</option>
+                            <option value="Prefer not to say" {% if patient.gender == 'Prefer not to say' %}selected{% endif %}>Prefer not to say</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="contact_number" class="form-label">Contact Number</label>
+                        <input type="tel" class="form-control" id="contact_number" name="contact_number" value="{{ patient.contact_number }}">
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="address" class="form-label">Address</label>
+                    <textarea class="form-control" id="address" name="address" rows="3">{{ patient.address }}</textarea>
+                </div>
+                
+                <div class="d-flex justify-content-end mt-4">
+                    <a href="{{ url_for('views.patient_detail', patient_id=patient.id) }}" class="btn btn-outline-secondary me-2">Cancel</a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i> Update Patient
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% else %}
+    <!-- Patient List -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-users me-2"></i> Patients</h1>
+        <a href="{{ url_for('views.new_patient') }}" class="btn btn-primary">
+            <i class="fas fa-user-plus me-1"></i> Add New Patient
+        </a>
+    </div>
+    
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="input-group mb-3">
+                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                <input type="text" class="form-control" id="patientSearch" placeholder="Search by name or ID...">
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>ID</th>
+                            <th>Date of Birth</th>
+                            <th>Added</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if patients %}
+                            {% for patient in patients %}
+                            <tr class="patient-row" data-name="{{ patient.first_name }} {{ patient.last_name }}" data-id="{{ patient.uuid }}">
+                                <td>{{ patient.first_name }} {{ patient.last_name }}</td>
+                                <td><span class="badge bg-secondary">{{ patient.uuid }}</span></td>
+                                <td>{{ patient.date_of_birth.strftime('%Y-%m-%d') }}</td>
+                                <td>{{ patient.created_at|format_datetime('%Y-%m-%d') }}</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="{{ url_for('views.patient_detail', patient_id=patient.id) }}" 
+                                           class="btn btn-sm btn-outline-info" title="View Patient">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{{ url_for('views.patient_vitals', patient_id=patient.id) }}" 
+                                           class="btn btn-sm btn-outline-primary" title="View Vitals">
+                                            <i class="fas fa-heartbeat"></i>
+                                        </a>
+                                        <a href="{{ url_for('views.edit_patient', patient_id=patient.id) }}" 
+                                           class="btn btn-sm btn-outline-warning" title="Edit Patient">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-outline-danger delete-patient" 
+                                                data-id="{{ patient.id }}" data-name="{{ patient.first_name }} {{ patient.last_name }}"
+                                                title="Delete Patient">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                        <form id="deleteForm{{ patient.id }}" action="{{ url_for('views.delete_patient', patient_id=patient.id) }}" method="post" class="d-none">
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr id="noResults">
+                                <td colspan="5" class="text-center py-4">
+                                    <p class="text-muted mb-0">No patients found</p>
+                                    <a href="{{ url_for('views.new_patient') }}" class="btn btn-primary mt-3">
+                                        <i class="fas fa-user-plus me-1"></i> Add New Patient
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div id="noResults" style="display: none;" class="text-center py-4">
+                <p class="text-muted mb-0">No patients match your search</p>
+            </div>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/patients.js') }}"></script>
+{% endblock %}
