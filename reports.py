@@ -145,6 +145,9 @@ def generate_patient_report(patient, doctor, vitals, notes, start_date=None, end
     """
     buffer = BytesIO()
     
+    # Get translations
+    t = get_report_translations()
+    
     # Create the PDF document
     doc = SimpleDocTemplate(
         buffer,
@@ -172,22 +175,22 @@ def generate_patient_report(patient, doctor, vitals, notes, start_date=None, end
     content = []
     
     # Report Header
-    content.append(Paragraph("Healthcare Monitoring Report", styles['Heading1Center']))
+    content.append(Paragraph(t['report_title'], styles['Heading1Center']))
     content.append(Spacer(1, 12))
     
     # Date of report
-    content.append(Paragraph(f"Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M')}", styles['Normal-Center']))
+    content.append(Paragraph(f"{t['generated_on']}: {datetime.now().strftime('%Y-%m-%d %H:%M')}", styles['Normal-Center']))
     content.append(Spacer(1, 24))
     
     # Patient Information
-    content.append(Paragraph("Patient Information", styles['Heading2']))
+    content.append(Paragraph(t['patient_info'], styles['Heading2']))
     content.append(Spacer(1, 6))
     
     patient_data = [
-        ["Name:", f"{patient.first_name} {patient.last_name}"],
-        ["Date of Birth:", patient.date_of_birth.strftime('%Y-%m-%d')],
-        ["Gender:", patient.gender or "Not specified"],
-        ["Contact:", patient.contact_number or "Not provided"]
+        [f"{t['name']}:", f"{patient.first_name} {patient.last_name}"],
+        [f"{t['date_of_birth']}:", patient.date_of_birth.strftime('%Y-%m-%d')],
+        [f"{t['gender']}:", patient.gender or t['not_specified']],
+        [f"{t['contact']}:", patient.contact_number or t['not_provided']]
     ]
     
     patient_table = Table(patient_data, colWidths=[1.5*inch, 4*inch])
@@ -206,13 +209,13 @@ def generate_patient_report(patient, doctor, vitals, notes, start_date=None, end
     content.append(Spacer(1, 12))
     
     # Doctor Information
-    content.append(Paragraph("Attending Physician", styles['Heading2']))
+    content.append(Paragraph(t['attending_physician'], styles['Heading2']))
     content.append(Spacer(1, 6))
     
     doctor_data = [
-        ["Name:", f"Dr. {doctor.first_name} {doctor.last_name}"],
-        ["Specialty:", doctor.specialty or "General Practice"],
-        ["Email:", doctor.email]
+        [f"{t['name']}:", f"Dr. {doctor.first_name} {doctor.last_name}"],
+        [f"{t['specialty']}:", doctor.specialty or t['general_practice']],
+        [f"{t['email']}:", doctor.email]
     ]
     
     doctor_table = Table(doctor_data, colWidths=[1.5*inch, 4*inch])
@@ -231,17 +234,20 @@ def generate_patient_report(patient, doctor, vitals, notes, start_date=None, end
     content.append(Spacer(1, 24))
     
     # Vital Signs
-    content.append(Paragraph("Vital Signs", styles['Heading2']))
+    content.append(Paragraph(t['vital_signs'], styles['Heading2']))
     content.append(Spacer(1, 6))
     
     if vitals:
         # Filter period explanation
         if start_date and end_date:
-            content.append(Paragraph(f"Period: From {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}", styles['Normal']))
+            period_text = t['period_from_to'].format(start_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d'))
+            content.append(Paragraph(period_text, styles['Normal']))
         elif start_date:
-            content.append(Paragraph(f"Period: From {start_date.strftime('%Y-%m-%d')}", styles['Normal']))
+            period_text = t['period_from'].format(start_date.strftime('%Y-%m-%d'))
+            content.append(Paragraph(period_text, styles['Normal']))
         elif end_date:
-            content.append(Paragraph(f"Period: Until {end_date.strftime('%Y-%m-%d')}", styles['Normal']))
+            period_text = t['period_until'].format(end_date.strftime('%Y-%m-%d'))
+            content.append(Paragraph(period_text, styles['Normal']))
             
         content.append(Spacer(1, 12))
         
@@ -264,16 +270,17 @@ def generate_patient_report(patient, doctor, vitals, notes, start_date=None, end
             
             # Reference range info
             if reference['min'] is not None and reference['max'] is not None:
-                content.append(Paragraph(f"Normal Range: {reference['min']} - {reference['max']} {unit}", styles['Normal']))
+                range_text = t['normal_range'].format(reference['min'], reference['max'], unit)
+                content.append(Paragraph(range_text, styles['Normal']))
                 content.append(Spacer(1, 6))
             
             # Table header
-            vitals_data = [["Date & Time", "Value", "Status"]]
+            vitals_data = [[t['datetime'], t['value'], t['status']]]
             
             # Add data rows
             for vital in sorted(type_vitals, key=lambda v: v.recorded_at, reverse=True):
                 # Determine status
-                status = "Normal"
+                status = t['normal']
                 status_color = colors.black
                 
                 if vital_type == 'blood_pressure':
@@ -282,13 +289,12 @@ def generate_patient_report(patient, doctor, vitals, notes, start_date=None, end
                 else:
                     value_display = f"{vital.value} {unit}"
                     # Check if value is outside normal range
-                    value_str = str(vital.value)
                     if reference['min'] is not None and reference['max'] is not None:
                         if vital.value < reference['min']:
-                            status = "Low"
+                            status = t['low']
                             status_color = colors.blue
                         elif vital.value > reference['max']:
-                            status = "High"
+                            status = t['high']
                             status_color = colors.red
                 
                 vitals_data.append([
@@ -315,12 +321,12 @@ def generate_patient_report(patient, doctor, vitals, notes, start_date=None, end
             
             # Add status color coding
             for i in range(1, len(vitals_data)):
-                if vitals_data[i][2] == "High":
+                if vitals_data[i][2] == t['high']:
                     vitals_table.setStyle(TableStyle([
                         ('TEXTCOLOR', (2, i), (2, i), colors.red),
                         ('FONTNAME', (2, i), (2, i), 'Helvetica-Bold')
                     ]))
-                elif vitals_data[i][2] == "Low":
+                elif vitals_data[i][2] == t['low']:
                     vitals_table.setStyle(TableStyle([
                         ('TEXTCOLOR', (2, i), (2, i), colors.blue),
                         ('FONTNAME', (2, i), (2, i), 'Helvetica-Bold')
@@ -329,11 +335,11 @@ def generate_patient_report(patient, doctor, vitals, notes, start_date=None, end
             content.append(vitals_table)
             content.append(Spacer(1, 18))
     else:
-        content.append(Paragraph("No vital signs recorded for this period.", styles['Normal']))
+        content.append(Paragraph(t['no_vitals'], styles['Normal']))
         content.append(Spacer(1, 12))
     
     # Notes
-    content.append(Paragraph("Clinical Notes", styles['Heading2']))
+    content.append(Paragraph(t['clinical_notes'], styles['Heading2']))
     content.append(Spacer(1, 6))
     
     if notes:
@@ -344,7 +350,7 @@ def generate_patient_report(patient, doctor, vitals, notes, start_date=None, end
             content.append(Paragraph(note.content, styles['Normal']))
             content.append(Spacer(1, 12))
     else:
-        content.append(Paragraph("No clinical notes recorded for this patient.", styles['Normal']))
+        content.append(Paragraph(t['no_notes'], styles['Normal']))
     
     # Build the PDF
     doc.build(content)
