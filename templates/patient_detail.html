@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block title %}{{ patient.first_name }} {{ patient.last_name }} - Healthcare Monitoring Platform{% endblock %}
+
+{% block content %}
+<div class="patient-header">
+    <div>
+        <h1>{{ patient.first_name }} {{ patient.last_name }}</h1>
+        <div class="d-flex align-items-center">
+            <span class="badge bg-secondary patient-id me-2">ID: {{ patient.uuid }}</span>
+            {% if patient.gender %}
+            <span class="badge bg-info text-dark me-2">{{ patient.gender }}</span>
+            {% endif %}
+            <span class="me-2">DOB: {{ patient.date_of_birth.strftime('%Y-%m-%d') }}</span>
+            <span>Age: {{ (now.date() - patient.date_of_birth).days // 365 }}</span>
+        </div>
+    </div>
+    
+    <div class="patient-actions">
+        <div class="btn-group" role="group">
+            <a href="{{ url_for('views.patient_vitals', patient_id=patient.id) }}" class="btn btn-outline-primary">
+                <i class="fas fa-heartbeat me-1"></i> Vital Signs
+            </a>
+            <a href="{{ url_for('views.edit_patient', patient_id=patient.id) }}" class="btn btn-outline-warning">
+                <i class="fas fa-edit me-1"></i> Edit
+            </a>
+            <button type="button" class="btn btn-outline-danger delete-patient" 
+                    data-id="{{ patient.id }}" data-name="{{ patient.first_name }} {{ patient.last_name }}">
+                <i class="fas fa-trash-alt me-1"></i> Delete
+            </button>
+            <form id="deleteForm{{ patient.id }}" action="{{ url_for('views.delete_patient', patient_id=patient.id) }}" method="post" class="d-none">
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Patient Information -->
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i> Patient Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <h6 class="text-muted mb-1">Contact Information</h6>
+                    <p>
+                        {% if patient.contact_number %}
+                        <i class="fas fa-phone me-2"></i> {{ patient.contact_number }}<br>
+                        {% else %}
+                        <i class="fas fa-phone me-2"></i> <span class="text-muted">No contact number</span><br>
+                        {% endif %}
+                    </p>
+                </div>
+                
+                <div class="mb-3">
+                    <h6 class="text-muted mb-1">Address</h6>
+                    <p>
+                        {% if patient.address %}
+                        <i class="fas fa-map-marker-alt me-2"></i> {{ patient.address }}
+                        {% else %}
+                        <i class="fas fa-map-marker-alt me-2"></i> <span class="text-muted">No address provided</span>
+                        {% endif %}
+                    </p>
+                </div>
+                
+                <div>
+                    <h6 class="text-muted mb-1">Registration Information</h6>
+                    <p>
+                        <i class="fas fa-calendar-plus me-2"></i> Added on {{ patient.created_at|format_datetime('%Y-%m-%d') }}<br>
+                        <i class="fas fa-clock me-2"></i> Last updated {{ patient.updated_at|format_datetime('%Y-%m-%d %H:%M') }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Vital Signs -->
+    <div class="col-lg-8 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-heartbeat me-2"></i> Recent Vital Signs</h5>
+                <a href="{{ url_for('views.patient_vitals', patient_id=patient.id) }}" class="btn btn-sm btn-outline-primary">
+                    View All
+                </a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Value</th>
+                                <th>Date & Time</th>
+                                <th>Source</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if recent_vitals %}
+                                {% for vital in recent_vitals %}
+                                <tr>
+                                    <td>
+                                        <span class="badge bg-info text-dark">
+                                            {{ vital.type.value|replace('_', ' ')|title }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {{ vital.value }} {% if vital.unit %}{{ vital.unit }}{% endif %}
+                                    </td>
+                                    <td>{{ vital.recorded_at|format_datetime('%Y-%m-%d %H:%M') }}</td>
+                                    <td>
+                                        {% if vital.origin.value == 'manual' %}
+                                        <span class="badge bg-secondary">Manual</span>
+                                        {% else %}
+                                        <span class="badge bg-primary">Device</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-3">
+                                        <p class="text-muted mb-0">No vital signs recorded yet</p>
+                                        <a href="{{ url_for('views.patient_vitals', patient_id=patient.id) }}" class="btn btn-sm btn-primary mt-2">
+                                            <i class="fas fa-plus-circle me-1"></i> Add Vital Signs
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notes Section -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fas fa-sticky-note me-2"></i> Medical Notes</h5>
+        <button type="button" class="btn btn-sm btn-primary" 
+                onclick="openAddNoteModal({{ patient.id }}, '{{ patient.first_name }} {{ patient.last_name }}')">
+            <i class="fas fa-plus-circle me-1"></i> Add Note
+        </button>
+    </div>
+    <div class="card-body">
+        {% if notes %}
+            {% for note in notes %}
+            <div class="note-card card mb-3">
+                <div class="card-body">
+                    <div class="note-meta">
+                        <strong>{{ note.doctor.first_name }} {{ note.doctor.last_name }}</strong> • 
+                        {{ note.created_at|format_datetime('%Y-%m-%d %H:%M') }}
+                    </div>
+                    <p class="card-text mb-0">{{ note.content }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="text-center py-4">
+                <p class="text-muted mb-2">No notes have been added yet</p>
+                <button type="button" class="btn btn-primary" 
+                        onclick="openAddNoteModal({{ patient.id }}, '{{ patient.first_name }} {{ patient.last_name }}')">
+                    <i class="fas fa-plus-circle me-1"></i> Add First Note
+                </button>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Add Note Modal -->
+<div class="modal fade" id="addNoteModal" tabindex="-1" aria-labelledby="addNoteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addNoteModalLabel">Add Note</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="addNoteForm" method="post" action="{{ url_for('views.add_note', patient_id=patient.id) }}">
+                <div class="modal-body">
+                    <input type="hidden" id="notePatientId" name="patient_id" value="{{ patient.id }}">
+                    <div class="mb-3">
+                        <label for="content" class="form-label">Note Content</label>
+                        <textarea class="form-control" id="content" name="content" rows="5" required></textarea>
+                        <div class="form-text">Enter your medical observations, treatment plans, or other relevant information.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Note</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/patients.js') }}"></script>
+{% endblock %}

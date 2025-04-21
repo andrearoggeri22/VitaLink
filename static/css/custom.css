@@ -1,0 +1,116 @@
+/* Custom styles for HealthCare Monitoring Platform */
+
+/* General layout */
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+main {
+    flex: 1;
+}
+
+/* Login page */
+.login-container {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 2rem;
+    border-radius: 0.5rem;
+}
+
+.login-logo {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+/* Dashboard */
+.dashboard-stats {
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    border-radius: 0.5rem;
+    transition: transform 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+/* Patient list */
+.patient-row {
+    transition: background-color 0.2s;
+}
+
+.patient-row:hover {
+    background-color: var(--bs-gray-800);
+}
+
+/* Patient detail */
+.patient-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.patient-id {
+    font-family: monospace;
+    background-color: var(--bs-gray-800);
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+}
+
+/* Vital signs */
+.vitals-chart-container {
+    height: 300px;
+    margin-bottom: 2rem;
+}
+
+.vital-sign-badge {
+    font-size: 0.875rem;
+    padding: 0.35rem 0.65rem;
+}
+
+/* Notes */
+.note-card {
+    margin-bottom: 1rem;
+    border-left: 4px solid var(--bs-info);
+}
+
+.note-meta {
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+    color: var(--bs-gray-600);
+}
+
+/* Utilities */
+.text-monospace {
+    font-family: monospace;
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(45deg, var(--bs-primary), var(--bs-info));
+}
+
+.bg-gradient-success {
+    background: linear-gradient(45deg, var(--bs-success), var(--bs-info));
+}
+
+.bg-gradient-warning {
+    background: linear-gradient(45deg, var(--bs-warning), var(--bs-danger));
+}
+
+/* Responsive fixes */
+@media (max-width: 768px) {
+    .patient-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .patient-actions {
+        margin-top: 1rem;
+    }
+}
