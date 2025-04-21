@@ -5,14 +5,75 @@ from functools import wraps
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, EmailField
+from wtforms.validators import DataRequired, Email, EqualTo, Length
 
 from app import db
 from models import Doctor
-from utils import validate_email
+from utils import validate_email, is_valid_password
 
 auth_bp = Blueprint('auth', __name__)
 logger = logging.getLogger(__name__)
 
+# Registration form
+class RegistrationForm(FlaskForm):
+    email = EmailField('Email', validators=[DataRequired(), Email()])
+    first_name = StringField('First Name', validators=[DataRequired(), Length(min=2, max=100)])
+    last_name = StringField('Last Name', validators=[DataRequired(), Length(min=2, max=100)])
+    specialty = StringField('Specialty')
+    password = PasswordField('Password', validators=[
+        DataRequired(),
+        Length(min=8, message="Password must be at least 8 characters long")
+    ])
+    confirm_password = PasswordField('Confirm Password', validators=[
+        DataRequired(),
+        EqualTo('password', message="Passwords must match")
+    ])
+
+@auth_bp.route('/register', methods=['GET', 'POST'])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('views.dashboard'))
+    
+    form = RegistrationForm()
+    
+    if request.method == 'POST' and form.validate_on_submit():
+        email = form.email.data
+        
+        # Check if email already exists
+        existing_doctor = Doctor.query.filter_by(email=email).first()
+        if existing_doctor:
+            flash('An account with this email already exists', 'danger')
+            return render_template('register.html', form=form, now=datetime.now())
+        
+        # Check password strength
+        is_strong, message = is_valid_password(form.password.data)
+        if not is_strong:
+            flash(message, 'danger')
+            return render_template('register.html', form=form, now=datetime.now())
+        
+        # Create new doctor account
+        doctor = Doctor(
+            email=email,
+            first_name=form.first_name.data,
+            last_name=form.last_name.data,
+            specialty=form.specialty.data
+        )
+        doctor.set_password(form.password.data)
+        
+        try:
+            db.session.add(doctor)
+            db.session.commit()
+            flash('Registration successful! You can now log in.', 'success')
+            logger.info(f"New doctor registered: {email}")
+            return redirect(url_for('auth.login'))
+        except:
+            db.session.rollback()
+            flash('An error occurred during registration. Please try again.', 'danger')
+    
+    return render_template('register.html', form=form, now=datetime.now())
+    
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -24,11 +85,11 @@ def login():
         
         if not email or not password:
             flash('Please provide both email and password', 'danger')
-            return render_template('login.html')
+            return render_template('login.html', now=datetime.now())
         
         if not validate_email(email):
             flash('Invalid email format', 'danger')
-            return render_template('login.html')
+            return render_template('login.html', now=datetime.now())
         
         doctor = Doctor.query.filter_by(email=email).first()
         
