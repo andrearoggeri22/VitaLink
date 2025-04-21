@@ -223,3 +223,167 @@ msgstr "Hai già un account?"
 msgid "Login here"
 msgstr "Accedi qui"
 
+#: templates/patient_detail.html:22
+msgid "Vital Signs"
+msgstr "Parametri Vitali"
+
+#: templates/patient_detail.html:25
+msgid "Generate Report"
+msgstr "Genera Rapporto"
+
+#: templates/patient_detail.html:28
+msgid "Edit"
+msgstr "Modifica"
+
+#: templates/patient_detail.html:32
+msgid "Delete"
+msgstr "Elimina"
+
+#: templates/patient_detail.html:45
+msgid "Patient Information"
+msgstr "Informazioni Paziente"
+
+#: templates/patient_detail.html:49
+msgid "Contact Information"
+msgstr "Informazioni di Contatto"
+
+#: templates/patient_detail.html:54
+msgid "No contact number"
+msgstr "Nessun numero di contatto"
+
+#: templates/patient_detail.html:60
+msgid "Address"
+msgstr "Indirizzo"
+
+#: templates/patient_detail.html:65
+msgid "No address provided"
+msgstr "Nessun indirizzo fornito"
+
+#: templates/patient_detail.html:71
+msgid "Registration Information"
+msgstr "Informazioni di Registrazione"
+
+#: templates/patient_detail.html:73
+msgid "Added on"
+msgstr "Aggiunto il"
+
+#: templates/patient_detail.html:74
+msgid "Last updated"
+msgstr "Ultimo aggiornamento"
+
+#: templates/patient_detail.html:85
+msgid "Recent Vital Signs"
+msgstr "Parametri Vitali Recenti"
+
+#: templates/patient_detail.html:87
+msgid "View All"
+msgstr "Visualizza Tutti"
+
+#: templates/patient_detail.html:95
+msgid "Type"
+msgstr "Tipo"
+
+#: templates/patient_detail.html:96
+msgid "Value"
+msgstr "Valore"
+
+#: templates/patient_detail.html:97
+msgid "Date & Time"
+msgstr "Data e Ora"
+
+#: templates/patient_detail.html:98
+msgid "Source"
+msgstr "Fonte"
+
+#: templates/patient_detail.html:116
+msgid "Manual"
+msgstr "Manuale"
+
+#: templates/patient_detail.html:118
+msgid "Device"
+msgstr "Dispositivo"
+
+#: templates/patient_detail.html:126
+msgid "No vital signs recorded yet"
+msgstr "Nessun parametro vitale registrato"
+
+#: templates/patient_detail.html:128
+msgid "Add Vital Signs"
+msgstr "Aggiungi Parametri Vitali"
+
+#: templates/patient_detail.html:144
+msgid "Medical Notes"
+msgstr "Note Mediche"
+
+#: templates/patient_detail.html:147
+msgid "Add Note"
+msgstr "Aggiungi Nota"
+
+#: templates/patient_detail.html:165
+msgid "No notes have been added yet"
+msgstr "Nessuna nota è stata ancora aggiunta"
+
+#: templates/patient_detail.html:168
+msgid "Add First Note"
+msgstr "Aggiungi Prima Nota"
+
+#: templates/patient_detail.html:180
+msgid "Add Note"
+msgstr "Aggiungi Nota"
+
+#: templates/patient_detail.html:187
+msgid "Note Content"
+msgstr "Contenuto Nota"
+
+#: templates/patient_detail.html:189
+msgid "Enter your medical observations, treatment plans, or other relevant information."
+msgstr "Inserisci le tue osservazioni mediche, piani di trattamento o altre informazioni rilevanti."
+
+#: templates/patient_detail.html:193
+msgid "Cancel"
+msgstr "Annulla"
+
+#: templates/patient_detail.html:194
+msgid "Save Note"
+msgstr "Salva Nota"
+
+#: templates/vitals.html:8
+msgid "Vital Signs"
+msgstr "Parametri Vitali"
+
+#: templates/vitals.html:15
+msgid "Back to Patient"
+msgstr "Torna al Paziente"
+
+#: templates/vitals.html:25
+msgid "Add Vital Sign"
+msgstr "Aggiungi Parametro Vitale"
+
+#: templates/vitals.html:30
+msgid "Type"
+msgstr "Tipo"
+
+#: templates/vitals.html:33
+msgid "Select type"
+msgstr "Seleziona tipo"
+
+#: templates/vitals.html:37
+msgid "Please select a vital sign type"
+msgstr "Seleziona un tipo di parametro vitale"
+
+#: templates/vitals.html:41
+msgid "Value"
+msgstr "Valore"
+
+#: templates/vitals.html:43
+msgid "Please enter a value"
+msgstr "Inserisci un valore"
+
+#: templates/vitals.html:47
+msgid "Unit"
+msgstr "Unità"
+
+#: templates/vitals.html:49
+msgid "Unit will be auto-filled based on the selected type"
+msgstr "L'unità sarà compilata automaticamente in base al tipo selezionato"
+
