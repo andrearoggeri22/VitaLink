@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Healthcare Monitoring Platform{% endblock %}</title>
+    <title>{% block title %}{{ _('Healthcare Monitoring Platform') }}{% endblock %}</title>
     
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
@@ -27,7 +27,7 @@
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="{{ url_for('views.index') }}">
                 <i class="fas fa-heartbeat me-2"></i>
-                <span>Healthcare Monitor</span>
+                <span>{{ _('Healthcare Monitor') }}</span>
             </a>
             
             {% if current_user.is_authenticated %}
@@ -41,19 +41,19 @@
                     <li class="nav-item">
                         <a class="nav-link {% if request.path == url_for('views.dashboard') %}active{% endif %}" 
                            href="{{ url_for('views.dashboard') }}">
-                            <i class="fas fa-tachometer-alt me-1"></i> Dashboard
+                            <i class="fas fa-tachometer-alt me-1"></i> {{ _('Dashboard') }}
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {% if '/patients' in request.path and not '/vitals' in request.path %}active{% endif %}" 
                            href="{{ url_for('views.patients') }}">
-                            <i class="fas fa-users me-1"></i> Patients
+                            <i class="fas fa-users me-1"></i> {{ _('Patients') }}
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {% if '/audit' in request.path %}active{% endif %}" 
                            href="{{ url_for('audit.get_audit_logs') }}">
-                            <i class="fas fa-history me-1"></i> Audit Logs
+                            <i class="fas fa-history me-1"></i> {{ _('Audit Logs') }}
                         </a>
                     </li>
                 </ul>
@@ -91,7 +91,7 @@
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <a class="dropdown-item" href="{{ url_for('auth.logout') }}">
-                                    <i class="fas fa-sign-out-alt me-1"></i> Logout
+                                    <i class="fas fa-sign-out-alt me-1"></i> {{ _('Logout') }}
                                 </a>
                             </li>
                         </ul>
@@ -123,7 +123,7 @@
     <footer class="bg-dark py-3 mt-auto">
         <div class="container text-center">
             <p class="text-muted mb-0">
-                &copy; {{ now.year }} Healthcare Monitoring Platform. All rights reserved.
+                &copy; {{ now.year }} {{ _('Healthcare Monitoring Platform. All rights reserved.') }}
             </p>
         </div>
     </footer>
