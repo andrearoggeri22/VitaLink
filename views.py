@@ -4,12 +4,18 @@ from datetime import datetime
 from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify, send_file
 from flask_login import login_required, current_user
 from sqlalchemy.exc import SQLAlchemyError
+import copy
 
 from app import db
-from models import Patient, Doctor, VitalSign, VitalSignType, DataOrigin, Note, DoctorPatient
+from models import Patient, Doctor, VitalSign, VitalSignType, DataOrigin, Note, DoctorPatient, ActionType, EntityType
 from utils import parse_date, is_vital_in_range, get_vital_sign_unit
 from notifications import notify_abnormal_vital
 from reports import generate_patient_report, generate_vital_trends_report
+from audit import (
+    log_patient_creation, log_patient_update, log_patient_delete,
+    log_vital_creation, log_note_creation, log_report_generation, log_patient_view,
+    log_action
+)
 
 views_bp = Blueprint('views', __name__)
 logger = logging.getLogger(__name__)
@@ -90,6 +96,9 @@ def new_patient():
             
             db.session.commit()
             
+            # Log the patient creation in the audit trail
+            log_patient_creation(current_user.id, patient)
+            
             flash(f'Patient {first_name} {last_name} created successfully with ID {patient.uuid}', 'success')
             logger.info(f"Doctor {current_user.id} created patient {patient.id}")
             
@@ -154,6 +163,9 @@ def edit_patient(patient_id):
             # Parse date
             dob = parse_date(date_of_birth)
             
+            # Save original data for audit log
+            old_data = patient.to_dict()
+            
             # Update patient information
             patient.first_name = first_name
             patient.last_name = last_name
@@ -164,6 +176,9 @@ def edit_patient(patient_id):
             patient.updated_at = datetime.utcnow()
             
             db.session.commit()
+            
+            # Log the patient update in the audit trail
+            log_patient_update(current_user.id, patient, old_data)
             
             flash('Patient information updated successfully', 'success')
             logger.info(f"Doctor {current_user.id} updated patient {patient.id}")
@@ -190,6 +205,9 @@ def delete_patient(patient_id):
         return redirect(url_for('views.patients'))
     
     try:
+        # Store patient data for audit log before deletion
+        patient_data = patient.to_dict()
+        
         # Remove the association between doctor and patient
         current_user.remove_patient(patient)
         
@@ -203,6 +221,22 @@ def delete_patient(patient_id):
                 db.session.delete(note)
             
             db.session.delete(patient)
+            
+            # Log complete patient deletion in the audit trail
+            log_patient_delete(current_user.id, patient)
+        else:
+            # Log patient disassociation in the audit trail
+            log_action(
+                doctor_id=current_user.id,
+                action_type=ActionType.UPDATE,
+                entity_type=EntityType.PATIENT,
+                entity_id=patient.id,
+                details={
+                    'action': 'disassociate',
+                    'patient_data': patient_data
+                },
+                patient_id=patient.id
+            )
         
         db.session.commit()
         
@@ -266,6 +300,9 @@ def patient_vitals(patient_id):
             
             db.session.add(vital)
             db.session.commit()
+            
+            # Log the vital sign creation in the audit trail
+            log_vital_creation(current_user.id, vital)
             
             # Check if the vital sign is outside normal range
             vital_value = str(value_float) if vital_type != 'blood_pressure' else value
@@ -383,6 +420,9 @@ def add_note(patient_id):
         db.session.add(note)
         db.session.commit()
         
+        # Log the note creation in the audit trail
+        log_note_creation(current_user.id, note)
+        
         flash('Note added successfully', 'success')
         logger.info(f"Doctor {current_user.id} added note for patient {patient_id}")
         
@@ -498,7 +538,18 @@ def generate_report(patient_id):
         # Generate a filename for the report
         filename = f"patient_report_{patient.last_name}_{datetime.now().strftime('%Y%m%d')}.pdf"
         
-        # Log this action
+        # Log this action in audit trail
+        log_report_generation(
+            doctor_id=current_user.id,
+            patient_id=patient_id,
+            report_type="complete",
+            params={
+                "start_date": start_date,
+                "end_date": end_date
+            }
+        )
+        
+        # Log this action in application logs
         logger.info(f"Doctor {current_user.id} generated report for patient {patient_id}")
         
         # Return the PDF as a downloadable file
@@ -588,7 +639,20 @@ def generate_vital_report(patient_id, vital_type):
         vital_name = vital_type.replace('_', ' ').title()
         filename = f"{vital_name}_report_{patient.last_name}_{datetime.now().strftime('%Y%m%d')}.pdf"
         
-        # Log this action
+        # Log this action in audit trail
+        log_report_generation(
+            doctor_id=current_user.id,
+            patient_id=patient_id,
+            report_type=f"vital_{vital_type}",
+            params={
+                "start_date": start_date,
+                "end_date": end_date,
+                "vital_type": vital_type,
+                "period_desc": period_desc
+            }
+        )
+        
+        # Log this action in application logs
         logger.info(f"Doctor {current_user.id} generated {vital_type} report for patient {patient_id}")
         
         # Return the PDF as a downloadable file
