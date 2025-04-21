@@ -324,7 +324,8 @@ def patient_vitals(patient_id):
                           patient=patient,
                           vitals=vitals,
                           vitals_by_type=vitals_by_type,
-                          vital_types=[type.value for type in VitalSignType])
+                          vital_types=[type.value for type in VitalSignType],
+                          now=datetime.now())
 
 @views_bp.route('/patients/<int:patient_id>/notes', methods=['POST'])
 @login_required
@@ -396,4 +397,4 @@ def profile():
                 db.session.commit()
                 flash('Password updated successfully', 'success')
     
-    return render_template('profile.html', doctor=current_user)
+    return render_template('profile.html', doctor=current_user, now=datetime.now())
