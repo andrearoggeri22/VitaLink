@@ -6,7 +6,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from app import db
 from models import Patient, VitalSign, VitalSignType, DataOrigin, Note
-from auth import doctor_required
+from auth import api_doctor_required as doctor_required
 from utils import validate_uuid, is_vital_in_range, get_vital_sign_unit
 from notifications import notify_abnormal_vital
 
