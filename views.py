@@ -1,4 +1,5 @@
 import logging
+import json
 from datetime import datetime
 
 from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify, send_file
@@ -9,7 +10,7 @@ import copy
 
 from app import db
 from models import Patient, Doctor, VitalSign, VitalSignType, DataOrigin, Note, DoctorPatient, ActionType, EntityType
-from utils import parse_date, is_vital_in_range, get_vital_sign_unit
+from utils import parse_date, is_vital_in_range, get_vital_sign_unit, to_serializable_dict
 from notifications import notify_abnormal_vital
 from reports import generate_patient_report, generate_vital_trends_report
 from audit import (
