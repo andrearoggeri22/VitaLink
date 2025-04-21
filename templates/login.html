@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Login - Healthcare Monitoring Platform{% endblock %}
+{% block title %}{{ _('Login') }} - {{ _('Healthcare Monitoring Platform') }}{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
@@ -9,13 +9,13 @@
             <div class="card-body p-4">
                 <div class="text-center mb-4">
                     <i class="fas fa-heartbeat text-primary fa-3x mb-3"></i>
-                    <h2>Healthcare Monitor</h2>
-                    <p class="text-muted">Please login to access the platform</p>
+                    <h2>{{ _('Healthcare Monitor') }}</h2>
+                    <p class="text-muted">{{ _('Please login to access the platform') }}</p>
                 </div>
                 
                 <form method="post" action="{{ url_for('auth.login') }}">
                     <div class="mb-3">
-                        <label for="email" class="form-label">Email address</label>
+                        <label for="email" class="form-label">{{ _('Email address') }}</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="fas fa-envelope"></i></span>
                             <input type="email" class="form-control" id="email" name="email" 
@@ -24,7 +24,7 @@
                     </div>
                     
                     <div class="mb-4">
-                        <label for="password" class="form-label">Password</label>
+                        <label for="password" class="form-label">{{ _('Password') }}</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="fas fa-lock"></i></span>
                             <input type="password" class="form-control" id="password" name="password" 
@@ -34,7 +34,7 @@
                     
                     <div class="d-grid">
                         <button type="submit" class="btn btn-primary py-2">
-                            <i class="fas fa-sign-in-alt me-2"></i> Login
+                            <i class="fas fa-sign-in-alt me-2"></i> {{ _('Login') }}
                         </button>
                     </div>
                 </form>
@@ -42,12 +42,12 @@
                 <div class="mt-4 text-center">
                     <p class="mb-2">
                         <a href="{{ url_for('auth.register') }}" class="text-decoration-none">
-                            <i class="fas fa-user-plus me-1"></i> New doctor? Register here
+                            <i class="fas fa-user-plus me-1"></i> {{ _('New doctor? Register here') }}
                         </a>
                     </p>
                     <p class="text-muted small">
-                        This is a secure platform for healthcare professionals only.
-                        <br>Unauthorized access is strictly prohibited.
+                        {{ _('This is a secure platform for healthcare professionals only.') }}
+                        <br>{{ _('Unauthorized access is strictly prohibited.') }}
                     </p>
                 </div>
             </div>
