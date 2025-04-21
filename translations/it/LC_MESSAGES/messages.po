@@ -165,12 +165,11 @@ msgstr "Accedi per utilizzare la piattaforma"
 
 #: templates/login.html:30 templates/register.html:29
 msgid "Email address"
-msgstr ""
+msgstr "Indirizzo Email"
 
 #: templates/login.html:39 templates/register.html:51
-#, fuzzy
 msgid "Password"
-msgstr "Conferma Password"
+msgstr "Password"
 
 #: templates/login.html:57
 msgid "New doctor? Register here"

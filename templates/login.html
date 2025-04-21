@@ -13,18 +13,6 @@
                     <p class="text-muted">{{ _('Please login to access the platform') }}</p>
                 </div>
                 
-                <!-- Language Selector -->
-                <div class="text-center mb-4">
-                    <div class="btn-group" role="group">
-                        {% for code, name in config['LANGUAGES'].items() %}
-                        <a href="{{ url_for('language.change_language', lang_code=code, next=request.path) }}" 
-                           class="btn btn-sm btn-outline-secondary {% if session.get('language') == code %}active{% endif %}">
-                            {{ name }}
-                        </a>
-                        {% endfor %}
-                    </div>
-                </div>
-                
                 <form method="post" action="{{ url_for('auth.login') }}">
                     <div class="mb-3">
                         <label for="email" class="form-label">{{ _('Email address') }}</label>
