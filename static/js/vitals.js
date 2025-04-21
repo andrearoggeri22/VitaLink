@@ -129,7 +129,7 @@ function initVitalsCharts() {
                         },
                         title: {
                             display: true,
-                            text: 'Date'
+                            text: dateText || 'Date'
                         }
                     },
                     y: {
@@ -148,7 +148,14 @@ function initVitalsCharts() {
                     tooltip: {
                         callbacks: {
                             title: function(tooltipItems) {
-                                return formatDate(tooltipItems[0].raw.x);
+                                if (tooltipItems && tooltipItems[0]) {
+                                    // Per Chart.js v3, l'oggetto contiene .parsed o .raw
+                                    const value = tooltipItems[0].parsed ? 
+                                        tooltipItems[0].parsed.x : 
+                                        (tooltipItems[0].raw ? tooltipItems[0].raw : tooltipItems[0].label);
+                                    return formatDate(value);
+                                }
+                                return '';
                             }
                         }
                     }
@@ -190,4 +197,33 @@ function initVitalsFilter() {
             });
         }
     }
+}
+
+/**
+ * Format a date object to a readable string
+ */
+function formatDate(date) {
+    if (!date) return '';
+    const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+    return new Date(date).toLocaleDateString(document.documentElement.lang || 'en', options);
+}
+
+/**
+ * Generate a random color for charts
+ */
+function getRandomColor() {
+    const colors = [
+        '#4285F4', // Blue
+        '#34A853', // Green
+        '#FBBC05', // Yellow
+        '#EA4335', // Red
+        '#8AB4F8', // Light blue
+        '#137333', // Dark green
+        '#F29900', // Orange
+        '#9C27B0', // Purple
+        '#009688', // Teal
+        '#FF5722'  // Deep orange
+    ];
+    
+    return colors[Math.floor(Math.random() * colors.length)];
 }
