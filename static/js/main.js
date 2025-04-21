@@ -115,8 +115,8 @@ function confirmAction(title, message, onConfirm) {
                         ${message}
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">${cancelButtonText || 'Cancel'}</button>
-                        <button type="button" class="btn btn-danger" id="confirmButton">${confirmButtonText || 'Confirm'}</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">${window.cancelButtonText || 'Cancel'}</button>
+                        <button type="button" class="btn btn-danger" id="confirmButton">${window.confirmButtonText || 'Confirm'}</button>
                     </div>
                 </div>
             </div>
