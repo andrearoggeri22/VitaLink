@@ -26,7 +26,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const deleteButtons = document.querySelectorAll('.delete-confirm');
     deleteButtons.forEach(function(button) {
         button.addEventListener('click', function(event) {
-            if (!confirm('Are you sure you want to delete this item? This action cannot be undone.')) {
+            // Get language from html lang attribute
+            const lang = document.documentElement.lang || 'en';
+            let confirmMessage = 'Are you sure you want to delete this item? This action cannot be undone.';
+            
+            // Messages per language
+            if (lang === 'it') {
+                confirmMessage = 'Sei sicuro di voler eliminare questo elemento? Questa azione non può essere annullata.';
+            }
+            
+            if (!confirm(confirmMessage)) {
                 event.preventDefault();
             }
         });
@@ -144,6 +153,16 @@ function confirmAction(title, message, onConfirm) {
         modalInstance.hide();
         onConfirm();
     });
+    
+    // Set up button text based on language
+    const lang = document.documentElement.lang || 'en';
+    if (lang === 'it') {
+        modal.querySelector('.btn-secondary').textContent = 'Annulla';
+        modal.querySelector('.btn-danger').textContent = 'Conferma';
+    } else {
+        modal.querySelector('.btn-secondary').textContent = 'Cancel';
+        modal.querySelector('.btn-danger').textContent = 'Confirm';
+    }
     
     // Show the modal
     modalInstance.show();
