@@ -527,3 +527,39 @@ msgstr "Torna ai Parametri Vitali"
 msgid "Uploading..."
 msgstr "Caricamento in corso..."
 
+#: notifications.py
+msgid "SMS notification not sent. Please check patient phone number format."
+msgstr "Notifica SMS non inviata. Verificare il formato del numero di telefono del paziente."
+
+#: notifications.py
+msgid "SMS notification service temporarily unavailable."
+msgstr "Servizio di notifica SMS temporaneamente non disponibile."
+
+#: notifications.py
+msgid "SMS notification service not configured"
+msgstr "Servizio di notifica SMS non configurato"
+
+#: notifications.py
+msgid "Patient has no contact number"
+msgstr "Il paziente non ha un numero di contatto"
+
+#: notifications.py
+msgid "SMS sent successfully"
+msgstr "SMS inviato con successo"
+
+#: views.py
+msgid "Abnormal value detected"
+msgstr "Valore anomalo rilevato"
+
+#: views.py
+msgid "Patient notification sent"
+msgstr "Notifica al paziente inviata"
+
+#: views.py
+msgid "Failed to send notification"
+msgstr "Impossibile inviare la notifica"
+
+#: views.py
+msgid "patient has no contact number for notifications"
+msgstr "il paziente non ha un numero di contatto per le notifiche"
+
