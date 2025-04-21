@@ -571,3 +571,143 @@ msgstr "Verifica connessione dispositivo Fitbit - modalità simulazione attivata
 msgid "Vital sign recorded successfully"
 msgstr "Parametro vitale registrato con successo"
 
+#: templates/audit_logs.html
+msgid "Start Date"
+msgstr "Data di inizio"
+
+#: templates/audit_logs.html
+msgid "End Date"
+msgstr "Data di fine"
+
+#: templates/audit_logs.html
+msgid "Action Type"
+msgstr "Tipo di azione"
+
+#: templates/audit_logs.html
+msgid "Entity Type"
+msgstr "Tipo di entità"
+
+#: templates/audit_logs.html
+msgid "All Actions"
+msgstr "Tutte le azioni"
+
+#: templates/audit_logs.html
+msgid "Create"
+msgstr "Crea"
+
+#: templates/audit_logs.html
+msgid "Update"
+msgstr "Aggiorna"
+
+#: templates/audit_logs.html
+msgid "Delete"
+msgstr "Elimina"
+
+#: templates/audit_logs.html
+msgid "View"
+msgstr "Visualizza"
+
+#: templates/audit_logs.html
+msgid "Export"
+msgstr "Esporta"
+
+#: templates/audit_logs.html
+msgid "All Entities"
+msgstr "Tutte le entità"
+
+#: templates/audit_logs.html
+msgid "Patient"
+msgstr "Paziente"
+
+#: templates/audit_logs.html
+msgid "Vital Sign"
+msgstr "Parametro vitale"
+
+#: templates/audit_logs.html
+msgid "Note"
+msgstr "Nota"
+
+#: templates/audit_logs.html
+msgid "Report"
+msgstr "Rapporto"
+
+#: templates/audit_logs.html
+msgid "Doctor"
+msgstr "Medico"
+
+#: templates/audit_logs.html
+msgid "All Doctors"
+msgstr "Tutti i medici"
+
+#: templates/audit_logs.html
+msgid "All Patients"
+msgstr "Tutti i pazienti"
+
+#: templates/audit_logs.html
+msgid "Clear Filters"
+msgstr "Cancella filtri"
+
+#: templates/audit_logs.html
+msgid "Apply Filters"
+msgstr "Applica filtri"
+
+#: templates/audit_logs.html
+msgid "Audit History"
+msgstr "Cronologia audit"
+
+#: templates/audit_logs.html
+msgid "Date & Time"
+msgstr "Data e ora"
+
+#: templates/audit_logs.html
+msgid "User"
+msgstr "Utente"
+
+#: templates/audit_logs.html
+msgid "Action"
+msgstr "Azione"
+
+#: templates/audit_logs.html
+msgid "Entity"
+msgstr "Entità"
+
+#: templates/audit_logs.html
+msgid "IP Address"
+msgstr "Indirizzo IP"
+
+#: templates/audit_logs.html
+msgid "Details"
+msgstr "Dettagli"
+
+#: templates/audit_logs.html
+msgid "View Details"
+msgstr "Visualizza dettagli"
+
+#: templates/audit_logs.html
+msgid "Audit Log Details"
+msgstr "Dettagli log di audit"
+
+#: templates/audit_logs.html
+msgid "Timestamp"
+msgstr "Data e ora"
+
+#: templates/audit_logs.html
+msgid "Close"
+msgstr "Chiudi"
+
+#: templates/audit_logs.html
+msgid "Actions by Type"
+msgstr "Azioni per tipo"
+
+#: templates/audit_logs.html
+msgid "Entities by Type"
+msgstr "Entità per tipo"
+
+#: templates/audit_logs.html
+msgid "Activity Timeline"
+msgstr "Cronologia attività"
+
+#: templates/audit_logs.html
+msgid "No audit logs found matching your criteria"
+msgstr "Nessun log di audit trovato corrispondente ai tuoi criteri"
+
