@@ -54,16 +54,18 @@ def format_datetime(value, format='%Y-%m-%d %H:%M:%S'):
 
 with app.app_context():
     # Import models to ensure they're registered with SQLAlchemy
-    from models import Doctor, Patient, VitalSign, DoctorPatient, Note
+    from models import Doctor, Patient, VitalSign, DoctorPatient, Note, AuditLog
     
     # Import and register blueprints
     from auth import auth_bp
     from views import views_bp
     from api import api_bp
+    from audit import audit_bp
     
     app.register_blueprint(auth_bp)
     app.register_blueprint(views_bp)
     app.register_blueprint(api_bp, url_prefix='/api')
+    app.register_blueprint(audit_bp, url_prefix='/audit')
     
     # Create database tables
     db.create_all()
