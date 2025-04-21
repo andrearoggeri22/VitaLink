@@ -1,4 +1,5 @@
 import uuid
+import json
 from datetime import datetime
 from enum import Enum, auto
 from flask_login import UserMixin
@@ -171,4 +172,79 @@ class Note(db.Model):
             'content': self.content,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None
+        }
+
+class ActionType(Enum):
+    CREATE = "create"
+    UPDATE = "update"
+    DELETE = "delete"
+    VIEW = "view"
+    EXPORT = "export"
+
+class EntityType(Enum):
+    PATIENT = "patient"
+    VITAL_SIGN = "vital_sign"
+    NOTE = "note"
+    REPORT = "report"
+
+class AuditLog(db.Model):
+    """
+    Model for storing audit logs of all actions performed in the system.
+    This is used for tracking who did what and when, for compliance and security purposes.
+    """
+    __tablename__ = 'audit_log'
+    id = db.Column(db.Integer, primary_key=True)
+    
+    # Who performed the action
+    doctor_id = db.Column(db.Integer, db.ForeignKey('doctor.id'), nullable=False)
+    doctor = db.relationship('Doctor')
+    
+    # When the action was performed
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    
+    # What type of action was performed
+    action_type = db.Column(db.Enum(ActionType), nullable=False)
+    
+    # What entity was affected
+    entity_type = db.Column(db.Enum(EntityType), nullable=False)
+    entity_id = db.Column(db.Integer, nullable=False)  # ID of the affected entity
+    
+    # Additional details about the action (stored as JSON)
+    details = db.Column(db.Text)  # JSON string with action details
+    
+    # Optional patient ID for easier querying
+    patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=True)
+    patient = db.relationship('Patient')
+    
+    # IP address of the user who performed the action
+    ip_address = db.Column(db.String(50))
+    
+    def __init__(self, doctor_id, action_type, entity_type, entity_id, details=None, patient_id=None, ip_address=None):
+        self.doctor_id = doctor_id
+        self.action_type = action_type
+        self.entity_type = entity_type
+        self.entity_id = entity_id
+        self.details = json.dumps(details) if details else None
+        self.patient_id = patient_id
+        self.ip_address = ip_address
+        
+    def get_details(self):
+        """Parse the JSON string into a Python dictionary."""
+        if self.details:
+            return json.loads(self.details)
+        return {}
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'doctor_id': self.doctor_id,
+            'doctor_name': f"{self.doctor.first_name} {self.doctor.last_name}" if self.doctor else None,
+            'timestamp': self.timestamp.isoformat() if self.timestamp else None,
+            'action_type': self.action_type.value,
+            'entity_type': self.entity_type.value,
+            'entity_id': self.entity_id,
+            'details': self.get_details(),
+            'patient_id': self.patient_id,
+            'patient_name': f"{self.patient.first_name} {self.patient.last_name}" if self.patient else None,
+            'ip_address': self.ip_address
         }
