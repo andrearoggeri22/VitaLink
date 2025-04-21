@@ -2,12 +2,13 @@ import os
 import logging
 from datetime import datetime
 
-from flask import Flask
+from flask import Flask, request, session
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
 from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_login import LoginManager
 from flask_jwt_extended import JWTManager
+from flask_babel import Babel
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -38,11 +39,28 @@ app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY", app.secret_key)
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = 3600  # 1 hour
 app.config["JWT_REFRESH_TOKEN_EXPIRES"] = 86400  # 24 hours
 
+# Configure Babel
+app.config['BABEL_DEFAULT_LOCALE'] = 'en'
+app.config['BABEL_TRANSLATION_DIRECTORIES'] = 'translations'
+app.config['LANGUAGES'] = {
+    'en': 'English',
+    'it': 'Italiano'
+}
+
+# Function to determine which language to use
+def get_locale():
+    # First, check if user has explicitly set language in session
+    if 'language' in session:
+        return session['language']
+    # Otherwise, try to detect from browser settings
+    return request.accept_languages.best_match(app.config['LANGUAGES'].keys())
+
 # Initialize extensions
 db.init_app(app)
 jwt = JWTManager(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'auth.login'
+babel = Babel(app, locale_selector=get_locale)
 
 # Custom template filters
 @app.template_filter('format_datetime')
@@ -61,11 +79,13 @@ with app.app_context():
     from views import views_bp
     from api import api_bp
     from audit import audit_bp
+    from language import language_bp
     
     app.register_blueprint(auth_bp)
     app.register_blueprint(views_bp)
     app.register_blueprint(api_bp, url_prefix='/api')
     app.register_blueprint(audit_bp, url_prefix='/audit')
+    app.register_blueprint(language_bp)
     
     # Create database tables
     db.create_all()
