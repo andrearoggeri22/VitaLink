@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ patient.first_name }} {{ patient.last_name }} - Healthcare Monitoring Platform{% endblock %}
+{% block title %}{{ patient.first_name }} {{ patient.last_name }} - {{ _('Healthcare Monitoring Platform') }}{% endblock %}
 
 {% block content %}
 <div class="patient-header">
@@ -19,17 +19,17 @@
     <div class="patient-actions">
         <div class="btn-group" role="group">
             <a href="{{ url_for('views.patient_vitals', patient_id=patient.id) }}" class="btn btn-outline-primary">
-                <i class="fas fa-heartbeat me-1"></i> Vital Signs
+                <i class="fas fa-heartbeat me-1"></i> {{ _('Vital Signs') }}
             </a>
             <a href="{{ url_for('views.generate_report', patient_id=patient.id) }}" class="btn btn-outline-info" target="_blank">
-                <i class="fas fa-file-pdf me-1"></i> Generate Report
+                <i class="fas fa-file-pdf me-1"></i> {{ _('Generate Report') }}
             </a>
             <a href="{{ url_for('views.edit_patient', patient_id=patient.id) }}" class="btn btn-outline-warning">
-                <i class="fas fa-edit me-1"></i> Edit
+                <i class="fas fa-edit me-1"></i> {{ _('Edit') }}
             </a>
             <button type="button" class="btn btn-outline-danger delete-patient" 
                     data-id="{{ patient.id }}" data-name="{{ patient.first_name }} {{ patient.last_name }}">
-                <i class="fas fa-trash-alt me-1"></i> Delete
+                <i class="fas fa-trash-alt me-1"></i> {{ _('Delete') }}
             </button>
             <form id="deleteForm{{ patient.id }}" action="{{ url_for('views.delete_patient', patient_id=patient.id) }}" method="post" class="d-none">
             </form>
