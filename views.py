@@ -130,6 +130,9 @@ def patient_detail(patient_id):
     # Get notes
     notes = patient.notes.order_by(Note.created_at.desc()).all()
     
+    # Log patient view in the audit trail
+    log_patient_view(current_user.id, patient.id)
+    
     return render_template('patient_detail.html', 
                           patient=patient,
                           recent_vitals=recent_vitals,
