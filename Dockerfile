@@ -7,6 +7,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     libpq-dev \
     postgresql-client \
+    iproute2 \
+    net-tools \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copia prima solo il file dei requisiti per sfruttare la cache Docker
@@ -36,8 +39,7 @@ ENV PYTHONUNBUFFERED=1
 # Configura l'entrypoint
 ENTRYPOINT ["/app/docker-entrypoint.sh"]
 
-# Installa curl per health check
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+# Nota: curl già installato in precedenza
 
 # Comando di avvio
 CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "3", "--access-logfile", "-", "--error-logfile", "-", "--log-level", "debug", "main:app"]
