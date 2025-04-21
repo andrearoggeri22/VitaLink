@@ -82,8 +82,8 @@
             deviceStatus.querySelector('.fa-spinner').classList.add('d-none');
             deviceStatus.querySelector('.text-checking').classList.add('d-none');
             
-            // Simuliamo che il dispositivo sia connesso
-            const isConnected = true;
+            // Simuliamo che il dispositivo NON sia connesso (come da impostazione del server)
+            const isConnected = false;
             
             if (isConnected) {
                 // Mostra il messaggio "connesso"
