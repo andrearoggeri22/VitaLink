@@ -247,12 +247,16 @@ def save_fitbit_data(patient_id, data):
         if not patient:
             return False, 0, ["Paziente non trovato"]
         
+        # Log per debug
+        logging.info(f"Inizio salvataggio dati Fitbit per paziente ID: {patient_id}")
+        
         for data_type, measurements in data.items():
             if data_type not in FITBIT_DATA_TYPES:
                 errors.append(f"Tipo di dato non supportato: {data_type}")
                 continue
             
             vital_type = FITBIT_DATA_TYPES[data_type]
+            logging.info(f"Elaborazione tipo dati: {data_type} -> enum type: {vital_type}, value: {vital_type.value}")
             
             for measurement in measurements:
                 try:
@@ -262,11 +266,14 @@ def save_fitbit_data(patient_id, data):
                     else:
                         recorded_at = datetime.datetime.strptime(measurement['timestamp'], '%Y-%m-%d')
                     
+                    # Log dei valori per debug
+                    logging.info(f"Valore da inserire: {measurement['value']}, timestamp: {recorded_at}")
+                    
                     # Crea il nuovo parametro vitale
                     vital = VitalSign(
                         patient_id=patient_id,
-                        type=vital_type,
-                        value=measurement['value'],
+                        type=vital_type,  # Oggetto VitalSignType dall'enum
+                        value=float(measurement['value']),  # Assicuriamo che sia un float
                         unit=get_vital_sign_unit(data_type),
                         recorded_at=recorded_at,
                         origin=DataOrigin.AUTOMATIC
@@ -287,16 +294,20 @@ def save_fitbit_data(patient_id, data):
                         )
                     
                 except Exception as e:
+                    logging.error(f"Errore salvataggio: {str(e)}")
                     errors.append(f"Errore nel salvataggio del parametro {data_type}: {str(e)}")
         
         db.session.commit()
+        logging.info(f"Dati Fitbit salvati con successo: {vitals_saved} parametri")
         return True, vitals_saved, errors
     
     except SQLAlchemyError as e:
         db.session.rollback()
+        logging.error(f"Errore database SQLAlchemy: {str(e)}")
         return False, 0, [f"Errore database: {str(e)}"]
     except Exception as e:
         db.session.rollback()
+        logging.error(f"Errore generico: {str(e)}")
         return False, 0, [f"Errore generico: {str(e)}"]
 
 @fitbit_bp.route('/patients/<int:patient_id>/check_device', methods=['GET'])
