@@ -107,11 +107,11 @@ def new_patient():
             return redirect(url_for('views.patient_detail', patient_id=patient.id))
             
         except ValueError:
-            flash('Invalid date format. Please use YYYY-MM-DD', 'danger')
+            flash(_('Formato data non valido. Utilizzare AAAA-MM-GG'), 'danger')
         except SQLAlchemyError as e:
             db.session.rollback()
             logger.error(f"Error creating patient: {str(e)}")
-            flash('An error occurred while creating the patient', 'danger')
+            flash(_('Si è verificato un errore durante la creazione del paziente'), 'danger')
     
     return render_template('patients.html', mode='new', now=datetime.now())
 
@@ -191,11 +191,11 @@ def edit_patient(patient_id):
             return redirect(url_for('views.patient_detail', patient_id=patient_id))
             
         except ValueError:
-            flash('Invalid date format. Please use YYYY-MM-DD', 'danger')
+            flash(_('Formato data non valido. Utilizzare AAAA-MM-GG'), 'danger')
         except SQLAlchemyError as e:
             db.session.rollback()
             logger.error(f"Error updating patient: {str(e)}")
-            flash('An error occurred while updating the patient', 'danger')
+            flash(_('Si è verificato un errore durante l\'aggiornamento del paziente'), 'danger')
     
     return render_template('patients.html', mode='edit', patient=patient, now=datetime.now())
 
@@ -251,7 +251,7 @@ def delete_patient(patient_id):
     except SQLAlchemyError as e:
         db.session.rollback()
         logger.error(f"Error deleting patient: {str(e)}")
-        flash('An error occurred while removing the patient', 'danger')
+        flash(_('Si è verificato un errore durante la rimozione del paziente'), 'danger')
     
     return redirect(url_for('views.patients'))
 
@@ -341,11 +341,11 @@ def patient_vitals(patient_id):
             logger.info(f"Doctor {current_user.id} added vital sign for patient {patient_id}")
             
         except ValueError:
-            flash('Invalid value format', 'danger')
+            flash(_('Formato valore non valido'), 'danger')
         except SQLAlchemyError as e:
             db.session.rollback()
             logger.error(f"Error adding vital sign: {str(e)}")
-            flash('An error occurred while recording the vital sign', 'danger')
+            flash(_('Si è verificato un errore durante la registrazione del parametro vitale'), 'danger')
     
     # Get vital signs
     start_date = request.args.get('start_date')
@@ -504,20 +504,20 @@ def profile():
             current_user.updated_at = datetime.utcnow()
             
             db.session.commit()
-            flash('Profile updated successfully', 'success')
+            flash(_('Profilo aggiornato con successo'), 'success')
         
         # Update password
         if current_password and new_password and confirm_password:
             if not current_user.check_password(current_password):
-                flash('Current password is incorrect', 'danger')
+                flash(_('La password attuale non è corretta'), 'danger')
             elif new_password != confirm_password:
-                flash('New passwords do not match', 'danger')
+                flash(_('Le nuove password non corrispondono'), 'danger')
             else:
                 current_user.set_password(new_password)
                 current_user.updated_at = datetime.utcnow()
                 
                 db.session.commit()
-                flash('Password updated successfully', 'success')
+                flash(_('Password aggiornata con successo'), 'success')
     
     return render_template('profile.html', doctor=current_user, now=datetime.now())
 
