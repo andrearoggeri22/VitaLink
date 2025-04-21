@@ -544,7 +544,7 @@ def generate_report(patient_id):
         try:
             start_datetime = datetime.strptime(start_date, '%Y-%m-%d')
         except ValueError:
-            flash('Invalid start date format. Please use YYYY-MM-DD', 'warning')
+            flash(_('Formato data di inizio non valido. Utilizzare AAAA-MM-GG'), 'warning')
     
     if end_date:
         try:
@@ -552,7 +552,7 @@ def generate_report(patient_id):
             # Add a day to include all records from the end date
             end_datetime = end_datetime.replace(hour=23, minute=59, second=59)
         except ValueError:
-            flash('Invalid end date format. Please use YYYY-MM-DD', 'warning')
+            flash(_('Formato data di fine non valido. Utilizzare AAAA-MM-GG'), 'warning')
     
     # Query vitals with filter
     vitals_query = patient.vital_signs
@@ -614,7 +614,7 @@ def generate_report(patient_id):
         
     except Exception as e:
         logger.error(f"Error generating report: {str(e)}")
-        flash('An error occurred while generating the report', 'danger')
+        flash(_('Si è verificato un errore durante la generazione del report'), 'danger')
         return redirect(url_for('views.patient_detail', patient_id=patient_id))
 
 @views_bp.route('/patients/<int:patient_id>/vital_report/<string:vital_type>')
@@ -632,7 +632,7 @@ def generate_vital_report(patient_id, vital_type):
     try:
         vital_type_enum = VitalSignType(vital_type)
     except ValueError:
-        flash('Invalid vital sign type', 'danger')
+        flash(_('Tipo di parametro vitale non valido'), 'danger')
         return redirect(url_for('views.patient_vitals', patient_id=patient_id))
     
     # Get filter parameters
@@ -661,7 +661,7 @@ def generate_vital_report(patient_id, vital_type):
             else:
                 period_desc = f"Until {end_date}"
         except ValueError:
-            flash('Invalid end date format. Please use YYYY-MM-DD', 'warning')
+            flash(_('Formato data di fine non valido. Utilizzare AAAA-MM-GG'), 'warning')
     
     # Query vitals with filter
     vitals_query = patient.vital_signs.filter(VitalSign.type == vital_type_enum)
@@ -675,7 +675,7 @@ def generate_vital_report(patient_id, vital_type):
     vitals = vitals_query.order_by(VitalSign.recorded_at).all()
     
     if not vitals:
-        flash('No data available for the selected vital sign and time period', 'warning')
+        flash(_('Nessun dato disponibile per il parametro vitale e il periodo di tempo selezionati'), 'warning')
         return redirect(url_for('views.patient_vitals', patient_id=patient_id))
     
     # Generate the PDF report
@@ -717,5 +717,5 @@ def generate_vital_report(patient_id, vital_type):
         
     except Exception as e:
         logger.error(f"Error generating vital report: {str(e)}")
-        flash('An error occurred while generating the report', 'danger')
+        flash(_('Si è verificato un errore durante la generazione del report'), 'danger')
         return redirect(url_for('views.patient_vitals', patient_id=patient_id))
