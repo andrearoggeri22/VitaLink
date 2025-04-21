@@ -711,3 +711,39 @@ msgstr "Cronologia attività"
 msgid "No audit logs found matching your criteria"
 msgstr "Nessun log di audit trovato corrispondente ai tuoi criteri"
 
+#: templates/audit_logs.html
+msgid "Records"
+msgstr "Record"
+
+#: templates/audit_logs.html
+msgid "Date & Time"
+msgstr "Data e ora"
+
+#: templates/audit_logs.html
+msgid "View Details"
+msgstr "Visualizza dettagli"
+
+#: templates/audit_logs.html
+msgid "Audit Log Details"
+msgstr "Dettagli log di audit"
+
+#: templates/audit_logs.html
+msgid "Entity ID"
+msgstr "ID entità"
+
+#: templates/audit_logs.html
+msgid "Actions by Type"
+msgstr "Azioni per tipo"
+
+#: templates/audit_logs.html
+msgid "Entities by Type"
+msgstr "Entità per tipo"
+
+#: templates/audit_logs.html
+msgid "Activity Timeline"
+msgstr "Cronologia attività"
+
+#: templates/audit_logs.html
+msgid "Number of Actions"
+msgstr "Numero di azioni"
+
