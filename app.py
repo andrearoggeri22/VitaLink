@@ -84,12 +84,14 @@ with app.app_context():
     from api import api_bp
     from audit import audit_bp
     from language import language_bp
+    from fitbit_integration import fitbit_bp
     
     app.register_blueprint(auth_bp)
     app.register_blueprint(views_bp)
     app.register_blueprint(api_bp, url_prefix='/api')
     app.register_blueprint(audit_bp, url_prefix='/audit')
     app.register_blueprint(language_bp)
+    app.register_blueprint(fitbit_bp, url_prefix='/fitbit')
     
     # Create database tables
     db.create_all()
