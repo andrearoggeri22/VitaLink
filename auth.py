@@ -153,7 +153,7 @@ def refresh_token():
     }), 200
 
 # Decorator for API authentication
-def doctor_required(f):
+def api_doctor_required(f):
     @wraps(f)
     @jwt_required()
     def decorated(*args, **kwargs):
@@ -164,5 +164,20 @@ def doctor_required(f):
             return jsonify({"error": "Doctor not found"}), 404
             
         return f(doctor, *args, **kwargs)
+    
+    return decorated
+
+# Decorator for web routes that require doctor authentication
+def doctor_required(f):
+    @wraps(f)
+    @login_required
+    def decorated(*args, **kwargs):
+        # Flask-Login already ensures the user is authenticated
+        # We just need to check if the user is a doctor
+        if not hasattr(current_user, 'id'):
+            flash('Authentication required', 'danger')
+            return redirect(url_for('auth.login'))
+        
+        return f(*args, **kwargs)
     
     return decorated
