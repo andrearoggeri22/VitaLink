@@ -9,22 +9,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
-# Copia i file di requisiti
-COPY pyproject.toml uv.lock /app/
+# Copia prima solo il file dei requisiti per sfruttare la cache Docker
+COPY docker-requirements.txt /app/
 
 # Installa le dipendenze Python
 RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir "uv==0.1.21" \
-    && uv pip install --no-cache-dir -e .
+    && pip install --no-cache-dir -r docker-requirements.txt
 
-# Copia il codice dell'applicazione
+# Copia il resto del codice dell'applicazione
 COPY . /app/
 
 # Creazione della directory uploads se non esiste
 RUN mkdir -p /app/uploads && chmod 777 /app/uploads
 
 # Rendi eseguibile lo script di entrypoint
-COPY docker-entrypoint.sh /app/
 RUN chmod +x /app/docker-entrypoint.sh
 
 # Esponi la porta su cui sarà in ascolto l'app
