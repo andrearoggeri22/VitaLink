@@ -54,3 +54,78 @@ msgstr "Disconnetti"
 msgid "Healthcare Monitoring Platform. All rights reserved."
 msgstr "Piattaforma di Monitoraggio Sanitario. Tutti i diritti riservati."
 
+msgid "Total patients under your care"
+msgstr "Pazienti totali in cura"
+
+msgid "View all patients"
+msgstr "Visualizza tutti i pazienti"
+
+msgid "Quick Actions"
+msgstr "Azioni Rapide"
+
+msgid "Manage your patients and vital signs"
+msgstr "Gestisci i tuoi pazienti e segni vitali"
+
+msgid "New Patient"
+msgstr "Nuovo Paziente"
+
+msgid "Search Patients"
+msgstr "Cerca Pazienti"
+
+msgid "Monitor changes and actions in the system"
+msgstr "Monitora modifiche e azioni nel sistema"
+
+msgid "View activity logs"
+msgstr "Visualizza log attività"
+
+msgid "System Status"
+msgstr "Stato del Sistema"
+
+msgid "Active"
+msgstr "Attivo"
+
+msgid "All systems operational"
+msgstr "Tutti i sistemi operativi"
+
+msgid "Last updated"
+msgstr "Ultimo aggiornamento"
+
+msgid "Recent Patients"
+msgstr "Pazienti Recenti"
+
+msgid "View All"
+msgstr "Visualizza Tutti"
+
+msgid "Name"
+msgstr "Nome"
+
+msgid "ID"
+msgstr "ID"
+
+msgid "Added"
+msgstr "Aggiunto"
+
+msgid "Actions"
+msgstr "Azioni"
+
+msgid "No patients added yet"
+msgstr "Nessun paziente aggiunto"
+
+msgid "Recent Vital Signs"
+msgstr "Segni Vitali Recenti"
+
+msgid "Patient"
+msgstr "Paziente"
+
+msgid "Type"
+msgstr "Tipo"
+
+msgid "Value"
+msgstr "Valore"
+
+msgid "Time"
+msgstr "Ora"
+
+msgid "No vital signs recorded yet"
+msgstr "Nessun segno vitale registrato"
+
