@@ -430,6 +430,10 @@ def generate_vital_trends_report(patient, vital_type, vitals, period_desc):
         chart.valueAxis.valueMin = min(values) * 0.9 if values else 0
         chart.valueAxis.valueMax = max(values) * 1.1 if values else 100
         
+        # Assicuriamoci che i valori min e max siano float
+        chart.valueAxis.valueMin = float(chart.valueAxis.valueMin)
+        chart.valueAxis.valueMax = float(chart.valueAxis.valueMax)
+        
         # Add reference lines if available
         if reference['min'] is not None:
             chart.valueAxis.valueMin = min(chart.valueAxis.valueMin, reference['min'] * 0.9)
