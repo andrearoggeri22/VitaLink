@@ -437,10 +437,16 @@ def generate_vital_trends_report(patient, vital_type, vitals, period_desc):
         # Add reference lines if available
         if reference['min'] is not None:
             chart.valueAxis.valueMin = min(chart.valueAxis.valueMin, reference['min'] * 0.9)
+            # Inizializza valueSteps se non esiste
+            if not hasattr(chart.valueAxis, 'valueSteps'):
+                chart.valueAxis.valueSteps = []
             chart.valueAxis.valueSteps.append(reference['min'])
         
         if reference['max'] is not None:
             chart.valueAxis.valueMax = max(chart.valueAxis.valueMax, reference['max'] * 1.1)
+            # Inizializza valueSteps se non esiste
+            if not hasattr(chart.valueAxis, 'valueSteps'):
+                chart.valueAxis.valueSteps = []
             chart.valueAxis.valueSteps.append(reference['max'])
         
         # Style the chart
