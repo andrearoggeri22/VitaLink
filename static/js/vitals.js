@@ -67,102 +67,124 @@ function initVitalsForm() {
  * Initialize charts for vital signs visualization
  */
 function initVitalsCharts() {
-    // Check if the vitals data container exists
-    const vitalsDataContainer = document.getElementById('vitalsData');
+    // Controlla se siamo nella pagina dei parametri vitali
+    const patientIdMatch = window.location.pathname.match(/\/patients\/(\d+)\/vitals/);
+    if (!patientIdMatch) return;
     
-    if (!vitalsDataContainer) return;
+    const patientId = patientIdMatch[1];
     
-    // Get vital signs data from the data container
-    let vitalsData;
-    try {
-        vitalsData = JSON.parse(vitalsDataContainer.getAttribute('data-vitals'));
-    } catch (error) {
-        console.error('Error parsing vital signs data:', error);
-        return;
+    // Estrai i parametri di filtro dall'URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const startDate = urlParams.get('start_date');
+    const endDate = urlParams.get('end_date');
+    const vitalType = urlParams.get('type');
+    
+    // Costruisci l'URL dell'API con i parametri di filtro
+    let apiUrl = `/api/patients/${patientId}/vitals`;
+    const apiParams = [];
+    
+    if (startDate) apiParams.push(`start_date=${startDate}`);
+    if (endDate) apiParams.push(`end_date=${endDate}`);
+    if (vitalType) apiParams.push(`type=${vitalType}`);
+    
+    if (apiParams.length > 0) {
+        apiUrl += `?${apiParams.join('&')}`;
     }
     
-    // Create charts for each vital sign type
-    for (const [type, values] of Object.entries(vitalsData)) {
-        if (!values || values.length === 0) continue;
-        
-        const canvasId = `chart-${type}`;
-        
-        // Check if canvas element exists
-        const canvas = document.getElementById(canvasId);
-        if (!canvas) continue;
-        
-        // Prepare data for the chart
-        const labels = values.map(v => new Date(v.recorded_at));
-        const data = values.map(v => v.value);
-        const unit = values[0].unit || '';
-        
-        // Format type name for display
-        const typeDisplay = type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-        
-        // Create the chart
-        new Chart(canvas, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: `${typeDisplay} (${unit})`,
-                    data: data,
-                    borderColor: getRandomColor(),
-                    backgroundColor: 'rgba(0, 0, 0, 0.1)',
-                    borderWidth: 2,
-                    tension: 0.1,
-                    pointRadius: 3,
-                    pointHoverRadius: 5
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    x: {
-                        type: 'time',
-                        time: {
-                            unit: 'day',
-                            displayFormats: {
-                                day: 'MMM d'
+    // Ottieni i dati tramite API
+    fetch(apiUrl)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(vitalsData => {
+            // Create charts for each vital sign type
+            for (const [type, values] of Object.entries(vitalsData)) {
+                if (!values || values.length === 0) continue;
+                
+                const canvasId = `chart-${type}`;
+                
+                // Check if canvas element exists
+                const canvas = document.getElementById(canvasId);
+                if (!canvas) continue;
+                
+                // Prepare data for the chart
+                const labels = values.map(v => new Date(v.recorded_at));
+                const data = values.map(v => v.value);
+                const unit = values[0].unit || '';
+                
+                // Format type name for display
+                const typeDisplay = type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                
+                // Create the chart
+                new Chart(canvas, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: `${typeDisplay} (${unit})`,
+                            data: data,
+                            borderColor: getRandomColor(),
+                            backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.1,
+                            pointRadius: 3,
+                            pointHoverRadius: 5
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: {
+                                    unit: 'day',
+                                    displayFormats: {
+                                        day: 'MMM d'
+                                    }
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Date'
+                                }
+                            },
+                            y: {
+                                beginAtZero: false,
+                                title: {
+                                    display: true,
+                                    text: unit
+                                }
                             }
                         },
-                        title: {
-                            display: true,
-                            text: dateText || 'Date'
-                        }
-                    },
-                    y: {
-                        beginAtZero: false,
-                        title: {
-                            display: true,
-                            text: unit
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top'
-                    },
-                    tooltip: {
-                        callbacks: {
-                            title: function(tooltipItems) {
-                                if (tooltipItems && tooltipItems[0]) {
-                                    // Per Chart.js v3, l'oggetto contiene .parsed o .raw
-                                    const value = tooltipItems[0].parsed ? 
-                                        tooltipItems[0].parsed.x : 
-                                        (tooltipItems[0].raw ? tooltipItems[0].raw : tooltipItems[0].label);
-                                    return formatDate(value);
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    title: function(tooltipItems) {
+                                        if (tooltipItems && tooltipItems[0]) {
+                                            const value = tooltipItems[0].parsed ? 
+                                                tooltipItems[0].parsed.x : 
+                                                (tooltipItems[0].raw ? tooltipItems[0].raw : tooltipItems[0].label);
+                                            return formatDate(value);
+                                        }
+                                        return '';
+                                    }
                                 }
-                                return '';
                             }
                         }
                     }
-                }
+                });
             }
+        })
+        .catch(error => {
+            console.error('Error fetching vital signs data:', error);
         });
-    }
 }
 
 /**
