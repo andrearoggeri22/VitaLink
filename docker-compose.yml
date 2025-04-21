@@ -10,6 +10,11 @@ services:
       - db
     environment:
       - DATABASE_URL=postgresql://vitalink:vitalink_password@db:5432/vitalink
+      - PGHOST=db
+      - PGPORT=5432
+      - PGUSER=vitalink
+      - PGPASSWORD=vitalink_password
+      - PGDATABASE=vitalink
       - FLASK_APP=main.py
       - FLASK_ENV=production
       - PYTHONUNBUFFERED=1
@@ -17,6 +22,15 @@ services:
       # (Twilio, SendGrid, ecc. dovrebbero essere configurate qui in produzione)
     volumes:
       - ./uploads:/app/uploads
+    # Aggiunge un health check per verificare che il servizio sia effettivamente disponibile
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - vitalink-network
 
   db:
     image: postgres:15-alpine
@@ -29,6 +43,18 @@ services:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    networks:
+      - vitalink-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vitalink"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
 volumes:
   postgres_data:
+
+networks:
+  vitalink-network:
+    driver: bridge
