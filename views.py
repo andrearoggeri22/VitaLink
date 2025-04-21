@@ -1,13 +1,15 @@
 import logging
 from datetime import datetime
 
-from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify
+from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify, send_file
 from flask_login import login_required, current_user
 from sqlalchemy.exc import SQLAlchemyError
 
 from app import db
 from models import Patient, Doctor, VitalSign, VitalSignType, DataOrigin, Note, DoctorPatient
-from utils import parse_date
+from utils import parse_date, is_vital_in_range, get_vital_sign_unit
+from notifications import notify_abnormal_vital
+from reports import generate_patient_report, generate_vital_trends_report
 
 views_bp = Blueprint('views', __name__)
 logger = logging.getLogger(__name__)
@@ -265,7 +267,35 @@ def patient_vitals(patient_id):
             db.session.add(vital)
             db.session.commit()
             
-            flash('Vital sign recorded successfully', 'success')
+            # Check if the vital sign is outside normal range
+            vital_value = str(value_float) if vital_type != 'blood_pressure' else value
+            is_normal, status = is_vital_in_range(vital_type, vital_value)
+            
+            # If value is abnormal and patient has contact number, send notification
+            notification_status = ""
+            if not is_normal and patient.contact_number:
+                if not unit:
+                    unit = get_vital_sign_unit(vital_type)
+                    
+                # Send SMS notification
+                success, message = notify_abnormal_vital(
+                    patient=patient,
+                    vital_type=vital_type,
+                    value=vital_value,
+                    unit=unit,
+                    status=status
+                )
+                
+                if success:
+                    notification_status = " Abnormal value detected. Patient notification sent."
+                    logger.info(f"Abnormal vital notification sent to patient {patient.id}")
+                else:
+                    notification_status = f" Abnormal value detected. Failed to send notification: {message}"
+                    logger.warning(f"Failed to send vital notification to patient {patient.id}: {message}")
+            elif not is_normal:
+                notification_status = " Abnormal value detected (patient has no contact number for notifications)."
+            
+            flash(f'Vital sign recorded successfully.{notification_status}', 'success')
             logger.info(f"Doctor {current_user.id} added vital sign for patient {patient_id}")
             
         except ValueError:
@@ -398,3 +428,178 @@ def profile():
                 flash('Password updated successfully', 'success')
     
     return render_template('profile.html', doctor=current_user, now=datetime.now())
+
+@views_bp.route('/patients/<int:patient_id>/report')
+@login_required
+def generate_report(patient_id):
+    """Generate a comprehensive patient report in PDF format."""
+    patient = Patient.query.get_or_404(patient_id)
+    
+    # Check if the current doctor is associated with this patient
+    if patient not in current_user.patients.all():
+        flash('You are not authorized to generate reports for this patient', 'danger')
+        return redirect(url_for('views.patients'))
+    
+    # Get filter parameters
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    
+    # Process date filters
+    start_datetime = None
+    end_datetime = None
+    
+    if start_date:
+        try:
+            start_datetime = datetime.strptime(start_date, '%Y-%m-%d')
+        except ValueError:
+            flash('Invalid start date format. Please use YYYY-MM-DD', 'warning')
+    
+    if end_date:
+        try:
+            end_datetime = datetime.strptime(end_date, '%Y-%m-%d')
+            # Add a day to include all records from the end date
+            end_datetime = end_datetime.replace(hour=23, minute=59, second=59)
+        except ValueError:
+            flash('Invalid end date format. Please use YYYY-MM-DD', 'warning')
+    
+    # Query vitals with filter
+    vitals_query = patient.vital_signs
+    
+    if start_datetime:
+        vitals_query = vitals_query.filter(VitalSign.recorded_at >= start_datetime)
+    
+    if end_datetime:
+        vitals_query = vitals_query.filter(VitalSign.recorded_at <= end_datetime)
+    
+    vitals = vitals_query.order_by(VitalSign.recorded_at.desc()).all()
+    
+    # Query notes with filter
+    notes_query = patient.notes
+    
+    if start_datetime:
+        notes_query = notes_query.filter(Note.created_at >= start_datetime)
+    
+    if end_datetime:
+        notes_query = notes_query.filter(Note.created_at <= end_datetime)
+    
+    notes = notes_query.order_by(Note.created_at.desc()).all()
+    
+    # Generate the PDF report
+    try:
+        pdf_buffer = generate_patient_report(
+            patient=patient,
+            doctor=current_user,
+            vitals=vitals,
+            notes=notes,
+            start_date=start_datetime,
+            end_date=end_datetime
+        )
+        
+        # Generate a filename for the report
+        filename = f"patient_report_{patient.last_name}_{datetime.now().strftime('%Y%m%d')}.pdf"
+        
+        # Log this action
+        logger.info(f"Doctor {current_user.id} generated report for patient {patient_id}")
+        
+        # Return the PDF as a downloadable file
+        return send_file(
+            pdf_buffer,
+            as_attachment=True,
+            download_name=filename,
+            mimetype='application/pdf'
+        )
+        
+    except Exception as e:
+        logger.error(f"Error generating report: {str(e)}")
+        flash('An error occurred while generating the report', 'danger')
+        return redirect(url_for('views.patient_detail', patient_id=patient_id))
+
+@views_bp.route('/patients/<int:patient_id>/vital_report/<string:vital_type>')
+@login_required
+def generate_vital_report(patient_id, vital_type):
+    """Generate a trend analysis report for a specific vital sign."""
+    patient = Patient.query.get_or_404(patient_id)
+    
+    # Check if the current doctor is associated with this patient
+    if patient not in current_user.patients.all():
+        flash('You are not authorized to generate reports for this patient', 'danger')
+        return redirect(url_for('views.patients'))
+    
+    # Validate vital type
+    try:
+        vital_type_enum = VitalSignType(vital_type)
+    except ValueError:
+        flash('Invalid vital sign type', 'danger')
+        return redirect(url_for('views.patient_vitals', patient_id=patient_id))
+    
+    # Get filter parameters
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    
+    # Process date filters
+    start_datetime = None
+    end_datetime = None
+    period_desc = "All Records"
+    
+    if start_date:
+        try:
+            start_datetime = datetime.strptime(start_date, '%Y-%m-%d')
+            period_desc = f"From {start_date}"
+        except ValueError:
+            flash('Invalid start date format. Please use YYYY-MM-DD', 'warning')
+    
+    if end_date:
+        try:
+            end_datetime = datetime.strptime(end_date, '%Y-%m-%d')
+            # Add a day to include all records from the end date
+            end_datetime = end_datetime.replace(hour=23, minute=59, second=59)
+            if start_date:
+                period_desc = f"{period_desc} to {end_date}"
+            else:
+                period_desc = f"Until {end_date}"
+        except ValueError:
+            flash('Invalid end date format. Please use YYYY-MM-DD', 'warning')
+    
+    # Query vitals with filter
+    vitals_query = patient.vital_signs.filter(VitalSign.type == vital_type_enum)
+    
+    if start_datetime:
+        vitals_query = vitals_query.filter(VitalSign.recorded_at >= start_datetime)
+    
+    if end_datetime:
+        vitals_query = vitals_query.filter(VitalSign.recorded_at <= end_datetime)
+    
+    vitals = vitals_query.order_by(VitalSign.recorded_at).all()
+    
+    if not vitals:
+        flash('No data available for the selected vital sign and time period', 'warning')
+        return redirect(url_for('views.patient_vitals', patient_id=patient_id))
+    
+    # Generate the PDF report
+    try:
+        pdf_buffer = generate_vital_trends_report(
+            patient=patient,
+            vital_type=vital_type,
+            vitals=vitals,
+            period_desc=period_desc
+        )
+        
+        # Generate a filename for the report
+        vital_name = vital_type.replace('_', ' ').title()
+        filename = f"{vital_name}_report_{patient.last_name}_{datetime.now().strftime('%Y%m%d')}.pdf"
+        
+        # Log this action
+        logger.info(f"Doctor {current_user.id} generated {vital_type} report for patient {patient_id}")
+        
+        # Return the PDF as a downloadable file
+        return send_file(
+            pdf_buffer,
+            as_attachment=True,
+            download_name=filename,
+            mimetype='application/pdf'
+        )
+        
+    except Exception as e:
+        logger.error(f"Error generating vital report: {str(e)}")
+        flash('An error occurred while generating the report', 'danger')
+        return redirect(url_for('views.patient_vitals', patient_id=patient_id))
