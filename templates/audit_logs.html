@@ -36,35 +36,35 @@
                 </div>
                 <div class="col-md-6 col-lg-3">
                     <div class="mb-3">
-                        <label for="action_type" class="form-label">Action Type</label>
+                        <label for="action_type" class="form-label">{{ _('Action Type') }}</label>
                         <select class="form-select" id="action_type" name="action_type">
-                            <option value="">All Actions</option>
-                            <option value="CREATE" {% if request.args.get('action_type') == 'CREATE' %}selected{% endif %}>Create</option>
-                            <option value="UPDATE" {% if request.args.get('action_type') == 'UPDATE' %}selected{% endif %}>Update</option>
-                            <option value="DELETE" {% if request.args.get('action_type') == 'DELETE' %}selected{% endif %}>Delete</option>
-                            <option value="VIEW" {% if request.args.get('action_type') == 'VIEW' %}selected{% endif %}>View</option>
-                            <option value="EXPORT" {% if request.args.get('action_type') == 'EXPORT' %}selected{% endif %}>Export</option>
+                            <option value="">{{ _('All Actions') }}</option>
+                            <option value="CREATE" {% if request.args.get('action_type') == 'CREATE' %}selected{% endif %}>{{ _('Create') }}</option>
+                            <option value="UPDATE" {% if request.args.get('action_type') == 'UPDATE' %}selected{% endif %}>{{ _('Update') }}</option>
+                            <option value="DELETE" {% if request.args.get('action_type') == 'DELETE' %}selected{% endif %}>{{ _('Delete') }}</option>
+                            <option value="VIEW" {% if request.args.get('action_type') == 'VIEW' %}selected{% endif %}>{{ _('View') }}</option>
+                            <option value="EXPORT" {% if request.args.get('action_type') == 'EXPORT' %}selected{% endif %}>{{ _('Export') }}</option>
                         </select>
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-3">
                     <div class="mb-3">
-                        <label for="entity_type" class="form-label">Entity Type</label>
+                        <label for="entity_type" class="form-label">{{ _('Entity Type') }}</label>
                         <select class="form-select" id="entity_type" name="entity_type">
-                            <option value="">All Entities</option>
-                            <option value="PATIENT" {% if request.args.get('entity_type') == 'PATIENT' %}selected{% endif %}>Patient</option>
-                            <option value="VITAL_SIGN" {% if request.args.get('entity_type') == 'VITAL_SIGN' %}selected{% endif %}>Vital Sign</option>
-                            <option value="NOTE" {% if request.args.get('entity_type') == 'NOTE' %}selected{% endif %}>Note</option>
-                            <option value="REPORT" {% if request.args.get('entity_type') == 'REPORT' %}selected{% endif %}>Report</option>
+                            <option value="">{{ _('All Entities') }}</option>
+                            <option value="PATIENT" {% if request.args.get('entity_type') == 'PATIENT' %}selected{% endif %}>{{ _('Patient') }}</option>
+                            <option value="VITAL_SIGN" {% if request.args.get('entity_type') == 'VITAL_SIGN' %}selected{% endif %}>{{ _('Vital Sign') }}</option>
+                            <option value="NOTE" {% if request.args.get('entity_type') == 'NOTE' %}selected{% endif %}>{{ _('Note') }}</option>
+                            <option value="REPORT" {% if request.args.get('entity_type') == 'REPORT' %}selected{% endif %}>{{ _('Report') }}</option>
                         </select>
                     </div>
                 </div>
                 {% if current_user.is_admin %}
                 <div class="col-md-6 col-lg-3">
                     <div class="mb-3">
-                        <label for="doctor_id" class="form-label">Doctor</label>
+                        <label for="doctor_id" class="form-label">{{ _('Doctor') }}</label>
                         <select class="form-select" id="doctor_id" name="doctor_id">
-                            <option value="">All Doctors</option>
+                            <option value="">{{ _('All Doctors') }}</option>
                             {% for doctor in doctors %}
                             <option value="{{ doctor.id }}" {% if request.args.get('doctor_id')|int == doctor.id %}selected{% endif %}>
                                 {{ doctor.first_name }} {{ doctor.last_name }}
@@ -76,9 +76,9 @@
                 {% endif %}
                 <div class="col-md-6 col-lg-3">
                     <div class="mb-3">
-                        <label for="patient_id" class="form-label">Patient</label>
+                        <label for="patient_id" class="form-label">{{ _('Patient') }}</label>
                         <select class="form-select" id="patient_id" name="patient_id">
-                            <option value="">All Patients</option>
+                            <option value="">{{ _('All Patients') }}</option>
                             {% for patient in patients %}
                             <option value="{{ patient.id }}" {% if request.args.get('patient_id')|int == patient.id %}selected{% endif %}>
                                 {{ patient.first_name }} {{ patient.last_name }}
@@ -90,10 +90,10 @@
             </div>
             <div class="d-flex justify-content-end mt-3">
                 <a href="{{ url_for('audit.get_audit_logs') }}" class="btn btn-outline-secondary me-2">
-                    Clear Filters
+                    {{ _('Clear Filters') }}
                 </a>
                 <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-search me-1"></i> Apply Filters
+                    <i class="fas fa-search me-1"></i> {{ _('Apply Filters') }}
                 </button>
             </div>
         </form>
@@ -103,21 +103,21 @@
 <!-- Audit Logs Table -->
 <div class="card shadow-sm">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <h5 class="mb-0"><i class="fas fa-history me-2"></i> Audit History</h5>
-        <span class="badge bg-primary">{{ logs|length }} Records</span>
+        <h5 class="mb-0"><i class="fas fa-history me-2"></i> {{ _('Audit History') }}</h5>
+        <span class="badge bg-primary">{{ logs|length }} {{ _('Records') }}</span>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-hover mb-0">
                 <thead>
                     <tr>
-                        <th>Date & Time</th>
-                        <th>User</th>
-                        <th>Action</th>
-                        <th>Entity</th>
-                        <th>Patient</th>
-                        <th>IP Address</th>
-                        <th>Details</th>
+                        <th>{{ _('Date & Time') }}</th>
+                        <th>{{ _('User') }}</th>
+                        <th>{{ _('Action') }}</th>
+                        <th>{{ _('Entity') }}</th>
+                        <th>{{ _('Patient') }}</th>
+                        <th>{{ _('IP Address') }}</th>
+                        <th>{{ _('Details') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -149,7 +149,7 @@
                             <td>
                                 <button type="button" class="btn btn-sm btn-outline-info" 
                                         data-bs-toggle="modal" data-bs-target="#detailsModal{{ log.id }}">
-                                    View Details
+                                    {{ _('View Details') }}
                                 </button>
                                 
                                 <!-- Details Modal -->
