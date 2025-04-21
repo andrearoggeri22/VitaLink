@@ -131,9 +131,57 @@ msgstr "Azioni"
 msgid "No patients added yet"
 msgstr "Nessun paziente aggiunto"
 
+#: templates/patients.html:43 templates/patients.html:109 templates/patients.html:169
+msgid "Date of Birth"
+msgstr "Data di Nascita"
+
+#: templates/patients.html:160
+msgid "Search by name or ID..."
+msgstr "Cerca per nome o ID..."
+
+#: templates/patients.html:151 templates/patients.html:152 templates/patients.html:212
+msgid "Add New Patient"
+msgstr "Aggiungi Nuovo Paziente"
+
+#: templates/patients.html:185
+msgid "View Patient"
+msgstr "Visualizza Paziente"
+
+#: templates/patients.html:189
+msgid "View Vitals"
+msgstr "Visualizza Parametri Vitali"
+
+#: templates/patients.html:193
+msgid "Edit Patient"
+msgstr "Modifica Paziente"
+
+#: templates/patients.html:198 templates/patients.html:232
+msgid "Delete Patient"
+msgstr "Elimina Paziente"
+
+#: templates/patients.html:233
+msgid "Are you sure you want to delete the patient {name}? This action cannot be undone."
+msgstr "Sei sicuro di voler eliminare il paziente {name}? Questa azione non può essere annullata."
+
+#: templates/patients.html:234 templates/patients.html:235
+msgid "Confirm"
+msgstr "Conferma"
+
+#: templates/patients.html:235
+msgid "Cancel"
+msgstr "Annulla"
+
 #: templates/dashboard.html:158
 msgid "Recent Vital Signs"
 msgstr "Segni Vitali Recenti"
+
+#: templates/patient_detail.html:14
+msgid "DOB"
+msgstr "Data di nascita"
+
+#: templates/patient_detail.html:15
+msgid "Age"
+msgstr "Età"
 
 #: templates/dashboard.html:166
 msgid "Patient"
@@ -571,7 +619,15 @@ msgstr "Verifica connessione dispositivo Fitbit - modalità simulazione attivata
 msgid "Vital sign recorded successfully"
 msgstr "Parametro vitale registrato con successo"
 
-#: templates/audit_logs.html
+#: templates/audit_logs.html:10
+msgid "Back to Dashboard"
+msgstr "Torna al Pannello di Controllo"
+
+#: templates/audit_logs.html:18
+msgid "Filter Logs"
+msgstr "Filtra Log"
+
+#: templates/audit_logs.html:25
 msgid "Start Date"
 msgstr "Data di inizio"
 
