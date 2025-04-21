@@ -19,22 +19,24 @@ def is_valid_password(password):
     - Contain at least one digit
     - Contain at least one special character
     """
+    from flask_babel import gettext as _
+    
     if len(password) < 8:
-        return False, "Password must be at least 8 characters long"
+        return False, _("La password deve essere di almeno 8 caratteri")
     
     if not re.search(r'[A-Z]', password):
-        return False, "Password must contain at least one uppercase letter"
+        return False, _("La password deve contenere almeno una lettera maiuscola")
     
     if not re.search(r'[a-z]', password):
-        return False, "Password must contain at least one lowercase letter"
+        return False, _("La password deve contenere almeno una lettera minuscola")
     
     if not re.search(r'[0-9]', password):
-        return False, "Password must contain at least one digit"
+        return False, _("La password deve contenere almeno un numero")
     
     if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
-        return False, "Password must contain at least one special character"
+        return False, _("La password deve contenere almeno un carattere speciale")
     
-    return True, "Password is valid"
+    return True, _("Password valida")
 
 def validate_uuid(uuid_string):
     """Validate UUID format."""
