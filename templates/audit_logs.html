@@ -157,36 +157,36 @@
                                     <div class="modal-dialog modal-lg">
                                         <div class="modal-content">
                                             <div class="modal-header">
-                                                <h5 class="modal-title">Audit Log Details</h5>
+                                                <h5 class="modal-title">{{ _('Audit Log Details') }}</h5>
                                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                             </div>
                                             <div class="modal-body">
                                                 <dl class="row">
-                                                    <dt class="col-sm-3">Timestamp</dt>
+                                                    <dt class="col-sm-3">{{ _('Timestamp') }}</dt>
                                                     <dd class="col-sm-9">{{ log.timestamp }}</dd>
                                                     
-                                                    <dt class="col-sm-3">Doctor</dt>
+                                                    <dt class="col-sm-3">{{ _('Doctor') }}</dt>
                                                     <dd class="col-sm-9">{{ log.doctor_name }}</dd>
                                                     
-                                                    <dt class="col-sm-3">Action</dt>
+                                                    <dt class="col-sm-3">{{ _('Action') }}</dt>
                                                     <dd class="col-sm-9">{{ log.action_type|title }}</dd>
                                                     
-                                                    <dt class="col-sm-3">Entity Type</dt>
+                                                    <dt class="col-sm-3">{{ _('Entity Type') }}</dt>
                                                     <dd class="col-sm-9">{{ log.entity_type|replace('_', ' ')|title }}</dd>
                                                     
-                                                    <dt class="col-sm-3">Entity ID</dt>
+                                                    <dt class="col-sm-3">{{ _('Entity ID') }}</dt>
                                                     <dd class="col-sm-9">{{ log.entity_id }}</dd>
                                                     
                                                     {% if log.patient_name %}
-                                                    <dt class="col-sm-3">Patient</dt>
+                                                    <dt class="col-sm-3">{{ _('Patient') }}</dt>
                                                     <dd class="col-sm-9">{{ log.patient_name }}</dd>
                                                     {% endif %}
                                                     
-                                                    <dt class="col-sm-3">IP Address</dt>
+                                                    <dt class="col-sm-3">{{ _('IP Address') }}</dt>
                                                     <dd class="col-sm-9">{{ log.ip_address }}</dd>
                                                     
                                                     {% if log.details %}
-                                                    <dt class="col-sm-3">Details</dt>
+                                                    <dt class="col-sm-3">{{ _('Details') }}</dt>
                                                     <dd class="col-sm-9">
                                                         <pre class="pre-scrollable"><code>{{ log.details|tojson(indent=2) }}</code></pre>
                                                     </dd>
@@ -194,7 +194,7 @@
                                                 </dl>
                                             </div>
                                             <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('Close') }}</button>
                                             </div>
                                         </div>
                                     </div>
@@ -205,7 +205,7 @@
                     {% else %}
                         <tr>
                             <td colspan="7" class="text-center py-4">
-                                <p class="text-muted mb-0">No audit logs found matching your criteria</p>
+                                <p class="text-muted mb-0">{{ _('No audit logs found matching your criteria') }}</p>
                             </td>
                         </tr>
                     {% endif %}
@@ -220,7 +220,7 @@
     <div class="col-md-6 mb-4">
         <div class="card shadow-sm h-100">
             <div class="card-header">
-                <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i> Actions by Type</h5>
+                <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i> {{ _('Actions by Type') }}</h5>
             </div>
             <div class="card-body">
                 <canvas id="actionTypeChart"></canvas>
@@ -230,7 +230,7 @@
     <div class="col-md-6 mb-4">
         <div class="card shadow-sm h-100">
             <div class="card-header">
-                <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i> Entities by Type</h5>
+                <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i> {{ _('Entities by Type') }}</h5>
             </div>
             <div class="card-body">
                 <canvas id="entityTypeChart"></canvas>
@@ -243,7 +243,7 @@
     <div class="col-md-12 mb-4">
         <div class="card shadow-sm">
             <div class="card-header">
-                <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i> Activity Timeline</h5>
+                <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i> {{ _('Activity Timeline') }}</h5>
             </div>
             <div class="card-body">
                 <canvas id="timelineChart"></canvas>
