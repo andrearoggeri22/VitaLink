@@ -44,12 +44,12 @@ def check_device_connected():
         bool: True se il dispositivo è connesso, False altrimenti
     """
     try:
-        # Per scopi dimostrativi e di testing, ritorna sempre True
+        # Per scopi dimostrativi e di testing, ritorniamo False per simulare l'assenza del dispositivo
         # In un'implementazione reale, controlleremmo il dispositivo fisico
         from flask_babel import gettext as _
         
         logging.info(_("Fitbit device connection check - simulation mode enabled"))
-        return True
+        return False
         
         # Il codice qui sotto verrebbe utilizzato in un'implementazione reale
         """
@@ -74,7 +74,7 @@ def check_device_connected():
         """
     except Exception as e:
         logging.error(f"Errore durante la verifica del dispositivo: {str(e)}")
-        return True  # Fail gracefully in demo mode
+        return False  # Ritorna False in caso di errore per sicurezza
 
 def extract_fitbit_data(patient_id):
     """
