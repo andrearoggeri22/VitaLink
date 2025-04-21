@@ -7,6 +7,34 @@ def validate_email(email):
     email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     return re.match(email_pattern, email) is not None
 
+def is_valid_password(password):
+    """
+    Validate password strength.
+    
+    Password must:
+    - Be at least 8 characters long
+    - Contain at least one uppercase letter
+    - Contain at least one lowercase letter
+    - Contain at least one digit
+    - Contain at least one special character
+    """
+    if len(password) < 8:
+        return False, "Password must be at least 8 characters long"
+    
+    if not re.search(r'[A-Z]', password):
+        return False, "Password must contain at least one uppercase letter"
+    
+    if not re.search(r'[a-z]', password):
+        return False, "Password must contain at least one lowercase letter"
+    
+    if not re.search(r'[0-9]', password):
+        return False, "Password must contain at least one digit"
+    
+    if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+        return False, "Password must contain at least one special character"
+    
+    return True, "Password is valid"
+
 def validate_uuid(uuid_string):
     """Validate UUID format."""
     try:
@@ -46,3 +74,78 @@ def format_vital_sign_value(vital_type, value, unit):
         return value
     
     return f"{value} {unit}"
+
+def get_vital_reference_range(vital_type, patient_age=None, patient_gender=None):
+    """
+    Get reference ranges for vital signs.
+    
+    Returns a dictionary with min and max values.
+    """
+    # Default reference ranges for adults
+    reference_ranges = {
+        'heart_rate': {'min': 60, 'max': 100, 'unit': 'bpm', 'name': 'Heart Rate'},
+        'blood_pressure': {'min': '90/60', 'max': '120/80', 'unit': 'mmHg', 'name': 'Blood Pressure'},
+        'oxygen_saturation': {'min': 95, 'max': 100, 'unit': '%', 'name': 'Oxygen Saturation'},
+        'temperature': {'min': 36.1, 'max': 37.2, 'unit': '°C', 'name': 'Temperature'},
+        'respiratory_rate': {'min': 12, 'max': 20, 'unit': 'breaths/min', 'name': 'Respiratory Rate'},
+        'glucose': {'min': 70, 'max': 100, 'unit': 'mg/dL', 'name': 'Glucose (Fasting)'},
+        'weight': {'min': None, 'max': None, 'unit': 'kg', 'name': 'Weight'}
+    }
+    
+    # Could implement age and gender specific ranges in the future
+    
+    if vital_type in reference_ranges:
+        return reference_ranges[vital_type]
+    else:
+        return {'min': None, 'max': None, 'unit': ''}
+
+def is_vital_in_range(vital_type, value):
+    """
+    Check if a vital sign value is within the normal range.
+    
+    Returns a tuple (is_normal, status) where status is 'normal', 'high', or 'low'
+    """
+    reference = get_vital_reference_range(vital_type)
+    
+    if reference['min'] is None or reference['max'] is None:
+        return True, 'normal'
+    
+    if vital_type == 'blood_pressure':
+        # Special case for blood pressure
+        try:
+            # Assuming value is in format "systolic/diastolic"
+            parts = value.split('/')
+            if len(parts) != 2:
+                return False, 'invalid'
+            
+            systolic = float(parts[0])
+            diastolic = float(parts[1])
+            
+            ref_parts_min = reference['min'].split('/')
+            ref_parts_max = reference['max'].split('/')
+            
+            sys_min = float(ref_parts_min[0])
+            dias_min = float(ref_parts_min[1])
+            sys_max = float(ref_parts_max[0])
+            dias_max = float(ref_parts_max[1])
+            
+            if systolic < sys_min or diastolic < dias_min:
+                return False, 'low'
+            elif systolic > sys_max or diastolic > dias_max:
+                return False, 'high'
+            else:
+                return True, 'normal'
+        except:
+            return False, 'invalid'
+    else:
+        # For other numeric vital signs
+        try:
+            value_float = float(value)
+            if value_float < reference['min']:
+                return False, 'low'
+            elif value_float > reference['max']:
+                return False, 'high'
+            else:
+                return True, 'normal'
+        except:
+            return False, 'invalid'

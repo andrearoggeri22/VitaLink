@@ -14,4 +14,8 @@ dependencies = [
     "flask-jwt-extended>=4.7.1",
     "pytest>=8.3.5",
     "sqlalchemy>=2.0.40",
+    "flask-wtf>=1.2.2",
+    "sendgrid>=6.11.0",
+    "twilio>=9.5.2",
+    "wtforms>=3.2.1",
 ]
