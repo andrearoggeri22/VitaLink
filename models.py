@@ -7,11 +7,44 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import db
 
+"""
+File: models.py
+Autore: VitaLink Team
+Data: Aprile 2025
+Descrizione: Definizione dei modelli di dati per l'applicazione VitaLink.
+             Contiene le entità principali del dominio e le relazioni tra esse.
+"""
+
 class DataOrigin(Enum):
+    """
+    Enumerazione che definisce l'origine dei dati dei parametri vitali.
+    
+    Attributi:
+        MANUAL: Dati inseriti manualmente dal medico
+        AUTOMATIC: Dati raccolti automaticamente da dispositivi
+    """
     MANUAL = "manual"
     AUTOMATIC = "automatic"
 
 class VitalSignType(Enum):
+    """
+    Enumerazione che definisce i tipi di parametri vitali supportati.
+    
+    Attributi:
+        HEART_RATE: Frequenza cardiaca
+        BLOOD_PRESSURE: Pressione sanguigna
+        OXYGEN_SATURATION: Saturazione di ossigeno
+        TEMPERATURE: Temperatura corporea
+        RESPIRATORY_RATE: Frequenza respiratoria
+        GLUCOSE: Livello di glucosio
+        WEIGHT: Peso corporeo
+        STEPS: Conteggio passi (dispositivi fitness)
+        CALORIES: Calorie bruciate (dispositivi fitness)
+        DISTANCE: Distanza percorsa (dispositivi fitness)
+        ACTIVE_MINUTES: Minuti di attività (dispositivi fitness)
+        SLEEP_DURATION: Durata del sonno (dispositivi fitness)
+        FLOORS_CLIMBED: Piani saliti (dispositivi fitness)
+    """
     HEART_RATE = "heart_rate"
     BLOOD_PRESSURE = "blood_pressure"
     OXYGEN_SATURATION = "oxygen_saturation"
@@ -19,7 +52,6 @@ class VitalSignType(Enum):
     RESPIRATORY_RATE = "respiratory_rate"
     GLUCOSE = "glucose"
     WEIGHT = "weight"
-    # Nuovi parametri per dispositivi fitness
     STEPS = "steps"
     CALORIES = "calories"
     DISTANCE = "distance"
@@ -27,14 +59,38 @@ class VitalSignType(Enum):
     SLEEP_DURATION = "sleep_duration"
     FLOORS_CLIMBED = "floors_climbed"
 
-# Association table for the many-to-many relationship between doctors and patients
 class DoctorPatient(db.Model):
+    """
+    Tabella di associazione per la relazione molti-a-molti tra medici e pazienti.
+    
+    Attributi:
+        doctor_id: ID del medico nella relazione
+        patient_id: ID del paziente nella relazione
+        assigned_date: Data di assegnazione del paziente al medico
+    """
     __tablename__ = 'doctor_patient'
     doctor_id = db.Column(db.Integer, db.ForeignKey('doctor.id'), primary_key=True)
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), primary_key=True)
     assigned_date = db.Column(db.DateTime, default=datetime.utcnow)
 
 class Doctor(UserMixin, db.Model):
+    """
+    Modello che rappresenta un medico nel sistema.
+    
+    Estende UserMixin per supportare l'autenticazione di Flask-Login.
+    
+    Attributi:
+        id: Identificatore unico del medico
+        email: Indirizzo email univoco del medico, utilizzato per l'autenticazione
+        password_hash: Hash della password del medico
+        first_name: Nome del medico
+        last_name: Cognome del medico
+        specialty: Specializzazione del medico
+        created_at: Data di creazione del record
+        updated_at: Data di ultimo aggiornamento del record
+        patients: Relazione con i pazienti assegnati al medico
+        notes: Relazione con le note create dal medico
+    """
     __tablename__ = 'doctor'
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
@@ -45,22 +101,46 @@ class Doctor(UserMixin, db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    # Relationship with patients
+    # Relazione con i pazienti (molti-a-molti)
     patients = db.relationship('Patient', 
                               secondary='doctor_patient',
                               backref=db.backref('doctors', lazy='dynamic'),
                               lazy='dynamic')
     
-    # Notes created by this doctor
+    # Note create da questo medico
     notes = db.relationship('Note', backref='doctor', lazy='dynamic')
 
     def set_password(self, password):
+        """
+        Imposta l'hash della password del medico.
+        
+        Args:
+            password: La password in chiaro da hashare
+            
+        Returns:
+            None
+        """
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
+        """
+        Verifica se la password fornita corrisponde all'hash memorizzato.
+        
+        Args:
+            password: La password in chiaro da verificare
+            
+        Returns:
+            bool: True se la password è corretta, False altrimenti
+        """
         return check_password_hash(self.password_hash, password)
     
     def to_dict(self):
+        """
+        Converte l'oggetto in un dizionario serializzabile.
+        
+        Returns:
+            dict: Rappresentazione dell'oggetto come dizionario
+        """
         return {
             'id': self.id,
             'email': self.email,
@@ -72,24 +152,62 @@ class Doctor(UserMixin, db.Model):
         }
     
     def get_patients(self):
-        """Get all patients associated with this doctor."""
+        """
+        Ottiene tutti i pazienti associati a questo medico.
+        
+        Returns:
+            list: Lista di oggetti Patient associati al medico
+        """
         return self.patients.all()
     
     def add_patient(self, patient):
-        """Add a patient to this doctor's list."""
+        """
+        Aggiunge un paziente alla lista dei pazienti di questo medico.
+        
+        Args:
+            patient: Oggetto Patient da aggiungere
+            
+        Returns:
+            None
+        """
         if patient not in self.patients.all():
             association = DoctorPatient(doctor_id=self.id, patient_id=patient.id)
             db.session.add(association)
             db.session.commit()
     
     def remove_patient(self, patient):
-        """Remove a patient from this doctor's list."""
+        """
+        Rimuove un paziente dalla lista dei pazienti di questo medico.
+        
+        Args:
+            patient: Oggetto Patient da rimuovere
+            
+        Returns:
+            None
+        """
         association = DoctorPatient.query.filter_by(doctor_id=self.id, patient_id=patient.id).first()
         if association:
             db.session.delete(association)
             db.session.commit()
 
 class Patient(db.Model):
+    """
+    Modello che rappresenta un paziente nel sistema.
+    
+    Attributi:
+        id: Identificatore unico del paziente
+        uuid: UUID univoco del paziente, usato in URL e API
+        first_name: Nome del paziente
+        last_name: Cognome del paziente
+        date_of_birth: Data di nascita del paziente
+        gender: Genere del paziente
+        contact_number: Numero di contatto del paziente
+        address: Indirizzo del paziente
+        created_at: Data di creazione del record
+        updated_at: Data di ultimo aggiornamento del record
+        vital_signs: Relazione con i parametri vitali del paziente
+        notes: Relazione con le note mediche del paziente
+    """
     __tablename__ = 'patient'
     id = db.Column(db.Integer, primary_key=True)
     uuid = db.Column(db.String(36), unique=True, nullable=False, default=lambda: str(uuid.uuid4()))
@@ -102,11 +220,17 @@ class Patient(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    # Relationships
+    # Relazioni
     vital_signs = db.relationship('VitalSign', backref='patient', lazy='dynamic')
     notes = db.relationship('Note', backref='patient', lazy='dynamic')
     
     def to_dict(self):
+        """
+        Converte l'oggetto in un dizionario serializzabile.
+        
+        Returns:
+            dict: Rappresentazione dell'oggetto come dizionario
+        """
         return {
             'id': self.id,
             'uuid': self.uuid,
@@ -121,7 +245,17 @@ class Patient(db.Model):
         }
     
     def get_vital_signs(self, type=None, start_date=None, end_date=None):
-        """Get vital signs for this patient with optional filtering."""
+        """
+        Ottiene i parametri vitali per questo paziente con possibile filtraggio.
+        
+        Args:
+            type (VitalSignType, optional): Tipo di parametro vitale da filtrare
+            start_date (datetime, optional): Data di inizio per il filtraggio
+            end_date (datetime, optional): Data di fine per il filtraggio
+            
+        Returns:
+            list: Lista di oggetti VitalSign che soddisfano i criteri di filtraggio
+        """
         query = self.vital_signs
         
         if type:
@@ -136,10 +270,28 @@ class Patient(db.Model):
         return query.order_by(VitalSign.recorded_at.desc()).all()
     
     def get_notes(self):
-        """Get all notes for this patient."""
+        """
+        Ottiene tutte le note mediche associate a questo paziente.
+        
+        Returns:
+            list: Lista di oggetti Note ordinati per data di creazione (più recenti prima)
+        """
         return self.notes.order_by(Note.created_at.desc()).all()
 
 class VitalSign(db.Model):
+    """
+    Modello che rappresenta un parametro vitale di un paziente.
+    
+    Attributi:
+        id: Identificatore unico del parametro vitale
+        patient_id: ID del paziente a cui appartiene il parametro
+        type: Tipo di parametro vitale (dall'enum VitalSignType)
+        value: Valore numerico del parametro
+        unit: Unità di misura del valore
+        recorded_at: Data e ora in cui è stato rilevato il parametro
+        origin: Origine del dato (manuale o automatica)
+        created_at: Data di creazione del record
+    """
     __tablename__ = 'vital_sign'
     id = db.Column(db.Integer, primary_key=True)
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=False)
@@ -151,6 +303,12 @@ class VitalSign(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     def to_dict(self):
+        """
+        Converte l'oggetto in un dizionario serializzabile.
+        
+        Returns:
+            dict: Rappresentazione dell'oggetto come dizionario
+        """
         return {
             'id': self.id,
             'patient_id': self.patient_id,
@@ -163,6 +321,17 @@ class VitalSign(db.Model):
         }
 
 class Note(db.Model):
+    """
+    Modello che rappresenta una nota medica per un paziente.
+    
+    Attributi:
+        id: Identificatore unico della nota
+        patient_id: ID del paziente a cui appartiene la nota
+        doctor_id: ID del medico che ha creato la nota
+        content: Contenuto testuale della nota
+        created_at: Data di creazione della nota
+        updated_at: Data di ultimo aggiornamento della nota
+    """
     __tablename__ = 'note'
     id = db.Column(db.Integer, primary_key=True)
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=False)
@@ -172,6 +341,12 @@ class Note(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     def to_dict(self):
+        """
+        Converte l'oggetto in un dizionario serializzabile.
+        
+        Returns:
+            dict: Rappresentazione dell'oggetto come dizionario
+        """
         return {
             'id': self.id,
             'patient_id': self.patient_id,
@@ -182,6 +357,16 @@ class Note(db.Model):
         }
 
 class ActionType(Enum):
+    """
+    Enumerazione che definisce i tipi di azioni per il sistema di audit log.
+    
+    Attributi:
+        CREATE: Azione di creazione di una nuova entità
+        UPDATE: Azione di aggiornamento di un'entità esistente
+        DELETE: Azione di eliminazione di un'entità
+        VIEW: Azione di visualizzazione di un'entità
+        EXPORT: Azione di esportazione di un'entità (es. generazione di report)
+    """
     CREATE = "create"
     UPDATE = "update"
     DELETE = "delete"
@@ -189,6 +374,15 @@ class ActionType(Enum):
     EXPORT = "export"
 
 class EntityType(Enum):
+    """
+    Enumerazione che definisce i tipi di entità tracciabili nel sistema di audit log.
+    
+    Attributi:
+        PATIENT: Entità paziente
+        VITAL_SIGN: Entità parametro vitale
+        NOTE: Entità nota medica
+        REPORT: Entità report/documento
+    """
     PATIENT = "patient"
     VITAL_SIGN = "vital_sign"
     NOTE = "note"
@@ -196,37 +390,62 @@ class EntityType(Enum):
 
 class AuditLog(db.Model):
     """
-    Model for storing audit logs of all actions performed in the system.
-    This is used for tracking who did what and when, for compliance and security purposes.
+    Modello per memorizzare i log di audit di tutte le azioni eseguite nel sistema.
+    Utilizzato per tracciare chi ha fatto cosa e quando, per scopi di conformità e sicurezza.
+    
+    Attributi:
+        id: Identificatore unico del record di audit
+        doctor_id: ID del medico che ha eseguito l'azione
+        doctor: Relazione con il medico che ha eseguito l'azione
+        timestamp: Data e ora in cui è stata eseguita l'azione
+        action_type: Tipo di azione eseguita (dall'enum ActionType)
+        entity_type: Tipo di entità interessata dall'azione (dall'enum EntityType)
+        entity_id: ID dell'entità interessata dall'azione
+        details: Dettagli aggiuntivi sull'azione (memorizzati come JSON)
+        patient_id: ID opzionale del paziente correlato all'azione
+        patient: Relazione con il paziente correlato all'azione
+        ip_address: Indirizzo IP da cui è stata eseguita l'azione
     """
     __tablename__ = 'audit_log'
     id = db.Column(db.Integer, primary_key=True)
     
-    # Who performed the action
+    # Chi ha eseguito l'azione
     doctor_id = db.Column(db.Integer, db.ForeignKey('doctor.id'), nullable=False)
     doctor = db.relationship('Doctor')
     
-    # When the action was performed
+    # Quando l'azione è stata eseguita
     timestamp = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     
-    # What type of action was performed
+    # Che tipo di azione è stata eseguita
     action_type = db.Column(db.Enum(ActionType), nullable=False)
     
-    # What entity was affected
+    # Quale entità è stata interessata
     entity_type = db.Column(db.Enum(EntityType), nullable=False)
-    entity_id = db.Column(db.Integer, nullable=False)  # ID of the affected entity
+    entity_id = db.Column(db.Integer, nullable=False)  # ID dell'entità interessata
     
-    # Additional details about the action (stored as JSON)
-    details = db.Column(db.Text)  # JSON string with action details
+    # Dettagli aggiuntivi sull'azione (memorizzati come JSON)
+    details = db.Column(db.Text)  # Stringa JSON con dettagli sull'azione
     
-    # Optional patient ID for easier querying
+    # ID opzionale del paziente per facilitare le query
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=True)
     patient = db.relationship('Patient')
     
-    # IP address of the user who performed the action
+    # Indirizzo IP dell'utente che ha eseguito l'azione
     ip_address = db.Column(db.String(50))
     
     def __init__(self, doctor_id, action_type, entity_type, entity_id, details=None, patient_id=None, ip_address=None):
+        """
+        Inizializza un nuovo record di audit log.
+        
+        Args:
+            doctor_id (int): ID del medico che ha eseguito l'azione
+            action_type (ActionType): Tipo di azione eseguita
+            entity_type (EntityType): Tipo di entità interessata dall'azione
+            entity_id (int): ID dell'entità interessata dall'azione
+            details (dict, optional): Dettagli aggiuntivi sull'azione
+            patient_id (int, optional): ID del paziente correlato all'azione
+            ip_address (str, optional): Indirizzo IP da cui è stata eseguita l'azione
+        """
         self.doctor_id = doctor_id
         self.action_type = action_type
         self.entity_type = entity_type
@@ -236,12 +455,23 @@ class AuditLog(db.Model):
         self.ip_address = ip_address
         
     def get_details(self):
-        """Parse the JSON string into a Python dictionary."""
+        """
+        Converte la stringa JSON dei dettagli in un dizionario Python.
+        
+        Returns:
+            dict: I dettagli dell'azione come dizionario
+        """
         if self.details:
             return json.loads(self.details)
         return {}
     
     def to_dict(self):
+        """
+        Converte l'oggetto in un dizionario serializzabile.
+        
+        Returns:
+            dict: Rappresentazione dell'oggetto come dizionario
+        """
         return {
             'id': self.id,
             'doctor_id': self.doctor_id,
