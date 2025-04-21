@@ -8,6 +8,18 @@
         <div class="card">
             <div class="card-header">
                 <h4 class="mb-0">{{ _('Doctor Registration') }}</h4>
+                
+                <!-- Language Selector -->
+                <div class="mt-2">
+                    <div class="btn-group btn-group-sm" role="group">
+                        {% for code, name in config['LANGUAGES'].items() %}
+                        <a href="{{ url_for('language.change_language', lang_code=code, next=request.path) }}" 
+                           class="btn btn-sm btn-outline-secondary {% if session.get('language') == code %}active{% endif %}">
+                            {{ name }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
             <div class="card-body">
                 <form method="POST" action="{{ url_for('auth.register') }}">
