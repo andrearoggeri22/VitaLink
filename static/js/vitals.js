@@ -30,7 +30,14 @@ function initVitalsForm() {
                 'temperature': '°C',
                 'respiratory_rate': 'breaths/min',
                 'glucose': 'mg/dL',
-                'weight': 'kg'
+                'weight': 'kg',
+                // Nuovi parametri Fitbit
+                'steps': 'steps',
+                'calories': 'kcal',
+                'distance': 'km',
+                'active_minutes': 'min',
+                'sleep_duration': 'hours',
+                'floors_climbed': 'floors'
             };
             
             // Set initial unit
