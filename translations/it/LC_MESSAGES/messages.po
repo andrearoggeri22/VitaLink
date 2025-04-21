@@ -165,7 +165,7 @@ msgstr "Accedi per utilizzare la piattaforma"
 
 #: templates/login.html:30 templates/register.html:29
 msgid "Email address"
-msgstr "Indirizzo Email"
+msgstr "Email"
 
 #: templates/login.html:39 templates/register.html:51
 msgid "Password"
