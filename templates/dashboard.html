@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard - Healthcare Monitoring Platform{% endblock %}
+{% block title %}{{ _('Dashboard') }} - {{ _('Healthcare Monitoring Platform') }}{% endblock %}
 
 {% block content %}
 <h1 class="mb-4">
-    <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+    <i class="fas fa-tachometer-alt me-2"></i> {{ _('Dashboard') }}
 </h1>
 
 <div class="row mb-4">
@@ -13,9 +13,9 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="card-title mb-0">Patients</h6>
+                        <h6 class="card-title mb-0">{{ _('Patients') }}</h6>
                         <h2 class="my-2">{{ patient_count }}</h2>
-                        <p class="card-text mb-0">Total patients under your care</p>
+                        <p class="card-text mb-0">{{ _('Total patients under your care') }}</p>
                     </div>
                     <div>
                         <i class="fas fa-users fa-3x opacity-50"></i>
@@ -24,7 +24,7 @@
             </div>
             <div class="card-footer bg-transparent border-0">
                 <a href="{{ url_for('views.patients') }}" class="text-white text-decoration-none small">
-                    View all patients <i class="fas fa-arrow-right ms-1"></i>
+                    {{ _('View all patients') }} <i class="fas fa-arrow-right ms-1"></i>
                 </a>
             </div>
         </div>
@@ -35,8 +35,8 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="card-title mb-0">Quick Actions</h6>
-                        <p class="card-text mt-3 mb-2">Manage your patients and vital signs</p>
+                        <h6 class="card-title mb-0">{{ _('Quick Actions') }}</h6>
+                        <p class="card-text mt-3 mb-2">{{ _('Manage your patients and vital signs') }}</p>
                     </div>
                     <div>
                         <i class="fas fa-tasks fa-3x opacity-50"></i>
@@ -45,10 +45,10 @@
             </div>
             <div class="card-footer bg-transparent border-0 d-flex justify-content-between">
                 <a href="{{ url_for('views.new_patient') }}" class="text-white text-decoration-none small">
-                    <i class="fas fa-plus-circle me-1"></i> New Patient
+                    <i class="fas fa-plus-circle me-1"></i> {{ _('New Patient') }}
                 </a>
                 <a href="{{ url_for('views.patients') }}" class="text-white text-decoration-none small">
-                    <i class="fas fa-search me-1"></i> Search Patients
+                    <i class="fas fa-search me-1"></i> {{ _('Search Patients') }}
                 </a>
             </div>
         </div>
@@ -59,8 +59,8 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="card-title mb-0">Audit Logs</h6>
-                        <p class="card-text mt-3 mb-2">Monitor changes and actions in the system</p>
+                        <h6 class="card-title mb-0">{{ _('Audit Logs') }}</h6>
+                        <p class="card-text mt-3 mb-2">{{ _('Monitor changes and actions in the system') }}</p>
                     </div>
                     <div>
                         <i class="fas fa-history fa-3x opacity-50"></i>
@@ -69,7 +69,7 @@
             </div>
             <div class="card-footer bg-transparent border-0">
                 <a href="{{ url_for('audit.get_audit_logs') }}" class="text-white text-decoration-none small">
-                    View activity logs <i class="fas fa-arrow-right ms-1"></i>
+                    {{ _('View activity logs') }} <i class="fas fa-arrow-right ms-1"></i>
                 </a>
             </div>
         </div>
@@ -80,9 +80,9 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="card-title mb-0">System Status</h6>
-                        <h2 class="my-2">Active</h2>
-                        <p class="card-text mb-0">All systems operational</p>
+                        <h6 class="card-title mb-0">{{ _('System Status') }}</h6>
+                        <h2 class="my-2">{{ _('Active') }}</h2>
+                        <p class="card-text mb-0">{{ _('All systems operational') }}</p>
                     </div>
                     <div>
                         <i class="fas fa-check-circle fa-3x opacity-50"></i>
