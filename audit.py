@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta
-from flask import request, current_app, jsonify, Blueprint
+from flask import request, current_app, jsonify, Blueprint, render_template
 from flask_login import current_user, login_required
 
-from models import AuditLog, ActionType, EntityType, Doctor, Patient, VitalSign, Note
+from models import AuditLog, ActionType, EntityType, Doctor, Patient, VitalSign, Note, DoctorPatient
 from app import db
 from auth import doctor_required
 
@@ -55,6 +55,7 @@ def get_audit_logs():
     patient_id = request.args.get('patient_id')
     action_type = request.args.get('action_type')
     entity_type = request.args.get('entity_type')
+    format_type = request.args.get('format', 'html')  # Default to HTML
     
     # Start building the query
     query = AuditLog.query
@@ -62,17 +63,17 @@ def get_audit_logs():
     # Apply filters
     if start_date:
         try:
-            start_date = datetime.strptime(start_date, '%Y-%m-%d')
-            query = query.filter(AuditLog.timestamp >= start_date)
+            start_date_obj = datetime.strptime(start_date, '%Y-%m-%d')
+            query = query.filter(AuditLog.timestamp >= start_date_obj)
         except ValueError:
             pass
     
     if end_date:
         try:
-            end_date = datetime.strptime(end_date, '%Y-%m-%d')
+            end_date_obj = datetime.strptime(end_date, '%Y-%m-%d')
             # Add one day to include the whole end date
-            end_date = end_date + timedelta(days=1)
-            query = query.filter(AuditLog.timestamp < end_date)
+            end_date_obj = end_date_obj + timedelta(days=1)
+            query = query.filter(AuditLog.timestamp < end_date_obj)
         except ValueError:
             pass
     
@@ -99,14 +100,43 @@ def get_audit_logs():
     # Get results ordered by timestamp (most recent first)
     logs = query.order_by(AuditLog.timestamp.desc()).all()
     
-    # Convert to dictionaries for JSON response
-    log_list = [log.to_dict() for log in logs]
+    # If format is JSON, return JSON response
+    if format_type == 'json':
+        # Convert to dictionaries for JSON response
+        log_list = [log.to_dict() for log in logs]
+        
+        return jsonify({
+            'status': 'success',
+            'count': len(log_list),
+            'logs': log_list
+        })
     
-    return jsonify({
-        'status': 'success',
-        'count': len(log_list),
-        'logs': log_list
-    })
+    # Otherwise, render HTML template
+    # Get list of patients and doctors for filter dropdowns
+    patients = Patient.query.join(
+        DoctorPatient, Patient.id == DoctorPatient.patient_id
+    ).filter(
+        DoctorPatient.doctor_id == current_user.id
+    ).all()
+    
+    # For admin users, show all doctors. For regular doctors, only show themselves
+    # Note: this is simplified as we don't have admin roles yet, but preparing for future
+    doctors = [current_user]
+    
+    # In the future, if admin roles are implemented:
+    # if current_user.is_admin:
+    #     doctors = Doctor.query.all()
+    
+    # Render the audit logs template
+    return render_template(
+        'audit_logs.html',
+        logs=[log.to_dict() for log in logs],
+        patients=patients,
+        doctors=doctors,
+        request=request,
+        current_user=current_user,
+        now=datetime.now()
+    )
 
 @audit_bp.route('/audit-logs/stats', methods=['GET'])
 @login_required

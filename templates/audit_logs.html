@@ -1,0 +1,380 @@
+{% extends "base.html" %}
+
+{% block title %}Audit Logs - Healthcare Monitoring Platform{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Audit Logs</h1>
+    <div>
+        <a href="{{ url_for('views.dashboard') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<!-- Filter Form -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-filter me-2"></i> Filter Logs</h5>
+    </div>
+    <div class="card-body">
+        <form id="filterForm" method="get" action="{{ url_for('audit.get_audit_logs') }}">
+            <div class="row g-3">
+                <div class="col-md-6 col-lg-3">
+                    <div class="mb-3">
+                        <label for="start_date" class="form-label">Start Date</label>
+                        <input type="date" class="form-control" id="start_date" name="start_date" 
+                              value="{{ request.args.get('start_date', '') }}">
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="mb-3">
+                        <label for="end_date" class="form-label">End Date</label>
+                        <input type="date" class="form-control" id="end_date" name="end_date"
+                              value="{{ request.args.get('end_date', '') }}">
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="mb-3">
+                        <label for="action_type" class="form-label">Action Type</label>
+                        <select class="form-select" id="action_type" name="action_type">
+                            <option value="">All Actions</option>
+                            <option value="CREATE" {% if request.args.get('action_type') == 'CREATE' %}selected{% endif %}>Create</option>
+                            <option value="UPDATE" {% if request.args.get('action_type') == 'UPDATE' %}selected{% endif %}>Update</option>
+                            <option value="DELETE" {% if request.args.get('action_type') == 'DELETE' %}selected{% endif %}>Delete</option>
+                            <option value="VIEW" {% if request.args.get('action_type') == 'VIEW' %}selected{% endif %}>View</option>
+                            <option value="EXPORT" {% if request.args.get('action_type') == 'EXPORT' %}selected{% endif %}>Export</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="mb-3">
+                        <label for="entity_type" class="form-label">Entity Type</label>
+                        <select class="form-select" id="entity_type" name="entity_type">
+                            <option value="">All Entities</option>
+                            <option value="PATIENT" {% if request.args.get('entity_type') == 'PATIENT' %}selected{% endif %}>Patient</option>
+                            <option value="VITAL_SIGN" {% if request.args.get('entity_type') == 'VITAL_SIGN' %}selected{% endif %}>Vital Sign</option>
+                            <option value="NOTE" {% if request.args.get('entity_type') == 'NOTE' %}selected{% endif %}>Note</option>
+                            <option value="REPORT" {% if request.args.get('entity_type') == 'REPORT' %}selected{% endif %}>Report</option>
+                        </select>
+                    </div>
+                </div>
+                {% if current_user.is_admin %}
+                <div class="col-md-6 col-lg-3">
+                    <div class="mb-3">
+                        <label for="doctor_id" class="form-label">Doctor</label>
+                        <select class="form-select" id="doctor_id" name="doctor_id">
+                            <option value="">All Doctors</option>
+                            {% for doctor in doctors %}
+                            <option value="{{ doctor.id }}" {% if request.args.get('doctor_id')|int == doctor.id %}selected{% endif %}>
+                                {{ doctor.first_name }} {{ doctor.last_name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                {% endif %}
+                <div class="col-md-6 col-lg-3">
+                    <div class="mb-3">
+                        <label for="patient_id" class="form-label">Patient</label>
+                        <select class="form-select" id="patient_id" name="patient_id">
+                            <option value="">All Patients</option>
+                            {% for patient in patients %}
+                            <option value="{{ patient.id }}" {% if request.args.get('patient_id')|int == patient.id %}selected{% endif %}>
+                                {{ patient.first_name }} {{ patient.last_name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex justify-content-end mt-3">
+                <a href="{{ url_for('audit.get_audit_logs') }}" class="btn btn-outline-secondary me-2">
+                    Clear Filters
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search me-1"></i> Apply Filters
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Audit Logs Table -->
+<div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fas fa-history me-2"></i> Audit History</h5>
+        <span class="badge bg-primary">{{ logs|length }} Records</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Entity</th>
+                        <th>Patient</th>
+                        <th>IP Address</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if logs %}
+                        {% for log in logs %}
+                        <tr>
+                            <td>{{ log.timestamp|format_datetime('%Y-%m-%d %H:%M:%S') }}</td>
+                            <td>{{ log.doctor_name }}</td>
+                            <td>
+                                <span class="badge {% if log.action_type == 'create' %}bg-success{% elif log.action_type == 'update' %}bg-info{% elif log.action_type == 'delete' %}bg-danger{% elif log.action_type == 'view' %}bg-secondary{% elif log.action_type == 'export' %}bg-primary{% endif %}">
+                                    {{ log.action_type|title }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-info text-dark">
+                                    {{ log.entity_type|replace('_', ' ')|title }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if log.patient_name %}
+                                <a href="{{ url_for('views.patient_detail', patient_id=log.patient_id) }}">
+                                    {{ log.patient_name }}
+                                </a>
+                                {% else %}
+                                <span class="text-muted">N/A</span>
+                                {% endif %}
+                            </td>
+                            <td><small>{{ log.ip_address }}</small></td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-outline-info" 
+                                        data-bs-toggle="modal" data-bs-target="#detailsModal{{ log.id }}">
+                                    View Details
+                                </button>
+                                
+                                <!-- Details Modal -->
+                                <div class="modal fade" id="detailsModal{{ log.id }}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-lg">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Audit Log Details</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <dl class="row">
+                                                    <dt class="col-sm-3">Timestamp</dt>
+                                                    <dd class="col-sm-9">{{ log.timestamp|format_datetime('%Y-%m-%d %H:%M:%S') }}</dd>
+                                                    
+                                                    <dt class="col-sm-3">Doctor</dt>
+                                                    <dd class="col-sm-9">{{ log.doctor_name }}</dd>
+                                                    
+                                                    <dt class="col-sm-3">Action</dt>
+                                                    <dd class="col-sm-9">{{ log.action_type|title }}</dd>
+                                                    
+                                                    <dt class="col-sm-3">Entity Type</dt>
+                                                    <dd class="col-sm-9">{{ log.entity_type|replace('_', ' ')|title }}</dd>
+                                                    
+                                                    <dt class="col-sm-3">Entity ID</dt>
+                                                    <dd class="col-sm-9">{{ log.entity_id }}</dd>
+                                                    
+                                                    {% if log.patient_name %}
+                                                    <dt class="col-sm-3">Patient</dt>
+                                                    <dd class="col-sm-9">{{ log.patient_name }}</dd>
+                                                    {% endif %}
+                                                    
+                                                    <dt class="col-sm-3">IP Address</dt>
+                                                    <dd class="col-sm-9">{{ log.ip_address }}</dd>
+                                                    
+                                                    {% if log.details %}
+                                                    <dt class="col-sm-3">Details</dt>
+                                                    <dd class="col-sm-9">
+                                                        <pre class="pre-scrollable"><code>{{ log.details|tojson(indent=2) }}</code></pre>
+                                                    </dd>
+                                                    {% endif %}
+                                                </dl>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center py-4">
+                                <p class="text-muted mb-0">No audit logs found matching your criteria</p>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Audit Statistics -->
+<div class="row mt-4">
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i> Actions by Type</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="actionTypeChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i> Entities by Type</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="entityTypeChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i> Activity Timeline</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="timelineChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Fetch statistics data
+    fetch('{{ url_for("audit.get_audit_stats") }}')
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                createActionTypeChart(data.action_stats);
+                createEntityTypeChart(data.entity_stats);
+                createTimelineChart(data.timeline);
+            }
+        })
+        .catch(error => console.error('Error fetching audit statistics:', error));
+});
+
+function createActionTypeChart(actionStats) {
+    if (!actionStats || actionStats.length === 0) return;
+    
+    const ctx = document.getElementById('actionTypeChart').getContext('2d');
+    const labels = actionStats.map(item => item.type.charAt(0).toUpperCase() + item.type.slice(1).toLowerCase());
+    const counts = actionStats.map(item => item.count);
+    const colors = [
+        'rgba(54, 162, 235, 0.7)',  // Create - Blue
+        'rgba(255, 206, 86, 0.7)',  // Update - Yellow
+        'rgba(255, 99, 132, 0.7)',  // Delete - Red
+        'rgba(75, 192, 192, 0.7)',  // View - Green
+        'rgba(153, 102, 255, 0.7)'  // Export - Purple
+    ];
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Number of Actions',
+                data: counts,
+                backgroundColor: colors,
+                borderColor: colors.map(c => c.replace('0.7', '1')),
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            }
+        }
+    });
+}
+
+function createEntityTypeChart(entityStats) {
+    if (!entityStats || entityStats.length === 0) return;
+    
+    const ctx = document.getElementById('entityTypeChart').getContext('2d');
+    const labels = entityStats.map(item => item.type.replace('_', ' ').replace(/(^\w{1})|(\s+\w{1})/g, letter => letter.toUpperCase()));
+    const counts = entityStats.map(item => item.count);
+    const colors = [
+        'rgba(255, 99, 132, 0.7)',    // Patient - Red
+        'rgba(54, 162, 235, 0.7)',    // Vital Sign - Blue
+        'rgba(255, 206, 86, 0.7)',    // Note - Yellow
+        'rgba(75, 192, 192, 0.7)'     // Report - Green
+    ];
+    
+    new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: counts,
+                backgroundColor: colors,
+                borderColor: colors.map(c => c.replace('0.7', '1')),
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'right'
+                }
+            }
+        }
+    });
+}
+
+function createTimelineChart(timeline) {
+    if (!timeline || !timeline.labels || timeline.labels.length === 0) return;
+    
+    const ctx = document.getElementById('timelineChart').getContext('2d');
+    
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: timeline.labels,
+            datasets: [{
+                label: 'Number of Actions',
+                data: timeline.counts,
+                fill: false,
+                borderColor: 'rgba(75, 192, 192, 1)',
+                tension: 0.1,
+                pointBackgroundColor: 'rgba(75, 192, 192, 1)'
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            }
+        }
+    });
+}
+</script>
+{% endblock %}
