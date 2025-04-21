@@ -50,10 +50,11 @@ def send_sms(to_number, message):
         
     except TwilioRestException as e:
         logger.error(f"Twilio error: {str(e)}")
-        return False, f"Failed to send SMS: {str(e)}"
+        # Return a more user-friendly error message
+        return False, f"SMS notification not sent. Please check patient phone number format."
     except Exception as e:
         logger.error(f"Error sending SMS: {str(e)}")
-        return False, f"An unexpected error occurred: {str(e)}"
+        return False, f"SMS notification service temporarily unavailable."
 
 
 def notify_abnormal_vital(patient, vital_type, value, unit, status):
