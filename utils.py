@@ -1,5 +1,6 @@
 import re
 import uuid
+import json
 from datetime import datetime
 
 def validate_email(email):
@@ -163,3 +164,20 @@ def is_vital_in_range(vital_type, value):
                 return True, 'normal'
         except:
             return False, 'invalid'
+
+def to_serializable_dict(obj):
+    """
+    Convert an object to a JSON serializable dictionary.
+    Useful for creating JSON-safe dictionaries from SQLAlchemy objects
+    and handling datetime serialization.
+    """
+    if isinstance(obj, dict):
+        return {k: to_serializable_dict(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [to_serializable_dict(i) for i in obj]
+    elif isinstance(obj, datetime):
+        return obj.isoformat()
+    elif hasattr(obj, 'to_dict'):
+        return obj.to_dict()
+    else:
+        return obj
