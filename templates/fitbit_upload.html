@@ -75,38 +75,57 @@
         const deviceStatus = document.getElementById('deviceStatusIndicator');
         const uploadBtn = document.getElementById('uploadBtn');
         
-        // Timeout simulato per controllo dispositivo
-        setTimeout(function() {
-            // Nasconde icona e testo "checking"
-            deviceStatus.classList.remove('checking');
-            deviceStatus.querySelector('.fa-spinner').classList.add('d-none');
-            deviceStatus.querySelector('.text-checking').classList.add('d-none');
-            
-            // Simuliamo che il dispositivo NON sia connesso (come da impostazione del server)
-            const isConnected = false;
-            
-            if (isConnected) {
-                // Mostra il messaggio "connesso"
-                deviceStatus.querySelector('.text-connected').classList.remove('d-none');
-                deviceStatus.classList.add('connected');
-                uploadBtn.disabled = false;
+        // Verifica dello stato del dispositivo dal server
+        // In un'applicazione reale, potremmo fare una richiesta AJAX al server
+        // per verificare lo stato del dispositivo in tempo reale
+        fetch('{{ url_for("fitbit.check_device_status", patient_id=patient.id) }}')
+            .then(response => response.json())
+            .then(data => {
+                // Nasconde icona e testo "checking"
+                deviceStatus.classList.remove('checking');
+                deviceStatus.querySelector('.fa-spinner').classList.add('d-none');
+                deviceStatus.querySelector('.text-checking').classList.add('d-none');
                 
-                // Aggiunge icona di successo
-                const connectedIcon = document.createElement('i');
-                connectedIcon.className = 'fas fa-check-circle text-success';
-                deviceStatus.querySelector('.fa-spinner').parentNode.insertBefore(connectedIcon, deviceStatus.querySelector('.fa-spinner'));
-            } else {
-                // Mostra il messaggio "disconnesso"
+                // Verifica se il dispositivo è connesso in base alla risposta del server
+                const isConnected = data.connected;
+                
+                if (isConnected) {
+                    // Mostra il messaggio "connesso"
+                    deviceStatus.querySelector('.text-connected').classList.remove('d-none');
+                    deviceStatus.classList.add('connected');
+                    uploadBtn.disabled = false;
+                    
+                    // Aggiunge icona di successo
+                    const connectedIcon = document.createElement('i');
+                    connectedIcon.className = 'fas fa-check-circle text-success';
+                    deviceStatus.querySelector('.fa-spinner').parentNode.insertBefore(connectedIcon, deviceStatus.querySelector('.fa-spinner'));
+                } else {
+                    // Mostra il messaggio "disconnesso"
+                    deviceStatus.querySelector('.text-disconnected').classList.remove('d-none');
+                    deviceStatus.classList.add('disconnected');
+                    uploadBtn.disabled = true;
+                    
+                    // Aggiunge icona di errore
+                    const disconnectedIcon = document.createElement('i');
+                    disconnectedIcon.className = 'fas fa-times-circle text-danger';
+                    deviceStatus.querySelector('.fa-spinner').parentNode.insertBefore(disconnectedIcon, deviceStatus.querySelector('.fa-spinner'));
+                }
+            })
+            .catch(error => {
+                console.error('Errore durante la verifica del dispositivo:', error);
+                // In caso di errore, mostriamo lo stato disconnesso
+                deviceStatus.classList.remove('checking');
+                deviceStatus.querySelector('.fa-spinner').classList.add('d-none');
+                deviceStatus.querySelector('.text-checking').classList.add('d-none');
+                
                 deviceStatus.querySelector('.text-disconnected').classList.remove('d-none');
                 deviceStatus.classList.add('disconnected');
                 uploadBtn.disabled = true;
                 
-                // Aggiunge icona di errore
                 const disconnectedIcon = document.createElement('i');
                 disconnectedIcon.className = 'fas fa-times-circle text-danger';
                 deviceStatus.querySelector('.fa-spinner').parentNode.insertBefore(disconnectedIcon, deviceStatus.querySelector('.fa-spinner'));
-            }
-        }, 2000);
+            });
         
         // Gestione click sul pulsante di upload
         document.getElementById('uploadForm').addEventListener('submit', function() {
