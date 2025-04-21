@@ -72,7 +72,7 @@ def new_patient():
         
         # Validate required fields
         if not first_name or not last_name or not date_of_birth:
-            flash('First name, last name, and date of birth are required fields', 'danger')
+            flash(_('Nome, cognome e data di nascita sono campi obbligatori'), 'danger')
             return redirect(url_for('views.new_patient'))
         
         try:
@@ -161,7 +161,7 @@ def edit_patient(patient_id):
         
         # Validate required fields
         if not first_name or not last_name or not date_of_birth:
-            flash('First name, last name, and date of birth are required fields', 'danger')
+            flash(_('Nome, cognome e data di nascita sono campi obbligatori'), 'danger')
             return redirect(url_for('views.edit_patient', patient_id=patient_id))
         
         try:
