@@ -290,6 +290,13 @@ class FitbitManager(private val context: Context) {
         connectToDevice(savedDevice)
     }
     
+    /**
+     * Metodo per aggiornare lo stato manualmente (usato dal ViewModel)
+     */
+    fun updateStatus(newStatus: SyncStatus) {
+        _status.postValue(newStatus)
+    }
+    
     companion object {
         private var instance: FitbitManager? = null
         
