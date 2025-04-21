@@ -200,5 +200,9 @@
 {% endblock %}
 
 {% block scripts %}
+<script>
+// Define translation variables 
+window.addNoteForText = "{{ _('Add Note for {name}') }}";
+</script>
 <script src="{{ url_for('static', filename='js/patients.js') }}"></script>
 {% endblock %}
