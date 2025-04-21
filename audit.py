@@ -40,7 +40,7 @@ def log_action(doctor_id, action_type, entity_type, entity_id, details=None, pat
     
     return audit_log
 
-@audit_bp.route('/audit-logs', methods=['GET'])
+@audit_bp.route('/logs', methods=['GET'])
 @login_required
 @doctor_required
 def get_audit_logs():
@@ -138,7 +138,7 @@ def get_audit_logs():
         now=datetime.now()
     )
 
-@audit_bp.route('/audit-logs/stats', methods=['GET'])
+@audit_bp.route('/logs/stats', methods=['GET'])
 @login_required
 @doctor_required
 def get_audit_stats():
