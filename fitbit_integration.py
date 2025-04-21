@@ -12,12 +12,14 @@ import json
 import glob
 import logging
 import datetime
+import uuid
 from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app, jsonify
 from flask_login import login_required, current_user
 from sqlalchemy.exc import SQLAlchemyError
+from flask_babel import _
 
 from models import Patient, VitalSign, VitalSignType, DataOrigin, db
-from audit import log_vital_creation
+from audit import log_vital_creation, log_action, ActionType, EntityType
 from utils import get_vital_sign_unit
 from notifications import notify_abnormal_vital
 from utils import is_vital_in_range
@@ -396,3 +398,106 @@ def upload_fitbit_data(patient_id):
     
     # GET request - mostra la pagina per il caricamento
     return render_template('fitbit_upload.html', patient=patient)
+
+# API per app mobile
+@fitbit_bp.route('/api/mobile/patient/verify', methods=['POST'])
+def mobile_verify_patient():
+    """
+    API endpoint per verificare l'ID del paziente dall'app mobile.
+    Il paziente inserisce il suo UUID nell'app e questo endpoint verifica se esiste.
+    
+    Returns:
+        JSON: Risposta con informazioni sul paziente se trovato
+    """
+    try:
+        data = request.get_json()
+        
+        if not data or 'patient_uuid' not in data:
+            return jsonify({'error': 'UUID paziente richiesto'}), 400
+            
+        patient_uuid = data['patient_uuid']
+        
+        try:
+            # Verifica se l'UUID è in formato valido
+            uuid_obj = uuid.UUID(patient_uuid)
+        except ValueError:
+            return jsonify({'error': 'UUID paziente non valido'}), 400
+            
+        # Cerca il paziente nel database
+        patient = Patient.query.filter_by(uuid=patient_uuid).first()
+        
+        if not patient:
+            return jsonify({'error': 'Paziente non trovato'}), 404
+            
+        # Restituisci informazioni di base sul paziente
+        return jsonify({
+            'patient_id': patient.id,
+            'name': f"{patient.first_name} {patient.last_name}",
+            'success': True
+        })
+        
+    except Exception as e:
+        logging.error(f"Errore durante la verifica del paziente mobile: {str(e)}")
+        return jsonify({'error': 'Errore del server'}), 500
+        
+@fitbit_bp.route('/api/mobile/data/upload', methods=['POST'])
+def mobile_upload_data():
+    """
+    API endpoint per caricare dati Fitbit dall'app mobile.
+    L'app mobile invia i dati raccolti dal dispositivo Fitbit.
+    
+    Returns:
+        JSON: Risposta di conferma del salvataggio
+    """
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({'error': 'Dati richiesti'}), 400
+            
+        # Valida i dati richiesti
+        required_fields = ['patient_id', 'fitbit_data']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({'error': f'Campo {field} richiesto'}), 400
+                
+        patient_id = data['patient_id']
+        fitbit_data = data['fitbit_data']
+        
+        # Verifica che il paziente esista
+        patient = Patient.query.get(patient_id)
+        if not patient:
+            return jsonify({'error': 'Paziente non trovato'}), 404
+            
+        # Salva i dati Fitbit
+        success, vitals_saved, errors = save_fitbit_data(patient_id, fitbit_data)
+        
+        # Log dell'azione di caricamento dati da mobile
+        log_action(
+            doctor_id=None,  # Nessun medico coinvolto, è un'azione automatica da mobile
+            action_type=ActionType.CREATE,
+            entity_type=EntityType.VITAL_SIGN,
+            entity_id=patient_id,  # Usiamo l'ID del paziente come reference
+            details={
+                'operation': 'mobile_data_upload',
+                'vitals_saved': vitals_saved,
+                'errors': errors
+            },
+            patient_id=patient_id
+        )
+        
+        if not success:
+            return jsonify({
+                'success': False,
+                'errors': errors
+            }), 400
+            
+        return jsonify({
+            'success': True,
+            'vitals_saved': vitals_saved,
+            'errors': errors
+        })
+        
+    except Exception as e:
+        logging.error(f"Errore durante il caricamento dei dati mobile: {str(e)}")
+        return jsonify({'error': 'Errore del server'}), 500
