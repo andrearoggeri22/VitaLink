@@ -219,6 +219,102 @@ msgstr "Email"
 msgid "Password"
 msgstr "Password"
 
+#: templates/patients.html:115 templates/patients.html:50
+msgid "Gender"
+msgstr "Genere"
+
+#: templates/patients.html:117 templates/patients.html:51
+msgid "Select gender"
+msgstr "Seleziona genere"
+
+#: templates/patients.html:118 templates/patients.html:52
+msgid "Male"
+msgstr "Maschio"
+
+#: templates/patients.html:119 templates/patients.html:53
+msgid "Female"
+msgstr "Femmina"
+
+#: templates/patients.html:120 templates/patients.html:54
+msgid "Other"
+msgstr "Altro"
+
+#: templates/patients.html:121 templates/patients.html:55
+msgid "Prefer not to say"
+msgstr "Preferisco non specificare"
+
+#: templates/patients.html:128 templates/patients.html:62
+msgid "Contact Number"
+msgstr "Numero di Contatto"
+
+#: templates/patients.html:141
+msgid "Update Patient"
+msgstr "Aggiorna Paziente"
+
+#: templates/patients.html:75
+msgid "Save Patient"
+msgstr "Salva Paziente"
+
+#: templates/patient_detail.html:206
+msgid "Delete Patient"
+msgstr "Elimina Paziente"
+
+#: templates/patient_detail.html:207
+msgid "Are you sure you want to delete the patient {name}? This action cannot be undone."
+msgstr "Sei sicuro di voler eliminare il paziente {name}? Questa azione non può essere annullata."
+
+#: templates/patient_detail.html:205
+msgid "Add Note for {name}"
+msgstr "Aggiungi Nota per {name}"
+
+#: templates/profile.html:3
+msgid "Profile"
+msgstr "Profilo"
+
+#: templates/profile.html:8
+msgid "Your Profile"
+msgstr "Il Tuo Profilo"
+
+#: templates/profile.html:12
+msgid "Account Information"
+msgstr "Informazioni Account"
+
+#: templates/profile.html:32
+msgid "Email Address"
+msgstr "Indirizzo Email"
+
+#: templates/profile.html:33
+msgid "You cannot change your email address"
+msgstr "Non puoi cambiare il tuo indirizzo email"
+
+#: templates/profile.html:37
+msgid "Specialty"
+msgstr "Specializzazione"
+
+#: templates/profile.html:44
+msgid "Update Profile"
+msgstr "Aggiorna Profilo"
+
+#: templates/profile.html:59
+msgid "Change Password"
+msgstr "Cambia Password"
+
+#: templates/profile.html:66
+msgid "Current Password"
+msgstr "Password Attuale"
+
+#: templates/profile.html:72
+msgid "New Password"
+msgstr "Nuova Password"
+
+#: templates/profile.html:79
+msgid "Confirm New Password"
+msgstr "Conferma Nuova Password"
+
+#: templates/profile.html:86
+msgid "Update Password"
+msgstr "Aggiorna Password"
+
 #: templates/login.html:57
 msgid "New doctor? Register here"
 msgstr "Nuovo medico? Registrati qui"
