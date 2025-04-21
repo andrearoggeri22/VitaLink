@@ -73,11 +73,17 @@ function initVitalsCharts() {
     if (!vitalsDataContainer) return;
     
     // Get vital signs data from the data container
-    const vitalsData = JSON.parse(vitalsDataContainer.getAttribute('data-vitals'));
+    let vitalsData;
+    try {
+        vitalsData = JSON.parse(vitalsDataContainer.getAttribute('data-vitals'));
+    } catch (error) {
+        console.error('Error parsing vital signs data:', error);
+        return;
+    }
     
     // Create charts for each vital sign type
     for (const [type, values] of Object.entries(vitalsData)) {
-        if (values.length === 0) continue;
+        if (!values || values.length === 0) continue;
         
         const canvasId = `chart-${type}`;
         
