@@ -50,10 +50,14 @@ app.config['LANGUAGES'] = {
 # Function to determine which language to use
 def get_locale():
     # First, check if user has explicitly set language in session
+    logger.debug(f"get_locale called, session: {session}")
     if 'language' in session:
+        logger.debug(f"Language from session: {session['language']}")
         return session['language']
     # Otherwise, try to detect from browser settings
-    return request.accept_languages.best_match(app.config['LANGUAGES'].keys())
+    best_match = request.accept_languages.best_match(app.config['LANGUAGES'].keys())
+    logger.debug(f"Best match from accept_languages: {best_match}")
+    return best_match
 
 # Initialize extensions
 db.init_app(app)
