@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ _('Upload Fitbit Data') }} - {{ patient.first_name }} {{ patient.last_name }}{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('views.dashboard') }}">{{ _('Dashboard') }}</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('views.patients') }}">{{ _('Patients') }}</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('views.patient_detail', patient_id=patient.id) }}">{{ patient.first_name }} {{ patient.last_name }}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ _('Upload Fitbit Data') }}</li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-cloud-upload-alt me-2"></i> {{ _('Upload Fitbit Data') }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-4">
+                        <h5 class="alert-heading"><i class="fas fa-info-circle me-2"></i> {{ _('Instructions') }}</h5>
+                        <p>{{ _('Connect your Fitbit device to your computer using a USB cable, then click the button below to upload the data.') }}</p>
+                        <hr>
+                        <p class="mb-0">{{ _('The following data will be extracted and saved to the patient\'s record:') }}</p>
+                        <ul>
+                            <li>{{ _('Heart Rate') }}</li>
+                            <li>{{ _('Steps') }}</li>
+                            <li>{{ _('Calories Burned') }}</li>
+                            <li>{{ _('Distance') }}</li>
+                            <li>{{ _('Active Minutes') }}</li>
+                            <li>{{ _('Sleep Duration') }}</li>
+                            <li>{{ _('Floors Climbed') }}</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="device-status mb-4">
+                            <h6 class="text-muted mb-3">{{ _('Device Connection Status') }}</h6>
+                            <div id="deviceStatusIndicator" class="checking">
+                                <i class="fas fa-spinner fa-spin text-warning"></i>
+                                <span class="ms-2 text-checking">{{ _('Checking for connected device...') }}</span>
+                                <span class="ms-2 text-connected d-none text-success">{{ _('Fitbit device connected') }}</span>
+                                <span class="ms-2 text-disconnected d-none text-danger">{{ _('No Fitbit device detected') }}</span>
+                            </div>
+                        </div>
+                        
+                        <form id="uploadForm" method="POST" action="{{ url_for('fitbit.upload_fitbit_data', patient_id=patient.id) }}">
+                            <button type="submit" id="uploadBtn" class="btn btn-primary btn-lg">
+                                <i class="fas fa-sync-alt me-2"></i> {{ _('Upload Fitbit Data Now') }}
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <div class="mt-4 text-center">
+                        <a href="{{ url_for('views.patient_vitals', patient_id=patient.id) }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i> {{ _('Back to Vital Signs') }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Simulazione controllo connessione dispositivo
+        const deviceStatus = document.getElementById('deviceStatusIndicator');
+        const uploadBtn = document.getElementById('uploadBtn');
+        
+        // Timeout simulato per controllo dispositivo
+        setTimeout(function() {
+            // Nasconde icona e testo "checking"
+            deviceStatus.classList.remove('checking');
+            deviceStatus.querySelector('.fa-spinner').classList.add('d-none');
+            deviceStatus.querySelector('.text-checking').classList.add('d-none');
+            
+            // Simuliamo che il dispositivo sia connesso
+            const isConnected = true;
+            
+            if (isConnected) {
+                // Mostra il messaggio "connesso"
+                deviceStatus.querySelector('.text-connected').classList.remove('d-none');
+                deviceStatus.classList.add('connected');
+                uploadBtn.disabled = false;
+                
+                // Aggiunge icona di successo
+                const connectedIcon = document.createElement('i');
+                connectedIcon.className = 'fas fa-check-circle text-success';
+                deviceStatus.querySelector('.fa-spinner').parentNode.insertBefore(connectedIcon, deviceStatus.querySelector('.fa-spinner'));
+            } else {
+                // Mostra il messaggio "disconnesso"
+                deviceStatus.querySelector('.text-disconnected').classList.remove('d-none');
+                deviceStatus.classList.add('disconnected');
+                uploadBtn.disabled = true;
+                
+                // Aggiunge icona di errore
+                const disconnectedIcon = document.createElement('i');
+                disconnectedIcon.className = 'fas fa-times-circle text-danger';
+                deviceStatus.querySelector('.fa-spinner').parentNode.insertBefore(disconnectedIcon, deviceStatus.querySelector('.fa-spinner'));
+            }
+        }, 2000);
+        
+        // Gestione click sul pulsante di upload
+        document.getElementById('uploadForm').addEventListener('submit', function() {
+            // Disabilita il pulsante e mostra un indicatore di caricamento
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> {{ _("Uploading...") }}';
+        });
+    });
+</script>
+{% endblock %}
