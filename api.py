@@ -7,7 +7,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from app import db
 from models import Patient, VitalSign, VitalSignType, DataOrigin, Note
 from auth import doctor_required
-from utils import validate_uuid
+from utils import validate_uuid, is_vital_in_range, get_vital_sign_unit
+from notifications import notify_abnormal_vital
 
 api_bp = Blueprint('api', __name__)
 logger = logging.getLogger(__name__)
@@ -149,10 +150,45 @@ def add_vital(doctor, patient_uuid):
         
         logger.info(f"Vital sign added for patient {patient_uuid} via API")
         
-        return jsonify({
+        # Check if the vital sign is outside normal range and send notification if needed
+        vital_value = str(value) if vital_type.value != 'blood_pressure' else value
+        is_normal, status = is_vital_in_range(vital_type.value, vital_value)
+        
+        # If value is abnormal, send notification
+        if not is_normal and patient.contact_number:
+            if not unit:
+                unit = get_vital_sign_unit(vital_type.value)
+                
+            # Send SMS notification for abnormal vital sign
+            success, message = notify_abnormal_vital(
+                patient=patient,
+                vital_type=vital_type.value,
+                value=vital_value,
+                unit=unit,
+                status=status
+            )
+            
+            if success:
+                logger.info(f"Abnormal vital notification sent to patient {patient_uuid}")
+            else:
+                logger.warning(f"Failed to send vital notification to patient {patient_uuid}: {message}")
+        
+        # Return response with notification status
+        response = {
             "message": "Vital sign recorded successfully",
-            "vital": vital.to_dict()
-        }), 201
+            "vital": vital.to_dict(),
+            "is_normal": is_normal
+        }
+        
+        if not is_normal:
+            response["status"] = status
+            if patient.contact_number:
+                response["notification_sent"] = True
+            else:
+                response["notification_sent"] = False
+                response["notification_message"] = "Patient has no contact number for notifications"
+        
+        return jsonify(response), 201
         
     except SQLAlchemyError as e:
         db.session.rollback()
