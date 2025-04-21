@@ -59,7 +59,14 @@ def get_vital_sign_unit(vital_type):
         'temperature': '°C',
         'respiratory_rate': 'breaths/min',
         'glucose': 'mg/dL',
-        'weight': 'kg'
+        'weight': 'kg',
+        # Unità per i nuovi parametri fitness
+        'steps': 'steps',
+        'calories': 'kcal',
+        'distance': 'km',
+        'active_minutes': 'min',
+        'sleep_duration': 'hours',
+        'floors_climbed': 'floors'
     }
     
     return vital_type_units.get(vital_type, '')
@@ -89,7 +96,14 @@ def get_vital_reference_range(vital_type, patient_age=None, patient_gender=None)
         'temperature': {'min': 36.1, 'max': 37.2, 'unit': '°C', 'name': 'Temperature'},
         'respiratory_rate': {'min': 12, 'max': 20, 'unit': 'breaths/min', 'name': 'Respiratory Rate'},
         'glucose': {'min': 70, 'max': 100, 'unit': 'mg/dL', 'name': 'Glucose (Fasting)'},
-        'weight': {'min': None, 'max': None, 'unit': 'kg', 'name': 'Weight'}
+        'weight': {'min': None, 'max': None, 'unit': 'kg', 'name': 'Weight'},
+        # Reference range per i nuovi parametri fitness
+        'steps': {'min': 5000, 'max': 10000, 'unit': 'steps', 'name': 'Steps'},
+        'calories': {'min': 1500, 'max': 3000, 'unit': 'kcal', 'name': 'Calories'},
+        'distance': {'min': 3, 'max': 8, 'unit': 'km', 'name': 'Distance'},
+        'active_minutes': {'min': 30, 'max': 60, 'unit': 'min', 'name': 'Active Minutes'},
+        'sleep_duration': {'min': 7, 'max': 9, 'unit': 'hours', 'name': 'Sleep Duration'},
+        'floors_climbed': {'min': 5, 'max': 20, 'unit': 'floors', 'name': 'Floors Climbed'}
     }
     
     # Could implement age and gender specific ranges in the future

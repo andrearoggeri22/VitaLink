@@ -19,6 +19,13 @@ class VitalSignType(Enum):
     RESPIRATORY_RATE = "respiratory_rate"
     GLUCOSE = "glucose"
     WEIGHT = "weight"
+    # Nuovi parametri per dispositivi fitness
+    STEPS = "steps"
+    CALORIES = "calories"
+    DISTANCE = "distance"
+    ACTIVE_MINUTES = "active_minutes"
+    SLEEP_DURATION = "sleep_duration"
+    FLOORS_CLIMBED = "floors_climbed"
 
 # Association table for the many-to-many relationship between doctors and patients
 class DoctorPatient(db.Model):
