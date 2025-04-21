@@ -123,7 +123,7 @@ def patient_detail(patient_id):
     
     # Check if the current doctor is associated with this patient
     if patient not in current_user.patients.all():
-        flash('You are not authorized to view this patient', 'danger')
+        flash(_('Non sei autorizzato a visualizzare questo paziente'), 'danger')
         return redirect(url_for('views.patients'))
     
     # Get recent vital signs
@@ -148,7 +148,7 @@ def edit_patient(patient_id):
     
     # Check if the current doctor is associated with this patient
     if patient not in current_user.patients.all():
-        flash('You are not authorized to edit this patient', 'danger')
+        flash(_('Non sei autorizzato a modificare questo paziente'), 'danger')
         return redirect(url_for('views.patients'))
     
     if request.method == 'POST':
@@ -206,7 +206,7 @@ def delete_patient(patient_id):
     
     # Check if the current doctor is associated with this patient
     if patient not in current_user.patients.all():
-        flash('You are not authorized to delete this patient', 'danger')
+        flash(_('Non sei autorizzato a eliminare questo paziente'), 'danger')
         return redirect(url_for('views.patients'))
     
     try:
@@ -262,7 +262,7 @@ def patient_vitals(patient_id):
     
     # Check if the current doctor is associated with this patient
     if patient not in current_user.patients.all():
-        flash('You are not authorized to view this patient', 'danger')
+        flash(_('Non sei autorizzato a visualizzare questo paziente'), 'danger')
         return redirect(url_for('views.patients'))
     
     if request.method == 'POST':
@@ -453,7 +453,7 @@ def add_note(patient_id):
     
     # Check if the current doctor is associated with this patient
     if patient not in current_user.patients.all():
-        flash('You are not authorized to add notes for this patient', 'danger')
+        flash(_('Non sei autorizzato ad aggiungere note per questo paziente'), 'danger')
         return redirect(url_for('views.patients'))
     
     content = request.form.get('content')
@@ -481,7 +481,7 @@ def add_note(patient_id):
     except SQLAlchemyError as e:
         db.session.rollback()
         logger.error(f"Error adding note: {str(e)}")
-        flash('An error occurred while adding the note', 'danger')
+        flash(_('Si è verificato un errore durante l\'aggiunta della nota'), 'danger')
     
     return redirect(url_for('views.patient_detail', patient_id=patient_id))
 
@@ -529,7 +529,7 @@ def generate_report(patient_id):
     
     # Check if the current doctor is associated with this patient
     if patient not in current_user.patients.all():
-        flash('You are not authorized to generate reports for this patient', 'danger')
+        flash(_('Non sei autorizzato a generare report per questo paziente'), 'danger')
         return redirect(url_for('views.patients'))
     
     # Get filter parameters
@@ -625,7 +625,7 @@ def generate_vital_report(patient_id, vital_type):
     
     # Check if the current doctor is associated with this patient
     if patient not in current_user.patients.all():
-        flash('You are not authorized to generate reports for this patient', 'danger')
+        flash(_('Non sei autorizzato a generare report per questo paziente'), 'danger')
         return redirect(url_for('views.patients'))
     
     # Validate vital type
