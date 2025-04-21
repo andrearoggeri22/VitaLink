@@ -129,3 +129,54 @@ msgstr "Ora"
 msgid "No vital signs recorded yet"
 msgstr "Nessun segno vitale registrato"
 
+msgid "Login"
+msgstr "Accedi"
+
+msgid "Register"
+msgstr "Registrati"
+
+msgid "Healthcare Monitoring Platform"
+msgstr "Piattaforma di Monitoraggio Sanitario"
+
+msgid "Healthcare Monitor"
+msgstr "Monitor Sanitario"
+
+msgid "Please login to access the platform"
+msgstr "Accedi per utilizzare la piattaforma"
+
+msgid "New doctor? Register here"
+msgstr "Nuovo medico? Registrati qui"
+
+msgid "This is a secure platform for healthcare professionals only."
+msgstr "Questa è una piattaforma sicura solo per professionisti sanitari."
+
+msgid "Unauthorized access is strictly prohibited."
+msgstr "L'accesso non autorizzato è severamente vietato."
+
+msgid "Doctor Registration"
+msgstr "Registrazione Medico"
+
+msgid "We'll never share your email with anyone else."
+msgstr "Non condivideremo mai la tua email con nessun altro."
+
+msgid "First Name"
+msgstr "Nome"
+
+msgid "Last Name"
+msgstr "Cognome"
+
+msgid "Medical Specialty"
+msgstr "Specializzazione Medica"
+
+msgid "Confirm Password"
+msgstr "Conferma Password"
+
+msgid "Create Account"
+msgstr "Crea Account"
+
+msgid "Already have an account?"
+msgstr "Hai già un account?"
+
+msgid "Login here"
+msgstr "Accedi qui"
+
