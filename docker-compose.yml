@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    restart: always
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgresql://vitalink:vitalink_password@db:5432/vitalink
+      - FLASK_APP=main.py
+      - FLASK_ENV=production
+      - PYTHONUNBUFFERED=1
+      # Altre variabili d'ambiente necessarie 
+      # (Twilio, SendGrid, ecc. dovrebbero essere configurate qui in produzione)
+    volumes:
+      - ./uploads:/app/uploads
+
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=vitalink
+      - POSTGRES_PASSWORD=vitalink_password
+      - POSTGRES_DB=vitalink
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres_data:
