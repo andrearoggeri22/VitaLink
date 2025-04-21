@@ -273,7 +273,7 @@ def patient_vitals(patient_id):
         
         # Validate required fields
         if not vital_type or not value:
-            flash('Vital sign type and value are required fields', 'danger')
+            flash(_('Il tipo di parametro vitale e il valore sono campi obbligatori'), 'danger')
             return redirect(url_for('views.patient_vitals', patient_id=patient_id))
         
         try:
@@ -288,7 +288,7 @@ def patient_vitals(patient_id):
                 try:
                     recorded_datetime = datetime.strptime(recorded_at, '%Y-%m-%dT%H:%M')
                 except ValueError:
-                    flash('Invalid date/time format. Please use YYYY-MM-DDTHH:MM', 'danger')
+                    flash(_('Formato data/ora non valido. Utilizzare AAAA-MM-GGTHH:MM'), 'danger')
                     return redirect(url_for('views.patient_vitals', patient_id=patient_id))
             else:
                 recorded_datetime = datetime.utcnow()
@@ -359,7 +359,7 @@ def patient_vitals(patient_id):
             start_datetime = datetime.strptime(start_date, '%Y-%m-%d')
             query = query.filter(VitalSign.recorded_at >= start_datetime)
         except ValueError:
-            flash('Invalid start date format. Please use YYYY-MM-DD', 'warning')
+            flash(_('Formato data di inizio non valido. Utilizzare AAAA-MM-GG'), 'warning')
     
     if end_date:
         try:
@@ -368,14 +368,14 @@ def patient_vitals(patient_id):
             end_datetime = end_datetime.replace(hour=23, minute=59, second=59)
             query = query.filter(VitalSign.recorded_at <= end_datetime)
         except ValueError:
-            flash('Invalid end date format. Please use YYYY-MM-DD', 'warning')
+            flash(_('Formato data di fine non valido. Utilizzare AAAA-MM-GG'), 'warning')
     
     if vital_type:
         try:
             vital_type_enum = VitalSignType(vital_type)
             query = query.filter(VitalSign.type == vital_type_enum)
         except ValueError:
-            flash('Invalid vital sign type', 'warning')
+            flash(_('Tipo di parametro vitale non valido'), 'warning')
     
     vitals = query.order_by(VitalSign.recorded_at.desc()).all()
     
@@ -649,7 +649,7 @@ def generate_vital_report(patient_id, vital_type):
             start_datetime = datetime.strptime(start_date, '%Y-%m-%d')
             period_desc = f"From {start_date}"
         except ValueError:
-            flash('Invalid start date format. Please use YYYY-MM-DD', 'warning')
+            flash(_('Formato data di inizio non valido. Utilizzare AAAA-MM-GG'), 'warning')
     
     if end_date:
         try:
