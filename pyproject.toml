@@ -18,4 +18,5 @@ dependencies = [
     "sendgrid>=6.11.0",
     "twilio>=9.5.2",
     "wtforms>=3.2.1",
+    "reportlab>=4.4.0",
 ]
