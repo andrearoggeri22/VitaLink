@@ -1,18 +1,18 @@
 {% extends "base.html" %}
 
-{% block title %}Vital Signs - {{ patient.first_name }} {{ patient.last_name }} - Healthcare Monitoring Platform{% endblock %}
+{% block title %}{{ _('Vital Signs') }} - {{ patient.first_name }} {{ patient.last_name }} - {{ _('Healthcare Monitoring Platform') }}{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h1>Vital Signs</h1>
+        <h1>{{ _('Vital Signs') }}</h1>
         <h5 class="text-muted">{{ patient.first_name }} {{ patient.last_name }}</h5>
         <span class="badge bg-secondary patient-id">ID: {{ patient.uuid }}</span>
     </div>
     
     <div>
         <a href="{{ url_for('views.patient_detail', patient_id=patient.id) }}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-1"></i> Back to Patient
+            <i class="fas fa-arrow-left me-1"></i> {{ _('Back to Patient') }}
         </a>
     </div>
 </div>
@@ -22,42 +22,42 @@
         <!-- Add Vital Sign Form -->
         <div class="card shadow-sm">
             <div class="card-header">
-                <h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i> Add Vital Sign</h5>
+                <h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i> {{ _('Add Vital Sign') }}</h5>
             </div>
             <div class="card-body">
                 <form id="vitalsForm" method="post" action="{{ url_for('views.patient_vitals', patient_id=patient.id) }}" class="needs-validation" novalidate>
                     <div class="mb-3">
-                        <label for="vitalType" class="form-label">Type <span class="text-danger">*</span></label>
+                        <label for="vitalType" class="form-label">{{ _('Type') }} <span class="text-danger">*</span></label>
                         <select class="form-select" id="vitalType" name="type" required>
-                            <option value="" selected disabled>Select type</option>
+                            <option value="" selected disabled>{{ _('Select type') }}</option>
                             {% for type in vital_types %}
                             <option value="{{ type }}">{{ type|replace('_', ' ')|title }}</option>
                             {% endfor %}
                         </select>
-                        <div class="invalid-feedback">Please select a vital sign type</div>
+                        <div class="invalid-feedback">{{ _('Please select a vital sign type') }}</div>
                     </div>
                     
                     <div class="mb-3">
-                        <label for="vitalValue" class="form-label">Value <span class="text-danger">*</span></label>
+                        <label for="vitalValue" class="form-label">{{ _('Value') }} <span class="text-danger">*</span></label>
                         <input type="number" class="form-control" id="vitalValue" name="value" step="0.01" required>
-                        <div class="invalid-feedback">Please enter a value</div>
+                        <div class="invalid-feedback">{{ _('Please enter a value') }}</div>
                     </div>
                     
                     <div class="mb-3">
-                        <label for="vitalUnit" class="form-label">Unit</label>
+                        <label for="vitalUnit" class="form-label">{{ _('Unit') }}</label>
                         <input type="text" class="form-control" id="vitalUnit" name="unit">
-                        <div class="form-text">Unit will be auto-filled based on the selected type</div>
+                        <div class="form-text">{{ _('Unit will be auto-filled based on the selected type') }}</div>
                     </div>
                     
                     <div class="mb-3">
-                        <label for="vitalRecordedAt" class="form-label">Date & Time</label>
+                        <label for="vitalRecordedAt" class="form-label">{{ _('Date & Time') }}</label>
                         <input type="datetime-local" class="form-control" id="vitalRecordedAt" name="recorded_at">
-                        <div class="form-text">If left empty, current date/time will be used</div>
+                        <div class="form-text">{{ _('If left empty, current date/time will be used') }}</div>
                     </div>
                     
                     <div class="d-grid mt-4">
                         <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-1"></i> Save Vital Sign
+                            <i class="fas fa-save me-1"></i> {{ _('Save Vital Sign') }}
                         </button>
                     </div>
                 </form>
@@ -69,27 +69,27 @@
         <!-- Vital Signs Filter Form -->
         <div class="card shadow-sm mb-4">
             <div class="card-header">
-                <h5 class="mb-0"><i class="fas fa-filter me-2"></i> Filter Vital Signs</h5>
+                <h5 class="mb-0"><i class="fas fa-filter me-2"></i> {{ _('Filter Vital Signs') }}</h5>
             </div>
             <div class="card-body">
                 <form id="vitalsFilterForm" method="get" action="{{ url_for('views.patient_vitals', patient_id=patient.id) }}">
                     <div class="row g-3">
                         <div class="col-md-4">
-                            <label for="startDate" class="form-label">Start Date</label>
+                            <label for="startDate" class="form-label">{{ _('Start Date') }}</label>
                             <input type="date" class="form-control" id="startDate" name="start_date" 
                                    value="{{ request.args.get('start_date', '') }}">
                         </div>
                         
                         <div class="col-md-4">
-                            <label for="endDate" class="form-label">End Date</label>
+                            <label for="endDate" class="form-label">{{ _('End Date') }}</label>
                             <input type="date" class="form-control" id="endDate" name="end_date" 
                                    value="{{ request.args.get('end_date', '') }}">
                         </div>
                         
                         <div class="col-md-4">
-                            <label for="filterType" class="form-label">Type</label>
+                            <label for="filterType" class="form-label">{{ _('Type') }}</label>
                             <select class="form-select" id="filterType" name="type">
-                                <option value="">All Types</option>
+                                <option value="">{{ _('All Types') }}</option>
                                 {% for type in vital_types %}
                                 <option value="{{ type }}" {% if request.args.get('type') == type %}selected{% endif %}>
                                     {{ type|replace('_', ' ')|title }}
@@ -101,14 +101,14 @@
                     
                     <div class="d-flex justify-content-between mt-3">
                         <a href="{{ url_for('views.generate_report', patient_id=patient.id) }}" class="btn btn-outline-info" target="_blank">
-                            <i class="fas fa-file-pdf me-1"></i> Complete Report
+                            <i class="fas fa-file-pdf me-1"></i> {{ _('Complete Report') }}
                         </a>
                         <div>
                             <a href="{{ url_for('views.patient_vitals', patient_id=patient.id) }}" class="btn btn-outline-secondary me-2">
-                                Clear Filters
+                                {{ _('Clear Filters') }}
                             </a>
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-search me-1"></i> Apply Filters
+                                <i class="fas fa-search me-1"></i> {{ _('Apply Filters') }}
                             </button>
                         </div>
                     </div>
@@ -119,7 +119,7 @@
         <!-- Vital Signs Visualization -->
         <div class="card shadow-sm">
             <div class="card-header">
-                <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i> Vital Signs Trends</h5>
+                <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i> {{ _('Vital Signs Trends') }}</h5>
             </div>
             <div class="card-body">
                 <!-- Hidden data container for JavaScript -->
@@ -151,7 +151,7 @@
                             <div class="text-end mt-2">
                                 <a href="{{ url_for('views.generate_vital_report', patient_id=patient.id, vital_type=type) }}" 
                                    class="btn btn-sm btn-outline-info" target="_blank">
-                                    <i class="fas fa-file-pdf me-1"></i> Generate {{ type|replace('_', ' ')|title }} Report
+                                    <i class="fas fa-file-pdf me-1"></i> {{ _('Generate') }} {{ type|replace('_', ' ')|title }} {{ _('Report') }}
                                 </a>
                             </div>
                         </div>
@@ -160,7 +160,7 @@
                     
                     {% if not vitals_by_type %}
                     <div class="text-center py-5">
-                        <p class="text-muted mb-0">No vital signs data available for visualization</p>
+                        <p class="text-muted mb-0">{{ _('No vital signs data available for visualization') }}</p>
                     </div>
                     {% endif %}
                 </div>
@@ -172,17 +172,17 @@
 <!-- Vital Signs History -->
 <div class="card shadow-sm">
     <div class="card-header">
-        <h5 class="mb-0"><i class="fas fa-history me-2"></i> Vital Signs History</h5>
+        <h5 class="mb-0"><i class="fas fa-history me-2"></i> {{ _('Vital Signs History') }}</h5>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-hover mb-0">
                 <thead>
                     <tr>
-                        <th>Type</th>
-                        <th>Value</th>
-                        <th>Date & Time</th>
-                        <th>Source</th>
+                        <th>{{ _('Type') }}</th>
+                        <th>{{ _('Value') }}</th>
+                        <th>{{ _('Date & Time') }}</th>
+                        <th>{{ _('Source') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -200,9 +200,9 @@
                             <td>{{ vital.recorded_at|format_datetime('%Y-%m-%d %H:%M') }}</td>
                             <td>
                                 {% if vital.origin.value == 'manual' %}
-                                <span class="badge bg-secondary">Manual</span>
+                                <span class="badge bg-secondary">{{ _('Manual') }}</span>
                                 {% else %}
-                                <span class="badge bg-primary">Device</span>
+                                <span class="badge bg-primary">{{ _('Device') }}</span>
                                 {% endif %}
                             </td>
                         </tr>
@@ -210,7 +210,7 @@
                     {% else %}
                         <tr>
                             <td colspan="4" class="text-center py-3">
-                                <p class="text-muted mb-0">No vital signs data found</p>
+                                <p class="text-muted mb-0">{{ _('No vital signs data found') }}</p>
                             </td>
                         </tr>
                     {% endif %}
