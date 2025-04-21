@@ -124,7 +124,7 @@
                     {% if logs %}
                         {% for log in logs %}
                         <tr>
-                            <td>{{ log.timestamp|format_datetime('%Y-%m-%d %H:%M:%S') }}</td>
+                            <td>{{ log.timestamp }}</td>
                             <td>{{ log.doctor_name }}</td>
                             <td>
                                 <span class="badge {% if log.action_type == 'create' %}bg-success{% elif log.action_type == 'update' %}bg-info{% elif log.action_type == 'delete' %}bg-danger{% elif log.action_type == 'view' %}bg-secondary{% elif log.action_type == 'export' %}bg-primary{% endif %}">
@@ -163,7 +163,7 @@
                                             <div class="modal-body">
                                                 <dl class="row">
                                                     <dt class="col-sm-3">Timestamp</dt>
-                                                    <dd class="col-sm-9">{{ log.timestamp|format_datetime('%Y-%m-%d %H:%M:%S') }}</dd>
+                                                    <dd class="col-sm-9">{{ log.timestamp }}</dd>
                                                     
                                                     <dt class="col-sm-3">Doctor</dt>
                                                     <dd class="col-sm-9">{{ log.doctor_name }}</dd>
