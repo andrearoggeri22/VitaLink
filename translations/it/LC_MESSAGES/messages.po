@@ -387,3 +387,67 @@ msgstr "Unità"
 msgid "Unit will be auto-filled based on the selected type"
 msgstr "L'unità sarà compilata automaticamente in base al tipo selezionato"
 
+#: templates/vitals.html:53
+msgid "Date & Time"
+msgstr "Data e Ora"
+
+#: templates/vitals.html:55
+msgid "If left empty, current date/time will be used"
+msgstr "Se lasciato vuoto, verrà utilizzata la data/ora corrente"
+
+#: templates/vitals.html:60
+msgid "Save Vital Sign"
+msgstr "Salva Parametro Vitale"
+
+#: templates/vitals.html:72
+msgid "Filter Vital Signs"
+msgstr "Filtra Parametri Vitali"
+
+#: templates/vitals.html:78
+msgid "Start Date"
+msgstr "Data di Inizio"
+
+#: templates/vitals.html:84
+msgid "End Date"
+msgstr "Data di Fine"
+
+#: templates/vitals.html:92
+msgid "All Types"
+msgstr "Tutti i Tipi"
+
+#: templates/vitals.html:104
+msgid "Complete Report"
+msgstr "Rapporto Completo"
+
+#: templates/vitals.html:108
+msgid "Clear Filters"
+msgstr "Cancella Filtri"
+
+#: templates/vitals.html:111
+msgid "Apply Filters"
+msgstr "Applica Filtri"
+
+#: templates/vitals.html:122
+msgid "Vital Signs Trends"
+msgstr "Tendenze Parametri Vitali"
+
+#: templates/vitals.html:154
+msgid "Generate"
+msgstr "Genera"
+
+#: templates/vitals.html:154
+msgid "Report"
+msgstr "Rapporto"
+
+#: templates/vitals.html:163
+msgid "No vital signs data available for visualization"
+msgstr "Nessun dato di parametri vitali disponibile per la visualizzazione"
+
+#: templates/vitals.html:175
+msgid "Vital Signs History"
+msgstr "Storico Parametri Vitali"
+
+#: templates/vitals.html:213
+msgid "No vital signs data found"
+msgstr "Nessun dato di parametri vitali trovato"
+
