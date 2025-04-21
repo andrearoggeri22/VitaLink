@@ -3,6 +3,7 @@ import logging
 from datetime import datetime
 from io import BytesIO
 import tempfile
+from flask import session
 
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
@@ -18,6 +19,114 @@ from utils import get_vital_reference_range, get_vital_sign_unit
 
 # Setup logger
 logger = logging.getLogger(__name__)
+
+def get_report_translations():
+    """
+    Get translations for report text based on the selected language.
+    
+    Returns:
+        dict: Dictionary of translated strings
+    """
+    language = session.get('language', 'en')
+    
+    if language == 'it':
+        return {
+            # Common terms
+            'report_title': 'Rapporto di Monitoraggio Sanitario',
+            'generated_on': 'Generato il',
+            'patient_info': 'Informazioni sul Paziente',
+            'attending_physician': 'Medico Curante',
+            'vital_signs': 'Parametri Vitali',
+            'clinical_notes': 'Note Cliniche',
+            'no_vitals': 'Nessun parametro vitale registrato per questo periodo.',
+            'no_notes': 'Nessuna nota clinica registrata per questo paziente.',
+            
+            # Patient/Doctor info
+            'name': 'Nome',
+            'date_of_birth': 'Data di Nascita',
+            'gender': 'Genere',
+            'contact': 'Contatto',
+            'specialty': 'Specialità',
+            'email': 'Email',
+            'not_specified': 'Non specificato',
+            'not_provided': 'Non fornito',
+            'general_practice': 'Medicina Generale',
+            
+            # Vital signs
+            'period_from_to': 'Periodo: Dal {} al {}',
+            'period_from': 'Periodo: Dal {}',
+            'period_until': 'Periodo: Fino al {}',
+            'normal_range': 'Intervallo Normale: {} - {} {}',
+            'datetime': 'Data e Ora',
+            'value': 'Valore',
+            'status': 'Stato',
+            'normal': 'Normale',
+            'high': 'Alto',
+            'low': 'Basso',
+            
+            # Trend analysis
+            'trend_analysis': 'Analisi dei Trend',
+            'patient': 'Paziente',
+            'period': 'Periodo',
+            'statistics': 'Statistiche',
+            'detailed_readings': 'Letture Dettagliate',
+            'average': 'Media',
+            'minimum': 'Minimo',
+            'maximum': 'Massimo',
+            'normal_readings': 'Letture Normali',
+            'high_readings': 'Letture Alte',
+            'low_readings': 'Letture Basse',
+            'no_vital_data': 'Nessun dato vitale disponibile per questo periodo.'
+        }
+    else:
+        return {
+            # Common terms
+            'report_title': 'Healthcare Monitoring Report',
+            'generated_on': 'Generated on',
+            'patient_info': 'Patient Information',
+            'attending_physician': 'Attending Physician',
+            'vital_signs': 'Vital Signs',
+            'clinical_notes': 'Clinical Notes',
+            'no_vitals': 'No vital signs recorded for this period.',
+            'no_notes': 'No clinical notes recorded for this patient.',
+            
+            # Patient/Doctor info
+            'name': 'Name',
+            'date_of_birth': 'Date of Birth',
+            'gender': 'Gender',
+            'contact': 'Contact',
+            'specialty': 'Specialty',
+            'email': 'Email',
+            'not_specified': 'Not specified',
+            'not_provided': 'Not provided',
+            'general_practice': 'General Practice',
+            
+            # Vital signs
+            'period_from_to': 'Period: From {} to {}',
+            'period_from': 'Period: From {}',
+            'period_until': 'Period: Until {}',
+            'normal_range': 'Normal Range: {} - {} {}',
+            'datetime': 'Date & Time',
+            'value': 'Value',
+            'status': 'Status',
+            'normal': 'Normal',
+            'high': 'High',
+            'low': 'Low',
+            
+            # Trend analysis
+            'trend_analysis': 'Trend Analysis',
+            'patient': 'Patient',
+            'period': 'Period',
+            'statistics': 'Statistics',
+            'detailed_readings': 'Detailed Readings',
+            'average': 'Average',
+            'minimum': 'Minimum',
+            'maximum': 'Maximum',
+            'normal_readings': 'Normal Readings',
+            'high_readings': 'High Readings',
+            'low_readings': 'Low Readings',
+            'no_vital_data': 'No vital data available for this period.'
+        }
 
 def generate_patient_report(patient, doctor, vitals, notes, start_date=None, end_date=None):
     """
