@@ -451,3 +451,79 @@ msgstr "Storico Parametri Vitali"
 msgid "No vital signs data found"
 msgstr "Nessun dato di parametri vitali trovato"
 
+#: templates/vitals.html:27
+msgid "Fitbit Sync"
+msgstr "Sincronizza Fitbit"
+
+#: templates/fitbit_upload.html:3 templates/fitbit_upload.html:12 templates/fitbit_upload.html:23
+msgid "Upload Fitbit Data"
+msgstr "Carica Dati Fitbit"
+
+#: templates/fitbit_upload.html:25
+msgid "Instructions"
+msgstr "Istruzioni"
+
+#: templates/fitbit_upload.html:26
+msgid "Connect your Fitbit device to your computer using a USB cable, then click the button below to upload the data."
+msgstr "Collega il tuo dispositivo Fitbit al computer usando un cavo USB, quindi clicca il pulsante qui sotto per caricare i dati."
+
+#: templates/fitbit_upload.html:28
+msgid "The following data will be extracted and saved to the patient's record:"
+msgstr "I seguenti dati verranno estratti e salvati nella cartella del paziente:"
+
+#: templates/fitbit_upload.html:30
+msgid "Heart Rate"
+msgstr "Frequenza Cardiaca"
+
+#: templates/fitbit_upload.html:31
+msgid "Steps"
+msgstr "Passi"
+
+#: templates/fitbit_upload.html:32
+msgid "Calories Burned"
+msgstr "Calorie Bruciate"
+
+#: templates/fitbit_upload.html:33
+msgid "Distance"
+msgstr "Distanza"
+
+#: templates/fitbit_upload.html:34
+msgid "Active Minutes"
+msgstr "Minuti di Attività"
+
+#: templates/fitbit_upload.html:35
+msgid "Sleep Duration"
+msgstr "Durata del Sonno"
+
+#: templates/fitbit_upload.html:36
+msgid "Floors Climbed"
+msgstr "Piani Saliti"
+
+#: templates/fitbit_upload.html:42
+msgid "Device Connection Status"
+msgstr "Stato Connessione Dispositivo"
+
+#: templates/fitbit_upload.html:45
+msgid "Checking for connected device..."
+msgstr "Verifica della connessione del dispositivo..."
+
+#: templates/fitbit_upload.html:46
+msgid "Fitbit device connected"
+msgstr "Dispositivo Fitbit connesso"
+
+#: templates/fitbit_upload.html:47
+msgid "No Fitbit device detected"
+msgstr "Nessun dispositivo Fitbit rilevato"
+
+#: templates/fitbit_upload.html:54
+msgid "Upload Fitbit Data Now"
+msgstr "Carica Dati Fitbit Ora"
+
+#: templates/fitbit_upload.html:61
+msgid "Back to Vital Signs"
+msgstr "Torna ai Parametri Vitali"
+
+#: templates/fitbit_upload.html:76
+msgid "Uploading..."
+msgstr "Caricamento in corso..."
+
