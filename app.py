@@ -74,6 +74,14 @@ def format_datetime(value, format='%Y-%m-%d %H:%M:%S'):
         return ""
     return value.strftime(format)
 
+# Inject common variables into templates
+@app.context_processor
+def inject_globals():
+    """Inject global variables into templates."""
+    return {
+        'now': datetime.now()
+    }
+
 with app.app_context():
     # Import models to ensure they're registered with SQLAlchemy
     from models import Doctor, Patient, VitalSign, DoctorPatient, Note, AuditLog
