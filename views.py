@@ -101,7 +101,7 @@ def new_patient():
             # Log the patient creation in the audit trail
             log_patient_creation(current_user.id, patient)
             
-            flash(f'Patient {first_name} {last_name} created successfully with ID {patient.uuid}', 'success')
+            flash(_(f'Paziente {first_name} {last_name} creato con successo con ID {patient.uuid}'), 'success')
             logger.info(f"Doctor {current_user.id} created patient {patient.id}")
             
             return redirect(url_for('views.patient_detail', patient_id=patient.id))
@@ -185,7 +185,7 @@ def edit_patient(patient_id):
             # Log the patient update in the audit trail
             log_patient_update(current_user.id, patient, old_data)
             
-            flash('Patient information updated successfully', 'success')
+            flash(_('Informazioni del paziente aggiornate con successo'), 'success')
             logger.info(f"Doctor {current_user.id} updated patient {patient.id}")
             
             return redirect(url_for('views.patient_detail', patient_id=patient_id))
@@ -245,7 +245,7 @@ def delete_patient(patient_id):
         
         db.session.commit()
         
-        flash('Patient removed successfully', 'success')
+        flash(_('Paziente rimosso con successo'), 'success')
         logger.info(f"Doctor {current_user.id} removed patient {patient_id}")
         
     except SQLAlchemyError as e:
@@ -475,7 +475,7 @@ def add_note(patient_id):
         # Log the note creation in the audit trail
         log_note_creation(current_user.id, note)
         
-        flash('Note added successfully', 'success')
+        flash(_('Nota aggiunta con successo'), 'success')
         logger.info(f"Doctor {current_user.id} added note for patient {patient_id}")
         
     except SQLAlchemyError as e:
