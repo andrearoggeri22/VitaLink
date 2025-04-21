@@ -5,6 +5,8 @@ const currentLanguage = document.documentElement.lang || 'en';
 
 // Translation strings based on language
 let deletePatientTitle, deletePatientMessage, addNoteForText, confirmButtonText, cancelButtonText;
+let dateText, normalText, highText, lowText, saveText, deviceConnectedText, deviceNotConnectedText;
+let noDataText, loadingText, errorText, successText, vitalsChartTitleText;
 
 if (currentLanguage === 'it') {
     // Italian translations
@@ -13,6 +15,26 @@ if (currentLanguage === 'it') {
     addNoteForText = 'Aggiungi nota per {name}';
     confirmButtonText = 'Conferma';
     cancelButtonText = 'Annulla';
+    
+    // Data e valori vitali
+    dateText = 'Data';
+    normalText = 'Normale';
+    highText = 'Alto';
+    lowText = 'Basso';
+    saveText = 'Salva';
+    
+    // Messaggi dispositivo
+    deviceConnectedText = 'Dispositivo connesso';
+    deviceNotConnectedText = 'Nessun dispositivo connesso';
+    
+    // Messaggi generali
+    noDataText = 'Nessun dato disponibile';
+    loadingText = 'Caricamento in corso...';
+    errorText = 'Si è verificato un errore';
+    successText = 'Operazione completata con successo';
+    
+    // Grafici
+    vitalsChartTitleText = 'Andamento dei parametri vitali';
 } else {
     // Default English translations
     deletePatientTitle = 'Delete Patient';
@@ -20,4 +42,24 @@ if (currentLanguage === 'it') {
     addNoteForText = 'Add Note for {name}';
     confirmButtonText = 'Confirm';
     cancelButtonText = 'Cancel';
+    
+    // Date and vital values
+    dateText = 'Date';
+    normalText = 'Normal';
+    highText = 'High';
+    lowText = 'Low';
+    saveText = 'Save';
+    
+    // Device messages
+    deviceConnectedText = 'Device connected';
+    deviceNotConnectedText = 'No device connected';
+    
+    // General messages
+    noDataText = 'No data available';
+    loadingText = 'Loading...';
+    errorText = 'An error occurred';
+    successText = 'Operation completed successfully';
+    
+    // Charts
+    vitalsChartTitleText = 'Vital Signs Trend';
 }
