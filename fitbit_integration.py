@@ -1,3 +1,12 @@
+"""
+File: fitbit_integration.py
+Autore: VitaLink Team
+Data: Aprile 2025
+Descrizione: Modulo per l'integrazione con dispositivi Fitbit. 
+             Gestisce la connessione ai dispositivi, l'estrazione e il salvataggio dei dati
+             nel sistema VitaLink.
+"""
+
 import os
 import json
 import glob
@@ -20,7 +29,7 @@ UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'upload
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
-# Tipi di dati che possono essere importati da Fitbit
+# Mappatura tra i tipi di dati Fitbit e i tipi di parametri vitali del sistema
 FITBIT_DATA_TYPES = {
     'heart_rate': VitalSignType.HEART_RATE,
     'steps': VitalSignType.STEPS,
@@ -32,7 +41,10 @@ FITBIT_DATA_TYPES = {
 }
 
 class DeviceConnectionError(Exception):
-    """Eccezione sollevata quando il dispositivo non può essere connesso"""
+    """
+    Eccezione sollevata quando il dispositivo Fitbit non può essere connesso o non è disponibile.
+    Utilizzata per gestire gli errori di connessione in modo specifico.
+    """
     pass
 
 def check_device_connected():
@@ -315,7 +327,16 @@ def save_fitbit_data(patient_id, data):
 def check_device_status(patient_id):
     """
     API endpoint per verificare se un dispositivo Fitbit è connesso.
-    Restituisce un JSON con lo stato della connessione.
+    
+    Args:
+        patient_id (int): ID del paziente (non utilizzato direttamente ma necessario per la route)
+        
+    Returns:
+        JSON: Risposta JSON con lo stato della connessione nel formato:
+             {
+               'connected': True|False,
+               'timestamp': '2025-04-21T20:06:41'
+             }
     """
     try:
         # Questo endpoint viene chiamato tramite AJAX dal client
