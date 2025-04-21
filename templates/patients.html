@@ -92,40 +92,40 @@
             <form id="patientForm" method="post" action="{{ url_for('views.edit_patient', patient_id=patient.id) }}" class="needs-validation" novalidate>
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label for="first_name" class="form-label">{{ _('First Name') }} <span class="text-danger">*</span></label>
+                        <label for="first_name" class="form-label">{{ _('Nome') }} <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="first_name" name="first_name" value="{{ patient.first_name }}" required>
-                        <div class="invalid-feedback">{{ _('First name is required') }}</div>
+                        <div class="invalid-feedback">{{ _('Il nome è obbligatorio') }}</div>
                     </div>
                     
                     <div class="col-md-6 mb-3">
-                        <label for="last_name" class="form-label">{{ _('Last Name') }} <span class="text-danger">*</span></label>
+                        <label for="last_name" class="form-label">{{ _('Cognome') }} <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="last_name" name="last_name" value="{{ patient.last_name }}" required>
-                        <div class="invalid-feedback">{{ _('Last name is required') }}</div>
+                        <div class="invalid-feedback">{{ _('Il cognome è obbligatorio') }}</div>
                     </div>
                 </div>
                 
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label for="date_of_birth" class="form-label">{{ _('Date of Birth') }} <span class="text-danger">*</span></label>
+                        <label for="date_of_birth" class="form-label">{{ _('Data di Nascita') }} <span class="text-danger">*</span></label>
                         <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" value="{{ patient.date_of_birth.strftime('%Y-%m-%d') }}" required>
-                        <div class="invalid-feedback">{{ _('Date of birth is required') }}</div>
+                        <div class="invalid-feedback">{{ _('La data di nascita è obbligatoria') }}</div>
                     </div>
                     
                     <div class="col-md-6 mb-3">
-                        <label for="gender" class="form-label">{{ _('Gender') }}</label>
+                        <label for="gender" class="form-label">{{ _('Genere') }}</label>
                         <select class="form-select" id="gender" name="gender">
-                            <option value="" {% if not patient.gender %}selected{% endif %}>{{ _('Select gender') }}</option>
-                            <option value="Male" {% if patient.gender == 'Male' %}selected{% endif %}>{{ _('Male') }}</option>
-                            <option value="Female" {% if patient.gender == 'Female' %}selected{% endif %}>{{ _('Female') }}</option>
-                            <option value="Other" {% if patient.gender == 'Other' %}selected{% endif %}>{{ _('Other') }}</option>
-                            <option value="Prefer not to say" {% if patient.gender == 'Prefer not to say' %}selected{% endif %}>{{ _('Prefer not to say') }}</option>
+                            <option value="" {% if not patient.gender %}selected{% endif %}>{{ _('Seleziona genere') }}</option>
+                            <option value="Male" {% if patient.gender == 'Male' %}selected{% endif %}>{{ _('Maschio') }}</option>
+                            <option value="Female" {% if patient.gender == 'Female' %}selected{% endif %}>{{ _('Femmina') }}</option>
+                            <option value="Other" {% if patient.gender == 'Other' %}selected{% endif %}>{{ _('Altro') }}</option>
+                            <option value="Prefer not to say" {% if patient.gender == 'Prefer not to say' %}selected{% endif %}>{{ _('Preferisco non dire') }}</option>
                         </select>
                     </div>
                 </div>
                 
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label for="contact_number" class="form-label">{{ _('Contact Number') }}</label>
+                        <label for="contact_number" class="form-label">{{ _('Numero di Telefono') }}</label>
                         <input type="tel" class="form-control" id="contact_number" name="contact_number" value="{{ patient.contact_number }}">
                     </div>
                 </div>
