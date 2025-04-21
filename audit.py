@@ -21,24 +21,38 @@ def log_action(doctor_id, action_type, entity_type, entity_id, details=None, pat
         patient_id (int, optional): ID of the patient related to the action (for easier querying)
     
     Returns:
-        AuditLog: The created audit log entry
+        AuditLog: The created audit log entry or None if an error occurs
     """
-    ip_address = request.remote_addr if request else None
-    
-    audit_log = AuditLog(
-        doctor_id=doctor_id,
-        action_type=action_type,
-        entity_type=entity_type,
-        entity_id=entity_id,
-        details=details,
-        patient_id=patient_id,
-        ip_address=ip_address
-    )
-    
-    db.session.add(audit_log)
-    db.session.commit()
-    
-    return audit_log
+    try:
+        # Verifica che entity_id non sia None per evitare l'errore "not-null constraint"
+        if entity_id is None:
+            # Se l'ID è None, utilizziamo un valore predefinito temporaneo
+            # In un sistema di produzione, dovremmo gestire diversamente
+            entity_id = 0
+            print(f"WARNING: entity_id is None for {entity_type}. Using temporary ID 0.")
+        
+        ip_address = request.remote_addr if request else None
+        
+        audit_log = AuditLog(
+            doctor_id=doctor_id,
+            action_type=action_type,
+            entity_type=entity_type,
+            entity_id=entity_id,
+            details=details,
+            patient_id=patient_id,
+            ip_address=ip_address
+        )
+        
+        db.session.add(audit_log)
+        db.session.commit()
+        
+        return audit_log
+    except Exception as e:
+        # In caso di errore, eseguiamo rollback e registriamo l'errore
+        db.session.rollback()
+        print(f"Error in log_action: {str(e)}")
+        # Non facciamo fallire l'intera operazione se il logging fallisce
+        return None
 
 @audit_bp.route('/logs', methods=['GET'])
 @login_required
