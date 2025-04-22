@@ -28,6 +28,7 @@ def get_report_translations():
         dict: Dictionary of translated strings
     """
     language = session.get('language', 'en')
+    logger.debug(f"Report language from session: {language}")
     
     if language == 'it':
         return {
