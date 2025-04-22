@@ -19,7 +19,7 @@ services:
       - FLASK_ENV=production
       - PYTHONUNBUFFERED=1
       # Other environment variables needed 
-      # (Twilio, SendGrid, ecc. should be configured here in production)
+      # (ClickSend, ecc. should be configured here in production)
     volumes:
       - ./uploads:/app/uploads
     # Add an health check to ensure that the service is up and running
