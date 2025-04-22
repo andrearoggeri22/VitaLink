@@ -1,0 +1,43 @@
+@startuml "Diagramma di Stato VitaLink"
+' Diagramma di Stato
+[*] --> Idle: System Start
+
+state Idle {
+  [*] --> Ready
+  Ready --> Processing: User Action
+  Processing --> Ready: Complete
+  Processing --> Error: Exception
+  Error --> Ready: Resolved
+}
+
+Idle --> Authentication: Login Attempt
+Authentication --> Dashboard: Success
+Authentication --> Idle: Failure
+
+state Dashboard {
+  [*] --> Overview
+  Overview --> PatientList: Select Patients
+  Overview --> Reports: Select Reports
+  Overview --> Settings: Select Settings
+  
+  PatientList --> PatientDetails: Select Patient
+  PatientDetails --> VitalSigns: View Vitals
+  PatientDetails --> Notes: View Notes
+  PatientDetails --> AddVitalSign: Add Vital
+  PatientDetails --> AddNote: Add Note
+  PatientDetails --> GenerateReport: Create Report
+  
+  VitalSigns --> PatientDetails: Back
+  Notes --> PatientDetails: Back
+  AddVitalSign --> PatientDetails: Submit/Cancel
+  AddNote --> PatientDetails: Submit/Cancel
+  GenerateReport --> PatientDetails: Complete
+  
+  PatientList --> Dashboard: Back
+  Reports --> Dashboard: Back
+  Settings --> Dashboard: Back
+}
+
+Dashboard --> Idle: Logout
+Dashboard --> [*]: Exit System
+@enduml

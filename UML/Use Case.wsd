@@ -1,0 +1,41 @@
+@startuml "Diagramma di Caso d'Uso VitaLink"
+' Diagramma di Caso d'Uso
+left to right direction
+
+actor "Healthcare Professional" as Doctor
+actor "Fitbit Device" as Device
+actor "System Administrator" as Admin
+
+rectangle "VitaLink Platform" {
+  usecase "Login" as UC1
+  usecase "Manage Patients" as UC2
+  usecase "View Patient Details" as UC3
+  usecase "Add Vital Signs" as UC4
+  usecase "Monitor Vital Signs" as UC5
+  usecase "Write Patient Notes" as UC6
+  usecase "Generate Reports" as UC7
+  usecase "Upload Fitbit Data" as UC8
+  usecase "Send SMS Alerts" as UC9
+  usecase "View Audit Logs" as UC10
+  usecase "Change Language" as UC11
+  usecase "Manage User Accounts" as UC12
+  
+  UC2 <.. UC3 : <<includes>>
+  UC5 <.. UC9 : <<extends>>
+  UC3 <.. UC7 : <<extends>>
+  UC3 <.. UC6 : <<extends>>
+}
+
+Doctor --> UC1
+Doctor --> UC2
+Doctor --> UC3
+Doctor --> UC4
+Doctor --> UC5
+Doctor --> UC6
+Doctor --> UC7
+Doctor --> UC11
+Device --> UC8
+Admin --> UC10
+Admin --> UC12
+Admin --> UC1
+@enduml

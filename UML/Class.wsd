@@ -1,0 +1,120 @@
+@startuml "Diagramma di Classe VitaLink"
+' Diagramma di Classe
+enum DataOrigin {
+  MANUAL
+  AUTOMATIC
+}
+
+enum VitalSignType {
+  HEART_RATE
+  BLOOD_PRESSURE
+  OXYGEN_SATURATION
+  TEMPERATURE
+  RESPIRATORY_RATE
+  GLUCOSE
+  WEIGHT
+  STEPS
+  CALORIES
+  DISTANCE
+  ACTIVE_MINUTES
+  SLEEP_DURATION
+  FLOORS_CLIMBED
+}
+
+enum ActionType {
+  CREATE
+  UPDATE
+  DELETE
+  VIEW
+  EXPORT
+}
+
+enum EntityType {
+  PATIENT
+  VITAL_SIGN
+  NOTE
+  REPORT
+}
+
+class Doctor {
+  -id: Integer
+  -email: String
+  -password_hash: String
+  -first_name: String
+  -last_name: String
+  -specialty: String
+  -created_at: DateTime
+  -updated_at: DateTime
+  +set_password(password: String): void
+  +check_password(password: String): boolean
+  +to_dict(): Map
+  +get_patients(): List<Patient>
+  +add_patient(patient: Patient): void
+  +remove_patient(patient: Patient): void
+}
+
+class Patient {
+  -id: Integer
+  -uuid: String
+  -first_name: String
+  -last_name: String
+  -date_of_birth: Date
+  -gender: String
+  -contact_number: String
+  -address: Text
+  -created_at: DateTime
+  -updated_at: DateTime
+  +to_dict(): Map
+  +get_vital_signs(type: VitalSignType, start_date: DateTime, end_date: DateTime): List<VitalSign>
+  +get_notes(): List<Note>
+}
+
+class DoctorPatient {
+  -doctor_id: Integer
+  -patient_id: Integer
+  -assigned_date: DateTime
+}
+
+class VitalSign {
+  -id: Integer
+  -patient_id: Integer
+  -type: VitalSignType
+  -value: Float
+  -unit: String
+  -recorded_at: DateTime
+  -origin: DataOrigin
+  -created_at: DateTime
+  +to_dict(): Map
+}
+
+class Note {
+  -id: Integer
+  -patient_id: Integer
+  -doctor_id: Integer
+  -content: Text
+  -created_at: DateTime
+  -updated_at: DateTime
+  +to_dict(): Map
+}
+
+class AuditLog {
+  -id: Integer
+  -doctor_id: Integer
+  -timestamp: DateTime
+  -action_type: ActionType
+  -entity_type: EntityType
+  -entity_id: Integer
+  -details: Text
+  -patient_id: Integer
+  -ip_address: String
+  +to_dict(): Map
+}
+
+Doctor "1" -- "many" DoctorPatient
+Patient "1" -- "many" DoctorPatient
+Doctor "1" -- "many" Note
+Patient "1" -- "many" Note
+Patient "1" -- "many" VitalSign
+Doctor "1" -- "many" AuditLog
+Patient "0..1" -- "many" AuditLog
+@enduml
