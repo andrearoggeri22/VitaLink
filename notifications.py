@@ -44,12 +44,12 @@ def send_sms(to_number, message):
         api_instance = clicksend_client.SMSApi(clicksend_client.ApiClient(configuration))
         
         # Create the SMS message
-        sms_message = clicksend_client.SmsMessage(
-            source="sdk",
-            body=message,
-            to=to_number,
-            from_=CLICKSEND_FROM_NUMBER
-        )
+        # Note: 'from' is a reserved keyword in Python, so we use named parameters
+        sms_message = clicksend_client.SmsMessage()
+        sms_message.source = "sdk"
+        sms_message.body = message
+        sms_message.to = to_number
+        sms_message._from = CLICKSEND_FROM_NUMBER  # Use _from instead of from_
         
         # Create a message collection (list of messages)
         sms_messages = clicksend_client.SmsMessageCollection(messages=[sms_message])
