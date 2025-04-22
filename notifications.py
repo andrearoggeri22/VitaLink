@@ -3,6 +3,7 @@ import logging
 from datetime import datetime
 import clicksend_client
 from clicksend_client.rest import ApiException
+from flask import session, request, current_app
 
 # Setup logger
 logger = logging.getLogger(__name__)
@@ -11,6 +12,47 @@ logger = logging.getLogger(__name__)
 CLICKSEND_USERNAME = os.environ.get("CLICKSEND_USERNAME")
 CLICKSEND_API_KEY = os.environ.get("CLICKSEND_API_KEY")
 CLICKSEND_FROM_NUMBER = os.environ.get("CLICKSEND_FROM_NUMBER")
+
+
+def get_sms_translations():
+    """
+    Get translations for SMS messages based on the selected language.
+    
+    Returns:
+        dict: Dictionary of translated strings
+    """
+    # Get current language from session or from browser preferred language
+    current_language = session.get('language')
+    if not current_language:
+        # Determine language from browser accept-languages header
+        current_language = request.accept_languages.best_match(current_app.config['LANGUAGES'].keys()) or 'en'
+        
+    logger.debug(f"SMS language: {current_language}")
+    
+    if current_language == 'it':
+        return {
+            # Abnormal vital sign notification
+            'alert_prefix': 'AVVISO VitaLink',
+            'vital_high': 'sopra la norma',
+            'vital_low': 'sotto la norma',
+            'vital_message': '{prefix}: {name}, il tuo {vital_type} con valore {value} {unit} è {status}. Contatta il tuo medico se non ti senti bene.',
+            
+            # Appointment reminder
+            'reminder_prefix': 'Promemoria',
+            'appointment_message': '{prefix}: Hai un appuntamento con Dr. {doctor} il {date} alle {time}. Presentati 15 minuti prima per completare eventuali documenti.'
+        }
+    else:
+        return {
+            # Abnormal vital sign notification
+            'alert_prefix': 'VitaLink ALERT',
+            'vital_high': 'above normal',
+            'vital_low': 'below normal',
+            'vital_message': '{prefix}: {name}, your {vital_type} reading of {value} {unit} is {status}. Please contact your healthcare provider if you feel unwell.',
+            
+            # Appointment reminder
+            'reminder_prefix': 'Reminder',
+            'appointment_message': '{prefix}: You have an appointment with Dr. {doctor} on {date} at {time}. Please arrive 15 minutes early to complete any paperwork.'
+        }
 
 
 def send_sms(to_number, message):
@@ -89,12 +131,21 @@ def notify_abnormal_vital(patient, vital_type, value, unit, status):
             f"Cannot send alert: Patient {patient.id} has no contact number")
         return False, "Patient has no contact number"
 
+    # Get translations
+    t = get_sms_translations()
+    
     # Format the message
-    status_text = "above normal" if status == "high" else "below normal"
-    message = (
-        f"VitaLink ALERT: {patient.first_name}, your {vital_type.replace('_', ' ')} "
-        f"reading of {value} {unit} is {status_text}. "
-        f"Please contact your healthcare provider if you feel unwell.")
+    status_text = t['vital_high'] if status == "high" else t['vital_low']
+    vital_type_formatted = vital_type.replace('_', ' ')
+    
+    message = t['vital_message'].format(
+        prefix=t['alert_prefix'],
+        name=patient.first_name,
+        vital_type=vital_type_formatted,
+        value=value,
+        unit=unit,
+        status=status_text
+    )
 
     # Send the SMS
     return send_sms(patient.contact_number, message)
@@ -117,11 +168,16 @@ def send_appointment_reminder(patient, doctor, appointment_date,
     if not patient.contact_number:
         return False, "Patient has no contact number"
 
+    # Get translations
+    t = get_sms_translations()
+    
     # Format the message
-    message = (
-        f"Reminder: You have an appointment with "
-        f"Dr. {doctor.last_name} on {appointment_date} at {appointment_time}. "
-        f"Please arrive 15 minutes early to complete any paperwork.")
+    message = t['appointment_message'].format(
+        prefix=t['reminder_prefix'],
+        doctor=doctor.last_name,
+        date=appointment_date,
+        time=appointment_time
+    )
 
     # Send the SMS
     return send_sms(patient.contact_number, message)
