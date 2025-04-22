@@ -2,7 +2,7 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Installa le dipendenze di sistema necessarie
+# Install the system's needed dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     libpq-dev \
@@ -12,34 +12,34 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copia prima solo il file dei requisiti per sfruttare la cache Docker
+# First copy only the requirements.txt to exploit Docker cache
 COPY docker-requirements.txt /app/
 
-# Installa le dipendenze Python
+# Install python dependencies
 RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir -r docker-requirements.txt
 
-# Copia il resto del codice dell'applicazione
+# Copy the remaining code of the application
 COPY . /app/
 
-# Creazione della directory uploads se non esiste
+# Creating the uploads directory if it doesn't exists
 RUN mkdir -p /app/uploads && chmod 777 /app/uploads
 
-# Rendi eseguibile lo script di entrypoint
+# Make entrypoint script executable
 RUN chmod +x /app/docker-entrypoint.sh
 
-# Esponi la porta su cui sarà in ascolto l'app
+# Expose the port on which the app will be listening
 EXPOSE 5000
 
-# Variabili d'ambiente predefinite (possono essere sovrascritte)
+# Default environment variables (can be overwritten)
 ENV FLASK_APP=main.py
 ENV FLASK_ENV=production
 ENV PYTHONUNBUFFERED=1
 
-# Configura l'entrypoint
+# Configure the entrypoint
 ENTRYPOINT ["/app/docker-entrypoint.sh"]
 
-# Nota: curl già installato in precedenza
+# Note: curl already installed before
 
-# Comando di avvio
+# Startup command
 CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "3", "--access-logfile", "-", "--error-logfile", "-", "--log-level", "debug", "main:app"]

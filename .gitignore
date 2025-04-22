@@ -1,4 +1,4 @@
-# File specifici di Replit
+# Replit specific files
 .replit
 .cache/
 replit.nix
@@ -9,7 +9,7 @@ replit.nix
 .nix/
 .bash_history
 
-# File di ambiente e segreti
+# Env and secrets files
 .env
 *.pem
 *.key
@@ -42,23 +42,23 @@ htmlcov/
 .pytest_cache/
 .mypy_cache/
 
-# Cartelle di upload temporanee
+# Temporary upload folders
 uploads/*
 !uploads/.gitkeep
 
-# Logs e dati di debug
+# Logs e debug datas
 *.log
 logs/
 attached_assets/
 debug/
 
-# Database locali e dati generati
+# Local databases and generated files
 *.sqlite
 *.sqlite3
 *.db
 *.db-journal
 
-# File specifici del sistema operativo
+# OS specific files
 .DS_Store
 .DS_Store?
 ._*
@@ -67,7 +67,7 @@ debug/
 ehthumbs.db
 Thumbs.db
 
-# File di configurazione IDE
+# IDE configuration files
 .idea/
 .vscode/
 *.swp
@@ -79,12 +79,12 @@ Thumbs.db
 *.sublime-workspace
 *.sublime-project
 
-# File di distribuzione e deployment
+# Distribution files and deployment
 docker-compose.debug.yml
 docker-compose.override.yml
 postgres-data/
 
-# Cartelle virtuali e node_modules
+# Virtual folders e node_modules
 venv/
 ENV/
 env/
@@ -92,13 +92,13 @@ node_modules/
 jspm_packages/
 bower_components/
 
-# File compilati e build
+# Compiled files and build
 *.mo
 *.pot
 .webassets-cache
 public/
 
-# File temporanei e backup
+# Temporary files and backups
 *.bak
 *.tmp
 *~
