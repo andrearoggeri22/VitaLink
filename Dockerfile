@@ -39,8 +39,8 @@ ENV FLASK_APP=main.py
 ENV FLASK_ENV=production
 ENV PYTHONUNBUFFERED=1
 
-# Configure the entrypoint using shell form for better error handling
-ENTRYPOINT ["/bin/bash", "-c", "if [ -x /app/docker-entrypoint.sh ]; then exec /app/docker-entrypoint.sh \"$@\"; else echo 'Error: /app/docker-entrypoint.sh not executable or missing'; exit 1; fi"]
+# Configure the entrypoint directly
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
 
 # Note: curl already installed before
 
