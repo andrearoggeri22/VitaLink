@@ -15,8 +15,6 @@ dependencies = [
     "pytest>=8.3.5",
     "sqlalchemy>=2.0.40",
     "flask-wtf>=1.2.2",
-
-
     "wtforms>=3.2.1",
     "reportlab>=4.4.0",
     "flask-babel>=4.0.0",
