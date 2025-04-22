@@ -46,26 +46,24 @@ class DeviceConnectionError(Exception):
     pass
 
 def check_device_connected():
-    """
-    Verifica se un dispositivo Fitbit è connesso via USB.
-    Controlla nelle directory del sistema per dispositivi USB compatibili.
-    
-    Ritorna:
-        bool: True se il dispositivo è connesso, False altrimenti
-    """
+    # Check if a Fitbit device is connected via USB
+    # Checks system directories for compatible USB devices
+    #
+    # Returns:
+    #   bool: True if the device is connected, False otherwise
     try:
-        # Per scopi dimostrativi e di testing, ritorniamo False per simulare l'assenza del dispositivo
-        # In un'implementazione reale, controlleremmo il dispositivo fisico
+        # For demonstration and testing purposes, we return False to simulate device absence
+        # In a real implementation, we would check the physical device
         from flask_babel import gettext as _
         
         logging.info(_("Fitbit device connection check - simulation mode enabled"))
         return False
         
-        # Il codice qui sotto verrebbe utilizzato in un'implementazione reale
+        # The code below would be used in a real implementation
         """
         import glob
         
-        # Cerca dispositivi Fitbit nelle directory USB (wearable device)
+        # Search for Fitbit devices in USB directories (wearable device)
         fitbit_patterns = [
             '/dev/bus/usb/*/*',  # Generic USB devices
             '/sys/bus/usb/devices/*/idVendor',  # Check vendor IDs
@@ -79,68 +77,66 @@ def check_device_connected():
                 if len(devices) > 0:
                     return True
         
-        # Nessun dispositivo Fitbit trovato
+        # No Fitbit device found
         return False
         """
     except Exception as e:
-        logging.error(f"Errore durante la verifica del dispositivo: {str(e)}")
-        return False  # Ritorna False in caso di errore per sicurezza
+        logging.error(f"Error during device verification: {str(e)}")
+        return False  # Return False in case of error for safety
 
 def extract_fitbit_data(patient_id):
-    """
-    Estrae i dati dal dispositivo Fitbit collegato via USB.
-    
-    Args:
-        patient_id (int): ID del paziente a cui associare i dati
-        
-    Returns:
-        dict: Dati estratti dal dispositivo nel formato:
-              {
-                'heart_rate': [{'timestamp': '2025-04-21T12:30:00', 'value': 75}],
-                'steps': [{'timestamp': '2025-04-21', 'value': 8500}],
-                'calories': [{'timestamp': '2025-04-21', 'value': 2100}],
-                ...
-              }
-              
-    Raises:
-        DeviceConnectionError: Se il dispositivo non è connesso o ci sono problemi di connessione
-    """
+    # Extract data from the connected Fitbit device via USB
+    #
+    # Args:
+    #     patient_id (int): ID of the patient to associate the data with
+    #
+    # Returns:
+    #     dict: Data extracted from the device in the format:
+    #           {
+    #             'heart_rate': [{'timestamp': '2025-04-21T12:30:00', 'value': 75}],
+    #             'steps': [{'timestamp': '2025-04-21', 'value': 8500}],
+    #             'calories': [{'timestamp': '2025-04-21', 'value': 2100}],
+    #             ...
+    #           }
+    #
+    # Raises:
+    #     DeviceConnectionError: If the device is not connected or there are connection problems
     if not check_device_connected():
-        raise DeviceConnectionError("Nessun dispositivo Fitbit connesso")
+        raise DeviceConnectionError("No Fitbit device connected")
     
     try:
-        # Implementazione per l'estrazione reale dei dati dal dispositivo Fitbit
+        # Implementation for real data extraction from Fitbit device
         import os
         import json
         import subprocess
         import tempfile
         
-        # 1. Identifica il dispositivo Fitbit nel sistema
-        # Utilizziamo lsusb per cercare dispositivi Fitbit
+        # 1. Identify the Fitbit device in the system
+        # We use lsusb to search for Fitbit devices
         try:
             usb_devices = subprocess.check_output(['lsusb'], universal_newlines=True)
-            # In un sistema reale, filtreremmo i dispositivi Fitbit
-            # Fitbit vendor ID è 0x2687
+            # In a real system, we would filter Fitbit devices
+            # Fitbit vendor ID is 0x2687
             if 'Fitbit' not in usb_devices and '2687' not in usb_devices:
-                logging.warning("Nessun dispositivo Fitbit trovato in lsusb")
-                # Continuiamo comunque per dimostrare la funzionalità
+                logging.warning("No Fitbit device found in lsusb")
+                # We continue anyway to demonstrate functionality
         except (subprocess.SubprocessError, FileNotFoundError):
-            logging.warning("Impossibile eseguire lsusb per trovare dispositivi Fitbit")
+            logging.warning("Unable to execute lsusb to find Fitbit devices")
         
-        # 2. Montiamo il dispositivo (in un sistema reale)
-        # In una implementazione completa, avremmo comandi per montare il filesystem del dispositivo
+        # 2. Mount the device (in a real system)
+        # In a complete implementation, we would have commands to mount the device's filesystem
         
-        # 3. Leggiamo i file dal dispositivo
-        # In un sistema reale, i dati potrebbero essere in un formato proprietario
-        # Qui simuliamo la lettura da file temporanei o dal dispositivo montato
+        # 3. Read files from the device
+        # In a real system, data might be in a proprietary format
+        # Here we simulate reading from temporary files or from the mounted device
         
-        # Directory temporanea per l'estrazione
+        # Temporary directory for extraction
         temp_dir = tempfile.mkdtemp()
         
-        # Creiamo file temporanei che simulano i file di dati dal Fitbit
+        # Create temporary files that simulate data files from Fitbit
         current_date = datetime.datetime.now()
         
-        # Generiamo dati di esempio ma come se fossero letti da file effettivi
+        # Generate sample data as if it were read from actual files
         result_data = {
             'heart_rate': [],
             'steps': [],
@@ -151,41 +147,41 @@ def extract_fitbit_data(patient_id):
             'floors_climbed': []
         }
         
-        # Estrazione frequenza cardiaca - simula dati delle ultime 24 ore con intervalli di 1 ora
+        # Heart rate extraction - simulate data from the last 24 hours with 1 hour intervals
         for i in range(24, 0, -1):
             timestamp = current_date - datetime.timedelta(hours=i)
-            # Variamo un po' i valori per simulare misurazioni reali
+            # Vary the values a bit to simulate real measurements
             heart_rate = 70 + (i % 10) - 5
             result_data['heart_rate'].append({
                 'timestamp': timestamp.strftime('%Y-%m-%dT%H:%M:%S'),
                 'value': heart_rate
             })
         
-        # Estrazione passi - dati degli ultimi 7 giorni
+        # Steps extraction - data from the last 7 days
         for i in range(7, 0, -1):
             timestamp = current_date - datetime.timedelta(days=i)
-            # Simuliamo diversi conteggi passi per giorno
+            # Simulate different step counts per day
             steps = 7500 + (i * 200) + (hash(str(i)) % 1000)
             result_data['steps'].append({
                 'timestamp': timestamp.strftime('%Y-%m-%d'),
                 'value': steps
             })
         
-        # Estrazione calorie - dati degli ultimi 7 giorni
+        # Calories extraction - data from the last 7 days
         for i in range(7, 0, -1):
             timestamp = current_date - datetime.timedelta(days=i)
-            # Calorie correlate ai passi
+            # Calories correlated to steps
             calories = 2000 + (result_data['steps'][7-i-1]['value'] / 20)
             result_data['calories'].append({
                 'timestamp': timestamp.strftime('%Y-%m-%d'),
                 'value': int(calories)
             })
         
-        # Estrazione distanza - dati degli ultimi 7 giorni
+        # Distance extraction - data from the last 7 days
         for i in range(7, 0, -1):
             timestamp = current_date - datetime.timedelta(days=i)
-            # Distanza correlata ai passi (approssimativamente)
-            distance = result_data['steps'][7-i-1]['value'] / 1300  # ~1300 passi per km
+            # Distance correlated to steps (approximately)
+            distance = result_data['steps'][7-i-1]['value'] / 1300  # ~1300 steps per km
             result_data['distance'].append({
                 'timestamp': timestamp.strftime('%Y-%m-%d'),
                 'value': round(distance, 2)
