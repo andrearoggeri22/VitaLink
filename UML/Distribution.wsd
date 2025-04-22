@@ -1,0 +1,41 @@
+@startuml "Diagramma della Distribuzione VitaLink"
+' Diagramma della Distribuzione
+node "Client Devices" {
+  node "Healthcare Professional Device" {
+    [Web Browser] as Browser
+  }
+  
+  node "Patient Device" {
+    [Fitbit Device] as Fitbit
+  }
+}
+
+cloud "VitaLink Cloud" {
+  node "Application Server" {
+    [Flask Application] as App
+    [Gunicorn WSGI Server] as Gunicorn
+    [SSL/TLS Layer] as SSL
+    
+    SSL - Gunicorn
+    Gunicorn - App
+  }
+  
+  node "Database Server" {
+    [PostgreSQL DBMS] as PostgreSQL
+    database "VitaLink DB" as DB
+    
+    PostgreSQL - DB
+  }
+}
+
+cloud "External Services" {
+  [Twilio SMS Service] as Twilio
+  [SendGrid Email Service] as SendGrid
+}
+
+Browser --> SSL : "HTTPS"
+Fitbit --> App : "USB/Bluetooth/API"
+App --> PostgreSQL : "SQL over TCP/IP"
+App --> Twilio : "HTTPS API"
+App --> SendGrid : "HTTPS API"
+@enduml

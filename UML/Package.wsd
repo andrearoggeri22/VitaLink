@@ -1,0 +1,67 @@
+@startuml "Diagramma del Pacchetto VitaLink"
+' Diagramma del Pacchetto
+package "VitaLink" {
+  package "Web Layer" {
+    package "Views" {
+      [Dashboard]
+      [Patient Views]
+      [Authentication Views]
+      [Report Views]
+    }
+    
+    package "Templates" {
+      [Base Templates]
+      [Patient Templates]
+      [Form Templates]
+      [Report Templates]
+    }
+    
+    package "Static Assets" {
+      [JavaScript]
+      [CSS]
+      [Images]
+    }
+  }
+  
+  package "Application Layer" {
+    [Authentication]
+    [Views Controllers]
+    [API Controllers]
+    [Report Generator]
+    [Notifications]
+    [Audit Logger]
+    [Internationalization]
+  }
+  
+  package "Integration Layer" {
+    [Fitbit Integration]
+    [SMS Gateway]
+    [Email Service]
+  }
+  
+  package "Data Layer" {
+    package "Models" {
+      [Doctor Model]
+      [Patient Model]
+      [VitalSign Model]
+      [Note Model]
+      [AuditLog Model]
+    }
+    
+    [Database Access]
+    [Data Validation]
+  }
+  
+  package "Utils" {
+    [Date Formatters]
+    [File Handlers]
+    [Security Helpers]
+  }
+}
+
+"Web Layer" ..> "Application Layer"
+"Application Layer" ..> "Data Layer"
+"Application Layer" ..> "Integration Layer"
+"Application Layer" ..> "Utils"
+"Web Layer" ..> "Utils"
+@enduml

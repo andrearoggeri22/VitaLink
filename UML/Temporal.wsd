@@ -1,0 +1,105 @@
+@startuml "Diagramma Temporale VitaLink"
+' Diagramma Temporale
+scale 1000 width
+
+concise "Healthcare Professional" as Doctor
+concise "Web Interface" as UI
+concise "Patient Controller" as PatientCtrl
+concise "Vital Signs Controller" as VitalCtrl
+concise "Database" as DB
+concise "Notification Service" as Notif
+
+@0
+Doctor is "Inactive"
+UI is "Idle"
+PatientCtrl is "Inactive"
+VitalCtrl is "Inactive"
+DB is "Ready"
+Notif is "Ready"
+
+@100
+Doctor -> UI : "Login"
+Doctor is "Authenticating"
+UI is "Processing"
+
+@150
+UI -> PatientCtrl : "Load Dashboard"
+PatientCtrl is "Loading"
+
+@200
+PatientCtrl -> DB : "Query Data"
+DB is "Processing"
+
+@250
+DB -> PatientCtrl : "Return Data"
+DB is "Ready"
+PatientCtrl -> UI : "Data Ready"
+PatientCtrl is "Inactive"
+UI is "Ready"
+UI -> Doctor : "Show Dashboard"
+Doctor is "Browsing"
+
+@300
+Doctor -> UI : "Select Patient"
+UI is "Processing"
+UI -> PatientCtrl : "Get Details"
+PatientCtrl is "Loading"
+
+@350
+PatientCtrl -> DB : "Query Patient"
+DB is "Processing"
+
+@400
+DB -> PatientCtrl : "Return Patient"
+DB is "Ready"
+PatientCtrl -> UI : "Patient Ready"
+PatientCtrl is "Inactive"
+UI is "Ready"
+UI -> Doctor : "Show Patient Details"
+Doctor is "Viewing Patient"
+
+@450
+Doctor -> UI : "Add Vital Sign"
+UI is "Processing"
+UI -> VitalCtrl : "Save Vital"
+VitalCtrl is "Processing"
+
+@500
+VitalCtrl -> DB : "Insert Record"
+DB is "Processing"
+
+@550
+DB -> VitalCtrl : "Confirm Insert"
+DB is "Ready"
+VitalCtrl is "Checking Values"
+
+@600
+VitalCtrl -> Notif : "Check Abnormal"
+Notif is "Checking"
+
+@650
+Notif -> Doctor : "Send Alert"
+Notif is "Ready"
+VitalCtrl -> UI : "Vital Added"
+VitalCtrl is "Inactive"
+UI is "Ready"
+UI -> Doctor : "Show Updated Vitals"
+Doctor is "Reviewing Vitals"
+
+@700
+Doctor -> UI : "Generate Report"
+UI is "Generating PDF"
+
+@800
+UI -> Doctor : "Download Report"
+Doctor is "Reviewing Report"
+
+@900
+Doctor -> UI : "Logout"
+UI is "Processing"
+
+@950
+UI -> Doctor : "Logged Out"
+Doctor is "Inactive"
+UI is "Idle"
+@enduml
