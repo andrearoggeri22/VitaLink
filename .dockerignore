@@ -40,10 +40,10 @@ ENV/
 *.swp
 *.swo
 
-# Dati locali
+# Local datas
 uploads/*
 !uploads/.gitkeep
 
-# Altri file
+# Other files
 *.log
 .DS_Store
