@@ -374,6 +374,9 @@ def generate_vital_trends_report(patient, vital_type, vitals, period_desc):
     """
     buffer = BytesIO()
     
+    # Get translations
+    t = get_report_translations()
+    
     # Create the PDF document
     doc = SimpleDocTemplate(
         buffer,
@@ -400,12 +403,12 @@ def generate_vital_trends_report(patient, vital_type, vitals, period_desc):
     content = []
     
     # Report Header
-    content.append(Paragraph(f"{reference['name']} Trend Analysis", styles['Heading1Center']))
+    content.append(Paragraph(f"{reference['name']} {t['trend_analysis']}", styles['Heading1Center']))
     content.append(Spacer(1, 12))
     
     # Patient info
-    content.append(Paragraph(f"Patient: {patient.first_name} {patient.last_name}", styles['Heading3']))
-    content.append(Paragraph(f"Period: {period_desc}", styles['Normal']))
+    content.append(Paragraph(f"{t['patient']}: {patient.first_name} {patient.last_name}", styles['Heading3']))
+    content.append(Paragraph(f"{t['period']}: {period_desc}", styles['Normal']))
     content.append(Spacer(1, 24))
     
     if vitals:
@@ -461,7 +464,7 @@ def generate_vital_trends_report(patient, vital_type, vitals, period_desc):
         content.append(Spacer(1, 12))
         
         # Add a statistics table
-        content.append(Paragraph("Statistics", styles['Heading3']))
+        content.append(Paragraph(t['statistics'], styles['Heading3']))
         content.append(Spacer(1, 6))
         
         # Calculate statistics
@@ -476,12 +479,12 @@ def generate_vital_trends_report(patient, vital_type, vitals, period_desc):
         
         # Create statistics table
         stats_data = [
-            ["Average", f"{avg_value:.1f} {unit}"],
-            ["Minimum", f"{min_value} {unit}"],
-            ["Maximum", f"{max_value} {unit}"],
-            ["Normal Readings", f"{normal_count} ({normal_count/len(values)*100:.1f}%)"],
-            ["High Readings", f"{high_count} ({high_count/len(values)*100:.1f}%)"],
-            ["Low Readings", f"{low_count} ({low_count/len(values)*100:.1f}%)"]
+            [t['average'], f"{avg_value:.1f} {unit}"],
+            [t['minimum'], f"{min_value} {unit}"],
+            [t['maximum'], f"{max_value} {unit}"],
+            [t['normal_readings'], f"{normal_count} ({normal_count/len(values)*100:.1f}%)"],
+            [t['high_readings'], f"{high_count} ({high_count/len(values)*100:.1f}%)"],
+            [t['low_readings'], f"{low_count} ({low_count/len(values)*100:.1f}%)"]
         ]
         
         stats_table = Table(stats_data, colWidths=[2*inch, 3*inch])
@@ -500,22 +503,22 @@ def generate_vital_trends_report(patient, vital_type, vitals, period_desc):
         content.append(Spacer(1, 18))
         
         # Detailed readings
-        content.append(Paragraph("Detailed Readings", styles['Heading3']))
+        content.append(Paragraph(t['detailed_readings'], styles['Heading3']))
         content.append(Spacer(1, 6))
         
         # Table header
-        readings_data = [["Date & Time", "Value", "Status"]]
+        readings_data = [[t['datetime'], t['value'], t['status']]]
         
         # Add data rows
         for vital in sorted_vitals:
             # Determine status
-            status = "Normal"
+            status = t['normal']
             
             if reference['min'] is not None and reference['max'] is not None:
                 if vital.value < reference['min']:
-                    status = "Low"
+                    status = t['low']
                 elif vital.value > reference['max']:
-                    status = "High"
+                    status = t['high']
             
             readings_data.append([
                 vital.recorded_at.strftime('%Y-%m-%d %H:%M'),
@@ -541,12 +544,12 @@ def generate_vital_trends_report(patient, vital_type, vitals, period_desc):
         
         # Add status color coding
         for i in range(1, len(readings_data)):
-            if readings_data[i][2] == "High":
+            if readings_data[i][2] == t['high']:
                 readings_table.setStyle(TableStyle([
                     ('TEXTCOLOR', (2, i), (2, i), colors.red),
                     ('FONTNAME', (2, i), (2, i), 'Helvetica-Bold')
                 ]))
-            elif readings_data[i][2] == "Low":
+            elif readings_data[i][2] == t['low']:
                 readings_table.setStyle(TableStyle([
                     ('TEXTCOLOR', (2, i), (2, i), colors.blue),
                     ('FONTNAME', (2, i), (2, i), 'Helvetica-Bold')
@@ -554,16 +557,26 @@ def generate_vital_trends_report(patient, vital_type, vitals, period_desc):
         
         content.append(readings_table)
     else:
-        content.append(Paragraph("No vital data available for this period.", styles['Normal']))
+        content.append(Paragraph(t['no_vital_data'], styles['Normal']))
     
-    # Recommendations section
+    # Recommendations section - Added in translations
     content.append(Spacer(1, 24))
-    content.append(Paragraph("Recommendations", styles['Heading3']))
+    
+    # Adding "recommendations" to Italian translations if it's not already there
+    if 'recommendations' not in t:
+        t['recommendations'] = 'Raccomandazioni' if session.get('language', 'en') == 'it' else 'Recommendations'
+    
+    content.append(Paragraph(t['recommendations'], styles['Heading3']))
     content.append(Spacer(1, 6))
-    content.append(Paragraph(
-        "Please consult with your healthcare provider to discuss these results. This report is generated "
-        "automatically and should be interpreted by a qualified medical professional.",
-        styles['Normal']))
+    
+    # Adding "consult_doctor" to Italian translations if it's not already there
+    if 'consult_doctor' not in t:
+        t['consult_doctor'] = ('Si prega di consultare il medico per discutere questi risultati. Questo rapporto è generato '
+                              'automaticamente e deve essere interpretato da un professionista medico qualificato.') if session.get('language', 'en') == 'it' else (
+                              'Please consult with your healthcare provider to discuss these results. This report is generated '
+                              'automatically and should be interpreted by a qualified medical professional.')
+    
+    content.append(Paragraph(t['consult_doctor'], styles['Normal']))
     
     # Build the PDF
     doc.build(content)
