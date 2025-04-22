@@ -288,7 +288,7 @@ def save_fitbit_data(patient_id, data):
                     db.session.add(vital)
                     vitals_saved += 1
                     
-                    # Verifica se il valore è fuori range e invia notifica
+                    # Check if value is outside normal range and send notification
                     is_normal, status = is_vital_in_range(data_type, measurement['value'])
                     if not is_normal:
                         notify_abnormal_vital(
@@ -300,47 +300,47 @@ def save_fitbit_data(patient_id, data):
                         )
                     
                 except Exception as e:
-                    logging.error(f"Errore salvataggio: {str(e)}")
-                    errors.append(f"Errore nel salvataggio del parametro {data_type}: {str(e)}")
+                    logging.error(f"Save error: {str(e)}")
+                    errors.append(f"Error saving parameter {data_type}: {str(e)}")
         
         db.session.commit()
-        logging.info(f"Dati Fitbit salvati con successo: {vitals_saved} parametri")
+        logging.info(f"Fitbit data successfully saved: {vitals_saved} parameters")
         return True, vitals_saved, errors
     
     except SQLAlchemyError as e:
         db.session.rollback()
-        logging.error(f"Errore database SQLAlchemy: {str(e)}")
-        return False, 0, [f"Errore database: {str(e)}"]
+        logging.error(f"SQLAlchemy database error: {str(e)}")
+        return False, 0, [f"Database error: {str(e)}"]
     except Exception as e:
         db.session.rollback()
-        logging.error(f"Errore generico: {str(e)}")
-        return False, 0, [f"Errore generico: {str(e)}"]
+        logging.error(f"Generic error: {str(e)}")
+        return False, 0, [f"Generic error: {str(e)}"]
 
 @fitbit_bp.route('/patients/<int:patient_id>/check_device', methods=['GET'])
 @login_required
 def check_device_status(patient_id):
     """
-    API endpoint per verificare se un dispositivo Fitbit è connesso.
+    API endpoint to check if a Fitbit device is connected.
     
     Args:
-        patient_id (int): ID del paziente (non utilizzato direttamente ma necessario per la route)
+        patient_id (int): Patient ID (not used directly but required for the route)
         
     Returns:
-        JSON: Risposta JSON con lo stato della connessione nel formato:
+        JSON: JSON response with connection status in the format:
              {
                'connected': True|False,
                'timestamp': '2025-04-21T20:06:41'
              }
     """
     try:
-        # Questo endpoint viene chiamato tramite AJAX dal client
+        # This endpoint is called via AJAX from the client
         is_connected = check_device_connected()
         return jsonify({
             'connected': is_connected,
             'timestamp': datetime.datetime.now().isoformat()
         })
     except Exception as e:
-        logging.error(f"Errore durante la verifica del dispositivo: {str(e)}")
+        logging.error(f"Error during device verification: {str(e)}")
         return jsonify({
             'connected': False,
             'error': str(e),
@@ -351,77 +351,77 @@ def check_device_status(patient_id):
 @login_required
 def upload_fitbit_data(patient_id):
     """
-    Route per caricare dati da un dispositivo Fitbit connesso via USB.
+    Route to upload data from a Fitbit device connected via USB.
     """
     patient = Patient.query.get_or_404(patient_id)
     
     if request.method == 'POST':
         try:
-            # Verifica se il dispositivo è connesso
+            # Check if the device is connected
             if not check_device_connected():
-                flash("Nessun dispositivo Fitbit connesso. Collega il dispositivo via USB e riprova.", "error")
+                flash("No Fitbit device connected. Connect the device via USB and try again.", "error")
                 return redirect(url_for('fitbit.upload_fitbit_data', patient_id=patient_id))
             
-            # Estrae i dati dal dispositivo
+            # Extract data from the device
             try:
                 data = extract_fitbit_data(patient_id)
             except DeviceConnectionError as e:
-                flash(f"Errore durante l'estrazione dei dati: {str(e)}", "error")
+                flash(f"Error during data extraction: {str(e)}", "error")
                 return redirect(url_for('fitbit.upload_fitbit_data', patient_id=patient_id))
             
-            # Salva i dati nel database
+            # Save data to the database
             success, vitals_saved, errors = save_fitbit_data(patient_id, data)
             
             if success:
-                flash(f"Dati Fitbit caricati con successo. {vitals_saved} parametri vitali salvati.", "success")
+                flash(f"Fitbit data successfully uploaded. {vitals_saved} vital parameters saved.", "success")
                 if errors:
                     for error in errors:
-                        flash(f"Avviso: {error}", "warning")
+                        flash(f"Warning: {error}", "warning")
             else:
-                flash("Errore durante il salvataggio dei dati Fitbit.", "error")
+                flash("Error saving Fitbit data.", "error")
                 for error in errors:
                     flash(error, "error")
             
             return redirect(url_for('views.patient_vitals', patient_id=patient_id))
         
         except Exception as e:
-            flash(f"Errore durante il processo di caricamento: {str(e)}", "error")
+            flash(f"Error during upload process: {str(e)}", "error")
             return redirect(url_for('fitbit.upload_fitbit_data', patient_id=patient_id))
     
-    # GET request - mostra la pagina per il caricamento
+    # GET request - show the upload page
     return render_template('fitbit_upload.html', patient=patient)
 
-# API per app mobile
+# Mobile app APIs
 @fitbit_bp.route('/api/mobile/patient/verify', methods=['POST'])
 def mobile_verify_patient():
     """
-    API endpoint per verificare l'ID del paziente dall'app mobile.
-    Il paziente inserisce il suo UUID nell'app e questo endpoint verifica se esiste.
+    API endpoint to verify patient ID from the mobile app.
+    The patient enters their UUID in the app and this endpoint verifies if it exists.
     
     Returns:
-        JSON: Risposta con informazioni sul paziente se trovato
+        JSON: Response with patient information if found
     """
     try:
         data = request.get_json()
         
         if not data or 'patient_uuid' not in data:
-            return jsonify({'error': 'UUID paziente richiesto'}), 400
+            return jsonify({'error': 'Patient UUID required'}), 400
             
         patient_uuid = data['patient_uuid']
         
         try:
-            # Verifica se l'UUID è in formato valido
+            # Verify if UUID is in valid format
             uuid_obj = uuid.UUID(patient_uuid)
         except ValueError:
-            return jsonify({'error': 'UUID paziente non valido'}), 400
+            return jsonify({'error': 'Invalid patient UUID'}), 400
             
-        # Cerca il paziente nel database
+        # Search for the patient in the database
         patient = Patient.query.filter_by(uuid=patient_uuid).first()
         
         if not patient:
-            return jsonify({'error': 'Paziente non trovato'}), 404
+            return jsonify({'error': 'Patient not found'}), 404
             
-        # Restituisci informazioni di base sul paziente
+        # Return basic patient information
         return jsonify({
             'patient_id': patient.id,
             'name': f"{patient.first_name} {patient.last_name}",
@@ -429,8 +429,8 @@ def mobile_verify_patient():
         })
         
     except Exception as e:
-        logging.error(f"Errore durante la verifica del paziente mobile: {str(e)}")
-        return jsonify({'error': 'Errore del server'}), 500
+        logging.error(f"Error during mobile patient verification: {str(e)}")
+        return jsonify({'error': 'Server error'}), 500
         
 @fitbit_bp.route('/api/mobile/data/upload', methods=['POST'])
 def mobile_upload_data():
