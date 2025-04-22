@@ -36,7 +36,6 @@ package "VitaLink" {
   package "Integration Layer" {
     [Fitbit Integration]
     [SMS Gateway]
-    [Email Service]
   }
   
   package "Data Layer" {

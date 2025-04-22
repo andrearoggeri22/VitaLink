@@ -29,11 +29,9 @@ package "VitaLink" {
 
 cloud "External Services" {
   [SMS Provider] as SMS
-  [Email Service] as Email
   [Fitbit Device] as Device
 }
 
 Notif --> SMS
-Notif --> Email
 Fitbit --> Device
 @enduml
