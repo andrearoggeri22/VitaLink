@@ -28,39 +28,39 @@ def send_sms(to_number, message):
     # Validate phone number format (basic check)
     if not to_number.startswith('+'):
         to_number = '+' + to_number
-        
+
     # Check if ClickSend is configured
     if not all([CLICKSEND_USERNAME, CLICKSEND_API_KEY, CLICKSEND_FROM_NUMBER]):
         logger.error("ClickSend credentials not configured")
         return False, "SMS notification service not configured"
-    
+
     try:
         # Configure the ClickSend client
         configuration = clicksend_client.Configuration()
         configuration.username = CLICKSEND_USERNAME
         configuration.password = CLICKSEND_API_KEY
-        
+
         # Create an instance of the API class
-        api_instance = clicksend_client.SMSApi(clicksend_client.ApiClient(configuration))
-        
+        api_instance = clicksend_client.SMSApi(
+            clicksend_client.ApiClient(configuration))
+
         # Create the SMS message
         # Note: In clicksend_client.SmsMessage 'from' is handled by '_from' parameter
-        sms_message = clicksend_client.SmsMessage(
-            _from=CLICKSEND_FROM_NUMBER,
-            body=message,
-            to=to_number,
-            source="sdk"
-        )
-        
+        sms_message = clicksend_client.SmsMessage(_from=CLICKSEND_FROM_NUMBER,
+                                                  body=message,
+                                                  to=to_number,
+                                                  source="sdk")
+
         # Create a message collection (list of messages)
-        sms_messages = clicksend_client.SmsMessageCollection(messages=[sms_message])
-        
+        sms_messages = clicksend_client.SmsMessageCollection(
+            messages=[sms_message])
+
         # Send the message
         api_response = api_instance.sms_send_post(sms_messages)
-        
+
         logger.info(f"SMS sent successfully to {to_number}: {api_response}")
         return True, f"SMS sent successfully"
-        
+
     except ApiException as e:
         logger.error(f"ClickSend API error: {str(e)}")
         # Return a more user-friendly error message
@@ -85,20 +85,23 @@ def notify_abnormal_vital(patient, vital_type, value, unit, status):
         bool: True if successful, False otherwise
     """
     if not patient.contact_number:
-        logger.warning(f"Cannot send alert: Patient {patient.id} has no contact number")
+        logger.warning(
+            f"Cannot send alert: Patient {patient.id} has no contact number")
         return False, "Patient has no contact number"
-    
+
     # Format the message
     status_text = "above normal" if status == "high" else "below normal"
-    message = (f"HEALTH ALERT: {patient.first_name}, your {vital_type.replace('_', ' ')} "
-              f"reading of {value} {unit} is {status_text}. "
-              f"Please contact your healthcare provider if you feel unwell.")
-    
+    message = (
+        f"VitaLink ALERT: {patient.first_name}, your {vital_type.replace('_', ' ')} "
+        f"reading of {value} {unit} is {status_text}. "
+        f"Please contact your healthcare provider if you feel unwell.")
+
     # Send the SMS
     return send_sms(patient.contact_number, message)
 
 
-def send_appointment_reminder(patient, doctor, appointment_date, appointment_time):
+def send_appointment_reminder(patient, doctor, appointment_date,
+                              appointment_time):
     """
     Send appointment reminder to patient
     
@@ -113,11 +116,12 @@ def send_appointment_reminder(patient, doctor, appointment_date, appointment_tim
     """
     if not patient.contact_number:
         return False, "Patient has no contact number"
-    
+
     # Format the message
-    message = (f"Reminder: You have an appointment with "
-              f"Dr. {doctor.last_name} on {appointment_date} at {appointment_time}. "
-              f"Please arrive 15 minutes early to complete any paperwork.")
-    
+    message = (
+        f"Reminder: You have an appointment with "
+        f"Dr. {doctor.last_name} on {appointment_date} at {appointment_time}. "
+        f"Please arrive 15 minutes early to complete any paperwork.")
+
     # Send the SMS
     return send_sms(patient.contact_number, message)
