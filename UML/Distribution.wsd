@@ -29,13 +29,11 @@ cloud "VitaLink Cloud" {
 }
 
 cloud "External Services" {
-  [Twilio SMS Service] as Twilio
-  [SendGrid Email Service] as SendGrid
+  [ClickSend SMS Service] as ClickSend
 }
 
 Browser --> SSL : "HTTPS"
 Fitbit --> App : "USB/Bluetooth/API"
 App --> PostgreSQL : "SQL over TCP/IP"
-App --> Twilio : "HTTPS API"
-App --> SendGrid : "HTTPS API"
+App --> ClickSend : "HTTPS API"
 @enduml
