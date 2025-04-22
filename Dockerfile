@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     iproute2 \
     net-tools \
     curl \
+    dos2unix \
     && rm -rf /var/lib/apt/lists/*
 
 # First copy only the requirements.txt to exploit Docker cache
