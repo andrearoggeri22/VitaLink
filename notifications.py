@@ -1,21 +1,21 @@
 import os
 import logging
 from datetime import datetime
-from twilio.rest import Client
-from twilio.base.exceptions import TwilioRestException
+import clicksend_client
+from clicksend_client.rest import ApiException
 
 # Setup logger
 logger = logging.getLogger(__name__)
 
-# Get Twilio credentials from environment
-TWILIO_ACCOUNT_SID = os.environ.get("TWILIO_ACCOUNT_SID")
-TWILIO_AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN")
-TWILIO_PHONE_NUMBER = os.environ.get("TWILIO_PHONE_NUMBER")
+# Get ClickSend credentials from environment
+CLICKSEND_USERNAME = os.environ.get("CLICKSEND_USERNAME")
+CLICKSEND_API_KEY = os.environ.get("CLICKSEND_API_KEY")
+CLICKSEND_FROM_NUMBER = os.environ.get("CLICKSEND_FROM_NUMBER")
 
 
 def send_sms(to_number, message):
     """
-    Send an SMS notification using Twilio
+    Send an SMS notification using ClickSend
     
     Args:
         to_number (str): The recipient's phone number in E.164 format (+123456789)
@@ -29,27 +29,39 @@ def send_sms(to_number, message):
     if not to_number.startswith('+'):
         to_number = '+' + to_number
         
-    # Check if Twilio is configured
-    if not all([TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER]):
-        logger.error("Twilio credentials not configured")
+    # Check if ClickSend is configured
+    if not all([CLICKSEND_USERNAME, CLICKSEND_API_KEY, CLICKSEND_FROM_NUMBER]):
+        logger.error("ClickSend credentials not configured")
         return False, "SMS notification service not configured"
     
     try:
-        # Initialize the Twilio client
-        client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+        # Configure the ClickSend client
+        configuration = clicksend_client.Configuration()
+        configuration.username = CLICKSEND_USERNAME
+        configuration.password = CLICKSEND_API_KEY
         
-        # Send the message
-        message = client.messages.create(
+        # Create an instance of the API class
+        api_instance = clicksend_client.SMSApi(clicksend_client.ApiClient(configuration))
+        
+        # Create the SMS message
+        sms_message = clicksend_client.SmsMessage(
+            source="sdk",
             body=message,
-            from_=TWILIO_PHONE_NUMBER,
-            to=to_number
+            to=to_number,
+            from_=CLICKSEND_FROM_NUMBER
         )
         
-        logger.info(f"SMS sent successfully to {to_number}, SID: {message.sid}")
+        # Create a message collection (list of messages)
+        sms_messages = clicksend_client.SmsMessageCollection(messages=[sms_message])
+        
+        # Send the message
+        api_response = api_instance.sms_send_post(sms_messages)
+        
+        logger.info(f"SMS sent successfully to {to_number}: {api_response}")
         return True, f"SMS sent successfully"
         
-    except TwilioRestException as e:
-        logger.error(f"Twilio error: {str(e)}")
+    except ApiException as e:
+        logger.error(f"ClickSend API error: {str(e)}")
         # Return a more user-friendly error message
         return False, f"SMS notification not sent. Please check patient phone number format."
     except Exception as e:
