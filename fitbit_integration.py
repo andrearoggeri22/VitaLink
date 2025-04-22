@@ -1,11 +1,9 @@
-"""
-File: fitbit_integration.py
-Autore: VitaLink Team
-Data: Aprile 2025
-Descrizione: Modulo per l'integrazione con dispositivi Fitbit. 
-             Gestisce la connessione ai dispositivi, l'estrazione e il salvataggio dei dati
-             nel sistema VitaLink.
-"""
+# File: fitbit_integration.py
+# Author: VitaLink Team
+# Date: April 2025
+# Description: Module for integration with Fitbit devices.
+#              Manages device connections, data extraction and storage
+#              in the VitaLink system.
 
 import os
 import json
@@ -26,12 +24,12 @@ from utils import is_vital_in_range
 
 fitbit_bp = Blueprint('fitbit', __name__)
 
-# Directory temporanea per il caricamento dei file
+# Temporary directory for file uploads
 UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
-# Mappatura tra i tipi di dati Fitbit e i tipi di parametri vitali del sistema
+# Mapping between Fitbit data types and system vital sign types
 FITBIT_DATA_TYPES = {
     'heart_rate': VitalSignType.HEART_RATE,
     'steps': VitalSignType.STEPS,
@@ -43,10 +41,8 @@ FITBIT_DATA_TYPES = {
 }
 
 class DeviceConnectionError(Exception):
-    """
-    Eccezione sollevata quando il dispositivo Fitbit non può essere connesso o non è disponibile.
-    Utilizzata per gestire gli errori di connessione in modo specifico.
-    """
+    # Exception raised when a Fitbit device cannot be connected or is unavailable
+    # Used to handle connection errors specifically
     pass
 
 def check_device_connected():
