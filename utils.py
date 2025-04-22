@@ -93,7 +93,7 @@ def get_vital_reference_range(vital_type, patient_age=None, patient_gender=None)
     """
     # Default reference ranges for adults
     reference_ranges = {
-        'heart_rate': {'min': 60, 'max': 100, 'unit': 'bpm', 'name': 'Heart Rate'},
+        'heart_rate': {'min': 60, 'max': 110, 'unit': 'bpm', 'name': 'Heart Rate'},
         'blood_pressure': {'min': '90/60', 'max': '120/80', 'unit': 'mmHg', 'name': 'Blood Pressure'},
         'oxygen_saturation': {'min': 95, 'max': 100, 'unit': '%', 'name': 'Oxygen Saturation'},
         'temperature': {'min': 36.1, 'max': 37.2, 'unit': '°C', 'name': 'Temperature'},
@@ -101,12 +101,12 @@ def get_vital_reference_range(vital_type, patient_age=None, patient_gender=None)
         'glucose': {'min': 70, 'max': 100, 'unit': 'mg/dL', 'name': 'Glucose (Fasting)'},
         'weight': {'min': None, 'max': None, 'unit': 'kg', 'name': 'Weight'},
         # Reference range per i nuovi parametri fitness
-        'steps': {'min': 5000, 'max': 10000, 'unit': 'steps', 'name': 'Steps'},
-        'calories': {'min': 1500, 'max': 3000, 'unit': 'kcal', 'name': 'Calories'},
-        'distance': {'min': 3, 'max': 8, 'unit': 'km', 'name': 'Distance'},
-        'active_minutes': {'min': 30, 'max': 60, 'unit': 'min', 'name': 'Active Minutes'},
+        'steps': {'min': 0, 'max': 50000, 'unit': 'steps', 'name': 'Steps'},
+        'calories': {'min': 0, 'max': 3000, 'unit': 'kcal', 'name': 'Calories'},
+        'distance': {'min': 0, 'max': 50, 'unit': 'km', 'name': 'Distance'},
+        'active_minutes': {'min': 0, 'max': 300, 'unit': 'min', 'name': 'Active Minutes'},
         'sleep_duration': {'min': 7, 'max': 9, 'unit': 'hours', 'name': 'Sleep Duration'},
-        'floors_climbed': {'min': 5, 'max': 20, 'unit': 'floors', 'name': 'Floors Climbed'}
+        'floors_climbed': {'min': 0, 'max': 50, 'unit': 'floors', 'name': 'Floors Climbed'}
     }
     
     # Could implement age and gender specific ranges in the future
