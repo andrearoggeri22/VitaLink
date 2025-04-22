@@ -261,67 +261,72 @@ def test_doctor_patient_relationship(client):
 def test_patient_vital_signs_filtering(client):
     """Test filtering of vital signs by patient."""
     with app.app_context():
-        # Create a patient
-        patient = Patient(
-            first_name="Filter",
-            last_name="Test",
-            date_of_birth=datetime(1975, 6, 20).date()
-        )
-        db.session.add(patient)
-        db.session.flush()
-        
-        # Create vital signs at different times
-        now = datetime.utcnow()
-        yesterday = now - timedelta(days=1)
-        week_ago = now - timedelta(days=7)
-        
-        vitals = [
-            VitalSign(
-                patient_id=patient.id,
-                type=VitalSignType.HEART_RATE,
-                value=70.0,
-                unit="bpm",
-                recorded_at=week_ago,
-                origin=DataOrigin.MANUAL
-            ),
-            VitalSign(
-                patient_id=patient.id,
-                type=VitalSignType.BLOOD_PRESSURE,
-                value=118.0,
-                unit="mmHg",
-                recorded_at=yesterday,
-                origin=DataOrigin.MANUAL
-            ),
-            VitalSign(
-                patient_id=patient.id,
-                type=VitalSignType.HEART_RATE,
-                value=72.0,
-                unit="bpm",
-                recorded_at=now,
-                origin=DataOrigin.AUTOMATIC
+        try:
+            # Create a patient
+            patient = Patient(
+                first_name="Filter",
+                last_name="Test",
+                date_of_birth=datetime(1975, 6, 20).date()
             )
-        ]
-        db.session.add_all(vitals)
-        db.session.commit()
-        
-        # Test filtering by type
-        heart_rate_vitals = patient.get_vital_signs(type=VitalSignType.HEART_RATE.value)
-        assert len(heart_rate_vitals) == 2
-        
-        # Test filtering by date
-        recent_vitals = patient.get_vital_signs(start_date=yesterday)
-        assert len(recent_vitals) == 2
-        
-        old_vitals = patient.get_vital_signs(end_date=yesterday)
-        assert len(old_vitals) == 2
-        
-        # Test combined filtering
-        recent_heart_rate = patient.get_vital_signs(
-            type=VitalSignType.HEART_RATE.value,
-            start_date=yesterday
-        )
-        assert len(recent_heart_rate) == 1
-        assert recent_heart_rate[0].value == 72.0
+            db.session.add(patient)
+            db.session.flush()
+            
+            # Create vital signs at different times
+            now = datetime.utcnow()
+            yesterday = now - timedelta(days=1)
+            week_ago = now - timedelta(days=7)
+            
+            vitals = [
+                VitalSign(
+                    patient_id=patient.id,
+                    type=VitalSignType.HEART_RATE,
+                    value=70.0,
+                    unit="bpm",
+                    recorded_at=week_ago,
+                    origin=DataOrigin.MANUAL
+                ),
+                VitalSign(
+                    patient_id=patient.id,
+                    type=VitalSignType.BLOOD_PRESSURE,
+                    value=118.0,
+                    unit="mmHg",
+                    recorded_at=yesterday,
+                    origin=DataOrigin.MANUAL
+                ),
+                VitalSign(
+                    patient_id=patient.id,
+                    type=VitalSignType.HEART_RATE,
+                    value=72.0,
+                    unit="bpm",
+                    recorded_at=now,
+                    origin=DataOrigin.AUTOMATIC
+                )
+            ]
+            db.session.add_all(vitals)
+            db.session.commit()
+            
+            # Test filtering by type
+            heart_rate_vitals = patient.get_vital_signs(type=VitalSignType.HEART_RATE)
+            assert len(heart_rate_vitals) == 2
+            
+            # Test filtering by date
+            recent_vitals = patient.get_vital_signs(start_date=yesterday)
+            assert len(recent_vitals) == 2
+            
+            old_vitals = patient.get_vital_signs(end_date=yesterday)
+            assert len(old_vitals) == 2
+            
+            # Test combined filtering
+            recent_heart_rate = patient.get_vital_signs(
+                type=VitalSignType.HEART_RATE,
+                start_date=yesterday
+            )
+            assert len(recent_heart_rate) == 1
+            assert recent_heart_rate[0].value == 72.0
+            
+        except Exception as e:
+            # In caso di errore durante il test, mostra un messaggio chiaro
+            pytest.fail(f"Errore durante il test di filtro dei segni vitali: {str(e)}")
 
 def test_patient_notes(client):
     """Test patient notes functionality."""
@@ -329,6 +334,7 @@ def test_patient_notes(client):
         try:
             # Create a doctor and patient
             doctor = Doctor(email="notes_test@example.com", first_name="Notes", last_name="Doctor")
+            doctor.set_password("testpassword")  # Imposta una password per evitare errori NOT NULL constraint
             db.session.add(doctor)
             
             patient = Patient(first_name="Notes", last_name="Patient", date_of_birth=datetime(1980, 1, 1).date())
