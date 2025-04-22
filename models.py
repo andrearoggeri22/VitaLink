@@ -174,23 +174,21 @@ class Doctor(UserMixin, db.Model):
             db.session.commit()
 
 class Patient(db.Model):
-    """
-    Modello che rappresenta un paziente nel sistema.
-    
-    Attributi:
-        id: Identificatore unico del paziente
-        uuid: UUID univoco del paziente, usato in URL e API
-        first_name: Nome del paziente
-        last_name: Cognome del paziente
-        date_of_birth: Data di nascita del paziente
-        gender: Genere del paziente
-        contact_number: Numero di contatto del paziente
-        address: Indirizzo del paziente
-        created_at: Data di creazione del record
-        updated_at: Data di ultimo aggiornamento del record
-        vital_signs: Relazione con i parametri vitali del paziente
-        notes: Relazione con le note mediche del paziente
-    """
+    # Model representing a patient in the system
+    #
+    # Attributes:
+    #   id: Unique identifier of the patient
+    #   uuid: Unique UUID of the patient, used in URLs and APIs
+    #   first_name: First name of the patient
+    #   last_name: Last name of the patient
+    #   date_of_birth: Date of birth of the patient
+    #   gender: Gender of the patient
+    #   contact_number: Contact number of the patient
+    #   address: Address of the patient
+    #   created_at: Record creation date
+    #   updated_at: Record last update date
+    #   vital_signs: Relationship with patient's vital signs
+    #   notes: Relationship with patient's medical notes
     __tablename__ = 'patient'
     id = db.Column(db.Integer, primary_key=True)
     uuid = db.Column(db.String(36), unique=True, nullable=False, default=lambda: str(uuid.uuid4()))
@@ -262,19 +260,17 @@ class Patient(db.Model):
         return self.notes.order_by(Note.created_at.desc()).all()
 
 class VitalSign(db.Model):
-    """
-    Modello che rappresenta un parametro vitale di un paziente.
-    
-    Attributi:
-        id: Identificatore unico del parametro vitale
-        patient_id: ID del paziente a cui appartiene il parametro
-        type: Tipo di parametro vitale (dall'enum VitalSignType)
-        value: Valore numerico del parametro
-        unit: Unità di misura del valore
-        recorded_at: Data e ora in cui è stato rilevato il parametro
-        origin: Origine del dato (manuale o automatica)
-        created_at: Data di creazione del record
-    """
+    # Model representing a vital sign of a patient
+    #
+    # Attributes:
+    #   id: Unique identifier of the vital sign
+    #   patient_id: ID of the patient to whom the parameter belongs
+    #   type: Type of vital sign (from VitalSignType enum)
+    #   value: Numeric value of the parameter
+    #   unit: Unit of measurement of the value
+    #   recorded_at: Date and time when the parameter was recorded
+    #   origin: Origin of the data (manual or automatic)
+    #   created_at: Record creation date
     __tablename__ = 'vital_sign'
     id = db.Column(db.Integer, primary_key=True)
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=False)
@@ -304,17 +300,15 @@ class VitalSign(db.Model):
         }
 
 class Note(db.Model):
-    """
-    Modello che rappresenta una nota medica per un paziente.
-    
-    Attributi:
-        id: Identificatore unico della nota
-        patient_id: ID del paziente a cui appartiene la nota
-        doctor_id: ID del medico che ha creato la nota
-        content: Contenuto testuale della nota
-        created_at: Data di creazione della nota
-        updated_at: Data di ultimo aggiornamento della nota
-    """
+    # Model representing a medical note for a patient
+    #
+    # Attributes:
+    #   id: Unique identifier of the note
+    #   patient_id: ID of the patient to whom the note belongs
+    #   doctor_id: ID of the doctor who created the note
+    #   content: Textual content of the note
+    #   created_at: Note creation date
+    #   updated_at: Note last update date
     __tablename__ = 'note'
     id = db.Column(db.Integer, primary_key=True)
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=False)
@@ -340,16 +334,14 @@ class Note(db.Model):
         }
 
 class ActionType(Enum):
-    """
-    Enumerazione che definisce i tipi di azioni per il sistema di audit log.
-    
-    Attributi:
-        CREATE: Azione di creazione di una nuova entità
-        UPDATE: Azione di aggiornamento di un'entità esistente
-        DELETE: Azione di eliminazione di un'entità
-        VIEW: Azione di visualizzazione di un'entità
-        EXPORT: Azione di esportazione di un'entità (es. generazione di report)
-    """
+    # Enumeration defining the types of actions for the audit log system
+    #
+    # Attributes:
+    #   CREATE: Action of creating a new entity
+    #   UPDATE: Action of updating an existing entity
+    #   DELETE: Action of deleting an entity
+    #   VIEW: Action of viewing an entity
+    #   EXPORT: Action of exporting an entity (e.g., report generation)
     CREATE = "create"
     UPDATE = "update"
     DELETE = "delete"
@@ -357,78 +349,72 @@ class ActionType(Enum):
     EXPORT = "export"
 
 class EntityType(Enum):
-    """
-    Enumerazione che definisce i tipi di entità tracciabili nel sistema di audit log.
-    
-    Attributi:
-        PATIENT: Entità paziente
-        VITAL_SIGN: Entità parametro vitale
-        NOTE: Entità nota medica
-        REPORT: Entità report/documento
-    """
+    # Enumeration defining the types of entities that can be tracked in the audit log system
+    #
+    # Attributes:
+    #   PATIENT: Patient entity
+    #   VITAL_SIGN: Vital sign entity
+    #   NOTE: Medical note entity
+    #   REPORT: Report/document entity
     PATIENT = "patient"
     VITAL_SIGN = "vital_sign"
     NOTE = "note"
     REPORT = "report"
 
 class AuditLog(db.Model):
-    """
-    Modello per memorizzare i log di audit di tutte le azioni eseguite nel sistema.
-    Utilizzato per tracciare chi ha fatto cosa e quando, per scopi di conformità e sicurezza.
-    
-    Attributi:
-        id: Identificatore unico del record di audit
-        doctor_id: ID del medico che ha eseguito l'azione
-        doctor: Relazione con il medico che ha eseguito l'azione
-        timestamp: Data e ora in cui è stata eseguita l'azione
-        action_type: Tipo di azione eseguita (dall'enum ActionType)
-        entity_type: Tipo di entità interessata dall'azione (dall'enum EntityType)
-        entity_id: ID dell'entità interessata dall'azione
-        details: Dettagli aggiuntivi sull'azione (memorizzati come JSON)
-        patient_id: ID opzionale del paziente correlato all'azione
-        patient: Relazione con il paziente correlato all'azione
-        ip_address: Indirizzo IP da cui è stata eseguita l'azione
-    """
+    # Model for storing audit logs of all actions performed in the system
+    # Used to track who did what and when, for compliance and security purposes
+    #
+    # Attributes:
+    #   id: Unique identifier of the audit record
+    #   doctor_id: ID of the doctor who performed the action
+    #   doctor: Relationship with the doctor who performed the action
+    #   timestamp: Date and time when the action was performed
+    #   action_type: Type of action performed (from ActionType enum)
+    #   entity_type: Type of entity affected by the action (from EntityType enum)
+    #   entity_id: ID of the entity affected by the action
+    #   details: Additional details about the action (stored as JSON)
+    #   patient_id: Optional ID of the patient related to the action
+    #   patient: Relationship with the patient related to the action
+    #   ip_address: IP address from which the action was performed
     __tablename__ = 'audit_log'
     id = db.Column(db.Integer, primary_key=True)
     
-    # Chi ha eseguito l'azione
+    # Who performed the action
     doctor_id = db.Column(db.Integer, db.ForeignKey('doctor.id'), nullable=False)
     doctor = db.relationship('Doctor')
     
-    # Quando l'azione è stata eseguita
+    # When the action was performed
     timestamp = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     
-    # Che tipo di azione è stata eseguita
+    # What type of action was performed
     action_type = db.Column(db.Enum(ActionType), nullable=False)
     
-    # Quale entità è stata interessata
+    # Which entity was affected
     entity_type = db.Column(db.Enum(EntityType), nullable=False)
-    entity_id = db.Column(db.Integer, nullable=False)  # ID dell'entità interessata
+    entity_id = db.Column(db.Integer, nullable=False)  # ID of the affected entity
     
-    # Dettagli aggiuntivi sull'azione (memorizzati come JSON)
-    details = db.Column(db.Text)  # Stringa JSON con dettagli sull'azione
+    # Additional details about the action (stored as JSON)
+    details = db.Column(db.Text)  # JSON string with action details
     
-    # ID opzionale del paziente per facilitare le query
+    # Optional patient ID to facilitate queries
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=True)
     patient = db.relationship('Patient')
     
-    # Indirizzo IP dell'utente che ha eseguito l'azione
+    # IP address of the user who performed the action
     ip_address = db.Column(db.String(50))
     
     def __init__(self, doctor_id, action_type, entity_type, entity_id, details=None, patient_id=None, ip_address=None):
-        """
-        Inizializza un nuovo record di audit log.
-        
-        Args:
-            doctor_id (int): ID del medico che ha eseguito l'azione
-            action_type (ActionType): Tipo di azione eseguita
-            entity_type (EntityType): Tipo di entità interessata dall'azione
-            entity_id (int): ID dell'entità interessata dall'azione
-            details (dict, optional): Dettagli aggiuntivi sull'azione
-            patient_id (int, optional): ID del paziente correlato all'azione
-            ip_address (str, optional): Indirizzo IP da cui è stata eseguita l'azione
-        """
+        # Initialize a new audit log record
+        #
+        # Args:
+        #   doctor_id (int): ID of the doctor who performed the action
+        #   action_type (ActionType): Type of action performed
+        #   entity_type (EntityType): Type of entity affected by the action
+        #   entity_id (int): ID of the entity affected by the action
+        #   details (dict, optional): Additional details about the action
+        #   patient_id (int, optional): ID of the patient related to the action
+        #   ip_address (str, optional): IP address from which the action was performed
         self.doctor_id = doctor_id
         self.action_type = action_type
         self.entity_type = entity_type
@@ -438,12 +424,10 @@ class AuditLog(db.Model):
         self.ip_address = ip_address
         
     def get_details(self):
-        """
-        Converte la stringa JSON dei dettagli in un dizionario Python.
-        
-        Returns:
-            dict: I dettagli dell'azione come dizionario
-        """
+        # Convert the JSON string of details to a Python dictionary
+        #
+        # Returns:
+        #   dict: The action details as a dictionary
         if self.details:
             return json.loads(self.details)
         return {}
