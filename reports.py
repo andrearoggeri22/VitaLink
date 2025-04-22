@@ -76,7 +76,9 @@ def get_report_translations():
             'normal_readings': 'Letture Normali',
             'high_readings': 'Letture Alte',
             'low_readings': 'Letture Basse',
-            'no_vital_data': 'Nessun dato vitale disponibile per questo periodo.'
+            'no_vital_data': 'Nessun dato vitale disponibile per questo periodo.',
+            'recommendations': 'Raccomandazioni',
+            'consult_doctor': 'Si prega di consultare il medico per discutere questi risultati. Questo rapporto è generato automaticamente e deve essere interpretato da un professionista medico qualificato.'
         }
     else:
         return {
@@ -125,7 +127,9 @@ def get_report_translations():
             'normal_readings': 'Normal Readings',
             'high_readings': 'High Readings',
             'low_readings': 'Low Readings',
-            'no_vital_data': 'No vital data available for this period.'
+            'no_vital_data': 'No vital data available for this period.',
+            'recommendations': 'Recommendations',
+            'consult_doctor': 'Please consult with your healthcare provider to discuss these results. This report is generated automatically and should be interpreted by a qualified medical professional.'
         }
 
 def generate_patient_report(patient, doctor, vitals, notes, start_date=None, end_date=None):
@@ -559,23 +563,10 @@ def generate_vital_trends_report(patient, vital_type, vitals, period_desc):
     else:
         content.append(Paragraph(t['no_vital_data'], styles['Normal']))
     
-    # Recommendations section - Added in translations
+    # Recommendations section - Now using prepared translations
     content.append(Spacer(1, 24))
-    
-    # Adding "recommendations" to Italian translations if it's not already there
-    if 'recommendations' not in t:
-        t['recommendations'] = 'Raccomandazioni' if session.get('language', 'en') == 'it' else 'Recommendations'
-    
     content.append(Paragraph(t['recommendations'], styles['Heading3']))
     content.append(Spacer(1, 6))
-    
-    # Adding "consult_doctor" to Italian translations if it's not already there
-    if 'consult_doctor' not in t:
-        t['consult_doctor'] = ('Si prega di consultare il medico per discutere questi risultati. Questo rapporto è generato '
-                              'automaticamente e deve essere interpretato da un professionista medico qualificato.') if session.get('language', 'en') == 'it' else (
-                              'Please consult with your healthcare provider to discuss these results. This report is generated '
-                              'automatically and should be interpreted by a qualified medical professional.')
-    
     content.append(Paragraph(t['consult_doctor'], styles['Normal']))
     
     # Build the PDF
