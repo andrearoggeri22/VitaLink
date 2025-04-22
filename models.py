@@ -7,44 +7,31 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import db
 
-"""
-File: models.py
-Autore: VitaLink Team
-Data: Aprile 2025
-Descrizione: Definizione dei modelli di dati per l'applicazione VitaLink.
-             Contiene le entità principali del dominio e le relazioni tra esse.
-"""
+# Models for the VitaLink application
+# Defines the main data entities and their relationships
 
 class DataOrigin(Enum):
-    """
-    Enumerazione che definisce l'origine dei dati dei parametri vitali.
-    
-    Attributi:
-        MANUAL: Dati inseriti manualmente dal medico
-        AUTOMATIC: Dati raccolti automaticamente da dispositivi
-    """
+    # Origin of the vital signs data
+    # MANUAL: Data entered manually by the doctor
+    # AUTOMATIC: Data collected automatically from devices
     MANUAL = "manual"
     AUTOMATIC = "automatic"
 
 class VitalSignType(Enum):
-    """
-    Enumerazione che definisce i tipi di parametri vitali supportati.
-    
-    Attributi:
-        HEART_RATE: Frequenza cardiaca
-        BLOOD_PRESSURE: Pressione sanguigna
-        OXYGEN_SATURATION: Saturazione di ossigeno
-        TEMPERATURE: Temperatura corporea
-        RESPIRATORY_RATE: Frequenza respiratoria
-        GLUCOSE: Livello di glucosio
-        WEIGHT: Peso corporeo
-        STEPS: Conteggio passi (dispositivi fitness)
-        CALORIES: Calorie bruciate (dispositivi fitness)
-        DISTANCE: Distanza percorsa (dispositivi fitness)
-        ACTIVE_MINUTES: Minuti di attività (dispositivi fitness)
-        SLEEP_DURATION: Durata del sonno (dispositivi fitness)
-        FLOORS_CLIMBED: Piani saliti (dispositivi fitness)
-    """
+    # Types of vital signs supported in the system
+    # HEART_RATE: Heart rate
+    # BLOOD_PRESSURE: Blood pressure
+    # OXYGEN_SATURATION: Oxygen saturation
+    # TEMPERATURE: Body temperature
+    # RESPIRATORY_RATE: Respiratory rate
+    # GLUCOSE: Glucose level
+    # WEIGHT: Body weight
+    # STEPS: Step count (fitness devices)
+    # CALORIES: Calories burned (fitness devices)
+    # DISTANCE: Distance traveled (fitness devices)
+    # ACTIVE_MINUTES: Active minutes (fitness devices)
+    # SLEEP_DURATION: Sleep duration (fitness devices)
+    # FLOORS_CLIMBED: Floors climbed (fitness devices)
     HEART_RATE = "heart_rate"
     BLOOD_PRESSURE = "blood_pressure"
     OXYGEN_SATURATION = "oxygen_saturation"
@@ -60,37 +47,33 @@ class VitalSignType(Enum):
     FLOORS_CLIMBED = "floors_climbed"
 
 class DoctorPatient(db.Model):
-    """
-    Tabella di associazione per la relazione molti-a-molti tra medici e pazienti.
-    
-    Attributi:
-        doctor_id: ID del medico nella relazione
-        patient_id: ID del paziente nella relazione
-        assigned_date: Data di assegnazione del paziente al medico
-    """
+    # Association table for the many-to-many relationship between doctors and patients
+    # 
+    # Attributes:
+    #   doctor_id: ID of the doctor in the relationship
+    #   patient_id: ID of the patient in the relationship
+    #   assigned_date: Date when the patient was assigned to the doctor
     __tablename__ = 'doctor_patient'
     doctor_id = db.Column(db.Integer, db.ForeignKey('doctor.id'), primary_key=True)
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), primary_key=True)
     assigned_date = db.Column(db.DateTime, default=datetime.utcnow)
 
 class Doctor(UserMixin, db.Model):
-    """
-    Modello che rappresenta un medico nel sistema.
-    
-    Estende UserMixin per supportare l'autenticazione di Flask-Login.
-    
-    Attributi:
-        id: Identificatore unico del medico
-        email: Indirizzo email univoco del medico, utilizzato per l'autenticazione
-        password_hash: Hash della password del medico
-        first_name: Nome del medico
-        last_name: Cognome del medico
-        specialty: Specializzazione del medico
-        created_at: Data di creazione del record
-        updated_at: Data di ultimo aggiornamento del record
-        patients: Relazione con i pazienti assegnati al medico
-        notes: Relazione con le note create dal medico
-    """
+    # Model representing a doctor in the system
+    # 
+    # Extends UserMixin to support Flask-Login authentication
+    # 
+    # Attributes:
+    #   id: Unique identifier of the doctor
+    #   email: Unique email address of the doctor, used for authentication
+    #   password_hash: Hash of the doctor's password
+    #   first_name: First name of the doctor
+    #   last_name: Last name of the doctor
+    #   specialty: Medical specialty of the doctor
+    #   created_at: Record creation date
+    #   updated_at: Record last update date
+    #   patients: Relationship with patients assigned to the doctor
+    #   notes: Relationship with notes created by the doctor
     __tablename__ = 'doctor'
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
@@ -101,13 +84,13 @@ class Doctor(UserMixin, db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    # Relazione con i pazienti (molti-a-molti)
+    # Relationship with patients (many-to-many)
     patients = db.relationship('Patient', 
                               secondary='doctor_patient',
                               backref=db.backref('doctors', lazy='dynamic'),
                               lazy='dynamic')
     
-    # Note create da questo medico
+    # Notes created by this doctor
     notes = db.relationship('Note', backref='doctor', lazy='dynamic')
 
     def set_password(self, password):
@@ -220,7 +203,7 @@ class Patient(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    # Relazioni
+    # Relationships
     vital_signs = db.relationship('VitalSign', backref='patient', lazy='dynamic')
     notes = db.relationship('Note', backref='patient', lazy='dynamic')
     
