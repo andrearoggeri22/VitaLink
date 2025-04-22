@@ -2,7 +2,7 @@ import logging
 import json
 from datetime import datetime
 
-from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify, send_file
+from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify, send_file, session
 from flask_login import login_required, current_user
 from sqlalchemy.exc import SQLAlchemyError
 from flask_babel import gettext as _
@@ -686,11 +686,16 @@ def generate_vital_report(patient_id, vital_type):
     
     # Generate the PDF report
     try:
+        # Get current language from session
+        current_language = session.get('language', 'en')
+        logger.debug(f"Generating vital report with language: {current_language}")
+        
         pdf_buffer = generate_vital_trends_report(
             patient=patient,
             vital_type=vital_type,
             vitals=vitals,
-            period_desc=period_desc
+            period_desc=period_desc,
+            language=current_language
         )
         
         # Generate a filename for the report
