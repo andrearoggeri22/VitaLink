@@ -3,6 +3,7 @@ import json
 from datetime import datetime
 
 from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify, send_file, session
+from app import app
 from flask_login import login_required, current_user
 from sqlalchemy.exc import SQLAlchemyError
 from flask_babel import gettext as _
@@ -579,8 +580,12 @@ def generate_report(patient_id):
     
     # Generate the PDF report
     try:
-        # Get current language from session
-        current_language = session.get('language', 'en')
+        # Get current language from session or from browser preferred language
+        current_language = session.get('language')
+        if not current_language:
+            # Determine language from browser accept-languages header
+            current_language = request.accept_languages.best_match(app.config['LANGUAGES'].keys()) or 'en'
+            
         logger.debug(f"Generating report with language: {current_language}")
         
         pdf_buffer = generate_patient_report(
@@ -686,8 +691,12 @@ def generate_vital_report(patient_id, vital_type):
     
     # Generate the PDF report
     try:
-        # Get current language from session
-        current_language = session.get('language', 'en')
+        # Get current language from session or from browser preferred language
+        current_language = session.get('language')
+        if not current_language:
+            # Determine language from browser accept-languages header
+            current_language = request.accept_languages.best_match(app.config['LANGUAGES'].keys()) or 'en'
+            
         logger.debug(f"Generating vital report with language: {current_language}")
         
         pdf_buffer = generate_vital_trends_report(
