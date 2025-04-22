@@ -20,15 +20,18 @@ from utils import get_vital_reference_range, get_vital_sign_unit
 # Setup logger
 logger = logging.getLogger(__name__)
 
-def get_report_translations():
+def get_report_translations(lang=None):
     """
     Get translations for report text based on the selected language.
+    
+    Args:
+        lang: Optional language code override. If not provided, uses session language.
     
     Returns:
         dict: Dictionary of translated strings
     """
-    language = session.get('language', 'en')
-    logger.debug(f"Report language from session: {language}")
+    language = lang or session.get('language', 'en')
+    logger.debug(f"Report language: {language}")
     
     if language == 'it':
         return {
@@ -133,7 +136,7 @@ def get_report_translations():
             'consult_doctor': 'Please consult with your healthcare provider to discuss these results. This report is generated automatically and should be interpreted by a qualified medical professional.'
         }
 
-def generate_patient_report(patient, doctor, vitals, notes, start_date=None, end_date=None):
+def generate_patient_report(patient, doctor, vitals, notes, start_date=None, end_date=None, language=None):
     """
     Generate a PDF report for a patient's vital signs and notes
     
@@ -144,6 +147,7 @@ def generate_patient_report(patient, doctor, vitals, notes, start_date=None, end
         notes: List of Note objects
         start_date: Optional start date for filtering
         end_date: Optional end date for filtering
+        language: Optional language code override (it/en)
         
     Returns:
         BytesIO: PDF file as a binary stream
@@ -151,7 +155,7 @@ def generate_patient_report(patient, doctor, vitals, notes, start_date=None, end
     buffer = BytesIO()
     
     # Get translations
-    t = get_report_translations()
+    t = get_report_translations(language)
     
     # Create the PDF document
     doc = SimpleDocTemplate(
@@ -364,7 +368,7 @@ def generate_patient_report(patient, doctor, vitals, notes, start_date=None, end
     return buffer
 
 
-def generate_vital_trends_report(patient, vital_type, vitals, period_desc):
+def generate_vital_trends_report(patient, vital_type, vitals, period_desc, language=None):
     """
     Generate a PDF report showing trends for a specific vital sign
     
@@ -373,6 +377,7 @@ def generate_vital_trends_report(patient, vital_type, vitals, period_desc):
         vital_type: Type of vital sign (string)
         vitals: List of VitalSign objects
         period_desc: Description of the time period
+        language: Optional language code override (it/en)
         
     Returns:
         BytesIO: PDF file as a binary stream
@@ -380,7 +385,7 @@ def generate_vital_trends_report(patient, vital_type, vitals, period_desc):
     buffer = BytesIO()
     
     # Get translations
-    t = get_report_translations()
+    t = get_report_translations(language)
     
     # Create the PDF document
     doc = SimpleDocTemplate(
