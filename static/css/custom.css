@@ -103,6 +103,10 @@ main {
     background: linear-gradient(45deg, var(--bs-warning), var(--bs-danger));
 }
 
+.bg-gradient-purple {
+    background: linear-gradient(45deg, var(--bs-purple), var(--bs-danger));
+}
+
 /* Responsive fixes */
 @media (max-width: 768px) {
     .patient-header {
