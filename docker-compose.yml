@@ -18,11 +18,11 @@ services:
       - FLASK_APP=main.py
       - FLASK_ENV=production
       - PYTHONUNBUFFERED=1
-      # Altre variabili d'ambiente necessarie 
-      # (Twilio, SendGrid, ecc. dovrebbero essere configurate qui in produzione)
+      # Other environment variables needed 
+      # (Twilio, SendGrid, ecc. should be configured here in production)
     volumes:
       - ./uploads:/app/uploads
-    # Aggiunge un health check per verificare che il servizio sia effettivamente disponibile
+    # Add an health check to ensure that the service is up and running
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/"]
       interval: 30s
