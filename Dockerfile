@@ -26,8 +26,10 @@ COPY . /app/
 # Creating the uploads directory if it doesn't exists
 RUN mkdir -p /app/uploads && chmod 777 /app/uploads
 
-# Make entrypoint script executable
-RUN chmod +x /app/docker-entrypoint.sh
+# Fix line endings and make entrypoint script executable
+RUN dos2unix /app/docker-entrypoint.sh && \
+    chmod +x /app/docker-entrypoint.sh && \
+    sed -i -e 's/\r$//' /app/docker-entrypoint.sh
 
 # Expose the port on which the app will be listening
 EXPOSE 5000
@@ -37,8 +39,8 @@ ENV FLASK_APP=main.py
 ENV FLASK_ENV=production
 ENV PYTHONUNBUFFERED=1
 
-# Configure the entrypoint
-ENTRYPOINT ["/app/docker-entrypoint.sh"]
+# Configure the entrypoint using shell form for better error handling
+ENTRYPOINT ["/bin/bash", "-c", "if [ -x /app/docker-entrypoint.sh ]; then exec /app/docker-entrypoint.sh \"$@\"; else echo 'Error: /app/docker-entrypoint.sh not executable or missing'; exit 1; fi"]
 
 # Note: curl already installed before
 

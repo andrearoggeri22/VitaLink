@@ -2,33 +2,33 @@
 set -e
 
 # Print debug information about the environment
-echo "Verifica configurazione di rete..."
+echo "Verifying network configuration..."
 ip addr show
-echo "Porte in ascolto:"
-netstat -tulpn || ss -tulpn || echo "Comando netstat/ss non disponibile"
+echo "Listening ports:"
+netstat -tulpn || ss -tulpn || echo "netstat/ss command not available"
 
 # Wait for PostgreSQL to be ready
-echo "Attesa connessione PostgreSQL..."
+echo "Waiting for PostgreSQL connection..."
 until PGPASSWORD=$PGPASSWORD psql -h "$PGHOST" -U "$PGUSER" -d "$PGDATABASE" -c '\q'; do
-  echo "PostgreSQL non ancora disponibile - in attesa..."
+  echo "PostgreSQL not yet available - waiting..."
   sleep 2
   # Print debug information about the connection attempt
-  echo "Tentativo di connessione a $PGHOST:$PGPORT con utente $PGUSER e database $PGDATABASE"
+  echo "Trying to connect to $PGHOST:$PGPORT with user $PGUSER and database $PGDATABASE"
 done
-echo "PostgreSQL disponibile!"
+echo "PostgreSQL available!"
 
 # Initialize database if needed
-echo "Inizializzazione del database..."
+echo "Initializing database..."
 python -c "from app import app, db; app.app_context().push(); db.create_all()"
 
 # Compile translations
-echo "Compilazione delle traduzioni..."
+echo "Compiling translations..."
 python compile_translations.py
 
 # Check bind address for Gunicorn
-echo "Verifica configurazione Gunicorn..."
-echo "Parametri: $@"
+echo "Verifying Gunicorn configuration..."
+echo "Parameters: $@"
 
 # Start application
-echo "Avvio dell'applicazione VitaLink su 0.0.0.0:5000..."
+echo "Starting VitaLink application on 0.0.0.0:5000..."
 exec "$@"
