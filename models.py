@@ -118,12 +118,10 @@ class Doctor(UserMixin, db.Model):
         return check_password_hash(self.password_hash, password)
     
     def to_dict(self):
-        """
-        Converte l'oggetto in un dizionario serializzabile.
-        
-        Returns:
-            dict: Rappresentazione dell'oggetto come dizionario
-        """
+        # Convert the object to a serializable dictionary
+        #
+        # Returns:
+        #   dict: Dictionary representation of the object
         return {
             'id': self.id,
             'email': self.email,
@@ -135,39 +133,33 @@ class Doctor(UserMixin, db.Model):
         }
     
     def get_patients(self):
-        """
-        Ottiene tutti i pazienti associati a questo medico.
-        
-        Returns:
-            list: Lista di oggetti Patient associati al medico
-        """
+        # Get all patients associated with this doctor
+        #
+        # Returns:
+        #   list: List of Patient objects associated with the doctor
         return self.patients.all()
     
     def add_patient(self, patient):
-        """
-        Aggiunge un paziente alla lista dei pazienti di questo medico.
-        
-        Args:
-            patient: Oggetto Patient da aggiungere
-            
-        Returns:
-            None
-        """
+        # Add a patient to this doctor's patient list
+        #
+        # Args:
+        #   patient: Patient object to add
+        # 
+        # Returns:
+        #   None
         if patient not in self.patients.all():
             association = DoctorPatient(doctor_id=self.id, patient_id=patient.id)
             db.session.add(association)
             db.session.commit()
     
     def remove_patient(self, patient):
-        """
-        Rimuove un paziente dalla lista dei pazienti di questo medico.
-        
-        Args:
-            patient: Oggetto Patient da rimuovere
-            
-        Returns:
-            None
-        """
+        # Remove a patient from this doctor's patient list
+        #
+        # Args:
+        #   patient: Patient object to remove
+        # 
+        # Returns:
+        #   None
         association = DoctorPatient.query.filter_by(doctor_id=self.id, patient_id=patient.id).first()
         if association:
             db.session.delete(association)
@@ -206,12 +198,10 @@ class Patient(db.Model):
     notes = db.relationship('Note', backref='patient', lazy='dynamic')
     
     def to_dict(self):
-        """
-        Converte l'oggetto in un dizionario serializzabile.
-        
-        Returns:
-            dict: Rappresentazione dell'oggetto come dizionario
-        """
+        # Convert the object to a serializable dictionary
+        #
+        # Returns:
+        #   dict: Dictionary representation of the object
         return {
             'id': self.id,
             'uuid': self.uuid,
@@ -226,17 +216,15 @@ class Patient(db.Model):
         }
     
     def get_vital_signs(self, type=None, start_date=None, end_date=None):
-        """
-        Ottiene i parametri vitali per questo paziente con possibile filtraggio.
-        
-        Args:
-            type (VitalSignType, optional): Tipo di parametro vitale da filtrare
-            start_date (datetime, optional): Data di inizio per il filtraggio
-            end_date (datetime, optional): Data di fine per il filtraggio
-            
-        Returns:
-            list: Lista di oggetti VitalSign che soddisfano i criteri di filtraggio
-        """
+        # Get vital signs for this patient with optional filtering
+        #
+        # Args:
+        #   type (VitalSignType, optional): Type of vital sign to filter by
+        #   start_date (datetime, optional): Start date for filtering
+        #   end_date (datetime, optional): End date for filtering
+        #            
+        # Returns:
+        #   list: List of VitalSign objects that meet the filtering criteria
         query = self.vital_signs
         
         if type:
@@ -251,12 +239,10 @@ class Patient(db.Model):
         return query.order_by(VitalSign.recorded_at.desc()).all()
     
     def get_notes(self):
-        """
-        Ottiene tutte le note mediche associate a questo paziente.
-        
-        Returns:
-            list: Lista di oggetti Note ordinati per data di creazione (più recenti prima)
-        """
+        # Get all medical notes associated with this patient
+        #
+        # Returns:
+        #   list: List of Note objects ordered by creation date (most recent first)
         return self.notes.order_by(Note.created_at.desc()).all()
 
 class VitalSign(db.Model):
@@ -282,12 +268,10 @@ class VitalSign(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     def to_dict(self):
-        """
-        Converte l'oggetto in un dizionario serializzabile.
-        
-        Returns:
-            dict: Rappresentazione dell'oggetto come dizionario
-        """
+        # Convert the object to a serializable dictionary
+        #
+        # Returns:
+        #   dict: Dictionary representation of the object
         return {
             'id': self.id,
             'patient_id': self.patient_id,
@@ -318,12 +302,10 @@ class Note(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     def to_dict(self):
-        """
-        Converte l'oggetto in un dizionario serializzabile.
-        
-        Returns:
-            dict: Rappresentazione dell'oggetto come dizionario
-        """
+        # Convert the object to a serializable dictionary
+        #
+        # Returns:
+        #   dict: Dictionary representation of the object
         return {
             'id': self.id,
             'patient_id': self.patient_id,
@@ -433,12 +415,10 @@ class AuditLog(db.Model):
         return {}
     
     def to_dict(self):
-        """
-        Converte l'oggetto in un dizionario serializzabile.
-        
-        Returns:
-            dict: Rappresentazione dell'oggetto come dizionario
-        """
+        # Convert the object to a serializable dictionary
+        #
+        # Returns:
+        #   dict: Dictionary representation of the object
         return {
             'id': self.id,
             'doctor_id': self.doctor_id,
