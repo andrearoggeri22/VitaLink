@@ -579,13 +579,18 @@ def generate_report(patient_id):
     
     # Generate the PDF report
     try:
+        # Get current language from session
+        current_language = session.get('language', 'en')
+        logger.debug(f"Generating report with language: {current_language}")
+        
         pdf_buffer = generate_patient_report(
             patient=patient,
             doctor=current_user,
             vitals=vitals,
             notes=notes,
             start_date=start_datetime,
-            end_date=end_datetime
+            end_date=end_datetime,
+            language=current_language
         )
         
         # Generate a filename for the report
