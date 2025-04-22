@@ -435,41 +435,41 @@ def mobile_verify_patient():
 @fitbit_bp.route('/api/mobile/data/upload', methods=['POST'])
 def mobile_upload_data():
     """
-    API endpoint per caricare dati Fitbit dall'app mobile.
-    L'app mobile invia i dati raccolti dal dispositivo Fitbit.
+    API endpoint to upload Fitbit data from the mobile app.
+    The mobile app sends data collected from the Fitbit device.
     
     Returns:
-        JSON: Risposta di conferma del salvataggio
+        JSON: Confirmation response of the save operation
     """
     try:
         data = request.get_json()
         
         if not data:
-            return jsonify({'error': 'Dati richiesti'}), 400
+            return jsonify({'error': 'Data required'}), 400
             
-        # Valida i dati richiesti
+        # Validate required data
         required_fields = ['patient_id', 'fitbit_data']
         for field in required_fields:
             if field not in data:
-                return jsonify({'error': f'Campo {field} richiesto'}), 400
+                return jsonify({'error': f'Field {field} required'}), 400
                 
         patient_id = data['patient_id']
         fitbit_data = data['fitbit_data']
         
-        # Verifica che il paziente esista
+        # Verify that the patient exists
         patient = Patient.query.get(patient_id)
         if not patient:
-            return jsonify({'error': 'Paziente non trovato'}), 404
+            return jsonify({'error': 'Patient not found'}), 404
             
-        # Salva i dati Fitbit
+        # Save Fitbit data
         success, vitals_saved, errors = save_fitbit_data(patient_id, fitbit_data)
         
-        # Log dell'azione di caricamento dati da mobile
+        # Log the mobile data upload action
         log_action(
-            doctor_id=None,  # Nessun medico coinvolto, è un'azione automatica da mobile
+            doctor_id=None,  # No doctor involved, it's an automatic action from mobile
             action_type=ActionType.CREATE,
             entity_type=EntityType.VITAL_SIGN,
-            entity_id=patient_id,  # Usiamo l'ID del paziente come reference
+            entity_id=patient_id,  # We use the patient ID as reference
             details={
                 'operation': 'mobile_data_upload',
                 'vitals_saved': vitals_saved,
@@ -491,5 +491,5 @@ def mobile_upload_data():
         })
         
     except Exception as e:
-        logging.error(f"Errore durante il caricamento dei dati mobile: {str(e)}")
-        return jsonify({'error': 'Errore del server'}), 500
+        logging.error(f"Error during mobile data upload: {str(e)}")
+        return jsonify({'error': 'Server error'}), 500
