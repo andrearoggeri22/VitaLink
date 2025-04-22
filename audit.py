@@ -24,10 +24,10 @@ def log_action(doctor_id, action_type, entity_type, entity_id, details=None, pat
         AuditLog: The created audit log entry or None if an error occurs
     """
     try:
-        # Verifica che entity_id non sia None per evitare l'errore "not-null constraint"
+        # Check that entity_id is not None to avoid "not-null constraint" error
         if entity_id is None:
-            # Se l'ID è None, utilizziamo un valore predefinito temporaneo
-            # In un sistema di produzione, dovremmo gestire diversamente
+            # If ID is None, use a temporary default value
+            # In a production system, we should handle this differently
             entity_id = 0
             print(f"WARNING: entity_id is None for {entity_type}. Using temporary ID 0.")
         
@@ -48,10 +48,10 @@ def log_action(doctor_id, action_type, entity_type, entity_id, details=None, pat
         
         return audit_log
     except Exception as e:
-        # In caso di errore, eseguiamo rollback e registriamo l'errore
+        # In case of error, perform rollback and log the error
         db.session.rollback()
         print(f"Error in log_action: {str(e)}")
-        # Non facciamo fallire l'intera operazione se il logging fallisce
+        # Don't let the entire operation fail if logging fails
         return None
 
 @audit_bp.route('/logs', methods=['GET'])
@@ -144,7 +144,7 @@ def get_audit_logs():
     # Render the audit logs template
     return render_template(
         'audit_logs.html',
-        logs=[log.to_dict() for log in logs],  # log.to_dict() già include doctor_name e patient_name
+        logs=[log.to_dict() for log in logs],  # log.to_dict() already includes doctor_name and patient_name
         patients=patients,
         doctors=doctors,
         request=request,
@@ -220,7 +220,7 @@ def get_audit_stats():
         db.func.count(AuditLog.id).label('access_count')
     ).join(Patient).filter(
         AuditLog.timestamp >= start_date,
-        AuditLog.patient_id != None  # Equivalente a "is not None"
+        AuditLog.patient_id != None  # Equivalent to "is not None"
     ).group_by(
         AuditLog.patient_id,
         Patient.first_name,

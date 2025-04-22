@@ -94,27 +94,23 @@ class Doctor(UserMixin, db.Model):
     notes = db.relationship('Note', backref='doctor', lazy='dynamic')
 
     def set_password(self, password):
-        """
-        Imposta l'hash della password del medico.
-        
-        Args:
-            password: La password in chiaro da hashare
-            
-        Returns:
-            None
-        """
+        # Set the doctor's password hash
+        #
+        # Args:
+        #   password: The plain text password to hash
+        #            
+        # Returns:
+        #   None
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
-        """
-        Verifica se la password fornita corrisponde all'hash memorizzato.
-        
-        Args:
-            password: La password in chiaro da verificare
-            
-        Returns:
-            bool: True se la password è corretta, False altrimenti
-        """
+        # Check if the provided password matches the stored hash
+        #
+        # Args:
+        #   password: The plain text password to verify
+        #            
+        # Returns:
+        #   bool: True if the password is correct, False otherwise
         return check_password_hash(self.password_hash, password)
     
     def to_dict(self):
