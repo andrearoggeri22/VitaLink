@@ -187,63 +187,63 @@ def extract_fitbit_data(patient_id):
                 'value': round(distance, 2)
             })
         
-        # Dati minuti attivi - ultimi 7 giorni
+        # Active minutes data - last 7 days
         for i in range(7, 0, -1):
             timestamp = current_date - datetime.timedelta(days=i)
-            # Minuti attivi correlati ai passi
+            # Active minutes correlated to steps
             active_mins = int(result_data['steps'][7-i-1]['value'] / 100)
             result_data['active_minutes'].append({
                 'timestamp': timestamp.strftime('%Y-%m-%d'),
                 'value': active_mins
             })
         
-        # Dati sonno - ultimi 7 giorni
+        # Sleep data - last 7 days
         for i in range(7, 0, -1):
             timestamp = current_date - datetime.timedelta(days=i)
-            # Ore di sonno con variazione
+            # Sleep hours with variation
             sleep_hours = 7 + ((hash(str(i*3)) % 20) / 10)
             result_data['sleep_duration'].append({
                 'timestamp': timestamp.strftime('%Y-%m-%d'),
                 'value': round(sleep_hours, 1)
             })
         
-        # Dati piani saliti - ultimi 7 giorni
+        # Floors climbed data - last 7 days
         for i in range(7, 0, -1):
             timestamp = current_date - datetime.timedelta(days=i)
-            # Piani con variazione
+            # Floors with variation
             floors = 8 + (hash(str(i*7)) % 10)
             result_data['floors_climbed'].append({
                 'timestamp': timestamp.strftime('%Y-%m-%d'),
                 'value': floors
             })
         
-        # 4. Pulizia
+        # 4. Cleanup
         try:
-            # In un sistema reale, smontare il dispositivo
-            # E rimuovere i file temporanei
+            # In a real system, unmount the device
+            # And remove temporary files
             import shutil
             shutil.rmtree(temp_dir)
         except Exception as cleanup_error:
-            logging.warning(f"Errore durante la pulizia: {str(cleanup_error)}")
+            logging.warning(f"Error during cleanup: {str(cleanup_error)}")
         
         return result_data
     except Exception as e:
-        logging.error(f"Errore durante l'estrazione dei dati dal dispositivo: {str(e)}")
-        raise DeviceConnectionError(f"Errore durante l'estrazione dei dati: {str(e)}")
+        logging.error(f"Error during data extraction from the device: {str(e)}")
+        raise DeviceConnectionError(f"Error during data extraction: {str(e)}")
 
 def save_fitbit_data(patient_id, data):
     """
-    Salva i dati estratti dal dispositivo Fitbit nel database.
+    Save data extracted from the Fitbit device to the database.
     
     Args:
-        patient_id (int): ID del paziente a cui associare i dati
-        data (dict): Dati estratti dal dispositivo nel formato descritto in extract_fitbit_data
+        patient_id (int): Patient ID to associate the data with
+        data (dict): Data extracted from the device in the format described in extract_fitbit_data
         
     Returns:
         tuple: (success, vitals_saved, errors)
-            success (bool): True se i dati sono stati salvati con successo
-            vitals_saved (int): Numero di parametri vitali salvati
-            errors (list): Lista di errori occorsi durante il salvataggio
+            success (bool): True if data was successfully saved
+            vitals_saved (int): Number of vital parameters saved
+            errors (list): List of errors occurred during the saving process
     """
     vitals_saved = 0
     errors = []
@@ -251,35 +251,35 @@ def save_fitbit_data(patient_id, data):
     try:
         patient = Patient.query.get(patient_id)
         if not patient:
-            return False, 0, ["Paziente non trovato"]
+            return False, 0, ["Patient not found"]
         
-        # Log per debug
-        logging.info(f"Inizio salvataggio dati Fitbit per paziente ID: {patient_id}")
+        # Debug logging
+        logging.info(f"Starting to save Fitbit data for patient ID: {patient_id}")
         
         for data_type, measurements in data.items():
             if data_type not in FITBIT_DATA_TYPES:
-                errors.append(f"Tipo di dato non supportato: {data_type}")
+                errors.append(f"Unsupported data type: {data_type}")
                 continue
             
             vital_type = FITBIT_DATA_TYPES[data_type]
-            logging.info(f"Elaborazione tipo dati: {data_type} -> enum type: {vital_type}, value: {vital_type.value}")
+            logging.info(f"Processing data type: {data_type} -> enum type: {vital_type}, value: {vital_type.value}")
             
             for measurement in measurements:
                 try:
-                    # Converte il timestamp in datetime
+                    # Convert timestamp to datetime
                     if 'T' in measurement['timestamp']:
                         recorded_at = datetime.datetime.strptime(measurement['timestamp'], '%Y-%m-%dT%H:%M:%S')
                     else:
                         recorded_at = datetime.datetime.strptime(measurement['timestamp'], '%Y-%m-%d')
                     
-                    # Log dei valori per debug
-                    logging.info(f"Valore da inserire: {measurement['value']}, timestamp: {recorded_at}")
+                    # Log values for debugging
+                    logging.info(f"Value to insert: {measurement['value']}, timestamp: {recorded_at}")
                     
-                    # Crea il nuovo parametro vitale
+                    # Create new vital sign parameter
                     vital = VitalSign(
                         patient_id=patient_id,
-                        type=vital_type,  # Oggetto VitalSignType dall'enum
-                        value=float(measurement['value']),  # Assicuriamo che sia un float
+                        type=vital_type,  # VitalSignType object from enum
+                        value=float(measurement['value']),  # Ensure it's a float
                         unit=get_vital_sign_unit(data_type),
                         recorded_at=recorded_at,
                         origin=DataOrigin.AUTOMATIC
