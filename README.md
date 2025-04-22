@@ -15,8 +15,7 @@ VitaLink è una piattaforma completa per il monitoraggio dei pazienti, sviluppat
 ## Requisiti
 
 - Docker e Docker Compose
-- Account Twilio per notifiche SMS (opzionale)
-- Account SendGrid per notifiche email (opzionale)
+- Account ClickSend per notifiche SMS (opzionale)
 
 ## Deployment con Docker
 
@@ -30,7 +29,7 @@ cp .env-example .env
 
 Modifica il file `.env` con i tuoi valori, in particolare per:
 - Credenziali database
-- Chiavi API Twilio e SendGrid
+- Credenziali ClickSend per SMS
 - Chiave segreta di sessione
 
 ### 2. Costruzione e avvio dei container
