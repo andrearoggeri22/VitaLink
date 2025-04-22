@@ -168,81 +168,95 @@ def test_vital_sign_model(client):
 def test_note_model(client):
     """Test the Note model functionality."""
     with app.app_context():
-        # Create a doctor and patient
-        doctor = Doctor(
-            email="note_test@example.com",
-            first_name="Note",
-            last_name="Doctor"
-        )
-        db.session.add(doctor)
+        try:
+            # Create a doctor and patient
+            doctor = Doctor(
+                email="note_test@example.com",
+                first_name="Note",
+                last_name="Doctor"
+            )
+            # Imposta una password per evitare errori NOT NULL constraint
+            doctor.set_password("testpassword")
+            db.session.add(doctor)
+            
+            patient = Patient(
+                first_name="Note",
+                last_name="Patient",
+                date_of_birth=datetime(1980, 1, 1).date()
+            )
+            db.session.add(patient)
+            db.session.flush()
+            
+            # Create a note
+            note = Note(
+                patient_id=patient.id,
+                doctor_id=doctor.id,
+                content="This is a test note about the patient."
+            )
+            db.session.add(note)
+            db.session.commit()
+            
+            # Retrieve and verify
+            saved_note = Note.query.filter_by(patient_id=patient.id).first()
+            assert saved_note is not None
+            assert saved_note.content == "This is a test note about the patient."
+            assert saved_note.doctor_id == doctor.id
+            
+            # Test to_dict method
+            note_dict = saved_note.to_dict()
+            assert note_dict['content'] == "This is a test note about the patient."
+            assert note_dict['patient_id'] == patient.id
+            assert note_dict['doctor_id'] == doctor.id
         
-        patient = Patient(
-            first_name="Note",
-            last_name="Patient",
-            date_of_birth=datetime(1980, 1, 1).date()
-        )
-        db.session.add(patient)
-        db.session.flush()
-        
-        # Create a note
-        note = Note(
-            patient_id=patient.id,
-            doctor_id=doctor.id,
-            content="This is a test note about the patient."
-        )
-        db.session.add(note)
-        db.session.commit()
-        
-        # Retrieve and verify
-        saved_note = Note.query.filter_by(patient_id=patient.id).first()
-        assert saved_note is not None
-        assert saved_note.content == "This is a test note about the patient."
-        assert saved_note.doctor_id == doctor.id
-        
-        # Test to_dict method
-        note_dict = saved_note.to_dict()
-        assert note_dict['content'] == "This is a test note about the patient."
-        assert note_dict['patient_id'] == patient.id
-        assert note_dict['doctor_id'] == doctor.id
+        except Exception as e:
+            # In caso di errore durante il test, mostra un messaggio chiaro
+            pytest.fail(f"Errore durante il test del modello Note: {str(e)}")
 
 def test_doctor_patient_relationship(client):
     """Test the many-to-many relationship between doctors and patients."""
     with app.app_context():
-        # Create doctors
-        doctor1 = Doctor(email="doctor1@example.com", first_name="Doctor", last_name="One")
-        doctor2 = Doctor(email="doctor2@example.com", first_name="Doctor", last_name="Two")
-        db.session.add_all([doctor1, doctor2])
+        try:
+            # Create doctors con password
+            doctor1 = Doctor(email="doctor1@example.com", first_name="Doctor", last_name="One")
+            doctor1.set_password("password1")
+            doctor2 = Doctor(email="doctor2@example.com", first_name="Doctor", last_name="Two") 
+            doctor2.set_password("password2")
+            db.session.add_all([doctor1, doctor2])
+            
+            # Create patients
+            patient1 = Patient(first_name="Patient", last_name="One", date_of_birth=datetime(1990, 1, 1).date())
+            patient2 = Patient(first_name="Patient", last_name="Two", date_of_birth=datetime(1990, 1, 2).date())
+            patient3 = Patient(first_name="Patient", last_name="Three", date_of_birth=datetime(1990, 1, 3).date())
+            db.session.add_all([patient1, patient2, patient3])
+            db.session.flush()
+            
+            # Associate doctors with patients
+            doctor1.add_patient(patient1)
+            doctor1.add_patient(patient2)
+            doctor2.add_patient(patient2)
+            doctor2.add_patient(patient3)
+            
+            # Test associations
+            assert len(doctor1.get_patients()) == 2
+            assert len(doctor2.get_patients()) == 2
+            assert patient1 in doctor1.get_patients()
+            assert patient2 in doctor1.get_patients()
+            assert patient2 in doctor2.get_patients()
+            assert patient3 in doctor2.get_patients()
+            
+            # Test removing associations
+            doctor1.remove_patient(patient1)
+            assert len(doctor1.get_patients()) == 1
+            assert patient1 not in doctor1.get_patients()
+            
+            # Check association timestamps
+            association = DoctorPatient.query.filter_by(doctor_id=doctor1.id, patient_id=patient2.id).first()
+            assert association is not None
+            assert association.assigned_date is not None
         
-        # Create patients
-        patient1 = Patient(first_name="Patient", last_name="One", date_of_birth=datetime(1990, 1, 1).date())
-        patient2 = Patient(first_name="Patient", last_name="Two", date_of_birth=datetime(1990, 1, 2).date())
-        patient3 = Patient(first_name="Patient", last_name="Three", date_of_birth=datetime(1990, 1, 3).date())
-        db.session.add_all([patient1, patient2, patient3])
-        db.session.flush()
-        
-        # Associate doctors with patients
-        doctor1.add_patient(patient1)
-        doctor1.add_patient(patient2)
-        doctor2.add_patient(patient2)
-        doctor2.add_patient(patient3)
-        
-        # Test associations
-        assert len(doctor1.get_patients()) == 2
-        assert len(doctor2.get_patients()) == 2
-        assert patient1 in doctor1.get_patients()
-        assert patient2 in doctor1.get_patients()
-        assert patient2 in doctor2.get_patients()
-        assert patient3 in doctor2.get_patients()
-        
-        # Test removing associations
-        doctor1.remove_patient(patient1)
-        assert len(doctor1.get_patients()) == 1
-        assert patient1 not in doctor1.get_patients()
-        
-        # Check association timestamps
-        association = DoctorPatient.query.filter_by(doctor_id=doctor1.id, patient_id=patient2.id).first()
-        assert association is not None
-        assert association.assigned_date is not None
+        except Exception as e:
+            # In caso di errore durante il test, mostra un messaggio chiaro
+            pytest.fail(f"Errore durante il test delle relazioni dottore-paziente: {str(e)}")
 
 def test_patient_vital_signs_filtering(client):
     """Test filtering of vital signs by patient."""
