@@ -436,10 +436,10 @@ def profile():
     
     return render_template('profile.html', doctor=current_user, now=datetime.now())
 
-@views_bp.route('/patients/<int:patient_id>/report')
+@views_bp.route('/patients/<int:patient_id>/complete_report', methods=['GET', 'POST'])
 @login_required
-def generate_report(patient_id):
-    """Generate a comprehensive patient report in PDF format."""
+def generate_complete_report(patient_id):
+    """Generate a comprehensive patient report in PDF format with all notes, charts and observations."""
     patient = Patient.query.get_or_404(patient_id)
     
     # Check if the current doctor is associated with this patient
@@ -447,78 +447,49 @@ def generate_report(patient_id):
         flash(_('You are not authorized to generate reports for this patient'), 'danger')
         return redirect(url_for('views.patients'))
     
-    # Get filter parameters
-    start_date = request.args.get('start_date')
-    end_date = request.args.get('end_date')
+    # Get notes
+    notes = patient.notes.order_by(Note.created_at.desc()).all()
     
-    # Process date filters
-    start_datetime = None
-    end_datetime = None
+    # Get observations
+    observations = VitalObservation.query.filter_by(patient_id=patient_id).all()
     
-    if start_date:
-        try:
-            start_datetime = datetime.strptime(start_date, '%Y-%m-%d')
-        except ValueError:
-            flash(_('Invalid start date format. Use YYYY-MM-DD'), 'warning')
-    
-    if end_date:
-        try:
-            end_datetime = datetime.strptime(end_date, '%Y-%m-%d')
-            # Add a day to include all records from the end date
-            end_datetime = end_datetime.replace(hour=23, minute=59, second=59)
-        except ValueError:
-            flash(_('Invalid end date format. Use YYYY-MM-DD'), 'warning')
-    
-    # Get health platform connection status
-    has_health_connection = patient.fitbit_access_token is not None
-    
-    # Query notes with filter
-    notes_query = patient.notes
-    
-    if start_datetime:
-        notes_query = notes_query.filter(Note.created_at >= start_datetime)
-    
-    if end_datetime:
-        notes_query = notes_query.filter(Note.created_at <= end_datetime)
-    
-    notes = notes_query.order_by(Note.created_at.desc()).all()
+    # Check if there's a summary
+    summary = None
+    if request.method == 'POST':
+        summary = request.form.get('summary')
     
     # Generate the PDF report
     try:
-        # Get current language from session or from browser preferred language
-        current_language = session.get('language')
-        if not current_language:
-            # Determine language from browser accept-languages header
-            current_language = request.accept_languages.best_match(app.config['LANGUAGES'].keys()) or 'en'
-            
-        logger.debug(f"Generating report with language: {current_language}")
+        # Use the current session language if available
+        current_language = session.get('language', 'en')
         
-        pdf_buffer = generate_patient_report(
-            patient=patient,
-            doctor=current_user,
-            notes=notes,
-            has_health_connection=has_health_connection,
-            start_date=start_datetime,
-            end_date=end_datetime,
+        logger.debug(f"Generating complete report with language: {current_language}")
+        
+        pdf_buffer = generate_complete_report(
+            patient, 
+            current_user, 
+            notes, 
+            observations,
+            summary=summary,
             language=current_language
         )
         
         # Generate a filename for the report
-        filename = f"patient_report_{patient.last_name}_{datetime.now().strftime('%Y%m%d')}.pdf"
+        filename = f"complete_report_{patient.last_name}_{datetime.now().strftime('%Y%m%d_%H%M')}.pdf"
         
-        # Log this action in audit trail
+        # Log the report generation
         log_report_generation(
-            doctor_id=current_user.id,
-            patient_id=patient_id,
-            report_type="complete",
-            params={
-                "start_date": start_date,
-                "end_date": end_date
+            current_user.id, 
+            patient.id, 
+            "complete", 
+            {
+                "notes_count": len(notes),
+                "observations_count": len(observations),
+                "has_summary": summary is not None
             }
         )
         
-        # Log this action in application logs
-        logger.info(f"Doctor {current_user.id} generated report for patient {patient_id}")
+        logger.info(f"Doctor {current_user.id} generated complete report for patient {patient_id}")
         
         # Return the PDF as a downloadable file
         return send_file(
@@ -529,14 +500,14 @@ def generate_report(patient_id):
         )
         
     except Exception as e:
-        logger.error(f"Error generating report: {str(e)}")
+        logger.error(f"Error generating complete report: {str(e)}")
         flash(_('An error occurred while generating the report'), 'danger')
         return redirect(url_for('views.patient_detail', patient_id=patient_id))
 
-@views_bp.route('/patients/<int:patient_id>/specific_report')
+@views_bp.route('/patients/<int:patient_id>/specific_report', methods=['GET', 'POST'])
 @login_required
 def generate_specific_report(patient_id):
-    """Generate a specific vital parameter report in PDF format using health platform data."""
+    """Generate a specific report with selected notes, vital types, charts and observations."""
     patient = Patient.query.get_or_404(patient_id)
     
     # Check if the current doctor is associated with this patient
@@ -544,92 +515,129 @@ def generate_specific_report(patient_id):
         flash(_('You are not authorized to generate reports for this patient'), 'danger')
         return redirect(url_for('views.patients'))
     
-    # Get vital type parameter
-    vital_type = request.args.get('vital_type')
-    if not vital_type:
-        flash(_('No vital parameter type specified'), 'danger')
-        return redirect(url_for('views.patient_vitals', patient_id=patient_id))
-    
-    # Get period parameter (in days)
-    period = request.args.get('period', '7')  # Default to 7 days
-    try:
-        period_days = int(period)
-    except ValueError:
-        period_days = 7
-    
-    # Calculate date range
-    end_date = datetime.now()
-    start_date = end_date - timedelta(days=period_days)
-    
-    # Period description for the report
-    period_desc = f"{_('Last')} {period_days} {_('days')}"
-    
-    # Log the report generation attempt
-    log_report_generation(current_user.id, patient.id, 'specific_vital', {
-        'vital_type': vital_type,
-        'period': period_days
-    })
-    
-    try:
-        # Attempt to get data from the health platform
-        from health_platforms import get_processed_fitbit_data
-        
-        # Check if patient has Fitbit connection
-        if not patient.fitbit_access_token:
-            flash(_('This patient does not have an active health platform connection'), 'warning')
-            return redirect(url_for('views.patient_vitals', patient_id=patient_id))
-        
-        # Fetch data from Fitbit
-        vitals = get_processed_fitbit_data(
-            patient, 
-            vital_type, 
-            start_date=start_date.strftime('%Y-%m-%d'),
-            end_date=end_date.strftime('%Y-%m-%d')
-        )
-        
-        if not vitals:
-            flash(_('No data available for the selected vital parameter and time period'), 'warning')
-            return redirect(url_for('views.patient_vitals', patient_id=patient_id))
-        
-        # Get current language from session
-        current_language = session.get('language', 'en')
-            
-        logger.debug(f"Generating specific vital report with language: {current_language}")
-        
-        # Generate the PDF report
-        from reports import generate_vital_trends_report
-        
-        # Try to convert vital_type to enum if possible
+    if request.method == 'POST':
         try:
-            vital_type_enum = VitalSignType[vital_type.upper()]
-        except (KeyError, AttributeError):
-            vital_type_enum = None
-        
-        pdf_buffer = generate_vital_trends_report(
-            patient=patient,
-            vital_type=vital_type_enum or vital_type,  # Use enum if possible, otherwise string ID
-            vitals=vitals,
-            period_desc=period_desc,
-            language=current_language
-        )
-        
-        # Generate a filename for the report
-        vital_name = vital_type.replace('_', ' ').title()
-        filename = f"{vital_name}_report_{patient.last_name}_{datetime.now().strftime('%Y%m%d')}.pdf"
-        
-        # Return the PDF as a downloadable file
-        return send_file(
-            pdf_buffer,
-            as_attachment=True,
-            download_name=filename,
-            mimetype='application/pdf'
-        )
-        
-    except Exception as e:
-        logger.exception(f"Error generating specific report: {str(e)}")
-        flash(_('Error generating specific report: %(error)s', error=str(e)), 'danger')
-        return redirect(url_for('views.patient_vitals', patient_id=patient_id))
+            # Get summary
+            summary = request.form.get('summary')
+            
+            # Parse selected notes
+            selected_note_ids = request.form.getlist('selected_notes')
+            selected_notes = []
+            if selected_note_ids:
+                selected_notes = Note.query.filter(Note.id.in_(selected_note_ids)).all()
+            
+            # Parse selected vital types
+            selected_vital_types_values = request.form.getlist('selected_vital_types')
+            selected_vital_types = []
+            for value in selected_vital_types_values:
+                for enum_member in VitalSignType:
+                    if enum_member.value == value:
+                        selected_vital_types.append(enum_member)
+                        break
+                        
+            # Parse selected charts
+            selected_charts = {}
+            for vital_type in selected_vital_types_values:
+                charts_key = f"charts_{vital_type}"
+                selected_periods = request.form.getlist(charts_key)
+                
+                # Convert period strings to days numbers
+                days_periods = []
+                for period in selected_periods:
+                    if period == '1d':
+                        days_periods.append(1)
+                    elif period == '7d':
+                        days_periods.append(7)
+                    elif period == '1m':
+                        days_periods.append(30)
+                    elif period == '3m':
+                        days_periods.append(90)
+                    elif period == '1y':
+                        days_periods.append(365)
+                
+                selected_charts[vital_type] = days_periods
+                
+            # Parse selected observations
+            selected_observation_ids = request.form.getlist('selected_observations')
+            selected_observations = []
+            if selected_observation_ids:
+                selected_observations = VitalObservation.query.filter(VitalObservation.id.in_(selected_observation_ids)).all()
+            
+            # Use the current session language if available
+            current_language = session.get('language', 'en')
+            
+            logger.debug(f"Generating specific report with language: {current_language}")
+            
+            # Generate the PDF report
+            pdf_buffer = generate_specific_report(
+                patient, 
+                current_user, 
+                selected_notes, 
+                selected_vital_types,
+                selected_charts,
+                selected_observations,
+                summary=summary,
+                language=current_language
+            )
+            
+            # Generate a filename for the report
+            filename = f"specific_report_{patient.last_name}_{datetime.now().strftime('%Y%m%d_%H%M')}.pdf"
+            
+            # Log the report generation
+            log_report_generation(
+                current_user.id, 
+                patient.id, 
+                "specific", 
+                {
+                    "notes_count": len(selected_notes),
+                    "vital_types": [vt.value for vt in selected_vital_types],
+                    "charts_count": sum(len(periods) for periods in selected_charts.values()),
+                    "observations_count": len(selected_observations),
+                    "has_summary": summary is not None
+                }
+            )
+            
+            logger.info(f"Doctor {current_user.id} generated specific report for patient {patient_id}")
+            
+            # Return the PDF as a downloadable file
+            return send_file(
+                pdf_buffer,
+                as_attachment=True,
+                download_name=filename,
+                mimetype='application/pdf'
+            )
+            
+        except Exception as e:
+            logger.exception(f"Error generating specific report: {str(e)}")
+            flash(_('Error generating specific report: %(error)s', error=str(e)), 'danger')
+            return redirect(url_for('views.patient_vitals', patient_id=patient_id))
+    
+    # GET request - load data for the form
+    notes = patient.notes.order_by(Note.created_at.desc()).all()
+    observations = VitalObservation.query.filter_by(patient_id=patient_id).all()
+    
+    # Group observations by vital type
+    observations_by_type = {}
+    for obs in observations:
+        vital_type = obs.vital_type.value
+        if vital_type not in observations_by_type:
+            observations_by_type[vital_type] = []
+        observations_by_type[vital_type].append(obs)
+    
+    return render_template(
+        'specific_report_form.html',
+        patient=patient,
+        notes=notes,
+        vital_types=list(VitalSignType),
+        observations_by_type=observations_by_type,
+        now=datetime.now()
+    )
 
+@views_bp.route('/patients/<int:patient_id>/report')
+@login_required
+def generate_report(patient_id):
+    """Legacy route - redirect to complete report for backward compatibility."""
+    return redirect(url_for('views.generate_complete_report', patient_id=patient_id))
 
 @views_bp.route('/patients/<int:patient_id>/vital_report/<string:vital_type>')
 @login_required

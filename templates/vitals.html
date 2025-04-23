@@ -123,10 +123,10 @@
             </div>
             <div class="card-body">
                 <div class="d-flex flex-column gap-2">
-                    <a href="{{ url_for('views.generate_report', patient_id=patient.id) }}" class="btn btn-outline-info" target="_blank">
+                    <a href="#" id="generateCompleteReportBtn" class="btn btn-outline-info">
                         <i class="fas fa-file-pdf me-1"></i> {{ _('Generate Complete Report') }}
                     </a>
-                    <a href="#" id="generateSpecificReportBtn" class="btn btn-outline-info" target="_blank">
+                    <a href="#" id="generateSpecificReportBtn" class="btn btn-outline-info">
                         <i class="fas fa-file-medical me-1"></i> {{ _('Generate Specific Report') }}
                     </a>
                 </div>
@@ -289,6 +289,143 @@
 </div>
 {% endblock %}
 
+<!-- Complete Report Modal -->
+<div class="modal fade" id="completeReportModal" tabindex="-1" aria-labelledby="completeReportModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="completeReportModalLabel">{{ _('Generate Complete Report') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ url_for('views.generate_complete_report', patient_id=patient.id) }}" method="post" target="_blank">
+                <div class="modal-body">
+                    <p>{{ _('This report will include all medical notes, all vital signs charts for each time period, and all observations.') }}</p>
+                    
+                    <div class="mb-3">
+                        <label for="summary" class="form-label">{{ _('Summary (Optional)') }}</label>
+                        <textarea class="form-control" id="summary" name="summary" rows="5" placeholder="{{ _('Add an optional summary for this report. This will appear in the report but will not be saved in the database.') }}"></textarea>
+                        <div class="form-text">{{ _('This summary will only be included in this report and will not be saved for future reference.') }}</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('Cancel') }}</button>
+                    <button type="submit" class="btn btn-primary">{{ _('Generate Report') }}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Specific Report Modal -->
+<div class="modal fade" id="specificReportModal" tabindex="-1" aria-labelledby="specificReportModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="specificReportModalLabel">{{ _('Generate Specific Report') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ url_for('views.generate_specific_report', patient_id=patient.id) }}" method="post" target="_blank">
+                <div class="modal-body">
+                    <p>{{ _('Create a customized report by selecting specific elements to include:') }}</p>
+                    
+                    <!-- Summary section -->
+                    <div class="mb-4">
+                        <label for="specific_summary" class="form-label">{{ _('Summary (Optional)') }}</label>
+                        <textarea class="form-control" id="specific_summary" name="summary" rows="3" placeholder="{{ _('Add an optional summary for this report.') }}"></textarea>
+                        <div class="form-text">{{ _('This summary will only be included in this report and will not be saved for future reference.') }}</div>
+                    </div>
+                    
+                    <!-- Notes section -->
+                    <h6 class="mb-2 border-bottom pb-2">{{ _('Medical Notes') }}</h6>
+                    <div class="mb-4" id="notesSelectionContainer">
+                        <div class="form-text mb-2">{{ _('Select notes to include in the report:') }}</div>
+                        <div class="d-flex justify-content-end mb-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="selectAllNotes">{{ _('Select All') }}</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary ms-2" id="deselectAllNotes">{{ _('Deselect All') }}</button>
+                        </div>
+                        
+                        <div class="notes-list" style="max-height: 200px; overflow-y: auto;">
+                            <!-- Notes checkboxes will be loaded here dynamically -->
+                            <div class="text-center py-3" id="notesLoading">
+                                <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                    <span class="visually-hidden">{{ _('Loading...') }}</span>
+                                </div>
+                                <span class="text-muted ms-2">{{ _('Loading notes...') }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Vital Types section -->
+                    <h6 class="mb-2 border-bottom pb-2">{{ _('Vital Signs') }}</h6>
+                    <div class="mb-4" id="vitalTypesSelectionContainer">
+                        <div class="form-text mb-2">{{ _('Select vital sign types to include:') }}</div>
+                        <div class="d-flex justify-content-end mb-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="selectAllVitalTypes">{{ _('Select All') }}</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary ms-2" id="deselectAllVitalTypes">{{ _('Deselect All') }}</button>
+                        </div>
+                        
+                        <div class="vital-types-list">
+                            {% for vital_type in vital_types %}
+                            <div class="vital-type-item mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input vital-type-checkbox" type="checkbox" id="vitalType{{ loop.index }}" name="selected_vital_types" value="{{ vital_type.value }}">
+                                    <label class="form-check-label" for="vitalType{{ loop.index }}">
+                                        {{ _(vital_type.value|replace('_', ' ')|title) }}
+                                    </label>
+                                </div>
+                                
+                                <div class="charts-selection ms-4 mt-2 d-none">
+                                    <div class="form-text mb-1">{{ _('Select time periods for charts:') }}</div>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="checkbox" id="chart1d{{ loop.index }}" name="charts_{{ vital_type.value }}" value="1d">
+                                            <label class="form-check-label" for="chart1d{{ loop.index }}">{{ _('1 Day') }}</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="checkbox" id="chart7d{{ loop.index }}" name="charts_{{ vital_type.value }}" value="7d">
+                                            <label class="form-check-label" for="chart7d{{ loop.index }}">{{ _('7 Days') }}</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="checkbox" id="chart1m{{ loop.index }}" name="charts_{{ vital_type.value }}" value="1m">
+                                            <label class="form-check-label" for="chart1m{{ loop.index }}">{{ _('1 Month') }}</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="checkbox" id="chart3m{{ loop.index }}" name="charts_{{ vital_type.value }}" value="3m">
+                                            <label class="form-check-label" for="chart3m{{ loop.index }}">{{ _('3 Months') }}</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="checkbox" id="chart1y{{ loop.index }}" name="charts_{{ vital_type.value }}" value="1y">
+                                            <label class="form-check-label" for="chart1y{{ loop.index }}">{{ _('1 Year') }}</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="observations-selection ms-4 mt-2 d-none">
+                                    <div class="form-text mb-1">{{ _('Select observations:') }}</div>
+                                    <div class="observations-list" data-vital-type="{{ vital_type.value }}" style="max-height: 150px; overflow-y: auto;">
+                                        <!-- Observations checkboxes will be loaded here dynamically -->
+                                        <div class="text-center py-2">
+                                            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                                <span class="visually-hidden">{{ _('Loading...') }}</span>
+                                            </div>
+                                            <span class="text-muted ms-2">{{ _('Loading observations...') }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('Cancel') }}</button>
+                    <button type="submit" class="btn btn-primary">{{ _('Generate Report') }}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 {% block scripts %}
 <!-- Chart.js per i grafici -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
@@ -302,5 +439,177 @@
     const BASE_URL = "{{ url_for('views.index') }}";
     // Patient ID per la pagina corrente
     const PATIENT_ID = {{ patient.id }};
+    
+    // Handle complete report modal
+    document.getElementById('generateCompleteReportBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // Open the complete report modal
+        const completeReportModal = new bootstrap.Modal(document.getElementById('completeReportModal'));
+        completeReportModal.show();
+    });
+    
+    // Handle specific report modal
+    document.getElementById('generateSpecificReportBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // Load notes for the specific report
+        loadNotesForSpecificReport();
+        
+        // Load observations for each vital type
+        loadObservationsForSpecificReport();
+        
+        // Show/hide charts and observations selections when vital type is checked/unchecked
+        const vitalTypeCheckboxes = document.querySelectorAll('.vital-type-checkbox');
+        vitalTypeCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const parent = this.closest('.vital-type-item');
+                const chartsSelection = parent.querySelector('.charts-selection');
+                const observationsSelection = parent.querySelector('.observations-selection');
+                
+                if (this.checked) {
+                    chartsSelection.classList.remove('d-none');
+                    observationsSelection.classList.remove('d-none');
+                } else {
+                    chartsSelection.classList.add('d-none');
+                    observationsSelection.classList.add('d-none');
+                }
+            });
+        });
+        
+        // Select/deselect all notes
+        document.getElementById('selectAllNotes').addEventListener('click', function() {
+            document.querySelectorAll('.note-checkbox').forEach(checkbox => {
+                checkbox.checked = true;
+            });
+        });
+        
+        document.getElementById('deselectAllNotes').addEventListener('click', function() {
+            document.querySelectorAll('.note-checkbox').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+        });
+        
+        // Select/deselect all vital types
+        document.getElementById('selectAllVitalTypes').addEventListener('click', function() {
+            document.querySelectorAll('.vital-type-checkbox').forEach(checkbox => {
+                checkbox.checked = true;
+                checkbox.dispatchEvent(new Event('change'));
+            });
+        });
+        
+        document.getElementById('deselectAllVitalTypes').addEventListener('click', function() {
+            document.querySelectorAll('.vital-type-checkbox').forEach(checkbox => {
+                checkbox.checked = false;
+                checkbox.dispatchEvent(new Event('change'));
+            });
+        });
+        
+        // Open the specific report modal
+        const specificReportModal = new bootstrap.Modal(document.getElementById('specificReportModal'));
+        specificReportModal.show();
+    });
+    
+    // Function to load notes for the specific report modal
+    function loadNotesForSpecificReport() {
+        const notesContainer = document.querySelector('#notesSelectionContainer .notes-list');
+        const loadingElement = document.getElementById('notesLoading');
+        
+        // Show loading state
+        if (loadingElement) {
+            loadingElement.classList.remove('d-none');
+        }
+        
+        fetch(`${BASE_URL}api/patients/${PATIENT_ID}/notes`)
+            .then(response => response.json())
+            .then(data => {
+                // Hide loading state
+                if (loadingElement) {
+                    loadingElement.classList.add('d-none');
+                }
+                
+                // If there are no notes
+                if (data.length === 0) {
+                    notesContainer.innerHTML = `<p class="text-center text-muted py-2">${translateText('No notes available')}</p>`;
+                    return;
+                }
+                
+                // Create checkboxes for each note
+                let html = '';
+                data.forEach(note => {
+                    const date = new Date(note.created_at).toLocaleString();
+                    const preview = note.content.length > 50 ? note.content.substring(0, 50) + '...' : note.content;
+                    
+                    html += `
+                    <div class="form-check mb-2">
+                        <input class="form-check-input note-checkbox" type="checkbox" id="note${note.id}" name="selected_notes" value="${note.id}">
+                        <label class="form-check-label" for="note${note.id}">
+                            <span class="fw-bold">${date}</span> - ${preview}
+                        </label>
+                    </div>
+                    `;
+                });
+                
+                notesContainer.innerHTML = html;
+            })
+            .catch(error => {
+                console.error('Error loading notes:', error);
+                if (loadingElement) {
+                    loadingElement.classList.add('d-none');
+                }
+                notesContainer.innerHTML = `<p class="text-center text-danger py-2">${translateText('Error loading notes')}</p>`;
+            });
+    }
+    
+    // Function to load observations for the specific report modal
+    function loadObservationsForSpecificReport() {
+        fetch(`${BASE_URL}api/patients/${PATIENT_ID}/observations`)
+            .then(response => response.json())
+            .then(data => {
+                // Group observations by vital type
+                const observationsByType = {};
+                data.forEach(obs => {
+                    if (!observationsByType[obs.vital_type]) {
+                        observationsByType[obs.vital_type] = [];
+                    }
+                    observationsByType[obs.vital_type].push(obs);
+                });
+                
+                // Update each observation list
+                document.querySelectorAll('.observations-list').forEach(container => {
+                    const vitalType = container.dataset.vitalType;
+                    const observations = observationsByType[vitalType] || [];
+                    
+                    if (observations.length === 0) {
+                        container.innerHTML = `<p class="text-center text-muted py-2">${translateText('No observations available for this vital type')}</p>`;
+                        return;
+                    }
+                    
+                    let html = '';
+                    observations.forEach(obs => {
+                        const startDate = new Date(obs.start_date).toLocaleDateString();
+                        const endDate = new Date(obs.end_date).toLocaleDateString();
+                        const preview = obs.content.length > 30 ? obs.content.substring(0, 30) + '...' : obs.content;
+                        
+                        html += `
+                        <div class="form-check mb-2">
+                            <input class="form-check-input observation-checkbox" type="checkbox" id="obs${obs.id}" name="selected_observations" value="${obs.id}">
+                            <label class="form-check-label" for="obs${obs.id}">
+                                <span class="fw-bold">${startDate} - ${endDate}</span>: ${preview}
+                            </label>
+                        </div>
+                        `;
+                    });
+                    
+                    container.innerHTML = html;
+                });
+            })
+            .catch(error => {
+                console.error('Error loading observations:', error);
+                document.querySelectorAll('.observations-list').forEach(container => {
+                    container.innerHTML = `<p class="text-center text-danger py-2">${translateText('Error loading observations')}</p>`;
+                });
+            });
+    }
 </script>
 {% endblock %}
