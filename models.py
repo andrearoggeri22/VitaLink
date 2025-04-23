@@ -161,6 +161,12 @@ class Doctor(UserMixin, db.Model):
             db.session.delete(association)
             db.session.commit()
 
+class HealthPlatform(Enum):
+    # Types of health platforms that can be integrated
+    FITBIT = "fitbit"
+    GOOGLE_FIT = "google_fit"
+    APPLE_HEALTH = "apple_health"
+
 class Patient(db.Model):
     # Model representing a patient in the system
     #
@@ -177,6 +183,10 @@ class Patient(db.Model):
     #   updated_at: Record last update date
     #   vital_signs: Relationship with patient's vital signs
     #   notes: Relationship with patient's medical notes
+    #   connected_platform: Health platform connected to this patient (Fitbit, Google Fit, etc.)
+    #   platform_access_token: OAuth access token for the connected health platform
+    #   platform_refresh_token: OAuth refresh token for the connected health platform
+    #   platform_token_expires_at: Expiration date of the current access token
     __tablename__ = 'patient'
     id = db.Column(db.Integer, primary_key=True)
     uuid = db.Column(db.String(36), unique=True, nullable=False, default=lambda: str(uuid.uuid4()))
@@ -188,6 +198,12 @@ class Patient(db.Model):
     address = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Health platform integration
+    connected_platform = db.Column(db.Enum(HealthPlatform), nullable=True)
+    platform_access_token = db.Column(db.String(1024), nullable=True)
+    platform_refresh_token = db.Column(db.String(1024), nullable=True)
+    platform_token_expires_at = db.Column(db.DateTime, nullable=True)
     
     # Relationships
     vital_signs = db.relationship('VitalSign', backref='patient', lazy='dynamic')
@@ -338,6 +354,48 @@ class EntityType(Enum):
     VITAL_SIGN = "vital_sign"
     NOTE = "note"
     REPORT = "report"
+    
+class HealthPlatformLink(db.Model):
+    # Model for storing temporary links for health platform integration
+    # These links expire after 24 hours and are used for patients to connect their health devices
+    #
+    # Attributes:
+    #   id: Unique identifier of the link
+    #   uuid: Unique UUID for the link, used in URLs
+    #   patient_id: ID of the patient this link is for
+    #   doctor_id: ID of the doctor who created the link
+    #   created_at: Link creation date/time
+    #   expires_at: Link expiration date/time (24 hours after creation)
+    #   used: Whether the link has been used
+    #   platform: The health platform this link is for (Fitbit, Google Fit, etc.)
+    __tablename__ = 'health_platform_link'
+    id = db.Column(db.Integer, primary_key=True)
+    uuid = db.Column(db.String(36), unique=True, nullable=False, default=lambda: str(uuid.uuid4()))
+    patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=False)
+    doctor_id = db.Column(db.Integer, db.ForeignKey('doctor.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    expires_at = db.Column(db.DateTime, default=lambda: datetime.utcnow() + datetime.timedelta(hours=24))
+    used = db.Column(db.Boolean, default=False)
+    platform = db.Column(db.Enum(HealthPlatform), nullable=False)
+    
+    # Relationships
+    patient = db.relationship('Patient', backref=db.backref('health_platform_links', lazy='dynamic'))
+    doctor = db.relationship('Doctor', backref=db.backref('health_platform_links', lazy='dynamic'))
+    
+    def is_expired(self):
+        return datetime.utcnow() > self.expires_at
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'uuid': self.uuid,
+            'patient_id': self.patient_id,
+            'doctor_id': self.doctor_id,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'expires_at': self.expires_at.isoformat() if self.expires_at else None,
+            'used': self.used,
+            'platform': self.platform.value if self.platform else None,
+        }
 
 class AuditLog(db.Model):
     # Model for storing audit logs of all actions performed in the system
