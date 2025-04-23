@@ -212,13 +212,13 @@ function updateObservationsUI(observations) {
 }
 
 /**
- * Apre il modal per aggiungere o modificare un'osservazione
- * @param {Object} observation Osservazione da modificare (null per aggiunta)
+ * Apre il modal per aggiungere una nuova osservazione
+ * @param {Object} observation Osservazione esistente solo per visualizzare i dettagli ed eventuale eliminazione
  */
 function openObservationModal(observation = null) {
     // Titolo del modal
     const modalTitle = document.getElementById('observationModalLabel');
-    modalTitle.textContent = observation ? translateText('Modifica osservazione') : translateText('Aggiungi osservazione');
+    modalTitle.textContent = translateText('Aggiungi osservazione');
     
     // Form
     const form = document.getElementById('observationForm');
@@ -229,43 +229,30 @@ function openObservationModal(observation = null) {
     // Popola le opzioni per i tipi di vitali disponibili
     populateVitalTypeOptions();
     
-    // ID osservazione (per modifica)
+    // ID osservazione (solo per eliminazione)
     const observationIdInput = document.getElementById('observationId');
     if (observationIdInput) {
         observationIdInput.value = observation ? observation.id : '';
     }
     
-    // Pulsante di eliminazione
+    // Pulsante di eliminazione - visibile solo se si tratta di un'osservazione esistente
     const deleteBtn = document.getElementById('deleteObservationBtn');
-    if (deleteBtn) {
+    const saveBtn = document.getElementById('saveObservationBtn');
+    
+    if (deleteBtn && saveBtn) {
         if (observation) {
+            // Se è un'osservazione esistente, mostra solo il pulsante di eliminazione
             deleteBtn.classList.remove('d-none');
+            saveBtn.classList.add('d-none');  // Nascondi il pulsante Salva
         } else {
+            // Se è una nuova osservazione, mostra solo il pulsante di salvataggio
             deleteBtn.classList.add('d-none');
+            saveBtn.classList.remove('d-none');
         }
     }
     
-    // Se è una modifica, popola i campi
-    if (observation) {
-        const typeSelect = document.getElementById('observationType');
-        const contentTextarea = document.getElementById('observationContent');
-        const startDateInput = document.getElementById('observationStartDate');
-        const endDateInput = document.getElementById('observationEndDate');
-        
-        if (typeSelect) typeSelect.value = observation.vital_type;
-        if (contentTextarea) contentTextarea.value = observation.content;
-        
-        if (startDateInput) {
-            const startDate = new Date(observation.start_date);
-            startDateInput.value = formatDateForInput(startDate);
-        }
-        
-        if (endDateInput) {
-            const endDate = new Date(observation.end_date);
-            endDateInput.value = formatDateForInput(endDate);
-        }
-    } else {
-        // Se è un'aggiunta, imposta date predefinite in base al periodo corrente
+    // Date predefinite in base al periodo corrente (solo per nuove osservazioni)
+    if (!observation) {
         const startDateInput = document.getElementById('observationStartDate');
         const endDateInput = document.getElementById('observationEndDate');
         
@@ -276,6 +263,14 @@ function openObservationModal(observation = null) {
             
             startDateInput.value = formatDateForInput(startDate);
             endDateInput.value = formatDateForInput(endDate);
+        }
+        
+        // Seleziona automaticamente il tipo di parametro vitale corrente
+        if (currentVitalType) {
+            const typeSelect = document.getElementById('observationType');
+            if (typeSelect) {
+                typeSelect.value = currentVitalType.toLowerCase();
+            }
         }
     }
     
@@ -306,14 +301,13 @@ function populateVitalTypeOptions() {
 }
 
 /**
- * Salva una nuova osservazione o aggiorna una esistente
+ * Salva una nuova osservazione
  */
 function saveObservation() {
     // Recupera dati dal form
     const form = document.getElementById('observationForm');
     if (!form) return;
     
-    const id = document.getElementById('observationId').value;
     const vitalType = document.getElementById('observationType').value;
     const content = document.getElementById('observationContent').value;
     const startDate = document.getElementById('observationStartDate').value;
@@ -341,15 +335,9 @@ function saveObservation() {
         end_date: endDate
     };
     
-    // URL e metodo dell'API
-    let apiUrl = `/web/observations`;
-    let method = 'POST';
-    
-    // Se è un aggiornamento
-    if (id) {
-        apiUrl += `/${id}`;
-        method = 'PUT';
-    }
+    // URL e metodo dell'API - sempre POST per una nuova osservazione
+    const apiUrl = `/web/observations`;
+    const method = 'POST';
     
     console.log('Saving observation:', observationData);
     
@@ -374,10 +362,7 @@ function saveObservation() {
         observationModal.hide();
         
         // Mostra messaggio di successo
-        showAlert(
-            id ? 'Osservazione aggiornata con successo' : 'Osservazione aggiunta con successo', 
-            'success'
-        );
+        showAlert('Osservazione aggiunta con successo', 'success');
         
         // Ricarica le osservazioni
         loadObservations();
