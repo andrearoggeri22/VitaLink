@@ -16,8 +16,8 @@ from flask_babel import gettext as _
 from sqlalchemy.exc import SQLAlchemyError
 
 from app import app, db
-from models import Patient, HealthPlatform, HealthPlatformLink, VitalSignType
-from utils import get_vital_sign_unit
+from models import Patient, HealthPlatform, HealthPlatformLink, VitalSignType, ActionType, EntityType
+from audit import log_action
 from health_platforms_config import FITBIT_CONFIG, FITBIT_ENDPOINTS
 
 # Create the blueprint

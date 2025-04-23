@@ -86,7 +86,7 @@ def inject_globals():
 
 with app.app_context():
     # Import models to ensure they're registered with SQLAlchemy
-    from models import Doctor, Patient, VitalSign, DoctorPatient, Note, AuditLog
+    from models import Doctor, Patient, VitalSign, DoctorPatient, Note, AuditLog, HealthPlatformLink
     
     # Import and register blueprints
     from auth import auth_bp
@@ -95,6 +95,7 @@ with app.app_context():
     from audit import audit_bp
     from language import language_bp
     from fitbit_integration import fitbit_bp
+    from health_platforms import health_bp
     
     app.register_blueprint(auth_bp)
     app.register_blueprint(views_bp)
@@ -102,6 +103,7 @@ with app.app_context():
     app.register_blueprint(audit_bp, url_prefix='/audit')
     app.register_blueprint(language_bp)
     app.register_blueprint(fitbit_bp, url_prefix='/fitbit')
+    app.register_blueprint(health_bp)
     
     # Create database tables
     db.create_all()
