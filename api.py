@@ -483,3 +483,51 @@ def delete_observation(doctor, observation_id):
         db.session.rollback()
         logger.error(f"Error deleting observation: {str(e)}")
         return jsonify({"error": _("An error occurred while deleting the observation")}), 500
+        
+@api_bp.route('/patients/import', methods=['POST'])
+@doctor_required
+def import_patient(doctor):
+    """Import an existing patient by UUID."""
+    data = request.json
+    
+    # Validate request data
+    if not data or 'patient_uuid' not in data:
+        return jsonify({"error": _("Patient UUID is required")}), 400
+    
+    patient_uuid = data['patient_uuid']
+    
+    # Validate UUID format
+    if not validate_uuid(patient_uuid):
+        return jsonify({"error": _("Invalid UUID format")}), 400
+    
+    # Find the patient
+    patient = Patient.query.filter_by(uuid=patient_uuid).first()
+    
+    if not patient:
+        return jsonify({"error": _("Patient not found")}), 404
+    
+    # Check if the doctor is already associated with this patient
+    if patient in doctor.patients.all():
+        return jsonify({"error": _("Patient is already associated with your account")}), 409
+    
+    try:
+        # Add patient to doctor's patients
+        doctor_patient = DoctorPatient(doctor_id=doctor.id, patient_id=patient.id)
+        db.session.add(doctor_patient)
+        db.session.commit()
+        
+        # Log the import action
+        log_patient_import(doctor.id, patient)
+        
+        return jsonify({
+            "message": _("Patient imported successfully"),
+            "patient": patient.to_dict()
+        }), 200
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        logger.error(f"Database error importing patient: {str(e)}")
+        return jsonify({"error": _("A database error occurred while importing the patient")}), 500
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error importing patient: {str(e)}")
+        return jsonify({"error": _("An error occurred while importing the patient")}), 500
