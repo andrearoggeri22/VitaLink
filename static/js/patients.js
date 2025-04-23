@@ -9,6 +9,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Set up delete patient confirmation
     initDeleteConfirmation();
+    
+    // Set up import patient functionality
+    initImportPatient();
 });
 
 /**
@@ -128,5 +131,94 @@ function openAddNoteModal(patientId, patientName) {
         
         const bsModal = new bootstrap.Modal(modal);
         bsModal.show();
+    }
+}
+
+/**
+ * Initialize the import patient functionality
+ */
+function initImportPatient() {
+    const importBtn = document.getElementById('importPatientBtn');
+    const importModal = document.getElementById('importPatientModal');
+    const submitBtn = document.getElementById('importPatientSubmit');
+    
+    if (importBtn && importModal) {
+        // Show the modal when the import button is clicked
+        importBtn.addEventListener('click', function() {
+            const modal = new bootstrap.Modal(importModal);
+            modal.show();
+        });
+        
+        // Handle form submission
+        if (submitBtn) {
+            submitBtn.addEventListener('click', function() {
+                const uuidInput = document.getElementById('patientUUID');
+                const errorDiv = document.getElementById('importPatientError');
+                
+                if (uuidInput.value.trim() === '') {
+                    // Show error if the UUID is empty
+                    if (errorDiv) {
+                        errorDiv.textContent = document.documentElement.lang === "it" 
+                            ? "Inserisci un UUID valido" 
+                            : "Please enter a valid UUID";
+                        errorDiv.style.display = 'block';
+                    }
+                    return;
+                }
+                
+                // Clear previous errors
+                if (errorDiv) {
+                    errorDiv.style.display = 'none';
+                }
+                
+                // Disable the submit button and show loading state
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>' + 
+                                      (document.documentElement.lang === "it" ? "Importazione..." : "Importing...");
+                
+                // Make the request to import the patient
+                fetch('/api/import_patient', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ uuid: uuidInput.value.trim() })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Reload the page on success to show the newly imported patient
+                        window.location.reload();
+                    } else {
+                        // Show error message
+                        if (errorDiv) {
+                            errorDiv.textContent = data.message;
+                            errorDiv.style.display = 'block';
+                        }
+                        
+                        // Reset button state
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<i class="fas fa-file-import me-1"></i>' + 
+                                             (document.documentElement.lang === "it" ? "Importa Paziente" : "Import Patient");
+                    }
+                })
+                .catch(error => {
+                    console.error('Error importing patient:', error);
+                    
+                    // Show generic error message
+                    if (errorDiv) {
+                        errorDiv.textContent = document.documentElement.lang === "it"
+                            ? "Si è verificato un errore durante l'importazione del paziente. Riprova più tardi."
+                            : "An error occurred while importing the patient. Please try again later.";
+                        errorDiv.style.display = 'block';
+                    }
+                    
+                    // Reset button state
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-file-import me-1"></i>' + 
+                                         (document.documentElement.lang === "it" ? "Importa Paziente" : "Import Patient");
+                });
+            });
+        }
     }
 }

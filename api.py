@@ -5,9 +5,10 @@ from flask import Blueprint, request, jsonify
 from sqlalchemy.exc import SQLAlchemyError
 from flask_babel import gettext as _
 from app import db
-from models import Patient, VitalSignType, Note, VitalObservation
+from models import Patient, VitalSignType, Note, VitalObservation, DoctorPatient
 from auth import api_doctor_required as doctor_required
 from utils import validate_uuid
+from audit import log_patient_import
 
 api_bp = Blueprint('api', __name__)
 logger = logging.getLogger(__name__)
