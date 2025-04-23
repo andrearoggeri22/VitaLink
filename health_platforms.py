@@ -431,9 +431,36 @@ def get_processed_fitbit_data(patient, data_type, start_date=None, end_date=None
     Returns:
         list: Processed data in format [{'timestamp': ISO8601, 'value': 123, 'unit': 'xyz'}, ...]
     """
-    raw_data = get_fitbit_data(patient, data_type, start_date, end_date)
+    # Convert data_type to lowercase if it's coming from JavaScript/frontend
+    # JavaScript uses uppercase like 'HEART_RATE' while Python backend expects lowercase like 'heart_rate'
+    normalized_data_type = data_type.lower() if isinstance(data_type, str) else data_type
+    
+    # Common conversions to handle different naming formats
+    if normalized_data_type == 'heart_rate':
+        api_data_type = 'heart_rate'
+    elif normalized_data_type in ['steps', 'step', 'steps_count']:
+        api_data_type = 'steps'
+    elif normalized_data_type in ['distance', 'distance_km']:
+        api_data_type = 'distance'
+    elif normalized_data_type in ['calories', 'calorie', 'energy']:
+        api_data_type = 'calories'
+    elif normalized_data_type in ['active_minutes', 'active_time', 'activity']:
+        api_data_type = 'active_minutes'
+    elif normalized_data_type in ['sleep_duration', 'sleep', 'sleep_time']:
+        api_data_type = 'sleep_duration'
+    elif normalized_data_type in ['floors_climbed', 'floors', 'elevation']:
+        api_data_type = 'floors_climbed'
+    elif normalized_data_type in ['weight', 'weight_kg', 'body_weight']:
+        api_data_type = 'weight'
+    else:
+        # Default to the original value if no match found
+        api_data_type = normalized_data_type
+    
+    raw_data = get_fitbit_data(patient, api_data_type, start_date, end_date)
     if raw_data:
-        return process_fitbit_data(raw_data, data_type)
+        return process_fitbit_data(raw_data, api_data_type)
+    
+    logger.warning(f"No data returned from Fitbit API for {api_data_type}, patient {patient.id}")
     return []
 
 # -------- Blueprint routes --------
