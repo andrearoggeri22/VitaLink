@@ -73,7 +73,7 @@ def new_patient():
         
         # Validate required fields
         if not first_name or not last_name or not date_of_birth:
-            flash(_('Nome, cognome e data di nascita sono campi obbligatori'), 'danger')
+            flash(_('Name, surname and date of birth are mandatory fields'), 'danger')
             return redirect(url_for('views.new_patient'))
         
         try:
@@ -102,17 +102,17 @@ def new_patient():
             # Log the patient creation in the audit trail
             log_patient_creation(current_user.id, patient)
             
-            flash(_(f'Paziente {first_name} {last_name} creato con successo con ID {patient.uuid}'), 'success')
+            flash(_(f'Patient {first_name} {last_name} successfully created with ID {patient.uuid}'), 'success')
             logger.info(f"Doctor {current_user.id} created patient {patient.id}")
             
             return redirect(url_for('views.patient_detail', patient_id=patient.id))
             
         except ValueError:
-            flash(_('Formato data non valido. Utilizzare AAAA-MM-GG'), 'danger')
+            flash(_('Invalid date format. Use YYYY-MM-DD'), 'danger')
         except SQLAlchemyError as e:
             db.session.rollback()
             logger.error(f"Error creating patient: {str(e)}")
-            flash(_('Si è verificato un errore durante la creazione del paziente'), 'danger')
+            flash(_('An error occurred while creating the patient'), 'danger')
     
     return render_template('patients.html', mode='new', now=datetime.now())
 
@@ -124,7 +124,7 @@ def patient_detail(patient_id):
     
     # Check if the current doctor is associated with this patient
     if patient not in current_user.patients.all():
-        flash(_('Non sei autorizzato a visualizzare questo paziente'), 'danger')
+        flash(_('You are not authorized to view this patient.'), 'danger')
         return redirect(url_for('views.patients'))
     
     # Get recent vital signs
@@ -149,7 +149,7 @@ def edit_patient(patient_id):
     
     # Check if the current doctor is associated with this patient
     if patient not in current_user.patients.all():
-        flash(_('Non sei autorizzato a modificare questo paziente'), 'danger')
+        flash(_('You are not authorized to modify this patient.'), 'danger')
         return redirect(url_for('views.patients'))
     
     if request.method == 'POST':
@@ -162,7 +162,7 @@ def edit_patient(patient_id):
         
         # Validate required fields
         if not first_name or not last_name or not date_of_birth:
-            flash(_('Nome, cognome e data di nascita sono campi obbligatori'), 'danger')
+            flash(_('Name, surname and date of birth are mandatory fields'), 'danger')
             return redirect(url_for('views.edit_patient', patient_id=patient_id))
         
         try:
@@ -186,17 +186,17 @@ def edit_patient(patient_id):
             # Log the patient update in the audit trail
             log_patient_update(current_user.id, patient, old_data)
             
-            flash(_('Informazioni del paziente aggiornate con successo'), 'success')
+            flash(_('Patient information updated successfully'), 'success')
             logger.info(f"Doctor {current_user.id} updated patient {patient.id}")
             
             return redirect(url_for('views.patient_detail', patient_id=patient_id))
             
         except ValueError:
-            flash(_('Formato data non valido. Utilizzare AAAA-MM-GG'), 'danger')
+            flash(_('Invalid date format. Use YYYY-MM-DD'), 'danger')
         except SQLAlchemyError as e:
             db.session.rollback()
             logger.error(f"Error updating patient: {str(e)}")
-            flash(_('Si è verificato un errore durante l\'aggiornamento del paziente'), 'danger')
+            flash(_('An error occurred while updating the patient'), 'danger')
     
     return render_template('patients.html', mode='edit', patient=patient, now=datetime.now())
 
@@ -207,7 +207,7 @@ def delete_patient(patient_id):
     
     # Check if the current doctor is associated with this patient
     if patient not in current_user.patients.all():
-        flash(_('Non sei autorizzato a eliminare questo paziente'), 'danger')
+        flash(_('You are not authorized to delete this patient.'), 'danger')
         return redirect(url_for('views.patients'))
     
     try:
@@ -247,13 +247,13 @@ def delete_patient(patient_id):
         
         db.session.commit()
         
-        flash(_('Paziente rimosso con successo'), 'success')
+        flash(_('Patient successfully removed'), 'success')
         logger.info(f"Doctor {current_user.id} removed patient {patient_id}")
         
     except SQLAlchemyError as e:
         db.session.rollback()
         logger.error(f"Error deleting patient: {str(e)}")
-        flash(_('Si è verificato un errore durante la rimozione del paziente'), 'danger')
+        flash(_('An error occurred while removing the patient'), 'danger')
     
     return redirect(url_for('views.patients'))
 
@@ -264,7 +264,7 @@ def patient_vitals(patient_id):
     
     # Check if the current doctor is associated with this patient
     if patient not in current_user.patients.all():
-        flash(_('Non sei autorizzato a visualizzare questo paziente'), 'danger')
+        flash(_('Nou are not authorized to view this patient'), 'danger')
         return redirect(url_for('views.patients'))
     
     if request.method == 'POST':
@@ -275,7 +275,7 @@ def patient_vitals(patient_id):
         
         # Validate required fields
         if not vital_type or not value:
-            flash(_('Il tipo di parametro vitale e il valore sono campi obbligatori'), 'danger')
+            flash(_('Vital parameter type and value are mandatory fields'), 'danger')
             return redirect(url_for('views.patient_vitals', patient_id=patient_id))
         
         try:
@@ -290,7 +290,7 @@ def patient_vitals(patient_id):
                 try:
                     recorded_datetime = datetime.strptime(recorded_at, '%Y-%m-%dT%H:%M')
                 except ValueError:
-                    flash(_('Formato data/ora non valido. Utilizzare AAAA-MM-GGTHH:MM'), 'danger')
+                    flash(_('Invalid date/time format. Use YYYY-MM-DDTHH:MM'), 'danger')
                     return redirect(url_for('views.patient_vitals', patient_id=patient_id))
             else:
                 recorded_datetime = datetime.utcnow()
@@ -343,11 +343,11 @@ def patient_vitals(patient_id):
             logger.info(f"Doctor {current_user.id} added vital sign for patient {patient_id}")
             
         except ValueError:
-            flash(_('Formato valore non valido'), 'danger')
+            flash(_('Invalid value format'), 'danger')
         except SQLAlchemyError as e:
             db.session.rollback()
             logger.error(f"Error adding vital sign: {str(e)}")
-            flash(_('Si è verificato un errore durante la registrazione del parametro vitale'), 'danger')
+            flash(_('An error occurred while recording the vital sign'), 'danger')
     
     # Get vital signs
     start_date = request.args.get('start_date')
@@ -361,7 +361,7 @@ def patient_vitals(patient_id):
             start_datetime = datetime.strptime(start_date, '%Y-%m-%d')
             query = query.filter(VitalSign.recorded_at >= start_datetime)
         except ValueError:
-            flash(_('Formato data di inizio non valido. Utilizzare AAAA-MM-GG'), 'warning')
+            flash(_('Invalid start date format. Use YYYY-MM-DD'), 'warning')
     
     if end_date:
         try:
@@ -370,14 +370,14 @@ def patient_vitals(patient_id):
             end_datetime = end_datetime.replace(hour=23, minute=59, second=59)
             query = query.filter(VitalSign.recorded_at <= end_datetime)
         except ValueError:
-            flash(_('Formato data di fine non valido. Utilizzare AAAA-MM-GG'), 'warning')
+            flash(_('Invalid end date format. Use YYYY-MM-DD'), 'warning')
     
     if vital_type:
         try:
             vital_type_enum = VitalSignType(vital_type)
             query = query.filter(VitalSign.type == vital_type_enum)
         except ValueError:
-            flash(_('Tipo di parametro vitale non valido'), 'warning')
+            flash(_('Invalid vital sign type'), 'warning')
     
     vitals = query.order_by(VitalSign.recorded_at.desc()).all()
     
@@ -455,13 +455,13 @@ def add_note(patient_id):
     
     # Check if the current doctor is associated with this patient
     if patient not in current_user.patients.all():
-        flash(_('Non sei autorizzato ad aggiungere note per questo paziente'), 'danger')
+        flash(_('You are not allowed to add notes for this patient'), 'danger')
         return redirect(url_for('views.patients'))
     
     content = request.form.get('content')
     
     if not content:
-        flash('Note content cannot be empty', 'danger')
+        flash(_('Note content cannot be empty'), 'danger')
         return redirect(url_for('views.patient_detail', patient_id=patient_id))
     
     try:
@@ -477,13 +477,13 @@ def add_note(patient_id):
         # Log the note creation in the audit trail
         log_note_creation(current_user.id, note)
         
-        flash(_('Nota aggiunta con successo'), 'success')
+        flash(_('Note added successfully'), 'success')
         logger.info(f"Doctor {current_user.id} added note for patient {patient_id}")
         
     except SQLAlchemyError as e:
         db.session.rollback()
         logger.error(f"Error adding note: {str(e)}")
-        flash(_('Si è verificato un errore durante l\'aggiunta della nota'), 'danger')
+        flash(_('An error occurred while adding the note'), 'danger')
     
     return redirect(url_for('views.patient_detail', patient_id=patient_id))
 
@@ -506,20 +506,20 @@ def profile():
             current_user.updated_at = datetime.utcnow()
             
             db.session.commit()
-            flash(_('Profilo aggiornato con successo'), 'success')
+            flash(_('Profile updated successfully'), 'success')
         
         # Update password
         if current_password and new_password and confirm_password:
             if not current_user.check_password(current_password):
-                flash(_('La password attuale non è corretta'), 'danger')
+                flash(_('The current password is incorrect'), 'danger')
             elif new_password != confirm_password:
-                flash(_('Le nuove password non corrispondono'), 'danger')
+                flash(_('New passwords do not match'), 'danger')
             else:
                 current_user.set_password(new_password)
                 current_user.updated_at = datetime.utcnow()
                 
                 db.session.commit()
-                flash(_('Password aggiornata con successo'), 'success')
+                flash(_('Password updated successfully'), 'success')
     
     return render_template('profile.html', doctor=current_user, now=datetime.now())
 
@@ -531,7 +531,7 @@ def generate_report(patient_id):
     
     # Check if the current doctor is associated with this patient
     if patient not in current_user.patients.all():
-        flash(_('Non sei autorizzato a generare report per questo paziente'), 'danger')
+        flash(_('You are not authorized to generate reports for this patient'), 'danger')
         return redirect(url_for('views.patients'))
     
     # Get filter parameters
@@ -546,7 +546,7 @@ def generate_report(patient_id):
         try:
             start_datetime = datetime.strptime(start_date, '%Y-%m-%d')
         except ValueError:
-            flash(_('Formato data di inizio non valido. Utilizzare AAAA-MM-GG'), 'warning')
+            flash(_('Invalid start date format. Use YYYY-MM-DD'), 'warning')
     
     if end_date:
         try:
@@ -554,7 +554,7 @@ def generate_report(patient_id):
             # Add a day to include all records from the end date
             end_datetime = end_datetime.replace(hour=23, minute=59, second=59)
         except ValueError:
-            flash(_('Formato data di fine non valido. Utilizzare AAAA-MM-GG'), 'warning')
+            flash(_('Invalid end date format. Use YYYY-MM-DD'), 'warning')
     
     # Query vitals with filter
     vitals_query = patient.vital_signs
@@ -625,7 +625,7 @@ def generate_report(patient_id):
         
     except Exception as e:
         logger.error(f"Error generating report: {str(e)}")
-        flash(_('Si è verificato un errore durante la generazione del report'), 'danger')
+        flash(_('An error occurred while generating the report'), 'danger')
         return redirect(url_for('views.patient_detail', patient_id=patient_id))
 
 @views_bp.route('/patients/<int:patient_id>/vital_report/<string:vital_type>')
@@ -636,14 +636,14 @@ def generate_vital_report(patient_id, vital_type):
     
     # Check if the current doctor is associated with this patient
     if patient not in current_user.patients.all():
-        flash(_('Non sei autorizzato a generare report per questo paziente'), 'danger')
+        flash(_('You are not authorized to generate reports for this patient.'), 'danger')
         return redirect(url_for('views.patients'))
     
     # Validate vital type
     try:
         vital_type_enum = VitalSignType(vital_type)
     except ValueError:
-        flash(_('Tipo di parametro vitale non valido'), 'danger')
+        flash(_('Invalid vital sign type'), 'danger')
         return redirect(url_for('views.patient_vitals', patient_id=patient_id))
     
     # Get filter parameters
@@ -658,9 +658,9 @@ def generate_vital_report(patient_id, vital_type):
     if start_date:
         try:
             start_datetime = datetime.strptime(start_date, '%Y-%m-%d')
-            period_desc = f"From {start_date}"
+            period_desc = _("From %(start_date)s") % {"start_date": start_date}
         except ValueError:
-            flash(_('Formato data di inizio non valido. Utilizzare AAAA-MM-GG'), 'warning')
+            flash(_('Invalid start date format. Use YYYY-MM-DD'), 'warning')
     
     if end_date:
         try:
@@ -668,11 +668,16 @@ def generate_vital_report(patient_id, vital_type):
             # Add a day to include all records from the end date
             end_datetime = end_datetime.replace(hour=23, minute=59, second=59)
             if start_date:
-                period_desc = f"{period_desc} to {end_date}"
+                period_desc = _("%(period_desc)s to %(end_date)s") % {
+                    "period_desc": period_desc,
+                    "end_date": end_date
+                }
             else:
-                period_desc = f"Until {end_date}"
+                period_desc = _("Until %(end_date)s") % {
+                    "end_date": end_date
+            }
         except ValueError:
-            flash(_('Formato data di fine non valido. Utilizzare AAAA-MM-GG'), 'warning')
+            flash(_('Invalid end date format. Use YYYY-MM-DD'), 'warning')
     
     # Query vitals with filter
     vitals_query = patient.vital_signs.filter(VitalSign.type == vital_type_enum)
@@ -686,7 +691,7 @@ def generate_vital_report(patient_id, vital_type):
     vitals = vitals_query.order_by(VitalSign.recorded_at).all()
     
     if not vitals:
-        flash(_('Nessun dato disponibile per il parametro vitale e il periodo di tempo selezionati'), 'warning')
+        flash(_('No data available for the selected vital parameter and time period'), 'warning')
         return redirect(url_for('views.patient_vitals', patient_id=patient_id))
     
     # Generate the PDF report
@@ -715,7 +720,9 @@ def generate_vital_report(patient_id, vital_type):
         log_report_generation(
             doctor_id=current_user.id,
             patient_id=patient_id,
-            report_type=f"vital_{vital_type}",
+            report_type = _("vital_%(vital_type)s") % {
+                "vital_type": vital_type
+            },
             params={
                 "start_date": start_date,
                 "end_date": end_date,
@@ -737,5 +744,5 @@ def generate_vital_report(patient_id, vital_type):
         
     except Exception as e:
         logger.error(f"Error generating vital report: {str(e)}")
-        flash(_('Si è verificato un errore durante la generazione del report'), 'danger')
+        flash(_('An error occurred while generating the report'), 'danger')
         return redirect(url_for('views.patient_vitals', patient_id=patient_id))

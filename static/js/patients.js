@@ -89,8 +89,8 @@ function initDeleteConfirmation() {
             const patientName = this.getAttribute('data-name');
             
             confirmAction(
-                window.deletePatientTitle || 'Delete Patient',
-                window.deletePatientMessage ? window.deletePatientMessage.replace('{name}', patientName) : `Are you sure you want to delete the patient ${patientName}? This action cannot be undone.`,
+                document.documentElement.lang === "it" ? "Elimina paziente" : 'Delete Patient',
+                document.documentElement.lang === "it" ? "Sei sicuro di voler eliminare il paziente? L'azione non può essere cancellata." : 'Are you sure you want to delete the patient? This action cannot be undone.',
                 function() {
                     // Submit the delete form
                     const form = document.getElementById(`deleteForm${patientId}`);
@@ -116,7 +116,7 @@ function openAddNoteModal(patientId, patientName) {
         const patientIdField = document.getElementById('notePatientId');
         const form = document.getElementById('addNoteForm');
         
-        modalTitle.textContent = window.addNoteForText ? window.addNoteForText.replace('{name}', patientName) : `Add Note for ${patientName}`;
+        modalTitle.textContent = document.documentElement.lang === "it" ? "Aggiungi nota" : 'Add note';
         
         if (patientIdField) {
             patientIdField.value = patientId;

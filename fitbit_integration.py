@@ -7,7 +7,7 @@ import uuid
 from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app, jsonify
 from flask_login import login_required, current_user
 from sqlalchemy.exc import SQLAlchemyError
-from flask_babel import _
+from flask_babel import gettext as _
 
 from models import Patient, VitalSign, VitalSignType, DataOrigin, db
 from audit import log_vital_creation, log_action, ActionType, EntityType
@@ -117,10 +117,10 @@ def extract_fitbit_data(patient_id):
             # In a real system, we would filter Fitbit devices
             # Fitbit vendor ID is 0x2687
             if 'Fitbit' not in usb_devices and '2687' not in usb_devices:
-                logging.warning("No Fitbit device found in lsusb")
+                logging.warning(_("No Fitbit device found in lsusb"))
                 # We continue anyway to demonstrate functionality
         except (subprocess.SubprocessError, FileNotFoundError):
-            logging.warning("Unable to execute lsusb to find Fitbit devices")
+            logging.warning(_("Unable to execute lsusb to find Fitbit devices"))
 
         # 2. Mount the device (in a real system)
         # In a complete implementation, we would have commands to mount the device's filesystem
@@ -244,7 +244,7 @@ def extract_fitbit_data(patient_id):
     except Exception as e:
         logging.error(
             f"Error during data extraction from the device: {str(e)}")
-        raise DeviceConnectionError(f"Error during data extraction: {str(e)}")
+        raise DeviceConnectionError(_("Error during data extraction: %(error)s") % {"error": str(e)})
 
 
 def save_fitbit_data(patient_id, data):
@@ -267,7 +267,7 @@ def save_fitbit_data(patient_id, data):
     try:
         patient = Patient.query.get(patient_id)
         if not patient:
-            return False, 0, ["Patient not found"]
+            return False, 0, [_("Patient not found")]
 
         # Debug logging
         logging.info(
@@ -275,7 +275,7 @@ def save_fitbit_data(patient_id, data):
 
         for data_type, measurements in data.items():
             if data_type not in FITBIT_DATA_TYPES:
-                errors.append(f"Unsupported data type: {data_type}")
+                errors.append(_("Unsupported data type: %(type)s") % {"type": data_type})
                 continue
 
             vital_type = FITBIT_DATA_TYPES[data_type]
@@ -324,8 +324,10 @@ def save_fitbit_data(patient_id, data):
 
                 except Exception as e:
                     logging.error(f"Save error: {str(e)}")
-                    errors.append(
-                        f"Error saving parameter {data_type}: {str(e)}")
+                    errors.append(_("Error saving parameter %(type)s: %(error)s") % {
+                        "type": data_type,
+                        "error": str(e)
+                })
 
         db.session.commit()
         logging.info(
@@ -335,11 +337,11 @@ def save_fitbit_data(patient_id, data):
     except SQLAlchemyError as e:
         db.session.rollback()
         logging.error(f"SQLAlchemy database error: {str(e)}")
-        return False, 0, [f"Database error: {str(e)}"]
+        return False, 0, [_("Database error: %(error)s") % {"error": str(e)}]
     except Exception as e:
         db.session.rollback()
         logging.error(f"Generic error: {str(e)}")
-        return False, 0, [f"Generic error: {str(e)}"]
+        return False, 0, [_("Generic error: %(error)s") % {"error": str(e)}]
 
 
 @fitbit_bp.route('/patients/<int:patient_id>/check_device', methods=['GET'])
@@ -388,7 +390,7 @@ def upload_fitbit_data(patient_id):
             # Check if the device is connected
             if not check_device_connected():
                 flash(
-                    "No Fitbit device connected. Connect the device via USB and try again.",
+                    _("No Fitbit device connected. Connect the device via USB and try again."),
                     "error")
                 return redirect(
                     url_for('fitbit.upload_fitbit_data',
@@ -398,7 +400,7 @@ def upload_fitbit_data(patient_id):
             try:
                 data = extract_fitbit_data(patient_id)
             except DeviceConnectionError as e:
-                flash(f"Error during data extraction: {str(e)}", "error")
+                flash(_("Error during data extraction: %(error)s") % {"error": str(e)}, "error")
                 return redirect(
                     url_for('fitbit.upload_fitbit_data',
                             patient_id=patient_id))
@@ -407,14 +409,12 @@ def upload_fitbit_data(patient_id):
             success, vitals_saved, errors = save_fitbit_data(patient_id, data)
 
             if success:
-                flash(
-                    f"Fitbit data successfully uploaded. {vitals_saved} vital parameters saved.",
-                    "success")
+                flash(_("Fitbit data successfully uploaded. %(count)s vital parameters saved.") % {"count": vitals_saved}, "success")
                 if errors:
                     for error in errors:
-                        flash(f"Warning: {error}", "warning")
+                        flash(_("Warning: %(msg)s") % {"msg": error}, "warning")
             else:
-                flash("Error saving Fitbit data.", "error")
+                flash(_("Error saving Fitbit data."), "error")
                 for error in errors:
                     flash(error, "error")
 
@@ -422,7 +422,7 @@ def upload_fitbit_data(patient_id):
                 url_for('views.patient_vitals', patient_id=patient_id))
 
         except Exception as e:
-            flash(f"Error during upload process: {str(e)}", "error")
+            flash(_("Error during upload process: %(msg)s") % {"msg": str(e)}, "error")
             return redirect(
                 url_for('fitbit.upload_fitbit_data', patient_id=patient_id))
 
@@ -444,7 +444,7 @@ def mobile_verify_patient():
         data = request.get_json()
 
         if not data or 'patient_uuid' not in data:
-            return jsonify({'error': 'Patient UUID required'}), 400
+            return jsonify({'error': _('Patient UUID required')}), 400
 
         patient_uuid = data['patient_uuid']
 
@@ -452,13 +452,13 @@ def mobile_verify_patient():
             # Verify if UUID is in valid format
             uuid_obj = uuid.UUID(patient_uuid)
         except ValueError:
-            return jsonify({'error': 'Invalid patient UUID'}), 400
+            return jsonify({'error': _('Invalid patient UUID')}), 400
 
         # Search for the patient in the database
         patient = Patient.query.filter_by(uuid=patient_uuid).first()
 
         if not patient:
-            return jsonify({'error': 'Patient not found'}), 404
+            return jsonify({'error': _('Patient not found')}), 404
 
         # Return basic patient information
         return jsonify({
@@ -469,7 +469,7 @@ def mobile_verify_patient():
 
     except Exception as e:
         logging.error(f"Error during mobile patient verification: {str(e)}")
-        return jsonify({'error': 'Server error'}), 500
+        return jsonify({'error': _('Server error')}), 500
 
 
 @fitbit_bp.route('/api/mobile/data/upload', methods=['POST'])
@@ -485,7 +485,7 @@ def mobile_upload_data():
         data = request.get_json()
 
         if not data:
-            return jsonify({'error': 'Data required'}), 400
+            return jsonify({'error': _('Data required')}), 400
 
         # Validate required data
         required_fields = ['patient_id', 'fitbit_data']
@@ -499,7 +499,7 @@ def mobile_upload_data():
         # Verify that the patient exists
         patient = Patient.query.get(patient_id)
         if not patient:
-            return jsonify({'error': 'Patient not found'}), 404
+            return jsonify({'error': _('Patient not found')}), 404
 
         # Save Fitbit data
         success, vitals_saved, errors = save_fitbit_data(

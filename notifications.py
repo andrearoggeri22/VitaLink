@@ -4,7 +4,7 @@ from datetime import datetime
 import clicksend_client
 from clicksend_client.rest import ApiException
 from flask import session, request, current_app
-
+from flask_babel import gettext as _
 # Setup logger
 logger = logging.getLogger(__name__)
 
@@ -74,7 +74,7 @@ def send_sms(to_number, message):
     # Check if ClickSend is configured
     if not all([CLICKSEND_USERNAME, CLICKSEND_API_KEY, CLICKSEND_FROM_NUMBER]):
         logger.error("ClickSend credentials not configured")
-        return False, "SMS notification service not configured"
+        return False, _("SMS notification service not configured")
 
     try:
         # Configure the ClickSend client
@@ -101,15 +101,15 @@ def send_sms(to_number, message):
         api_response = api_instance.sms_send_post(sms_messages)
 
         logger.info(f"SMS sent successfully to {to_number}: {api_response}")
-        return True, f"SMS sent successfully"
+        return True, _("SMS sent successfully")
 
     except ApiException as e:
         logger.error(f"ClickSend API error: {str(e)}")
         # Return a more user-friendly error message
-        return False, f"SMS notification not sent. Please check patient phone number format."
+        return False, _("SMS notification not sent. Please check patient phone number format.")
     except Exception as e:
         logger.error(f"Error sending SMS: {str(e)}")
-        return False, f"SMS notification service temporarily unavailable."
+        return False, _("SMS notification service temporarily unavailable.")
 
 
 def notify_abnormal_vital(patient, vital_type, value, unit, status):
@@ -129,7 +129,7 @@ def notify_abnormal_vital(patient, vital_type, value, unit, status):
     if not patient.contact_number:
         logger.warning(
             f"Cannot send alert: Patient {patient.id} has no contact number")
-        return False, "Patient has no contact number"
+        return False, _("Patient has no contact number")
 
     # Get translations
     t = get_sms_translations()
@@ -166,7 +166,7 @@ def send_appointment_reminder(patient, doctor, appointment_date,
         bool: True if successful, False otherwise
     """
     if not patient.contact_number:
-        return False, "Patient has no contact number"
+        return False, _("Patient has no contact number")
 
     # Get translations
     t = get_sms_translations()
