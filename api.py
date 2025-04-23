@@ -184,6 +184,10 @@ def add_note(doctor, patient_uuid):
         db.session.add(note)
         db.session.commit()
         
+        # Log the note creation
+        from audit import log_note_creation
+        log_note_creation(doctor.id, note)
+        
         logger.info(f"Note added for patient {patient_uuid} via API")
         
         return jsonify({
@@ -195,6 +199,55 @@ def add_note(doctor, patient_uuid):
         db.session.rollback()
         logger.error(f"Error adding note: {str(e)}")
         return jsonify({"error": _("An error occurred while adding the note")}), 500
+
+@api_bp.route('/notes/<int:note_id>', methods=['DELETE'])
+@doctor_required
+def delete_note(doctor, note_id):
+    """Delete a note."""
+    # Find the note
+    note = Note.query.get(note_id)
+    
+    if not note:
+        return jsonify({"error": _("Note not found")}), 404
+    
+    # Find the patient
+    patient = Patient.query.get(note.patient_id)
+    
+    if not patient:
+        return jsonify({"error": _("Patient not found")}), 404
+    
+    # Check if the doctor is associated with this patient
+    if patient not in doctor.patients.all():
+        return jsonify({"error": _("You are not authorized to access this patient")}), 403
+    
+    # Check if the doctor is the author of the note
+    if note.doctor_id != doctor.id:
+        return jsonify({"error": _("You can only delete notes you have created")}), 403
+    
+    # Delete the note
+    try:
+        # Log the note deletion
+        from audit import log_note_delete
+        log_note_delete(doctor.id, note)
+        
+        # Store note details for response
+        note_dict = note.to_dict()
+        patient_uuid = patient.uuid
+        
+        db.session.delete(note)
+        db.session.commit()
+        
+        logger.info(f"Note {note_id} deleted for patient {patient_uuid} via API")
+        
+        return jsonify({
+            "message": _("Note deleted successfully"),
+            "note": note_dict
+        }), 200
+        
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        logger.error(f"Error deleting note: {str(e)}")
+        return jsonify({"error": _("An error occurred while deleting the note")}), 500
 
 @api_bp.route('/observations/<int:patient_id>', methods=['GET'])
 @doctor_required
