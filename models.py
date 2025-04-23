@@ -382,6 +382,7 @@ class ActionType(Enum):
     #   CONNECT: Action of connecting a health platform
     #   DISCONNECT: Action of disconnecting a health platform
     #   SYNC: Action of synchronizing data from a health platform
+    #   IMPORT: Action of importing an existing entity
     CREATE = "CREATE"
     UPDATE = "UPDATE"
     DELETE = "DELETE"
@@ -391,6 +392,7 @@ class ActionType(Enum):
     CONNECT = "CONNECT"
     DISCONNECT = "DISCONNECT"
     SYNC = "sync" # Nota: questo è in minuscolo perché è così nel database
+    IMPORT = "IMPORT"
 
 class EntityType(Enum):
     # Enumeration defining the types of entities that can be tracked in the audit log system
