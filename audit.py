@@ -115,34 +115,97 @@ def get_audit_logs():
         query = query.filter_by(patient_id=patient_id)
     
     if action_type:
-        # Mappa diretta dai valori delle stringhe agli enum
-        action_map = {
-            'CREATE': ActionType.CREATE,
-            'UPDATE': ActionType.UPDATE,
-            'DELETE': ActionType.DELETE,
-            'VIEW': ActionType.VIEW,
-            'EXPORT': ActionType.EXPORT,
-            'GENERATE_LINK': ActionType.GENERATE_LINK,
-            'CONNECT': ActionType.CONNECT,
-            'DISCONNECT': ActionType.DISCONNECT,
-            'SYNC': ActionType.SYNC
-        }
-        if action_type.upper() in action_map:
-            query = query.filter_by(action_type=action_map[action_type.upper()])
+        # Ottieni i valori delle enum dal database
+        try:
+            existing_action_types = db.session.query(db.distinct(AuditLog.action_type)).all()
+            existing_action_types = [action_type[0].value.upper() for action_type in existing_action_types]
+            
+            if action_type.upper() in existing_action_types:
+                # Mappa diretta dai valori delle stringhe agli enum
+                action_map = {
+                    'CREATE': ActionType.CREATE,
+                    'UPDATE': ActionType.UPDATE,
+                    'DELETE': ActionType.DELETE,
+                    'VIEW': ActionType.VIEW,
+                    'EXPORT': ActionType.EXPORT,
+                    'GENERATE_LINK': ActionType.GENERATE_LINK,
+                    'CONNECT': ActionType.CONNECT,
+                    'DISCONNECT': ActionType.DISCONNECT,
+                    'SYNC': ActionType.SYNC
+                }
+                
+                # Filtro solo se esiste nel database
+                query = query.filter_by(action_type=action_map[action_type.upper()])
+            else:
+                # Se il valore non esiste, restituisci un insieme vuoto (nessun risultato)
+                # invece di generare un errore
+                return render_template(
+                    'audit_logs.html',
+                    logs=[],
+                    patients=patients,
+                    doctors=doctors,
+                    request=request,
+                    current_user=current_user,
+                    now=datetime.now(),
+                    message=f"Non ci sono risultati per il tipo di azione: {action_type}."
+                )
+        except Exception as e:
+            # In caso di errore, restituisci un insieme vuoto
+            return render_template(
+                'audit_logs.html',
+                logs=[],
+                patients=patients,
+                doctors=doctors,
+                request=request,
+                current_user=current_user,
+                now=datetime.now(),
+                message=f"Errore durante il filtraggio per azione: {str(e)}"
+            )
     
     if entity_type:
-        # Mappa diretta dai valori delle stringhe agli enum
-        entity_map = {
-            'PATIENT': EntityType.PATIENT,
-            'NOTE': EntityType.NOTE,
-            'REPORT': EntityType.REPORT,
-            'HEALTH_PLATFORM': EntityType.HEALTH_PLATFORM,
-            'HEALTH_LINK': EntityType.HEALTH_LINK,
-            'OBSERVATION': EntityType.OBSERVATION,
-            'VITAL_SIGN': EntityType.VITAL_SIGN
-        }
-        if entity_type.upper() in entity_map:
-            query = query.filter_by(entity_type=entity_map[entity_type.upper()])
+        # Ottieni i valori delle enum dal database
+        try:
+            existing_entity_types = db.session.query(db.distinct(AuditLog.entity_type)).all()
+            existing_entity_types = [entity_type[0].value.upper() for entity_type in existing_entity_types]
+            
+            if entity_type.upper() in existing_entity_types:
+                # Mappa diretta dai valori delle stringhe agli enum
+                entity_map = {
+                    'PATIENT': EntityType.PATIENT,
+                    'NOTE': EntityType.NOTE,
+                    'REPORT': EntityType.REPORT,
+                    'HEALTH_PLATFORM': EntityType.HEALTH_PLATFORM,
+                    'HEALTH_LINK': EntityType.HEALTH_LINK,
+                    'OBSERVATION': EntityType.OBSERVATION,
+                    'VITAL_SIGN': EntityType.VITAL_SIGN
+                }
+                
+                # Filtro solo se esiste nel database
+                query = query.filter_by(entity_type=entity_map[entity_type.upper()])
+            else:
+                # Se il valore non esiste, restituisci un insieme vuoto
+                return render_template(
+                    'audit_logs.html',
+                    logs=[],
+                    patients=patients,
+                    doctors=doctors,
+                    request=request,
+                    current_user=current_user,
+                    now=datetime.now(),
+                    message=f"Non ci sono risultati per il tipo di entità: {entity_type}."
+                )
+        except Exception as e:
+            # In caso di errore, restituisci un insieme vuoto
+            return render_template(
+                'audit_logs.html',
+                logs=[],
+                patients=patients,
+                doctors=doctors,
+                request=request,
+                current_user=current_user,
+                now=datetime.now(),
+                message=f"Errore durante il filtraggio per entità: {str(e)}"
+            )
     
     # Get results ordered by timestamp (most recent first)
     logs = query.order_by(AuditLog.timestamp.desc()).all()
