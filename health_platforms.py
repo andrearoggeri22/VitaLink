@@ -60,6 +60,22 @@ def generate_platform_link(patient, doctor, platform):
         db.session.add(new_link)
         db.session.commit()
         
+        # Log the action
+        try:
+            log_action(
+                doctor_id=doctor.id,
+                action_type=ActionType.GENERATE_LINK,
+                entity_type=EntityType.HEALTH_LINK,
+                entity_id=new_link.id,
+                details={
+                    'platform': platform.value,
+                    'expires_at': new_link.expires_at.isoformat() if new_link.expires_at else None,
+                },
+                patient_id=patient.id
+            )
+        except Exception as log_error:
+            logger.error(f"Error logging platform link creation: {str(log_error)}")
+        
         return new_link
     except Exception as e:
         logger.error(f"Error generating platform link: {str(e)}")
@@ -608,6 +624,22 @@ def oauth_callback():
             # Mark the link as used
             link.used = True
             db.session.commit()
+            
+            # Log the connection
+            try:
+                log_action(
+                    doctor_id=link.doctor_id,
+                    action_type=ActionType.CONNECT,
+                    entity_type=EntityType.HEALTH_PLATFORM,
+                    entity_id=patient.id,  # Using patient ID since there's no specific health platform entity
+                    details={
+                        'platform': HealthPlatform.FITBIT.value,
+                        'connected_at': datetime.utcnow().isoformat()
+                    },
+                    patient_id=patient.id
+                )
+            except Exception as log_error:
+                logger.error(f"Error logging platform connection: {str(log_error)}")
             
             flash(_('Successfully connected to Fitbit'), 'success')
             return render_template('health_connect_result.html',
