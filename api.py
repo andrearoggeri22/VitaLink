@@ -3,7 +3,7 @@ from datetime import datetime
 
 from flask import Blueprint, request, jsonify
 from sqlalchemy.exc import SQLAlchemyError
-
+from flask_babel import gettext as _
 from app import db
 from models import Patient, VitalSign, VitalSignType, DataOrigin, Note
 from auth import api_doctor_required as doctor_required
@@ -28,17 +28,17 @@ def get_patient(doctor, patient_uuid):
     """Get a specific patient by UUID."""
     # Validate UUID format
     if not validate_uuid(patient_uuid):
-        return jsonify({"error": "Invalid UUID format"}), 400
+        return jsonify({"error": _("Invalid UUID format")}), 400
     
     # Find the patient
     patient = Patient.query.filter_by(uuid=patient_uuid).first()
     
     if not patient:
-        return jsonify({"error": "Patient not found"}), 404
+        return jsonify({"error": _("Patient not found")}), 404
     
     # Check if the doctor is associated with this patient
     if patient not in doctor.patients.all():
-        return jsonify({"error": "You are not authorized to access this patient"}), 403
+        return jsonify({"error": _("You are not authorized to access this patient")}), 403
     
     return jsonify({
         "patient": patient.to_dict()
@@ -50,17 +50,17 @@ def get_vitals(doctor, patient_uuid):
     """Get vital signs for a specific patient."""
     # Validate UUID format
     if not validate_uuid(patient_uuid):
-        return jsonify({"error": "Invalid UUID format"}), 400
+        return jsonify({"error": _("Invalid UUID format")}), 400
     
     # Find the patient
     patient = Patient.query.filter_by(uuid=patient_uuid).first()
     
     if not patient:
-        return jsonify({"error": "Patient not found"}), 404
+        return jsonify({"error": _("Patient not found")}), 404
     
     # Check if the doctor is associated with this patient
     if patient not in doctor.patients.all():
-        return jsonify({"error": "You are not authorized to access this patient"}), 403
+        return jsonify({"error": _("You are not authorized to access this patient")}), 403
     
     # Get query parameters for filtering
     type_param = request.args.get('type')
@@ -84,42 +84,44 @@ def add_vital(doctor, patient_uuid):
     """Add a new vital sign for a patient."""
     # Validate UUID format
     if not validate_uuid(patient_uuid):
-        return jsonify({"error": "Invalid UUID format"}), 400
+        return jsonify({"error": _("Invalid UUID format")}), 400
     
     # Find the patient
     patient = Patient.query.filter_by(uuid=patient_uuid).first()
     
     if not patient:
-        return jsonify({"error": "Patient not found"}), 404
+        return jsonify({"error": _("Patient not found")}), 404
     
     # Check if the doctor is associated with this patient
     if patient not in doctor.patients.all():
-        return jsonify({"error": "You are not authorized to access this patient"}), 403
+        return jsonify({"error": _("You are not authorized to access this patient")}), 403
     
     # Validate request data
     if not request.is_json:
-        return jsonify({"error": "Missing JSON in request"}), 400
+        return jsonify({"error": _("Missing JSON in request")}), 400
     
     data = request.json
     
     required_fields = ['type', 'value']
     for field in required_fields:
         if field not in data:
-            return jsonify({"error": f"Missing required field: {field}"}), 400
+            return jsonify({"error": _("Missing required field: {field}") % {"field": field}}), 400
     
     # Validate vital sign type
     try:
         vital_type = VitalSignType(data['type'])
     except ValueError:
         return jsonify({
-            "error": f"Invalid vital sign type. Must be one of: {[t.value for t in VitalSignType]}"
+            "error": _("Invalid vital sign type. Must be one of: %(types)s") % {
+                "types": ", ".join(t.value for t in VitalSignType)
+            }
         }), 400
     
     # Validate value
     try:
         value = float(data['value'])
     except ValueError:
-        return jsonify({"error": "Value must be a number"}), 400
+        return jsonify({"error": _("Value must be a number")}), 400
     
     # Get optional fields
     unit = data.get('unit')
@@ -130,7 +132,7 @@ def add_vital(doctor, patient_uuid):
         try:
             recorded_datetime = datetime.fromisoformat(recorded_at.replace('Z', '+00:00'))
         except ValueError:
-            return jsonify({"error": "Invalid date format. Use ISO format (YYYY-MM-DDTHH:MM:SS)"}), 400
+            return jsonify({"error": _("Invalid date format. Use ISO format (YYYY-MM-DDTHH:MM:SS)")}), 400
     else:
         recorded_datetime = datetime.utcnow()
     
@@ -175,7 +177,7 @@ def add_vital(doctor, patient_uuid):
         
         # Return response with notification status
         response = {
-            "message": "Vital sign recorded successfully",
+            "message": _("Vital sign recorded successfully"),
             "vital": vital.to_dict(),
             "is_normal": is_normal
         }
@@ -186,14 +188,14 @@ def add_vital(doctor, patient_uuid):
                 response["notification_sent"] = True
             else:
                 response["notification_sent"] = False
-                response["notification_message"] = "Patient has no contact number for notifications"
+                response["notification_message"] = _("Patient has no contact number for notifications")
         
         return jsonify(response), 201
         
     except SQLAlchemyError as e:
         db.session.rollback()
         logger.error(f"Error adding vital sign: {str(e)}")
-        return jsonify({"error": "An error occurred while recording the vital sign"}), 500
+        return jsonify({"error": _("An error occurred while recording the vital sign")}), 500
 
 @api_bp.route('/patients/<string:patient_uuid>/notes', methods=['GET'])
 @doctor_required
@@ -201,17 +203,17 @@ def get_notes(doctor, patient_uuid):
     """Get notes for a specific patient."""
     # Validate UUID format
     if not validate_uuid(patient_uuid):
-        return jsonify({"error": "Invalid UUID format"}), 400
+        return jsonify({"error": _("Invalid UUID format")}), 400
     
     # Find the patient
     patient = Patient.query.filter_by(uuid=patient_uuid).first()
     
     if not patient:
-        return jsonify({"error": "Patient not found"}), 404
+        return jsonify({"error":_("Patient not found")}), 404
     
     # Check if the doctor is associated with this patient
     if patient not in doctor.patients.all():
-        return jsonify({"error": "You are not authorized to access this patient"}), 403
+        return jsonify({"error": _("You are not authorized to access this patient")}), 403
     
     # Get notes
     notes = patient.get_notes()
@@ -226,26 +228,26 @@ def add_note(doctor, patient_uuid):
     """Add a new note for a patient."""
     # Validate UUID format
     if not validate_uuid(patient_uuid):
-        return jsonify({"error": "Invalid UUID format"}), 400
+        return jsonify({"error": _("Invalid UUID format")}), 400
     
     # Find the patient
     patient = Patient.query.filter_by(uuid=patient_uuid).first()
     
     if not patient:
-        return jsonify({"error": "Patient not found"}), 404
+        return jsonify({"error": _("Patient not found")}), 404
     
     # Check if the doctor is associated with this patient
     if patient not in doctor.patients.all():
-        return jsonify({"error": "You are not authorized to access this patient"}), 403
+        return jsonify({"error": _("You are not authorized to access this patient")}), 403
     
     # Validate request data
     if not request.is_json:
-        return jsonify({"error": "Missing JSON in request"}), 400
+        return jsonify({"error": _("Missing JSON in request")}), 400
     
     data = request.json
     
     if 'content' not in data or not data['content']:
-        return jsonify({"error": "Note content cannot be empty"}), 400
+        return jsonify({"error": _("Note content cannot be empty")}), 400
     
     content = data['content']
     
@@ -263,11 +265,11 @@ def add_note(doctor, patient_uuid):
         logger.info(f"Note added for patient {patient_uuid} via API")
         
         return jsonify({
-            "message": "Note added successfully",
+            "message": _("Note added successfully"),
             "note": note.to_dict()
         }), 201
         
     except SQLAlchemyError as e:
         db.session.rollback()
         logger.error(f"Error adding note: {str(e)}")
-        return jsonify({"error": "An error occurred while adding the note"}), 500
+        return jsonify({"error": _("An error occurred while adding the note")}), 500

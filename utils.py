@@ -2,7 +2,7 @@ import re
 import uuid
 import json
 from datetime import datetime
-
+from flask_babel import gettext as _
 def validate_email(email):
     """Validate email format."""
     email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
@@ -22,21 +22,21 @@ def is_valid_password(password):
     from flask_babel import gettext as _
     
     if len(password) < 8:
-        return False, _("La password deve essere di almeno 8 caratteri")
+        return False, _("The password must be at least 8 characters long")
     
     if not re.search(r'[A-Z]', password):
-        return False, _("La password deve contenere almeno una lettera maiuscola")
+        return False, _("The password must contain at least one uppercase letter")
     
     if not re.search(r'[a-z]', password):
-        return False, _("La password deve contenere almeno una lettera minuscola")
+        return False, _("The password must contain at least one lowercase letter")
     
     if not re.search(r'[0-9]', password):
-        return False, _("La password deve contenere almeno un numero")
+        return False, _("The password must contain at least one digit")
     
     if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
-        return False, _("La password deve contenere almeno un carattere speciale")
+        return False, _("The password must contain at least one special character")
     
-    return True, _("Password valida")
+    return True, _("The password is strong")
 
 def validate_uuid(uuid_string):
     """Validate UUID format."""
@@ -51,7 +51,7 @@ def parse_date(date_string):
     try:
         return datetime.strptime(date_string, '%Y-%m-%d').date()
     except ValueError:
-        raise ValueError("Invalid date format. Please use YYYY-MM-DD")
+        raise ValueError(_("Invalid date format. Please use YYYY-MM-DD"))
 
 def get_vital_sign_unit(vital_type):
     """Get the appropriate unit for a vital sign type."""

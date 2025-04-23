@@ -124,8 +124,8 @@ function confirmAction(title, message, onConfirm) {
                         ${message}
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">${window.cancelButtonText || 'Cancel'}</button>
-                        <button type="button" class="btn btn-danger" id="confirmButton">${window.confirmButtonText || 'Confirm'}</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">${document.documentElement.lang === "it" ? "Annulla" : 'Cancel'}</button>
+                        <button type="button" class="btn btn-danger" id="confirmButton">${document.documentElement.lang === "it" ? "Conferma" : 'Confirm'}</button>
                     </div>
                 </div>
             </div>
@@ -153,16 +153,6 @@ function confirmAction(title, message, onConfirm) {
         modalInstance.hide();
         onConfirm();
     });
-    
-    // Set up button text based on language
-    const lang = document.documentElement.lang || 'en';
-    if (lang === 'it') {
-        modal.querySelector('.btn-secondary').textContent = 'Annulla';
-        modal.querySelector('.btn-danger').textContent = 'Conferma';
-    } else {
-        modal.querySelector('.btn-secondary').textContent = 'Cancel';
-        modal.querySelector('.btn-danger').textContent = 'Confirm';
-    }
     
     // Show the modal
     modalInstance.show();

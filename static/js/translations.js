@@ -4,15 +4,16 @@
 const currentLanguage = document.documentElement.lang || 'en';
 
 // Translation strings based on language
-let deletePatientTitle, deletePatientMessage, addNoteForText, confirmButtonText, cancelButtonText;
+let deletePatientTitle, deletePatientMessage, deleteItemMessage, addNoteForText, confirmButtonText, cancelButtonText;
 let dateText, normalText, highText, lowText, saveText, deviceConnectedText, deviceNotConnectedText;
 let noDataText, loadingText, errorText, successText, vitalsChartTitleText;
 
 if (currentLanguage === 'it') {
     // Italian translations
     deletePatientTitle = 'Elimina Paziente';
-    deletePatientMessage = 'Sei sicuro di voler eliminare il paziente {name}? Questa azione non può essere annullata.';
-    addNoteForText = 'Aggiungi nota per {name}';
+    deletePatientMessage = 'Sei sicuro di voler eliminare il paziente? Questa azione non può essere annullata.';
+    deleteItemMessage = 'Sei sicuro di voler eliminare questo elemento? Questa azione non può essere annullata.';
+    addNoteForText = 'Aggiungi nota';
     confirmButtonText = 'Conferma';
     cancelButtonText = 'Annulla';
     
@@ -38,8 +39,9 @@ if (currentLanguage === 'it') {
 } else {
     // Default English translations
     deletePatientTitle = 'Delete Patient';
-    deletePatientMessage = 'Are you sure you want to delete the patient {name}? This action cannot be undone.';
-    addNoteForText = 'Add Note for {name}';
+    deletePatientMessage = 'Are you sure you want to delete the patient? This action cannot be undone.';
+    deleteItemMessage = 'Are you sure you want to delete this item? This action cannot be undone.';
+    addNoteForText = 'Add Note';
     confirmButtonText = 'Confirm';
     cancelButtonText = 'Cancel';
     

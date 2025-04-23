@@ -47,7 +47,7 @@
                     <li class="nav-item dropdown me-2">
                         <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button"
                            data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-globe me-1"></i> Language
+                            <i class="fas fa-globe me-1"></i> {{_(Language)}}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown">
                             
@@ -89,12 +89,12 @@
                 <div class="text-center mb-4">
                     <i class="fas fa-heartbeat text-primary fa-3x mb-3"></i>
                     <h2>Healthcare Monitor</h2>
-                    <p class="text-muted">Please login to access the platform</p>
+                    <p class="text-muted">{{_(Please login to access the platform)}}</p>
                 </div>
                 
                 <form method="post" action="/login">
                     <div class="mb-3">
-                        <label for="email" class="form-label">Email address</label>
+                        <label for="email" class="form-label">{{_(Email address)}}</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="fas fa-envelope"></i></span>
                             <input type="email" class="form-control" id="email" name="email" 
@@ -121,12 +121,12 @@
                 <div class="mt-4 text-center">
                     <p class="mb-2">
                         <a href="/register" class="text-decoration-none">
-                            <i class="fas fa-user-plus me-1"></i> New doctor? Register here
+                            <i class="fas fa-user-plus me-1"></i> {{_(New doctor? Register here)}}
                         </a>
                     </p>
                     <p class="text-muted small">
-                        This is a secure platform for healthcare professionals only.
-                        <br>Unauthorized access is strictly prohibited.
+                        {{_(This is a secure platform for healthcare professionals only.)}}
+                        <br>{{_(Unauthorized access is strictly prohibited.)}}
                     </p>
                 </div>
             </div>
@@ -140,7 +140,7 @@
     <footer class="bg-dark py-3 mt-auto">
         <div class="container text-center">
             <p class="text-muted mb-0">
-                &copy; 2025 Healthcare Monitoring Platform. All rights reserved.
+                &copy; {{_(2025 Healthcare Monitoring Platform. All rights reserved.)}}
             </p>
         </div>
     </footer>
