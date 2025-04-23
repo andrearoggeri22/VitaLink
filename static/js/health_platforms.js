@@ -23,6 +23,8 @@ const PLATFORMS = {
 
 // DOM elements references
 let syncButton = null;
+let connectButton = null;
+let disconnectButton = null;
 let syncModal = null;
 let platformButtons = null;
 let connectionStatusElem = null;
@@ -33,14 +35,54 @@ let connectionStatusElem = null;
 function initHealthPlatforms() {
     // Initialize DOM references
     syncButton = document.getElementById('syncHealthBtn');
+    connectButton = document.getElementById('connectBtn');
+    disconnectButton = document.getElementById('disconnectBtn');
     
-    // Check if patient has an active connection
-    if (syncButton) {
-        // First check connection status and update button text
-        checkConnectionStatus();
+    console.log('Initializing health platform...');
+    console.log('Sync button found:', !!syncButton);
+    console.log('Connect button found:', !!connectButton);
+    console.log('Disconnect button found:', !!disconnectButton);
+    
+    // Find connection details section
+    const connectionDetails = document.getElementById('connectionDetails');
+    if (connectionDetails) {
+        console.log('Connection details section found');
         
-        // Add event listener based on current state
-        syncButton.addEventListener('click', handleSyncButtonClick);
+        // Get patient ID from the URL
+        const patientId = getPatientIdFromUrl();
+        console.log('Patient ID:', patientId);
+        
+        if (patientId) {
+            // Add click event to the sync button
+            if (syncButton) {
+                console.log('Adding click event listener to sync button');
+                syncButton.addEventListener('click', function() {
+                    createHealthPlatformModal(patientId);
+                });
+            }
+            
+            // Add click event to the connect button if it exists
+            if (connectButton) {
+                console.log('Adding click event listener to connect button');
+                connectButton.addEventListener('click', function() {
+                    createHealthPlatformModal(patientId);
+                });
+            }
+            
+            // Add click event to the disconnect button if it exists
+            if (disconnectButton) {
+                console.log('Adding click event listener to disconnect button');
+                disconnectButton.addEventListener('click', function() {
+                    const platform = document.getElementById('platformName')?.textContent || 'fitbit';
+                    if (confirm(translateText('Sei sicuro di voler disconnettere questa piattaforma? I dati non saranno più disponibili.'))) {
+                        disconnectHealthPlatform(patientId, platform);
+                    }
+                });
+            }
+            
+            // Check connection status
+            checkConnectionStatus(patientId);
+        }
     }
     
     // Check if we need to load data for charts
@@ -69,28 +111,97 @@ function initHealthPlatforms() {
 
 /**
  * Check the connection status for the patient
- * Updates button text based on connection status
+ * Updates button text based on connection status and populates connection details
+ * @param {number} patientId The patient ID
  */
-function checkConnectionStatus() {
-    const patientId = getPatientIdFromUrl();
+function checkConnectionStatus(patientId) {
     if (!patientId) {
         console.error('Could not determine patient ID');
         return;
     }
     
+    const connectionLoading = document.getElementById('connectionLoading');
+    const connectionActive = document.getElementById('connectionActive');
+    const connectionInactive = document.getElementById('connectionInactive');
+    
+    console.log('Checking connection status for patient', patientId);
+    
     fetch(`/health/check_connection/${patientId}`)
     .then(response => response.json())
     .then(data => {
+        console.log('Connection status data:', data);
+        
+        if (connectionLoading) connectionLoading.classList.add('d-none');
+        
         if (data.connected) {
-            updateButtonToDisconnect(data.platform);
+            // Update button to disconnect
+            if (syncButton) {
+                syncButton.innerHTML = `<i class="fas fa-unlink me-1"></i> ${translateText('Disconnect')}`;
+                syncButton.classList.remove('btn-info');
+                syncButton.classList.add('btn-danger');
+                syncButton.setAttribute('data-connected', 'true');
+                syncButton.setAttribute('data-platform', data.platform);
+            }
+            
+            // Update connection details if present
+            if (connectionActive && connectionInactive) {
+                connectionActive.classList.remove('d-none');
+                connectionInactive.classList.add('d-none');
+                
+                // Populate platform info
+                if (document.getElementById('platformName')) {
+                    document.getElementById('platformName').textContent = data.platform.charAt(0).toUpperCase() + data.platform.slice(1);
+                }
+                
+                // Populate connection date
+                if (document.getElementById('connectionDate')) {
+                    document.getElementById('connectionDate').textContent = new Date(data.connection_date).toLocaleDateString();
+                }
+                
+                // Populate expiration date
+                if (document.getElementById('expirationDate')) {
+                    document.getElementById('expirationDate').textContent = data.expiration_date ? 
+                        new Date(data.expiration_date).toLocaleDateString() : 
+                        translateText('No expiration');
+                }
+            }
         } else {
-            updateButtonToConnect();
+            // Update button to connect
+            if (syncButton) {
+                syncButton.innerHTML = `<i class="fas fa-sync me-1"></i> ${translateText('Health Sync')}`;
+                syncButton.classList.remove('btn-danger');
+                syncButton.classList.add('btn-info');
+                syncButton.setAttribute('data-connected', 'false');
+                syncButton.removeAttribute('data-platform');
+            }
+            
+            // Update connection details if present
+            if (connectionActive && connectionInactive) {
+                connectionActive.classList.add('d-none');
+                connectionInactive.classList.remove('d-none');
+            }
         }
     })
     .catch(error => {
         console.error('Error checking connection status:', error);
+        
+        // Hide loading indicator
+        if (connectionLoading) connectionLoading.classList.add('d-none');
+        
+        // Show inactive state in case of error
+        if (connectionActive && connectionInactive) {
+            connectionActive.classList.add('d-none');
+            connectionInactive.classList.remove('d-none');
+        }
+        
         // Default to Connect button in case of error
-        updateButtonToConnect();
+        if (syncButton) {
+            syncButton.innerHTML = `<i class="fas fa-sync me-1"></i> ${translateText('Health Sync')}`;
+            syncButton.classList.remove('btn-danger');
+            syncButton.classList.add('btn-info');
+            syncButton.setAttribute('data-connected', 'false');
+            syncButton.removeAttribute('data-platform');
+        }
     });
 }
 
@@ -152,15 +263,17 @@ function handleSyncButtonClick() {
  * @param {string} platform The platform name
  */
 function disconnectHealthPlatform(patientId, platform) {
-    // Confirm before disconnecting
-    if (!confirm(translateText('Sei sicuro di voler disconnettere questa piattaforma? I dati non saranno più disponibili.'))) {
-        return;
-    }
+    console.log('Disconnecting platform', platform, 'for patient', patientId);
     
-    // Disable button during the request
+    // Disable buttons during the request
     if (syncButton) {
         syncButton.disabled = true;
-        syncButton.innerHTML = `<i class="fas fa-spinner fa-spin me-1"></i> ${translateText('Disconnessione...')}`;
+        syncButton.innerHTML = `<i class="fas fa-spinner fa-spin me-1"></i> ${translateText('Disconnecting...')}`;
+    }
+    
+    if (disconnectButton) {
+        disconnectButton.disabled = true;
+        disconnectButton.innerHTML = `<i class="fas fa-spinner fa-spin me-1"></i> ${translateText('Disconnecting...')}`;
     }
     
     // Make API request to disconnect
@@ -173,12 +286,27 @@ function disconnectHealthPlatform(patientId, platform) {
     })
     .then(response => response.json())
     .then(data => {
+        console.log('Disconnect response:', data);
+        
         if (data.success) {
-            // Update UI
-            updateButtonToConnect();
+            // Update connection details UI if present
+            const connectionActive = document.getElementById('connectionActive');
+            const connectionInactive = document.getElementById('connectionInactive');
             
-            // Show success notification
-            showNotification(translateText('Disconnessione completata con successo'), 'success');
+            if (connectionActive && connectionInactive) {
+                connectionActive.classList.add('d-none');
+                connectionInactive.classList.remove('d-none');
+            }
+            
+            // Update sync button if present
+            if (syncButton) {
+                syncButton.innerHTML = `<i class="fas fa-sync me-1"></i> ${translateText('Health Sync')}`;
+                syncButton.classList.remove('btn-danger');
+                syncButton.classList.add('btn-info');
+                syncButton.setAttribute('data-connected', 'false');
+                syncButton.removeAttribute('data-platform');
+                syncButton.disabled = false;
+            }
             
             // Clear any cached data
             apiDataCache = {};
@@ -189,26 +317,45 @@ function disconnectHealthPlatform(patientId, platform) {
                 const dataType = activeTab.id.replace('tab-', '');
                 loadHealthPlatformData(dataType);
             }
+            
+            // Show success notification
+            showNotification(translateText('Successfully disconnected from health platform'), 'success');
         } else {
+            // Re-enable buttons
+            if (syncButton) syncButton.disabled = false;
+            if (disconnectButton) disconnectButton.disabled = false;
+            
+            // Restore original button text
+            if (syncButton) {
+                syncButton.innerHTML = `<i class="fas fa-unlink me-1"></i> ${translateText('Disconnect')}`;
+            }
+            
+            if (disconnectButton) {
+                disconnectButton.innerHTML = `<i class="fas fa-unlink me-1"></i> ${translateText('Disconnect')}`;
+            }
+            
             // Show error notification
-            showNotification(translateText('Errore durante la disconnessione: ') + data.message, 'danger');
-        }
-        
-        // Re-enable button
-        if (syncButton) {
-            syncButton.disabled = false;
+            showNotification(translateText('Error disconnecting: ') + data.message, 'danger');
         }
     })
     .catch(error => {
         console.error('Error disconnecting health platform:', error);
         
-        // Show error notification
-        showNotification(translateText('Errore durante la disconnessione. Riprova più tardi.'), 'danger');
+        // Re-enable buttons
+        if (syncButton) syncButton.disabled = false;
+        if (disconnectButton) disconnectButton.disabled = false;
         
-        // Re-enable button
+        // Restore original button text
         if (syncButton) {
-            syncButton.disabled = false;
+            syncButton.innerHTML = `<i class="fas fa-unlink me-1"></i> ${translateText('Disconnect')}`;
         }
+        
+        if (disconnectButton) {
+            disconnectButton.innerHTML = `<i class="fas fa-unlink me-1"></i> ${translateText('Disconnect')}`;
+        }
+        
+        // Show error notification
+        showNotification(translateText('Error disconnecting. Please try again later.'), 'danger');
     });
 }
 
