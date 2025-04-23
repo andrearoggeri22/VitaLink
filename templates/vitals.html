@@ -240,33 +240,44 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="observationForm">
-                    <input type="hidden" id="observationId" name="id">
-                    
-                    <div class="mb-3">
-                        <label for="observationType" class="form-label">{{ _('Vital Parameter') }}</label>
-                        <select class="form-select" id="observationType" name="vital_type" required>
-                            <option value="">{{ _('Select parameter') }}</option>
-                            <!-- These options will be populated dynamically based on available chart data -->
-                        </select>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="observationContent" class="form-label">{{ _('Observation') }}</label>
-                        <textarea class="form-control" id="observationContent" name="content" rows="4" required></textarea>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="observationStartDate" class="form-label">{{ _('Start Date') }}</label>
-                            <input type="date" class="form-control" id="observationStartDate" name="start_date" required>
+                <!-- Form normale per aggiunta osservazione -->
+                <div id="addObservationContent">
+                    <form id="observationForm">
+                        <input type="hidden" id="observationId" name="id">
+                        
+                        <div class="mb-3">
+                            <label for="observationType" class="form-label">{{ _('Vital Parameter') }}</label>
+                            <select class="form-select" id="observationType" name="vital_type" required>
+                                <option value="">{{ _('Select parameter') }}</option>
+                                <!-- These options will be populated dynamically based on available chart data -->
+                            </select>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="observationEndDate" class="form-label">{{ _('End Date') }}</label>
-                            <input type="date" class="form-control" id="observationEndDate" name="end_date" required>
+                        
+                        <div class="mb-3">
+                            <label for="observationContent" class="form-label">{{ _('Observation') }}</label>
+                            <textarea class="form-control" id="observationContent" name="content" rows="4" required></textarea>
                         </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="observationStartDate" class="form-label">{{ _('Start Date') }}</label>
+                                <input type="date" class="form-control" id="observationStartDate" name="start_date" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="observationEndDate" class="form-label">{{ _('End Date') }}</label>
+                                <input type="date" class="form-control" id="observationEndDate" name="end_date" required>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Contenuto semplificato per eliminazione -->
+                <div id="deleteObservationContent" class="d-none">
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        {{ _('Are you sure you want to delete this observation?') }}
                     </div>
-                </form>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('Cancel') }}</button>
