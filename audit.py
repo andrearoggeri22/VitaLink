@@ -50,6 +50,9 @@ def log_action(doctor_id, action_type, entity_type, entity_id, details=None, pat
         
         ip_address = request.remote_addr if request else None
         
+        # Log the params for debugging
+        print(f"DEBUG: log_action - doctor_id={doctor_id}, action_type={action_type}, entity_type={entity_type}, entity_id={entity_id}")
+        
         audit_log = AuditLog(
             doctor_id=doctor_id,
             action_type=action_type,
@@ -67,7 +70,10 @@ def log_action(doctor_id, action_type, entity_type, entity_id, details=None, pat
     except Exception as e:
         # In case of error, perform rollback and log the error
         db.session.rollback()
+        import traceback
         print(f"Error in log_action: {str(e)}")
+        print(f"Parameters: doctor_id={doctor_id}, action_type={action_type}, entity_type={entity_type}, entity_id={entity_id}")
+        print(traceback.format_exc())
         # Don't let the entire operation fail if logging fails
         return None
 
