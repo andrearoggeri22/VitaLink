@@ -718,6 +718,31 @@ function translateText(text) {
     return text;
 }
 
+/**
+ * Gestisce il clic sul pulsante per generare un report specifico
+ * Reindirizza alla URL per generare il PDF con il tipo vitale e periodo correnti
+ */
+function setupSpecificReportButton() {
+    const reportBtn = document.getElementById('generateSpecificReportBtn');
+    if (!reportBtn) return;
+    
+    reportBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // Verifica che ci sia un tipo vitale attualmente selezionato
+        if (!currentVitalType) {
+            alert(translateText('Seleziona prima un tipo di parametro vitale.'));
+            return;
+        }
+        
+        // Crea l'URL per il report specifico
+        const reportUrl = `${BASE_URL}patients/${PATIENT_ID}/specific_report?vital_type=${currentVitalType}&period=${currentPeriod}`;
+        
+        // Apri l'URL in una nuova finestra/tab
+        window.open(reportUrl, '_blank');
+    });
+}
+
 // Inizializza i grafici quando il documento è caricato
 document.addEventListener('DOMContentLoaded', function() {
     initVitalsCharts();
@@ -726,4 +751,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (typeof initObservations === 'function') {
         initObservations();
     }
+    
+    // Inizializza il pulsante per il report specifico
+    setupSpecificReportButton();
 });
