@@ -13,14 +13,14 @@
 // Costanti e variabili globali
 const SUPPORTED_DATA_TYPES = {
     FITBIT: [
-        { id: 'heart_rate', name: 'Frequenza cardiaca', unit: 'bpm', color: '#FF5252' },
-        { id: 'steps', name: 'Passi', unit: 'passi', color: '#2196F3' },
-        { id: 'distance', name: 'Distanza', unit: 'km', color: '#4CAF50' },
-        { id: 'calories', name: 'Calorie', unit: 'kcal', color: '#FF9800' },
-        { id: 'active_minutes', name: 'Minuti attivi', unit: 'min', color: '#9C27B0' },
-        { id: 'sleep_duration', name: 'Durata sonno', unit: 'ore', color: '#3F51B5' },
-        { id: 'floors_climbed', name: 'Piani saliti', unit: 'piani', color: '#795548' },
-        { id: 'weight', name: 'Peso', unit: 'kg', color: '#607D8B' }
+        { id: 'HEART_RATE', name: 'Frequenza cardiaca', unit: 'bpm', color: '#FF5252' },
+        { id: 'STEPS', name: 'Passi', unit: 'passi', color: '#2196F3' },
+        { id: 'DISTANCE', name: 'Distanza', unit: 'km', color: '#4CAF50' },
+        { id: 'CALORIES', name: 'Calorie', unit: 'kcal', color: '#FF9800' },
+        { id: 'ACTIVE_MINUTES', name: 'Minuti attivi', unit: 'min', color: '#9C27B0' },
+        { id: 'SLEEP_DURATION', name: 'Durata sonno', unit: 'ore', color: '#3F51B5' },
+        { id: 'FLOORS_CLIMBED', name: 'Piani saliti', unit: 'piani', color: '#795548' },
+        { id: 'WEIGHT', name: 'Peso', unit: 'kg', color: '#607D8B' }
     ]
 };
 
