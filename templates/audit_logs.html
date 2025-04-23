@@ -113,6 +113,11 @@
         <span class="badge bg-primary">{{ logs|length }} {{ _('Records') }}</span>
     </div>
     <div class="card-body p-0">
+        {% if message %}
+        <div class="alert alert-info m-3" role="alert">
+            {{ message }}
+        </div>
+        {% endif %}
         <div class="table-responsive">
             <table class="table table-hover mb-0">
                 <thead>
