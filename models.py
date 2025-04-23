@@ -403,12 +403,14 @@ class EntityType(Enum):
     #   REPORT: Report/document entity
     #   HEALTH_PLATFORM: Health platform entity
     #   HEALTH_LINK: Health platform link entity
+    #   OBSERVATION: Vital observation entity
     PATIENT = "patient"
     VITAL_SIGN = "vital_sign"
     NOTE = "note"
     REPORT = "report"
     HEALTH_PLATFORM = "health_platform"
     HEALTH_LINK = "health_link"
+    OBSERVATION = "observation"
     
 class HealthPlatformLink(db.Model):
     # Model for storing temporary links for health platform integration
