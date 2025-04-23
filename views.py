@@ -37,6 +37,12 @@ def dashboard():
     # Get recent patients
     recent_patients = current_user.patients.order_by(Patient.created_at.desc()).limit(5).all()
     
+    # Get recent audit logs
+    from models import AuditLog
+    recent_audits = AuditLog.query.filter_by(doctor_id=current_user.id).order_by(
+        AuditLog.timestamp.desc()
+    ).limit(10).all()
+    
     # Get recent observations
     recent_observations = VitalObservation.query.join(
         DoctorPatient, VitalObservation.patient_id == DoctorPatient.patient_id
@@ -50,6 +56,7 @@ def dashboard():
                           patient_count=patient_count,
                           recent_patients=recent_patients,
                           recent_observations=recent_observations,
+                          recent_audits=recent_audits,
                           now=datetime.now())
 
 @views_bp.route('/patients')

@@ -2,11 +2,28 @@ from datetime import datetime, timedelta
 from flask import request, current_app, jsonify, Blueprint, render_template
 from flask_login import current_user, login_required
 
-from models import AuditLog, ActionType, EntityType, Doctor, Patient, VitalSign, Note, DoctorPatient, HealthPlatformLink, HealthPlatform
+from models import AuditLog, ActionType, EntityType, Doctor, Patient, Note, DoctorPatient, HealthPlatformLink, HealthPlatform, VitalObservation
 from app import db
 from auth import doctor_required
 
 audit_bp = Blueprint('audit', __name__)
+
+@audit_bp.route('/audit-logs')
+@login_required
+@doctor_required
+def view_logs():
+    """
+    View all audit logs for the current doctor
+    
+    Returns:
+        Response: HTML page with all audit logs
+    """
+    # Get all audit logs for the current doctor, ordered by timestamp (most recent first)
+    logs = AuditLog.query.filter_by(doctor_id=current_user.id).order_by(
+        AuditLog.timestamp.desc()
+    ).all()
+    
+    return render_template('audit_logs.html', logs=logs)
 
 def log_action(doctor_id, action_type, entity_type, entity_id, details=None, patient_id=None):
     """
