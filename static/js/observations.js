@@ -12,6 +12,7 @@
 // Variabili globali
 let currentObservations = [];
 let observationModal = null;
+let currentVitalType = null; // Tipo di parametro vitale correntemente selezionato
 
 /**
  * Inizializza la gestione delle osservazioni
@@ -116,7 +117,14 @@ function updateObservationsUI(observations) {
     // Container per la lista delle osservazioni
     const observationsList = document.getElementById('observationsList');
     
-    if (observations.length === 0) {
+    // Filtra le osservazioni in base al tipo di parametro vitale correntemente selezionato
+    let filteredObservations = observations;
+    if (currentVitalType) {
+        filteredObservations = observations.filter(obs => obs.vital_type === currentVitalType.toLowerCase());
+        console.log(`Mostrando solo osservazioni per il tipo: ${currentVitalType.toLowerCase()}`);
+    }
+    
+    if (filteredObservations.length === 0) {
         // Mostra messaggio di nessuna osservazione
         document.getElementById('noObservations').classList.remove('d-none');
         observationsList.classList.add('d-none');
@@ -132,7 +140,7 @@ function updateObservationsUI(observations) {
     
     // Raggruppa le osservazioni per tipo
     const groupedObservations = {};
-    observations.forEach(obs => {
+    filteredObservations.forEach(obs => {
         if (!groupedObservations[obs.vital_type]) {
             groupedObservations[obs.vital_type] = [];
         }
@@ -192,15 +200,15 @@ function updateObservationsUI(observations) {
                             <i class="fas fa-calendar-alt me-1"></i> ${dateStr}
                         </small>
                     </div>
-                    <button class="btn btn-sm btn-outline-primary edit-observation-btn">
-                        <i class="fas fa-edit"></i>
+                    <button class="btn btn-sm btn-outline-danger delete-observation-btn">
+                        <i class="fas fa-trash-alt"></i>
                     </button>
                 </div>
             `;
             
-            // Aggiungi event listener al pulsante di modifica
-            const editBtn = item.querySelector('.edit-observation-btn');
-            editBtn.addEventListener('click', function() {
+            // Aggiungi event listener al pulsante di eliminazione
+            const deleteBtn = item.querySelector('.delete-observation-btn');
+            deleteBtn.addEventListener('click', function() {
                 openObservationModal(obs);
             });
             
