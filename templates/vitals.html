@@ -118,14 +118,11 @@
         
         <!-- Reports Section -->
         <div class="card shadow-sm mt-4">
-            <div class="card-header bg-info text-white">
+            <div class="card-header">
                 <h5 class="mb-0"><i class="fas fa-file-medical-alt me-2"></i> {{ _('Reports') }}</h5>
             </div>
             <div class="card-body">
                 <div class="d-flex flex-column gap-2">
-                    <a href="#" id="generateCompleteReportBtn" class="btn btn-outline-info">
-                        <i class="fas fa-file-pdf me-1"></i> {{ _('Generate Complete Report') }}
-                    </a>
                     <a href="#" id="generateSpecificReportBtn" class="btn btn-outline-info">
                         <i class="fas fa-file-medical me-1"></i> {{ _('Generate Specific Report') }}
                     </a>
@@ -288,33 +285,6 @@
     </div>
 </div>
 {% endblock %}
-
-<!-- Complete Report Modal -->
-<div class="modal fade" id="completeReportModal" tabindex="-1" aria-labelledby="completeReportModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="completeReportModalLabel">{{ _('Generate Complete Report') }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form action="{{ url_for('views.create_complete_patient_report', patient_id=patient.id) }}" method="post" target="_blank">
-                <div class="modal-body">
-                    <p>{{ _('This report will include all medical notes, all vital signs charts for each time period, and all observations.') }}</p>
-                    
-                    <div class="mb-3">
-                        <label for="summary" class="form-label">{{ _('Summary (Optional)') }}</label>
-                        <textarea class="form-control" id="summary" name="summary" rows="5" placeholder="{{ _('Add an optional summary for this report. This will appear in the report but will not be saved in the database.') }}"></textarea>
-                        <div class="form-text">{{ _('This summary will only be included in this report and will not be saved for future reference.') }}</div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('Cancel') }}</button>
-                    <button type="submit" class="btn btn-primary">{{ _('Generate Report') }}</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 
 <!-- Specific Report Modal -->
 <div class="modal fade" id="specificReportModal" tabindex="-1" aria-labelledby="specificReportModalLabel" aria-hidden="true">
