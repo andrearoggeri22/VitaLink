@@ -131,6 +131,12 @@ def add_web_observation():
         db.session.add(observation)
         db.session.commit()
         
+        # Registrazione audit
+        try:
+            log_observation_creation(current_user.id, observation)
+        except Exception as e:
+            logger.error(f"Errore durante la registrazione dell'audit per la creazione dell'osservazione: {str(e)}")
+        
         logger.info(f"Osservazione aggiunta per il paziente {patient_id} dal medico {current_user.id}")
         
         return jsonify({
@@ -195,8 +201,22 @@ def update_web_observation(observation_id):
     
     # Salva le modifiche
     try:
+        # Salva i dati precedenti per l'audit
+        old_data = {
+            'vital_type': observation.vital_type.value if observation.vital_type else None,
+            'content': observation.content,
+            'start_date': observation.start_date.isoformat() if observation.start_date else None,
+            'end_date': observation.end_date.isoformat() if observation.end_date else None,
+        }
+        
         observation.updated_at = datetime.utcnow()
         db.session.commit()
+        
+        # Registrazione audit
+        try:
+            log_observation_update(current_user.id, observation, old_data)
+        except Exception as e:
+            logger.error(f"Errore durante la registrazione dell'audit per l'aggiornamento dell'osservazione: {str(e)}")
         
         logger.info(f"Osservazione {observation_id} aggiornata dal medico {current_user.id}")
         
@@ -223,8 +243,35 @@ def delete_web_observation(observation_id):
     
     # Elimina l'osservazione
     try:
+        # Salva una copia dei dati dell'osservazione prima dell'eliminazione per l'audit
+        observation_copy = {
+            'id': observation.id,
+            'patient_id': observation.patient_id,
+            'vital_type': observation.vital_type,
+            'content': observation.content,
+            'start_date': observation.start_date,
+            'end_date': observation.end_date
+        }
+        
         db.session.delete(observation)
         db.session.commit()
+        
+        # Registrazione audit
+        try:
+            # Crea un oggetto temporaneo con gli attributi necessari per il logging
+            class TempObservation:
+                def __init__(self, data):
+                    self.id = data['id']
+                    self.patient_id = data['patient_id']
+                    self.vital_type = data['vital_type']
+                    self.content = data['content']
+                    self.start_date = data['start_date']
+                    self.end_date = data['end_date']
+            
+            temp_obs = TempObservation(observation_copy)
+            log_observation_delete(current_user.id, temp_obs)
+        except Exception as e:
+            logger.error(f"Errore durante la registrazione dell'audit per l'eliminazione dell'osservazione: {str(e)}")
         
         logger.info(f"Osservazione {observation_id} eliminata dal medico {current_user.id}")
         
