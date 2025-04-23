@@ -118,53 +118,14 @@
     </div>
     
     <div class="col-lg-8 mb-4">
-        <!-- Vital Signs Filter Form -->
+        <!-- Report Generation Button -->
         <div class="card shadow-sm mb-4">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="fas fa-filter me-2"></i> {{ _('Filter Vital Signs') }}</h5>
-            </div>
             <div class="card-body">
-                <form id="vitalsFilterForm" method="get" action="{{ url_for('views.patient_vitals', patient_id=patient.id) }}">
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <label for="startDate" class="form-label">{{ _('Start Date') }}</label>
-                            <input type="date" class="form-control" id="startDate" name="start_date" 
-                                   value="{{ request.args.get('start_date', '') }}">
-                        </div>
-                        
-                        <div class="col-md-4">
-                            <label for="endDate" class="form-label">{{ _('End Date') }}</label>
-                            <input type="date" class="form-control" id="endDate" name="end_date" 
-                                   value="{{ request.args.get('end_date', '') }}">
-                        </div>
-                        
-                        <div class="col-md-4">
-                            <label for="filterType" class="form-label">{{ _('Type') }}</label>
-                            <select class="form-select" id="filterType" name="type">
-                                <option value="">{{ _('All Types') }}</option>
-                                {% for type in vital_types %}
-                                <option value="{{ type }}" {% if request.args.get('type') == type %}selected{% endif %}>
-                                    {{ type|replace('_', ' ')|title }}
-                                </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="d-flex justify-content-between mt-3">
-                        <a href="{{ url_for('views.generate_report', patient_id=patient.id) }}" class="btn btn-outline-info" target="_blank">
-                            <i class="fas fa-file-pdf me-1"></i> {{ _('Complete Report') }}
-                        </a>
-                        <div>
-                            <a href="{{ url_for('views.patient_vitals', patient_id=patient.id) }}" class="btn btn-outline-secondary me-2">
-                                {{ _('Clear Filters') }}
-                            </a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-search me-1"></i> {{ _('Apply Filters') }}
-                            </button>
-                        </div>
-                    </div>
-                </form>
+                <div class="d-flex justify-content-center">
+                    <a href="{{ url_for('views.generate_report', patient_id=patient.id) }}" class="btn btn-outline-info" target="_blank">
+                        <i class="fas fa-file-pdf me-1"></i> {{ _('Generate Complete Report') }}
+                    </a>
+                </div>
             </div>
         </div>
         
@@ -204,6 +165,35 @@
     </div>
 </div>
 
+<!-- Vital Observations -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fas fa-comment-medical me-2"></i> {{ _('Observations for Current Period') }}</h5>
+        <button type="button" class="btn btn-primary btn-sm" id="addObservationBtn">
+            <i class="fas fa-plus me-1"></i> {{ _('Add Observation') }}
+        </button>
+    </div>
+    <div class="card-body">
+        <div id="observationsContainer">
+            <!-- Observations will be loaded here -->
+            <div class="text-center py-3" id="observationsLoading">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">{{ _('Loading...') }}</span>
+                </div>
+                <p class="text-muted mt-2">{{ _('Loading observations...') }}</p>
+            </div>
+            
+            <div id="noObservations" class="d-none">
+                <p class="text-center text-muted py-3">{{ _('No observations for the current period.') }}</p>
+            </div>
+            
+            <div id="observationsList" class="d-none">
+                <!-- Observations will be added here dynamically -->
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Vital Signs History -->
 <div class="card shadow-sm">
     <div class="card-header">
@@ -229,6 +219,52 @@
                     </tr>
                 </tbody>
             </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Observation Modal -->
+<div class="modal fade" id="observationModal" tabindex="-1" aria-labelledby="observationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="observationModalLabel">{{ _('Add Observation') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="observationForm">
+                    <input type="hidden" id="observationId" name="id">
+                    
+                    <div class="mb-3">
+                        <label for="observationType" class="form-label">{{ _('Vital Parameter') }}</label>
+                        <select class="form-select" id="observationType" name="vital_type" required>
+                            <option value="">{{ _('Select parameter') }}</option>
+                            <!-- These options will be populated dynamically based on available chart data -->
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="observationContent" class="form-label">{{ _('Observation') }}</label>
+                        <textarea class="form-control" id="observationContent" name="content" rows="4" required></textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="observationStartDate" class="form-label">{{ _('Start Date') }}</label>
+                            <input type="date" class="form-control" id="observationStartDate" name="start_date" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="observationEndDate" class="form-label">{{ _('End Date') }}</label>
+                            <input type="date" class="form-control" id="observationEndDate" name="end_date" required>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('Cancel') }}</button>
+                <button type="button" class="btn btn-danger d-none" id="deleteObservationBtn">{{ _('Delete') }}</button>
+                <button type="button" class="btn btn-primary" id="saveObservationBtn">{{ _('Save') }}</button>
+            </div>
         </div>
     </div>
 </div>
