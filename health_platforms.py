@@ -274,13 +274,15 @@ def ensure_fresh_token(patient):
 
 # -------- Data retrieval from Fitbit API --------
 
-def get_fitbit_data(patient, data_type):
+def get_fitbit_data(patient, data_type, start_date=None, end_date=None):
     """
     Get data from Fitbit API for the specified data type
     
     Args:
         patient (Patient): Patient object
         data_type (str): Type of data to retrieve (heart_rate, steps, etc.)
+        start_date (str, optional): Start date in YYYY-MM-DD format
+        end_date (str, optional): End date in YYYY-MM-DD format
         
     Returns:
         dict: Data from Fitbit API or None if error
@@ -295,7 +297,25 @@ def get_fitbit_data(patient, data_type):
         return None
     
     endpoint_config = FITBIT_ENDPOINTS[data_type]
-    endpoint = endpoint_config['endpoint']
+    
+    # Costruisci l'endpoint con le date fornite o usa l'endpoint predefinito
+    if start_date and end_date:
+        # Sostituisci la parte della data nell'endpoint
+        base_endpoint = endpoint_config.get('base_endpoint', endpoint_config['endpoint'])
+        period = endpoint_config.get('period', '1d')  # periodo predefinito di 1 giorno
+        detail_level = endpoint_config.get('detail_level', '')  # livello di dettaglio
+        
+        # Diversi tipi di dati hanno diverse strutture di endpoint
+        if data_type == 'heart_rate':
+            endpoint = f"/1/user/-/activities/heart/date/{start_date}/{end_date}/{detail_level or '1min'}.json"
+        elif data_type == 'sleep_duration':
+            # Per sonno, usiamo un endpoint diverso che accetta un intervallo di date
+            endpoint = f"/1.2/user/-/sleep/date/{start_date}/{end_date}.json"
+        else:
+            # Per altri tipi di dati (passi, calorie, ecc.)
+            endpoint = f"/1/user/-/activities/{data_type.replace('_', '')}/date/{start_date}/{end_date}.json"
+    else:
+        endpoint = endpoint_config['endpoint']
     
     headers = {
         'Authorization': f'Bearer {access_token}'
@@ -398,18 +418,20 @@ def process_fitbit_data(data, data_type):
     
     return results
 
-def get_processed_fitbit_data(patient, data_type):
+def get_processed_fitbit_data(patient, data_type, start_date=None, end_date=None):
     """
     Get and process data from Fitbit API for the specified data type
     
     Args:
         patient (Patient): Patient object
         data_type (str): Type of data to retrieve (heart_rate, steps, etc.)
+        start_date (str, optional): Start date in YYYY-MM-DD format
+        end_date (str, optional): End date in YYYY-MM-DD format
         
     Returns:
         list: Processed data in format [{'timestamp': ISO8601, 'value': 123, 'unit': 'xyz'}, ...]
     """
-    raw_data = get_fitbit_data(patient, data_type)
+    raw_data = get_fitbit_data(patient, data_type, start_date, end_date)
     if raw_data:
         return process_fitbit_data(raw_data, data_type)
     return []
@@ -839,10 +861,18 @@ def get_data(data_type, patient_id):
         data_type (str): Type of data to retrieve
         patient_id (int): ID of the patient
         
+    Query Parameters:
+        start_date (str, optional): Start date in YYYY-MM-DD format
+        end_date (str, optional): End date in YYYY-MM-DD format
+        
     Returns:
         Response: JSON with the requested data
     """
     try:
+        # Get start_date and end_date from query params if provided
+        start_date = request.args.get('start_date', None)
+        end_date = request.args.get('end_date', None)
+        
         patient = Patient.query.get_or_404(patient_id)
         
         # Ensure the doctor is associated with this patient
@@ -862,20 +892,12 @@ def get_data(data_type, patient_id):
         
         # Get data based on the platform
         if patient.connected_platform == HealthPlatform.FITBIT:
-            data = get_processed_fitbit_data(patient, data_type)
+            data = get_processed_fitbit_data(patient, data_type, start_date, end_date)
             
             if data:
-                return jsonify({
-                    'success': True,
-                    'data': data,
-                    'platform': patient.connected_platform.value
-                })
+                return jsonify(data)
             else:
-                return jsonify({
-                    'success': False,
-                    'message': _('No data available for this type'),
-                    'platform': patient.connected_platform.value
-                }), 404
+                return jsonify([])
         else:
             return jsonify({
                 'success': False,
