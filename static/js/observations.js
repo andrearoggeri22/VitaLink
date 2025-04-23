@@ -213,47 +213,56 @@ function updateObservationsUI(observations) {
 }
 
 /**
- * Apre il modal per aggiungere una nuova osservazione
- * @param {Object} observation Osservazione esistente solo per visualizzare i dettagli ed eventuale eliminazione
+ * Apre il modal per aggiungere una nuova osservazione o eliminare un'osservazione esistente
+ * @param {Object} observation Osservazione esistente solo per eventuale eliminazione
  */
 function openObservationModal(observation = null) {
-    // Titolo del modal
+    // Elementi UI
     const modalTitle = document.getElementById('observationModalLabel');
-    modalTitle.textContent = translateText('Aggiungi osservazione');
-    
-    // Form
-    const form = document.getElementById('observationForm');
-    if (form) {
-        form.reset();
-    }
-    
-    // Popola le opzioni per i tipi di vitali disponibili
-    populateVitalTypeOptions();
-    
-    // ID osservazione (solo per eliminazione)
-    const observationIdInput = document.getElementById('observationId');
-    if (observationIdInput) {
-        observationIdInput.value = observation ? observation.id : '';
-    }
-    
-    // Pulsante di eliminazione - visibile solo se si tratta di un'osservazione esistente
+    const addContent = document.getElementById('addObservationContent');
+    const deleteContent = document.getElementById('deleteObservationContent');
     const deleteBtn = document.getElementById('deleteObservationBtn');
     const saveBtn = document.getElementById('saveObservationBtn');
+    const form = document.getElementById('observationForm');
+    const observationIdInput = document.getElementById('observationId');
     
-    if (deleteBtn && saveBtn) {
-        if (observation) {
-            // Se è un'osservazione esistente, mostra solo il pulsante di eliminazione
-            deleteBtn.classList.remove('d-none');
-            saveBtn.classList.add('d-none');  // Nascondi il pulsante Salva
-        } else {
-            // Se è una nuova osservazione, mostra solo il pulsante di salvataggio
-            deleteBtn.classList.add('d-none');
-            saveBtn.classList.remove('d-none');
+    if (observation) {
+        // Se è un'osservazione esistente, mostra solo la conferma di eliminazione
+        modalTitle.textContent = translateText('Elimina osservazione');
+        
+        // Mostra il contenuto di eliminazione e nascondi il form
+        addContent.classList.add('d-none');
+        deleteContent.classList.remove('d-none');
+        
+        // Mostra solo il pulsante Elimina
+        deleteBtn.classList.remove('d-none');
+        saveBtn.classList.add('d-none');
+        
+        // Salva l'ID dell'osservazione
+        if (observationIdInput) {
+            observationIdInput.value = observation.id;
         }
-    }
-    
-    // Date predefinite in base al periodo corrente (solo per nuove osservazioni)
-    if (!observation) {
+    } else {
+        // Se è una nuova osservazione
+        modalTitle.textContent = translateText('Aggiungi osservazione');
+        
+        // Mostra il form e nascondi il contenuto di eliminazione
+        addContent.classList.remove('d-none');
+        deleteContent.classList.add('d-none');
+        
+        // Mostra solo il pulsante Salva
+        deleteBtn.classList.add('d-none');
+        saveBtn.classList.remove('d-none');
+        
+        // Reset form
+        if (form) {
+            form.reset();
+        }
+        
+        // Popola le opzioni per i tipi di vitali disponibili
+        populateVitalTypeOptions();
+        
+        // Date predefinite in base al periodo corrente
         const startDateInput = document.getElementById('observationStartDate');
         const endDateInput = document.getElementById('observationEndDate');
         
@@ -382,12 +391,7 @@ function deleteObservation() {
     const id = document.getElementById('observationId').value;
     if (!id) return;
     
-    // Chiedi conferma
-    if (!confirm('Sei sicuro di voler eliminare questa osservazione?')) {
-        return;
-    }
-    
-    // URL dell'API
+    // URL dell'API (non serve più la conferma del browser, abbiamo già la conferma nel modal)
     const apiUrl = `/web/observations/${id}`;
     
     // Chiamata API

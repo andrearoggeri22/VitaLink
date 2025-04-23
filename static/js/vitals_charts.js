@@ -477,18 +477,39 @@ function updateChart(typeId, data) {
 
 /**
  * Prepara i dati per il grafico
+ * Genera un array di date per il periodo selezionato, anche se non ci sono dati per tutte le date
  * @param {Array} data Dati ricevuti dall'API
  * @param {Object} typeInfo Informazioni sul tipo di dati
  * @returns {Object} Dati formattati per Chart.js
  */
 function prepareChartData(data, typeInfo) {
-    // Se i dati sono vuoti, restituisci un set di dati vuoto
+    // Genera array di date per il periodo selezionato
+    const today = new Date();
+    const startDate = new Date();
+    startDate.setDate(today.getDate() - currentPeriod);
+    
+    // Crea array con tutte le date del periodo
+    const allDates = [];
+    const allLabels = [];
+    const currentDate = new Date(startDate);
+    
+    // Aggiungi tutte le date dal periodo di inizio a oggi
+    while (currentDate <= today) {
+        allDates.push(new Date(currentDate));
+        allLabels.push(formatTimestamp(currentDate));
+        currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
+    // Se i dati sono vuoti, restituisci un set di dati vuoto ma con le date del periodo
     if (!data || !data.length) {
+        // Crea array di valori nulli per tutte le date
+        const emptyValues = allDates.map(() => null);
+        
         return {
-            labels: [],
+            labels: allLabels,
             datasets: [{
-                label: typeInfo.name,
-                data: [],
+                label: `${typeInfo.name} (${typeInfo.unit})`,
+                data: emptyValues,
                 borderColor: typeInfo.color,
                 backgroundColor: `${typeInfo.color}33`, // Colore con opacità 0.2
                 fill: true,
@@ -500,19 +521,31 @@ function prepareChartData(data, typeInfo) {
     // Ordina i dati per timestamp
     data.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
     
-    // Prepara etichette e valori
-    const labels = data.map(item => formatTimestamp(item.timestamp));
-    const values = data.map(item => item.value);
+    // Crea un mapping dei dati per data
+    const dataByDate = {};
+    data.forEach(item => {
+        const date = new Date(item.timestamp);
+        const dateKey = formatDateForAPI(date);
+        dataByDate[dateKey] = item.value;
+    });
+    
+    // Prepara i valori per tutte le date del periodo
+    const values = allDates.map(date => {
+        const dateKey = formatDateForAPI(date);
+        return dataByDate[dateKey] || null;
+    });
     
     return {
-        labels: labels,
+        labels: allLabels,
         datasets: [{
             label: `${typeInfo.name} (${typeInfo.unit})`,
             data: values,
             borderColor: typeInfo.color,
             backgroundColor: `${typeInfo.color}33`, // Colore con opacità 0.2
             fill: true,
-            tension: 0.4
+            tension: 0.4,
+            // Importante: consenti la visualizzazione della linea anche con valori nulli/mancanti
+            spanGaps: true
         }]
     };
 }
@@ -583,7 +616,8 @@ function updateOrCreateChart(typeId, chartData, typeInfo) {
 }
 
 /**
- * Aggiorna la tabella dei dati
+ * Aggiorna la tabella dei dati in "Anamnesi dei parametri vitali"
+ * Mostra solo i dati del tipo correntemente selezionato, per sincronizzare con il grafico
  * @param {string} typeId ID del tipo di dati
  * @param {Array} data Dati ricevuti dall'API
  */
@@ -621,6 +655,10 @@ function updateDataTable(typeId, data) {
             }
             noDataRow.style.display = 'table-row';
         }
+        
+        // Rimuovi tutte le righe esistenti
+        const existingRows = tableBody.querySelectorAll('tr:not(#noVitalsDataRow)');
+        existingRows.forEach(row => row.remove());
         return;
     }
     
@@ -649,7 +687,8 @@ function updateDataTable(typeId, data) {
                     </span>
                 </td>
                 <td>
-                    ${item.value} ${typeInfo.unit}
+                    <strong>${item.value}</strong>
+                    <small class="text-muted">${typeInfo.unit}</small>
                 </td>
                 <td>${formattedDate}</td>
                 <td>
@@ -661,7 +700,7 @@ function updateDataTable(typeId, data) {
         `;
     }).join('');
     
-    // Aggiungi le righe alla tabella
+    // Rimuovi tutte le righe esistenti e aggiungi le nuove
     const existingRows = tableBody.querySelectorAll('tr:not(#noVitalsDataRow)');
     existingRows.forEach(row => row.remove());
     
