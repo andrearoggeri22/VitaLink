@@ -336,11 +336,19 @@ class ActionType(Enum):
     #   DELETE: Action of deleting an entity
     #   VIEW: Action of viewing an entity
     #   EXPORT: Action of exporting an entity (e.g., report generation)
+    #   GENERATE_LINK: Action of generating a link for health platform integration
+    #   CONNECT: Action of connecting a health platform
+    #   DISCONNECT: Action of disconnecting a health platform
+    #   SYNC: Action of synchronizing data from a health platform
     CREATE = "create"
     UPDATE = "update"
     DELETE = "delete"
     VIEW = "view"
     EXPORT = "export"
+    GENERATE_LINK = "generate_link"
+    CONNECT = "connect"
+    DISCONNECT = "disconnect"
+    SYNC = "sync"
 
 class EntityType(Enum):
     # Enumeration defining the types of entities that can be tracked in the audit log system
@@ -350,10 +358,14 @@ class EntityType(Enum):
     #   VITAL_SIGN: Vital sign entity
     #   NOTE: Medical note entity
     #   REPORT: Report/document entity
+    #   HEALTH_PLATFORM: Health platform entity
+    #   HEALTH_LINK: Health platform link entity
     PATIENT = "patient"
     VITAL_SIGN = "vital_sign"
     NOTE = "note"
     REPORT = "report"
+    HEALTH_PLATFORM = "health_platform"
+    HEALTH_LINK = "health_link"
     
 class HealthPlatformLink(db.Model):
     # Model for storing temporary links for health platform integration
