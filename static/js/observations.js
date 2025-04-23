@@ -332,7 +332,7 @@ function saveObservation() {
     }
     
     // Prepara i dati per l'invio
-    const patientId = getPatientIdFromUrl();
+    const patientId = PATIENT_ID || getPatientIdFromUrl();
     const observationData = {
         patient_id: patientId,
         vital_type: vitalType,
@@ -350,6 +350,8 @@ function saveObservation() {
         apiUrl += `/${id}`;
         method = 'PUT';
     }
+    
+    console.log('Saving observation:', observationData);
     
     // Chiamata API
     fetch(apiUrl, {
