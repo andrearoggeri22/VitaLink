@@ -615,3 +615,19 @@ def log_note_delete(doctor_id, note):
         },
         patient_id=note.patient_id
     )
+
+def log_patient_import(doctor_id, patient):
+    """Log patient import."""
+    return log_action(
+        doctor_id=doctor_id,
+        action_type=ActionType.IMPORT,
+        entity_type=EntityType.PATIENT,
+        entity_id=patient.id,
+        details={
+            'patient_uuid': patient.uuid,
+            'patient_name': f"{patient.first_name} {patient.last_name}",
+            'patient_dob': patient.date_of_birth.isoformat() if patient.date_of_birth else None,
+            'imported_at': datetime.utcnow().isoformat(),
+        },
+        patient_id=patient.id
+    )

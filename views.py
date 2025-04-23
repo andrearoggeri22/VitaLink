@@ -436,76 +436,7 @@ def profile():
     
     return render_template('profile.html', doctor=current_user, now=datetime.now())
 
-@views_bp.route('/patients/<int:patient_id>/complete_report', methods=['GET', 'POST'])
-@login_required
-def create_complete_patient_report(patient_id):
-    """Generate a comprehensive patient report in PDF format with all notes, charts and observations."""
-    patient = Patient.query.get_or_404(patient_id)
-    
-    # Check if the current doctor is associated with this patient
-    if patient not in current_user.patients.all():
-        flash(_('You are not authorized to generate reports for this patient'), 'danger')
-        return redirect(url_for('views.patients'))
-    
-    # Get notes
-    notes = patient.notes.order_by(Note.created_at.desc()).all()
-    
-    # Get observations
-    observations = VitalObservation.query.filter_by(patient_id=patient_id).all()
-    
-    # Check if there's a summary
-    summary = None
-    if request.method == 'POST':
-        summary = request.form.get('summary')
-    
-    # Generate the PDF report
-    try:
-        # Use the current session language if available
-        current_language = session.get('language', 'en')
-        
-        logger.debug(f"Generating complete report with language: {current_language}")
-        
-        from reports import generate_complete_report
-        pdf_buffer = generate_complete_report(
-            patient, 
-            current_user, 
-            notes, 
-            observations,
-            summary=summary,
-            language=current_language
-        )
-        
-        # Generate a filename for the report
-        filename = f"complete_report_{patient.last_name}_{datetime.now().strftime('%Y%m%d_%H%M')}.pdf"
-        
-        # Log the report generation
-        log_report_generation(
-            current_user.id, 
-            patient.id, 
-            "complete", 
-            {
-                "notes_count": len(notes),
-                "observations_count": len(observations),
-                "has_summary": summary is not None
-            }
-        )
-        
-        logger.info(f"Doctor {current_user.id} generated complete report for patient {patient_id}")
-        
-        # Return the PDF as a downloadable file
-        return send_file(
-            pdf_buffer,
-            as_attachment=True,
-            download_name=filename,
-            mimetype='application/pdf'
-        )
-        
-    except Exception as e:
-        import traceback
-        error_details = traceback.format_exc()
-        logger.error(f"Error generating complete report: {str(e)}\n{error_details}")
-        flash(_('An error occurred while generating the report: %(error)s', error=str(e)), 'danger')
-        return redirect(url_for('views.patient_detail', patient_id=patient_id))
+# Funzione per il report completo rimossa come richiesto
 
 @views_bp.route('/patients/<int:patient_id>/specific_report', methods=['GET', 'POST'])
 @login_required
@@ -640,8 +571,9 @@ def create_specific_patient_report(patient_id):
 @views_bp.route('/patients/<int:patient_id>/report')
 @login_required
 def generate_report(patient_id):
-    """Legacy route - redirect to complete report for backward compatibility."""
-    return redirect(url_for('views.create_complete_patient_report', patient_id=patient_id))
+    """Legacy route - now redirects to specific report form."""
+    flash(_('Complete reports have been removed. Please use the specific report feature.'), 'info')
+    return redirect(url_for('views.create_specific_patient_report', patient_id=patient_id))
 
 @views_bp.route('/patients/<int:patient_id>/vital_report/<string:vital_type>')
 @login_required
