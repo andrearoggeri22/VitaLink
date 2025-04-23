@@ -335,7 +335,7 @@ function saveObservation() {
     const patientId = PATIENT_ID || getPatientIdFromUrl();
     const observationData = {
         patient_id: patientId,
-        vital_type: vitalType.toUpperCase(), // Assicuriamo che sia in maiuscolo come nell'enum
+        vital_type: vitalType.toLowerCase(), // Assicuriamo che sia in minuscolo come nell'enum
         content: content,
         start_date: startDate,
         end_date: endDate
@@ -402,7 +402,7 @@ function deleteObservation() {
     }
     
     // URL dell'API
-    const apiUrl = `/api/observations/${id}`;
+    const apiUrl = `/web/observations/${id}`;
     
     // Chiamata API
     fetch(apiUrl, {
@@ -471,6 +471,15 @@ function formatDateForInput(date) {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+}
+
+/**
+ * Formatta una data per l'API
+ * @param {Date} date Data da formattare
+ * @returns {string} Data formattata in formato ISO YYYY-MM-DD
+ */
+function formatDateForAPI(date) {
+    return formatDateForInput(date);
 }
 
 /**
