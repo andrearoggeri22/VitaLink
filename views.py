@@ -10,9 +10,8 @@ from flask_babel import gettext as _
 import copy
 
 from app import db
-from models import Patient, Doctor, VitalSign, VitalSignType, DataOrigin, Note, DoctorPatient, ActionType, EntityType, VitalObservation
-from utils import parse_date, is_vital_in_range, get_vital_sign_unit, to_serializable_dict
-from notifications import notify_abnormal_vital
+from models import Patient, Doctor, VitalSignType, DataOrigin, Note, DoctorPatient, ActionType, EntityType, VitalObservation
+from utils import parse_date, to_serializable_dict
 from reports import generate_patient_report, generate_vital_trends_report
 from audit import (
     log_patient_creation, log_patient_update, log_patient_delete,
@@ -38,19 +37,19 @@ def dashboard():
     # Get recent patients
     recent_patients = current_user.patients.order_by(Patient.created_at.desc()).limit(5).all()
     
-    # Get recent vital signs for this doctor's patients
-    recent_vitals = VitalSign.query.join(
-        DoctorPatient, VitalSign.patient_id == DoctorPatient.patient_id
+    # Get recent observations
+    recent_observations = VitalObservation.query.join(
+        DoctorPatient, VitalObservation.patient_id == DoctorPatient.patient_id
     ).filter(
         DoctorPatient.doctor_id == current_user.id
     ).order_by(
-        VitalSign.recorded_at.desc()
+        VitalObservation.created_at.desc()
     ).limit(10).all()
     
     return render_template('dashboard.html', 
                           patient_count=patient_count,
                           recent_patients=recent_patients,
-                          recent_vitals=recent_vitals,
+                          recent_observations=recent_observations,
                           now=datetime.now())
 
 @views_bp.route('/patients')
@@ -127,9 +126,6 @@ def patient_detail(patient_id):
         flash(_('You are not authorized to view this patient.'), 'danger')
         return redirect(url_for('views.patients'))
     
-    # Get recent vital signs
-    recent_vitals = patient.vital_signs.order_by(VitalSign.recorded_at.desc()).limit(10).all()
-    
     # Get notes
     notes = patient.notes.order_by(Note.created_at.desc()).all()
     
@@ -138,7 +134,6 @@ def patient_detail(patient_id):
     
     return render_template('patient_detail.html', 
                           patient=patient,
-                          recent_vitals=recent_vitals,
                           notes=notes,
                           now=datetime.now())
 
@@ -219,10 +214,7 @@ def delete_patient(patient_id):
         
         # If the patient has no other doctors, delete the patient (optional)
         if patient.doctors.count() == 0:
-            # Delete all vital signs and notes for the patient
-            for vital in patient.vital_signs.all():
-                db.session.delete(vital)
-            
+            # Delete all notes for the patient
             for note in patient.notes.all():
                 db.session.delete(note)
             
@@ -257,148 +249,29 @@ def delete_patient(patient_id):
     
     return redirect(url_for('views.patients'))
 
-@views_bp.route('/patients/<int:patient_id>/vitals', methods=['GET', 'POST'])
+@views_bp.route('/patients/<int:patient_id>/vitals', methods=['GET'])
 @login_required
 def patient_vitals(patient_id):
     patient = Patient.query.get_or_404(patient_id)
     
     # Check if the current doctor is associated with this patient
     if patient not in current_user.patients.all():
-        flash(_('Nou are not authorized to view this patient'), 'danger')
+        flash(_('You are not authorized to view this patient'), 'danger')
         return redirect(url_for('views.patients'))
     
-    if request.method == 'POST':
-        vital_type = request.form.get('type')
-        value = request.form.get('value')
-        unit = request.form.get('unit')
-        recorded_at = request.form.get('recorded_at')
-        
-        # Validate required fields
-        if not vital_type or not value:
-            flash(_('Vital parameter type and value are mandatory fields'), 'danger')
-            return redirect(url_for('views.patient_vitals', patient_id=patient_id))
-        
-        try:
-            # Convert vital type to enum
-            vital_type_enum = VitalSignType(vital_type)
-            
-            # Parse value
-            value_float = float(value)
-            
-            # Parse date/time or use current time
-            if recorded_at:
-                try:
-                    recorded_datetime = datetime.strptime(recorded_at, '%Y-%m-%dT%H:%M')
-                except ValueError:
-                    flash(_('Invalid date/time format. Use YYYY-MM-DDTHH:MM'), 'danger')
-                    return redirect(url_for('views.patient_vitals', patient_id=patient_id))
-            else:
-                recorded_datetime = datetime.utcnow()
-            
-            # Create new vital sign
-            vital = VitalSign(
-                patient_id=patient_id,
-                type=vital_type_enum,
-                value=value_float,
-                unit=unit,
-                recorded_at=recorded_datetime,
-                origin=DataOrigin.MANUAL
-            )
-            
-            db.session.add(vital)
-            db.session.commit()
-            
-            # Log the vital sign creation in the audit trail
-            log_vital_creation(current_user.id, vital)
-            
-            # Check if the vital sign is outside normal range
-            vital_value = str(value_float) if vital_type != 'blood_pressure' else value
-            is_normal, status = is_vital_in_range(vital_type, vital_value)
-            
-            # If value is abnormal and patient has contact number, send notification
-            notification_status = ""
-            if not is_normal and patient.contact_number:
-                if not unit:
-                    unit = get_vital_sign_unit(vital_type)
-                    
-                # Send SMS notification
-                success, message = notify_abnormal_vital(
-                    patient=patient,
-                    vital_type=vital_type,
-                    value=vital_value,
-                    unit=unit,
-                    status=status
-                )
-                
-                if success:
-                    notification_status = f" {_('Abnormal value detected')}. {_('Patient notification sent')}."
-                    logger.info(f"Abnormal vital notification sent to patient {patient.id}")
-                else:
-                    notification_status = f" {_('Abnormal value detected')}. {_('Failed to send notification')}: {_(message)}"
-                    logger.warning(f"Failed to send vital notification to patient {patient.id}: {message}")
-            elif not is_normal:
-                notification_status = f" {_('Abnormal value detected')} ({_('patient has no contact number for notifications')})."
-            
-            flash(f'{_("Vital sign recorded successfully")}.{notification_status}', 'success')
-            logger.info(f"Doctor {current_user.id} added vital sign for patient {patient_id}")
-            
-        except ValueError:
-            flash(_('Invalid value format'), 'danger')
-        except SQLAlchemyError as e:
-            db.session.rollback()
-            logger.error(f"Error adding vital sign: {str(e)}")
-            flash(_('An error occurred while recording the vital sign'), 'danger')
-    
-    # Get vital signs
-    start_date = request.args.get('start_date')
-    end_date = request.args.get('end_date')
-    vital_type = request.args.get('type')
-    
-    query = patient.vital_signs
-    
-    if start_date:
-        try:
-            start_datetime = datetime.strptime(start_date, '%Y-%m-%d')
-            query = query.filter(VitalSign.recorded_at >= start_datetime)
-        except ValueError:
-            flash(_('Invalid start date format. Use YYYY-MM-DD'), 'warning')
-    
-    if end_date:
-        try:
-            end_datetime = datetime.strptime(end_date, '%Y-%m-%d')
-            # Add a day to include all records from the end date
-            end_datetime = end_datetime.replace(hour=23, minute=59, second=59)
-            query = query.filter(VitalSign.recorded_at <= end_datetime)
-        except ValueError:
-            flash(_('Invalid end date format. Use YYYY-MM-DD'), 'warning')
-    
-    if vital_type:
-        try:
-            vital_type_enum = VitalSignType(vital_type)
-            query = query.filter(VitalSign.type == vital_type_enum)
-        except ValueError:
-            flash(_('Invalid vital sign type'), 'warning')
-    
-    vitals = query.order_by(VitalSign.recorded_at.desc()).all()
-    
-    # Get all vital sign types for tabs
-    vitals_by_type = {}
-    for vital in patient.vital_signs.all():
-        type_name = vital.type.value
-        if type_name not in vitals_by_type:
-            vitals_by_type[type_name] = True
+    # Get observations
+    observations = VitalObservation.query.filter_by(patient_id=patient_id).order_by(VitalObservation.created_at.desc()).all()
     
     return render_template('vitals.html', 
                           patient=patient,
-                          vitals=vitals,
-                          vitals_by_type=vitals_by_type,
+                          observations=observations,
                           vital_types=[type.value for type in VitalSignType],
                           now=datetime.now())
                           
 @views_bp.route('/api/patients/<int:patient_id>/vitals')
 @login_required
 def api_patient_vitals(patient_id):
-    """API endpoint to get vital signs data in JSON format"""
+    """API endpoint to get health platform data in JSON format"""
     patient = Patient.query.get_or_404(patient_id)
     
     # Check if the current doctor is associated with this patient
@@ -409,44 +282,30 @@ def api_patient_vitals(patient_id):
     end_date = request.args.get('end_date')
     vital_type = request.args.get('type')
     
-    query = patient.vital_signs
+    # Check if patient has health platform connection
+    if not patient.fitbit_access_token:
+        return jsonify({'error': 'No health platform connection', 'vital_type': vital_type}), 404
     
-    if start_date:
-        try:
-            start_datetime = datetime.strptime(start_date, '%Y-%m-%d')
-            query = query.filter(VitalSign.recorded_at >= start_datetime)
-        except ValueError:
-            return jsonify({'error': 'Invalid start date format'}), 400
+    # Import health platform functionality
+    from health_platforms import get_processed_fitbit_data
     
-    if end_date:
-        try:
-            end_datetime = datetime.strptime(end_date, '%Y-%m-%d')
-            end_datetime = end_datetime.replace(hour=23, minute=59, second=59)
-            query = query.filter(VitalSign.recorded_at <= end_datetime)
-        except ValueError:
-            return jsonify({'error': 'Invalid end date format'}), 400
-    
-    if vital_type:
-        try:
-            vital_type_enum = VitalSignType(vital_type)
-            query = query.filter(VitalSign.type == vital_type_enum)
-        except ValueError:
-            return jsonify({'error': 'Invalid vital sign type'}), 400
-    
-    # Organize vitals by type for plotting
-    vitals_by_type = {}
-    for vital in query.order_by(VitalSign.recorded_at).all():
-        type_name = vital.type.value
-        if type_name not in vitals_by_type:
-            vitals_by_type[type_name] = []
+    # Get data from Fitbit
+    try:
+        data = get_processed_fitbit_data(
+            patient,
+            vital_type,
+            start_date=start_date,
+            end_date=end_date
+        )
         
-        vitals_by_type[type_name].append({
-            'value': float(vital.value),
-            'recorded_at': vital.recorded_at.isoformat(),
-            'unit': vital.unit or get_vital_sign_unit(type_name)
-        })
-    
-    return jsonify(vitals_by_type)
+        if not data:
+            return jsonify({vital_type: []}), 200
+        
+        # Organize data by vital type
+        return jsonify({vital_type: data}), 200
+    except Exception as e:
+        logger.error(f"Error getting data from health platform: {str(e)}")
+        return jsonify({'error': 'Failed to retrieve health platform data', 'message': str(e)}), 500
 
 @views_bp.route('/patients/<int:patient_id>/notes', methods=['POST'])
 @login_required
@@ -556,16 +415,8 @@ def generate_report(patient_id):
         except ValueError:
             flash(_('Invalid end date format. Use YYYY-MM-DD'), 'warning')
     
-    # Query vitals with filter
-    vitals_query = patient.vital_signs
-    
-    if start_datetime:
-        vitals_query = vitals_query.filter(VitalSign.recorded_at >= start_datetime)
-    
-    if end_datetime:
-        vitals_query = vitals_query.filter(VitalSign.recorded_at <= end_datetime)
-    
-    vitals = vitals_query.order_by(VitalSign.recorded_at.desc()).all()
+    # Get health platform connection status
+    has_health_connection = patient.fitbit_access_token is not None
     
     # Query notes with filter
     notes_query = patient.notes
@@ -591,8 +442,8 @@ def generate_report(patient_id):
         pdf_buffer = generate_patient_report(
             patient=patient,
             doctor=current_user,
-            vitals=vitals,
             notes=notes,
+            has_health_connection=has_health_connection,
             start_date=start_datetime,
             end_date=end_datetime,
             language=current_language
@@ -777,16 +628,26 @@ def generate_vital_report(patient_id, vital_type):
         except ValueError:
             flash(_('Invalid end date format. Use YYYY-MM-DD'), 'warning')
     
-    # Query vitals with filter
-    vitals_query = patient.vital_signs.filter(VitalSign.type == vital_type_enum)
+    # Get health platform data using Fitbit API
+    from health_platforms import get_processed_fitbit_data
     
-    if start_datetime:
-        vitals_query = vitals_query.filter(VitalSign.recorded_at >= start_datetime)
-    
-    if end_datetime:
-        vitals_query = vitals_query.filter(VitalSign.recorded_at <= end_datetime)
-    
-    vitals = vitals_query.order_by(VitalSign.recorded_at).all()
+    try:
+        # If patient doesn't have a health platform connection, redirect
+        if not patient.fitbit_access_token:
+            flash(_('Patient does not have a health platform connection. Please connect first.'), 'warning')
+            return redirect(url_for('views.patient_vitals', patient_id=patient_id))
+            
+        # Get data from Fitbit
+        vitals = get_processed_fitbit_data(
+            patient,
+            vital_type_enum.value,
+            start_date=start_date,
+            end_date=end_date
+        )
+    except Exception as e:
+        logger.error(f"Error retrieving data from health platform: {str(e)}")
+        flash(_('Error retrieving data from health platform'), 'danger')
+        return redirect(url_for('views.patient_vitals', patient_id=patient_id))
     
     if not vitals:
         flash(_('No data available for the selected vital parameter and time period'), 'warning')

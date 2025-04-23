@@ -9,11 +9,8 @@ from flask_login import login_required, current_user
 from sqlalchemy.exc import SQLAlchemyError
 from flask_babel import gettext as _
 
-from models import Patient, VitalSign, VitalSignType, DataOrigin, db
-from audit import log_vital_creation, log_action, ActionType, EntityType
-from utils import get_vital_sign_unit
-from notifications import notify_abnormal_vital
-from utils import is_vital_in_range
+from models import Patient, VitalSignType, db 
+from audit import log_action, ActionType, EntityType
 
 fitbit_bp = Blueprint('fitbit', __name__)
 
@@ -249,7 +246,11 @@ def extract_fitbit_data(patient_id):
 
 def save_fitbit_data(patient_id, data):
     """
-    Save data extracted from the Fitbit device to the database.
+    [DEPRECATED] Previously saved data extracted from the Fitbit device to the database.
+    
+    This function is kept for backwards compatibility but is now deprecated.
+    In the new architecture, data is retrieved directly from health platforms via OAuth
+    instead of being stored in the database.
     
     Args:
         patient_id (int): Patient ID to associate the data with
@@ -257,91 +258,19 @@ def save_fitbit_data(patient_id, data):
         
     Returns:
         tuple: (success, vitals_saved, errors)
-            success (bool): True if data was successfully saved
-            vitals_saved (int): Number of vital parameters saved
-            errors (list): List of errors occurred during the saving process
+            success (bool): False (function deprecated) 
+            vitals_saved (int): 0 (function deprecated)
+            errors (list): List containing deprecation message
     """
-    vitals_saved = 0
-    errors = []
-
-    try:
-        patient = Patient.query.get(patient_id)
-        if not patient:
-            return False, 0, [_("Patient not found")]
-
-        # Debug logging
-        logging.info(
-            f"Starting to save Fitbit data for patient ID: {patient_id}")
-
-        for data_type, measurements in data.items():
-            if data_type not in FITBIT_DATA_TYPES:
-                errors.append(_("Unsupported data type: %(type)s") % {"type": data_type})
-                continue
-
-            vital_type = FITBIT_DATA_TYPES[data_type]
-            logging.info(
-                f"Processing data type: {data_type} -> enum type: {vital_type}, value: {vital_type.value}"
-            )
-
-            for measurement in measurements:
-                try:
-                    # Convert timestamp to datetime
-                    if 'T' in measurement['timestamp']:
-                        recorded_at = datetime.datetime.strptime(
-                            measurement['timestamp'], '%Y-%m-%dT%H:%M:%S')
-                    else:
-                        recorded_at = datetime.datetime.strptime(
-                            measurement['timestamp'], '%Y-%m-%d')
-
-                    # Log values for debugging
-                    logging.info(
-                        f"Value to insert: {measurement['value']}, timestamp: {recorded_at}"
-                    )
-
-                    # Create new vital sign parameter
-                    vital = VitalSign(
-                        patient_id=patient_id,
-                        type=vital_type,  # VitalSignType object from enum
-                        value=float(
-                            measurement['value']),  # Ensure it's a float
-                        unit=get_vital_sign_unit(data_type),
-                        recorded_at=recorded_at,
-                        origin=DataOrigin.AUTOMATIC)
-
-                    db.session.add(vital)
-                    vitals_saved += 1
-
-                    # Check if value is outside normal range and send notification
-                    is_normal, status = is_vital_in_range(
-                        data_type, measurement['value'])
-                    if not is_normal:
-                        notify_abnormal_vital(
-                            patient=patient,
-                            vital_type=vital_type.value,
-                            value=measurement['value'],
-                            unit=get_vital_sign_unit(data_type),
-                            status=status)
-
-                except Exception as e:
-                    logging.error(f"Save error: {str(e)}")
-                    errors.append(_("Error saving parameter %(type)s: %(error)s") % {
-                        "type": data_type,
-                        "error": str(e)
-                })
-
-        db.session.commit()
-        logging.info(
-            f"Fitbit data successfully saved: {vitals_saved} parameters")
-        return True, vitals_saved, errors
-
-    except SQLAlchemyError as e:
-        db.session.rollback()
-        logging.error(f"SQLAlchemy database error: {str(e)}")
-        return False, 0, [_("Database error: %(error)s") % {"error": str(e)}]
-    except Exception as e:
-        db.session.rollback()
-        logging.error(f"Generic error: {str(e)}")
-        return False, 0, [_("Generic error: %(error)s") % {"error": str(e)}]
+    logging.warning("save_fitbit_data is deprecated. Use health_platforms module for data retrieval.")
+    
+    # Check if the patient exists (only needed for backwards compatibility)
+    patient = Patient.query.get(patient_id)
+    if not patient:
+        return False, 0, [_("Patient not found")]
+    
+    # Return deprecation message
+    return False, 0, [_("This functionality is deprecated. The system now uses OAuth connections with health platforms.")]
 
 
 @fitbit_bp.route('/patients/<int:patient_id>/check_device', methods=['GET'])

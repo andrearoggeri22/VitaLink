@@ -15,7 +15,6 @@ from reportlab.graphics.charts.linecharts import HorizontalLineChart
 from reportlab.graphics.charts.legends import Legend
 
 from models import VitalSignType
-from utils import get_vital_reference_range, get_vital_sign_unit
 
 # Setup logger
 logger = logging.getLogger(__name__)
@@ -136,15 +135,15 @@ def get_report_translations(lang=None):
             'consult_doctor': 'Please consult with your healthcare provider to discuss these results. This report is generated automatically and should be interpreted by a qualified medical professional.'
         }
 
-def generate_patient_report(patient, doctor, vitals, notes, start_date=None, end_date=None, language=None):
+def generate_patient_report(patient, doctor, notes, has_health_connection=False, start_date=None, end_date=None, language=None):
     """
-    Generate a PDF report for a patient's vital signs and notes
+    Generate a PDF report for a patient's health data and notes
     
     Args:
         patient: Patient object
         doctor: Doctor object
-        vitals: List of VitalSign objects
         notes: List of Note objects
+        has_health_connection: Whether the patient has a health platform connection
         start_date: Optional start date for filtering
         end_date: Optional end date for filtering
         language: Optional language code override (it/en)
@@ -242,110 +241,33 @@ def generate_patient_report(patient, doctor, vitals, notes, start_date=None, end
     content.append(doctor_table)
     content.append(Spacer(1, 24))
     
-    # Vital Signs
+    # Health Data Section
     content.append(Paragraph(t['vital_signs'], styles['Heading2']))
     content.append(Spacer(1, 6))
     
-    if vitals:
-        # Filter period explanation
-        if start_date and end_date:
-            period_text = t['period_from_to'].format(start_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d'))
-            content.append(Paragraph(period_text, styles['Normal']))
-        elif start_date:
-            period_text = t['period_from'].format(start_date.strftime('%Y-%m-%d'))
-            content.append(Paragraph(period_text, styles['Normal']))
-        elif end_date:
-            period_text = t['period_until'].format(end_date.strftime('%Y-%m-%d'))
-            content.append(Paragraph(period_text, styles['Normal']))
-            
-        content.append(Spacer(1, 12))
+    # Filter period explanation
+    if start_date and end_date:
+        period_text = t['period_from_to'].format(start_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d'))
+        content.append(Paragraph(period_text, styles['Normal']))
+    elif start_date:
+        period_text = t['period_from'].format(start_date.strftime('%Y-%m-%d'))
+        content.append(Paragraph(period_text, styles['Normal']))
+    elif end_date:
+        period_text = t['period_until'].format(end_date.strftime('%Y-%m-%d'))
+        content.append(Paragraph(period_text, styles['Normal']))
         
-        # Group vitals by type
-        vitals_by_type = {}
-        for vital in vitals:
-            type_name = vital.type.value
-            if type_name not in vitals_by_type:
-                vitals_by_type[type_name] = []
-            vitals_by_type[type_name].append(vital)
-        
-        # Create a table for each vital type
-        for vital_type, type_vitals in vitals_by_type.items():
-            # Get reference range
-            reference = get_vital_reference_range(vital_type)
-            unit = get_vital_sign_unit(vital_type)
-            
-            content.append(Paragraph(f"{reference['name']}", styles['Heading3']))
-            content.append(Spacer(1, 3))
-            
-            # Reference range info
-            if reference['min'] is not None and reference['max'] is not None:
-                range_text = t['normal_range'].format(reference['min'], reference['max'], unit)
-                content.append(Paragraph(range_text, styles['Normal']))
-                content.append(Spacer(1, 6))
-            
-            # Table header
-            vitals_data = [[t['datetime'], t['value'], t['status']]]
-            
-            # Add data rows
-            for vital in sorted(type_vitals, key=lambda v: v.recorded_at, reverse=True):
-                # Determine status
-                status = t['normal']
-                status_color = colors.black
-                
-                if vital_type == 'blood_pressure':
-                    # Special case for blood pressure
-                    value_display = vital.value
-                else:
-                    value_display = f"{vital.value} {unit}"
-                    # Check if value is outside normal range
-                    if reference['min'] is not None and reference['max'] is not None:
-                        if vital.value < reference['min']:
-                            status = t['low']
-                            status_color = colors.blue
-                        elif vital.value > reference['max']:
-                            status = t['high']
-                            status_color = colors.red
-                
-                vitals_data.append([
-                    vital.recorded_at.strftime('%Y-%m-%d %H:%M'),
-                    value_display,
-                    status
-                ])
-            
-            # Create table
-            vitals_table = Table(vitals_data, colWidths=[2*inch, 2*inch, 1.5*inch])
-            vitals_table.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
-                ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
-                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (-1, 0), 10),
-                ('BOTTOMPADDING', (0, 0), (-1, 0), 5),
-                ('ALIGN', (0, 1), (-1, -1), 'LEFT'),
-                ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-                ('FONTSIZE', (0, 1), (-1, -1), 9),
-                ('GRID', (0, 0), (-1, -1), 1, colors.black),
-                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ]))
-            
-            # Add status color coding
-            for i in range(1, len(vitals_data)):
-                if vitals_data[i][2] == t['high']:
-                    vitals_table.setStyle(TableStyle([
-                        ('TEXTCOLOR', (2, i), (2, i), colors.red),
-                        ('FONTNAME', (2, i), (2, i), 'Helvetica-Bold')
-                    ]))
-                elif vitals_data[i][2] == t['low']:
-                    vitals_table.setStyle(TableStyle([
-                        ('TEXTCOLOR', (2, i), (2, i), colors.blue),
-                        ('FONTNAME', (2, i), (2, i), 'Helvetica-Bold')
-                    ]))
-            
-            content.append(vitals_table)
-            content.append(Spacer(1, 18))
+    content.append(Spacer(1, 12))
+    
+    if has_health_connection:
+        content.append(Paragraph("Health Platform Connection: Active", styles['Normal']))
+        content.append(Paragraph("Data can be viewed through the VitaLink platform's web interface.", styles['Normal']))
+        content.append(Spacer(1, 6))
+        content.append(Paragraph("The patient is connected to an external health platform that provides real-time vital sign data. This report does not include the real-time data to ensure accuracy. Please consult the VitaLink web interface for the most up-to-date health information.", styles['Normal']))
     else:
-        content.append(Paragraph(t['no_vitals'], styles['Normal']))
-        content.append(Spacer(1, 12))
+        content.append(Paragraph("Health Platform Connection: Not Active", styles['Normal']))
+        content.append(Paragraph("The patient is not currently connected to any health platform for automatic vital sign monitoring.", styles['Normal']))
+    
+    content.append(Spacer(1, 18))
     
     # Notes
     content.append(Paragraph(t['clinical_notes'], styles['Heading2']))
@@ -375,7 +297,7 @@ def generate_vital_trends_report(patient, vital_type, vitals, period_desc, langu
     Args:
         patient: Patient object
         vital_type: Type of vital sign (string)
-        vitals: List of VitalSign objects
+        vitals: List of data points from health platform
         period_desc: Description of the time period
         language: Optional language code override (it/en)
         
@@ -405,15 +327,35 @@ def generate_vital_trends_report(patient, vital_type, vitals, period_desc, langu
         alignment=1
     ))
     
-    # Get reference range and unit
-    reference = get_vital_reference_range(vital_type)
-    unit = get_vital_sign_unit(vital_type)
+    # Mappatura dei nomi di parametri vitali
+    vital_names = {
+        'heart_rate': 'Heart Rate',
+        'steps': 'Steps',
+        'weight': 'Weight',
+        'sleep': 'Sleep',
+        'activity': 'Activity',
+        'distance': 'Distance'
+    }
+    
+    # Mappatura delle unità di misura
+    vital_units = {
+        'heart_rate': 'bpm',
+        'steps': 'steps',
+        'weight': 'kg',
+        'sleep': 'minutes',
+        'activity': 'minutes',
+        'distance': 'km'
+    }
+    
+    # Get the vital name and unit
+    vital_name = vital_names.get(vital_type, vital_type.replace('_', ' ').title())
+    unit = vital_units.get(vital_type, '')
     
     # Build content
     content = []
     
     # Report Header
-    content.append(Paragraph(f"{reference['name']} {t['trend_analysis']}", styles['Heading1Center']))
+    content.append(Paragraph(f"{vital_name} {t['trend_analysis']}", styles['Heading1Center']))
     content.append(Spacer(1, 12))
     
     # Patient info
@@ -422,8 +364,9 @@ def generate_vital_trends_report(patient, vital_type, vitals, period_desc, langu
     content.append(Spacer(1, 24))
     
     if vitals:
-        # Sort vitals by date
-        sorted_vitals = sorted(vitals, key=lambda v: v.recorded_at)
+        # Assume vitals è un elenco di dizionari con 'timestamp' e 'value'
+        # Sort per data/ora
+        sorted_vitals = sorted(vitals, key=lambda v: v['timestamp'])
         
         # Create a line chart for the vitals trend
         drawing = Drawing(400, 200)
@@ -435,8 +378,13 @@ def generate_vital_trends_report(patient, vital_type, vitals, period_desc, langu
         chart.y = 25
         
         # Prepare data
-        dates = [v.recorded_at.strftime('%m/%d') for v in sorted_vitals]
-        values = [v.value for v in sorted_vitals]
+        # Estrai data in formato breve dal timestamp ISO
+        dates = []
+        for v in sorted_vitals:
+            dt = datetime.fromisoformat(v['timestamp'].replace('Z', '+00:00'))
+            dates.append(dt.strftime('%m/%d'))
+        
+        values = [float(v['value']) for v in sorted_vitals]
         
         chart.data = [values]
         chart.categoryAxis.categoryNames = dates
@@ -446,21 +394,6 @@ def generate_vital_trends_report(patient, vital_type, vitals, period_desc, langu
         # Assicuriamoci che i valori min e max siano float
         chart.valueAxis.valueMin = float(chart.valueAxis.valueMin)
         chart.valueAxis.valueMax = float(chart.valueAxis.valueMax)
-        
-        # Add reference lines if available
-        if reference['min'] is not None:
-            chart.valueAxis.valueMin = min(chart.valueAxis.valueMin, reference['min'] * 0.9)
-            # Inizializza valueSteps se non esiste
-            if not hasattr(chart.valueAxis, 'valueSteps'):
-                chart.valueAxis.valueSteps = []
-            chart.valueAxis.valueSteps.append(reference['min'])
-        
-        if reference['max'] is not None:
-            chart.valueAxis.valueMax = max(chart.valueAxis.valueMax, reference['max'] * 1.1)
-            # Inizializza valueSteps se non esiste
-            if not hasattr(chart.valueAxis, 'valueSteps'):
-                chart.valueAxis.valueSteps = []
-            chart.valueAxis.valueSteps.append(reference['max'])
         
         # Style the chart
         chart.lines[0].strokeWidth = 2
@@ -482,19 +415,11 @@ def generate_vital_trends_report(patient, vital_type, vitals, period_desc, langu
         min_value = min(values)
         max_value = max(values)
         
-        # Count abnormal readings
-        high_count = sum(1 for v in values if reference['max'] is not None and v > reference['max'])
-        low_count = sum(1 for v in values if reference['min'] is not None and v < reference['min'])
-        normal_count = len(values) - high_count - low_count
-        
         # Create statistics table
         stats_data = [
             [t['average'], f"{avg_value:.1f} {unit}"],
             [t['minimum'], f"{min_value} {unit}"],
-            [t['maximum'], f"{max_value} {unit}"],
-            [t['normal_readings'], f"{normal_count} ({normal_count/len(values)*100:.1f}%)"],
-            [t['high_readings'], f"{high_count} ({high_count/len(values)*100:.1f}%)"],
-            [t['low_readings'], f"{low_count} ({low_count/len(values)*100:.1f}%)"]
+            [t['maximum'], f"{max_value} {unit}"]
         ]
         
         stats_table = Table(stats_data, colWidths=[2*inch, 3*inch])
@@ -517,27 +442,20 @@ def generate_vital_trends_report(patient, vital_type, vitals, period_desc, langu
         content.append(Spacer(1, 6))
         
         # Table header
-        readings_data = [[t['datetime'], t['value'], t['status']]]
+        readings_data = [[t['datetime'], t['value']]]
         
         # Add data rows
         for vital in sorted_vitals:
-            # Determine status
-            status = t['normal']
-            
-            if reference['min'] is not None and reference['max'] is not None:
-                if vital.value < reference['min']:
-                    status = t['low']
-                elif vital.value > reference['max']:
-                    status = t['high']
+            # Parse datetime from ISO format
+            dt = datetime.fromisoformat(vital['timestamp'].replace('Z', '+00:00'))
             
             readings_data.append([
-                vital.recorded_at.strftime('%Y-%m-%d %H:%M'),
-                f"{vital.value} {unit}",
-                status
+                dt.strftime('%Y-%m-%d %H:%M'),
+                f"{vital['value']} {unit}"
             ])
         
         # Create table
-        readings_table = Table(readings_data, colWidths=[2*inch, 2*inch, 1.5*inch])
+        readings_table = Table(readings_data, colWidths=[2.5*inch, 3*inch])
         readings_table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
@@ -551,19 +469,6 @@ def generate_vital_trends_report(patient, vital_type, vitals, period_desc, langu
             ('GRID', (0, 0), (-1, -1), 1, colors.black),
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         ]))
-        
-        # Add status color coding
-        for i in range(1, len(readings_data)):
-            if readings_data[i][2] == t['high']:
-                readings_table.setStyle(TableStyle([
-                    ('TEXTCOLOR', (2, i), (2, i), colors.red),
-                    ('FONTNAME', (2, i), (2, i), 'Helvetica-Bold')
-                ]))
-            elif readings_data[i][2] == t['low']:
-                readings_table.setStyle(TableStyle([
-                    ('TEXTCOLOR', (2, i), (2, i), colors.blue),
-                    ('FONTNAME', (2, i), (2, i), 'Helvetica-Bold')
-                ]))
         
         content.append(readings_table)
     else:
