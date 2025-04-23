@@ -189,7 +189,11 @@ def get_audit_stats():
     
     # Count actions by type
     action_stats = []
-    for action_type in ActionType:
+    # Get only the action types that exist in the database to avoid InvalidTextRepresentation errors
+    existing_action_types = db.session.query(db.distinct(AuditLog.action_type)).all()
+    existing_action_types = [action_type[0] for action_type in existing_action_types]
+    
+    for action_type in existing_action_types:
         count = base_query.filter_by(action_type=action_type).count()
         if count > 0:
             action_stats.append({
@@ -199,7 +203,11 @@ def get_audit_stats():
     
     # Count actions by entity type
     entity_stats = []
-    for entity_type in EntityType:
+    # Same approach for entity types
+    existing_entity_types = db.session.query(db.distinct(AuditLog.entity_type)).all()
+    existing_entity_types = [entity_type[0] for entity_type in existing_entity_types]
+    
+    for entity_type in existing_entity_types:
         count = base_query.filter_by(entity_type=entity_type).count()
         if count > 0:
             entity_stats.append({
