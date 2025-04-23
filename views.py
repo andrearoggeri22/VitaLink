@@ -8,11 +8,12 @@ from flask_login import login_required, current_user
 from sqlalchemy.exc import SQLAlchemyError
 from flask_babel import gettext as _
 import copy
+import json
 
 from app import db
 from models import Patient, Doctor, VitalSignType, DataOrigin, Note, DoctorPatient, ActionType, EntityType, VitalObservation
 from utils import parse_date, to_serializable_dict
-from reports import generate_patient_report, generate_vital_trends_report
+from reports import generate_patient_report, generate_vital_trends_report, generate_complete_report, generate_specific_report, create_vital_chart
 from audit import (
     log_patient_creation, log_patient_update, log_patient_delete,
     log_vital_creation, log_note_creation, log_report_generation, log_patient_view,
