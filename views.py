@@ -317,6 +317,7 @@ def api_patient_vitals(patient_id):
 @views_bp.route('/patients/<int:patient_id>/notes', methods=['POST'])
 @login_required
 def add_note(patient_id):
+    """Add a new note for a patient."""
     patient = Patient.query.get_or_404(patient_id)
     
     # Check if the current doctor is associated with this patient
@@ -352,6 +353,51 @@ def add_note(patient_id):
         flash(_('An error occurred while adding the note'), 'danger')
     
     return redirect(url_for('views.patient_detail', patient_id=patient_id))
+
+@views_bp.route('/notes/<int:note_id>', methods=['DELETE'])
+@login_required
+def delete_note(note_id):
+    """Delete a note."""
+    # Find the note
+    note = Note.query.get_or_404(note_id)
+    
+    # Find the patient
+    patient = Patient.query.get(note.patient_id)
+    
+    if not patient:
+        return jsonify({"error": _("Patient not found")}), 404
+    
+    # Check if the doctor is associated with this patient
+    if patient not in current_user.patients.all():
+        return jsonify({"error": _("You are not authorized to access this patient")}), 403
+    
+    # Check if the doctor is the author of the note
+    if note.doctor_id != current_user.id:
+        return jsonify({"error": _("You can only delete notes you have created")}), 403
+    
+    # Delete the note
+    try:
+        # Log the note deletion
+        from audit import log_note_delete
+        log_note_delete(current_user.id, note)
+        
+        # Store note details for response
+        note_dict = note.to_dict()
+        
+        db.session.delete(note)
+        db.session.commit()
+        
+        logger.info(f"Note {note_id} deleted")
+        
+        return jsonify({
+            "message": _("Note deleted successfully"),
+            "note": note_dict
+        }), 200
+        
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        logger.error(f"Error deleting note: {str(e)}")
+        return jsonify({"error": _("An error occurred while deleting the note")}), 500
 
 @views_bp.route('/profile', methods=['GET', 'POST'])
 @login_required
