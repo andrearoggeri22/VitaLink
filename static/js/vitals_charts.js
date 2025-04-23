@@ -249,7 +249,19 @@ function updateChartTabs(dataTypes) {
     tabButtons.forEach(tab => {
         tab.addEventListener('shown.bs.tab', function(event) {
             const typeId = event.target.id.replace('tab-', '');
+            
+            // Aggiorna il tipo di parametro vitale corrente
+            currentVitalType = typeId;
+            console.log(`Tipo vitale corrente impostato a: ${currentVitalType}`);
+            
+            // Carica i dati per il grafico
             loadDataForType(typeId);
+            
+            // Ricarica le osservazioni con il filtro aggiornato (se la funzione esiste)
+            if (typeof loadObservations === 'function') {
+                console.log('Ricarica osservazioni con filtro sul tipo vitale corrente');
+                loadObservations();
+            }
         });
     });
 }
