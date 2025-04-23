@@ -23,25 +23,43 @@ const CACHE_EXPIRY_MS = 10 * 60 * 1000; // 10 minutes
  * Initialize the health platforms integration on patient detail page
  */
 function initializeHealthPlatform() {
+    console.log('Initializing health platform...');
+    
     // Initialize DOM references
     syncButton = document.getElementById('syncHealthBtn');
+    console.log('Sync button found:', syncButton !== null);
     
     // Initialize connection details section
     const connectionDetails = document.getElementById('connectionDetails');
     if (connectionDetails) {
+        console.log('Connection details section found');
         // Get the patient ID from the URL
         const patientId = getPatientIdFromUrl();
         if (patientId) {
+            console.log('Patient ID:', patientId);
             loadConnectionDetails(patientId);
         } else {
             console.error('Could not determine patient ID from URL');
             showConnectionError();
         }
+    } else {
+        console.log('Connection details section not found');
     }
     
     // Add event listener to sync button if it exists
     if (syncButton) {
+        console.log('Adding click event listener to sync button');
+        // Rimuovi prima eventuali listener precedenti per evitare duplicazioni
+        syncButton.removeEventListener('click', handleSyncButtonClick);
         syncButton.addEventListener('click', handleSyncButtonClick);
+        
+        // Aggiunge anche un handler diretto per assicurarci che funzioni
+        syncButton.onclick = function() {
+            console.log('Direct click handler triggered');
+            handleSyncButtonClick();
+        };
+    } else {
+        console.error('Sync button not found, cannot add event listener');
     }
 }
 
@@ -144,6 +162,7 @@ function showConnectionError() {
  * This handles both connection and disconnection based on the current state
  */
 function handleSyncButtonClick() {
+    console.log('Health Sync button clicked');
     // Get the patient ID from the URL
     const patientId = getPatientIdFromUrl();
     if (!patientId) {
@@ -151,15 +170,20 @@ function handleSyncButtonClick() {
         return;
     }
     
+    console.log('Patient ID from URL:', patientId);
+    
     // Check if we're connected or not
     const isConnected = syncButton.getAttribute('data-connected') === 'true';
+    console.log('Is connected:', isConnected);
     
     if (isConnected) {
         // Handle disconnection
         const platform = syncButton.getAttribute('data-platform');
+        console.log('Disconnecting from platform:', platform);
         disconnectHealthPlatform(patientId, platform);
     } else {
         // Handle connection - show platform selection modal
+        console.log('Creating health platform modal');
         createHealthPlatformModal(patientId);
     }
 }
@@ -258,11 +282,19 @@ function createHealthPlatformModal(patientId) {
     connectionStatusElem = document.getElementById('connectionStatus');
     
     // Make sure Bootstrap is initialized
+    console.log('Bootstrap object:', typeof bootstrap);
     if (typeof bootstrap === 'undefined') {
         console.error('Bootstrap is not defined. Make sure it is properly loaded.');
+        // Prova a usare un approccio alternativo: creare un jQuery modal se disponibile
+        if (typeof $ !== 'undefined' && typeof $('#healthPlatformModal').modal === 'function') {
+            console.log('Trying jQuery modal fallback');
+            $('#healthPlatformModal').modal('show');
+            return;
+        }
         alert('Error: Could not create popup. Please refresh the page and try again.');
         return;
     }
+    console.log('Bootstrap Modal constructor:', typeof bootstrap.Modal);
     
     // Explicitly show the modal with a small delay to ensure DOM is ready
     setTimeout(() => {
