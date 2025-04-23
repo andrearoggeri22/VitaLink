@@ -175,7 +175,17 @@ function loadAvailableDataTypes(platform) {
     
     // Carica i dati per il primo tipo
     if (dataTypes.length > 0) {
+        // Imposta il tipo di parametro vitale iniziale
+        currentVitalType = dataTypes[0].id;
+        console.log(`Tipo vitale iniziale impostato a: ${currentVitalType}`);
+        
+        // Carica i dati per il grafico
         loadDataForType(dataTypes[0].id);
+        
+        // Ricarica le osservazioni con il filtro del tipo corrente
+        if (typeof loadObservations === 'function') {
+            setTimeout(loadObservations, 500);
+        }
     }
 }
 
@@ -315,7 +325,17 @@ function reloadAllCharts() {
     const activeTab = document.querySelector('#vitalsChartTabs .nav-link.active');
     if (activeTab) {
         const typeId = activeTab.id.replace('tab-', '');
+        
+        // Aggiorna il tipo di parametro vitale corrente
+        currentVitalType = typeId;
+        
+        // Carica i dati per il grafico
         loadDataForType(typeId);
+        
+        // Ricarica le osservazioni con il filtro del tipo corrente
+        if (typeof loadObservations === 'function') {
+            setTimeout(loadObservations, 500);
+        }
     }
 }
 
