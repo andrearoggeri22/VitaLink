@@ -530,9 +530,10 @@ function prepareChartData(data, typeInfo) {
     });
     
     // Prepara i valori per tutte le date del periodo
+    // Importante: se il valore è 0, deve essere visualizzato come 0 e non come null
     const values = allDates.map(date => {
         const dateKey = formatDateForAPI(date);
-        return dataByDate[dateKey] || null;
+        return dataByDate[dateKey] !== undefined ? dataByDate[dateKey] : null;
     });
     
     return {
