@@ -2,6 +2,30 @@
 
 {% block title %}{{ _('Generate Specific Report') }} - {{ patient.first_name }} {{ patient.last_name }}{% endblock %}
 
+{% block styles %}
+<style>
+    .vital-type-card {
+        transition: all 0.3s ease;
+    }
+    
+    .vital-type-card.border-danger {
+        border-color: #dc3545 !important;
+        box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+    }
+    
+    .period-error {
+        color: #dc3545;
+        font-size: 0.875em;
+        margin-top: 0.25rem;
+    }
+    
+    .charts-selection {
+        border-top: 1px solid rgba(0,0,0,.125);
+        padding-top: 1rem;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -124,28 +148,33 @@
                                     </div>
                                     <div class="card-body charts-selection d-none">
                                         <div class="form-text mb-2">{{ _('Select time periods for charts:') }}</div>
+                                        <div class="d-flex justify-content-end mb-2">
+                                            <button type="button" class="btn btn-sm btn-outline-secondary me-2 select-all-periods" data-vital-type="{{ vital_type.value }}">{{ _('Select All Periods') }}</button>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary deselect-all-periods" data-vital-type="{{ vital_type.value }}">{{ _('Deselect All') }}</button>
+                                        </div>
                                         <div class="d-flex flex-wrap gap-2">
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="chart1d{{ loop.index }}" name="charts_{{ vital_type.value }}" value="1d">
+                                                <input class="form-check-input period-checkbox" type="checkbox" id="chart1d{{ loop.index }}" name="charts_{{ vital_type.value }}" value="1d" data-vital-type="{{ vital_type.value }}">
                                                 <label class="form-check-label" for="chart1d{{ loop.index }}">{{ _('1 Day') }}</label>
                                             </div>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="chart7d{{ loop.index }}" name="charts_{{ vital_type.value }}" value="7d">
+                                                <input class="form-check-input period-checkbox" type="checkbox" id="chart7d{{ loop.index }}" name="charts_{{ vital_type.value }}" value="7d" data-vital-type="{{ vital_type.value }}">
                                                 <label class="form-check-label" for="chart7d{{ loop.index }}">{{ _('7 Days') }}</label>
                                             </div>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="chart1m{{ loop.index }}" name="charts_{{ vital_type.value }}" value="1m">
+                                                <input class="form-check-input period-checkbox" type="checkbox" id="chart1m{{ loop.index }}" name="charts_{{ vital_type.value }}" value="1m" data-vital-type="{{ vital_type.value }}">
                                                 <label class="form-check-label" for="chart1m{{ loop.index }}">{{ _('1 Month') }}</label>
                                             </div>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="chart3m{{ loop.index }}" name="charts_{{ vital_type.value }}" value="3m">
+                                                <input class="form-check-input period-checkbox" type="checkbox" id="chart3m{{ loop.index }}" name="charts_{{ vital_type.value }}" value="3m" data-vital-type="{{ vital_type.value }}">
                                                 <label class="form-check-label" for="chart3m{{ loop.index }}">{{ _('3 Months') }}</label>
                                             </div>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="chart1y{{ loop.index }}" name="charts_{{ vital_type.value }}" value="1y">
+                                                <input class="form-check-input period-checkbox" type="checkbox" id="chart1y{{ loop.index }}" name="charts_{{ vital_type.value }}" value="1y" data-vital-type="{{ vital_type.value }}">
                                                 <label class="form-check-label" for="chart1y{{ loop.index }}">{{ _('1 Year') }}</label>
                                             </div>
                                         </div>
+                                        <div class="invalid-feedback d-none period-error">{{ _('Please select at least one time period') }}</div>
                                     </div>
                                 </div>
                             </div>
@@ -182,6 +211,10 @@
                     chartsSelection.classList.remove('d-none');
                 } else {
                     chartsSelection.classList.add('d-none');
+                    // Deselect all period checkboxes when vital type is deselected
+                    card.querySelectorAll('.period-checkbox').forEach(periodCheckbox => {
+                        periodCheckbox.checked = false;
+                    });
                 }
             });
         });
@@ -225,6 +258,63 @@
                 checkbox.checked = false;
                 checkbox.dispatchEvent(new Event('change'));
             });
+        });
+        
+        // Select/deselect all time periods for a specific vital type
+        document.querySelectorAll('.select-all-periods').forEach(button => {
+            button.addEventListener('click', function() {
+                const vitalType = this.getAttribute('data-vital-type');
+                document.querySelectorAll(`.period-checkbox[data-vital-type="${vitalType}"]`).forEach(checkbox => {
+                    checkbox.checked = true;
+                });
+                // Hide error message if it was shown
+                const periodError = this.closest('.charts-selection').querySelector('.period-error');
+                periodError.classList.add('d-none');
+            });
+        });
+        
+        document.querySelectorAll('.deselect-all-periods').forEach(button => {
+            button.addEventListener('click', function() {
+                const vitalType = this.getAttribute('data-vital-type');
+                document.querySelectorAll(`.period-checkbox[data-vital-type="${vitalType}"]`).forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+            });
+        });
+        
+        // Form validation before submission
+        document.getElementById('specificReportForm').addEventListener('submit', function(event) {
+            let isValid = true;
+            
+            // Check that selected vital types have at least one time period selected
+            document.querySelectorAll('.vital-type-checkbox:checked').forEach(checkbox => {
+                const vitalType = checkbox.value;
+                const periodCheckboxes = document.querySelectorAll(`.period-checkbox[data-vital-type="${vitalType}"]:checked`);
+                
+                if (periodCheckboxes.length === 0) {
+                    // Show error message
+                    const periodError = checkbox.closest('.vital-type-card').querySelector('.period-error');
+                    periodError.classList.remove('d-none');
+                    isValid = false;
+                    
+                    // Add red border to the card
+                    checkbox.closest('.vital-type-card').classList.add('border-danger');
+                } else {
+                    // Hide error message if it was shown
+                    const periodError = checkbox.closest('.vital-type-card').querySelector('.period-error');
+                    periodError.classList.add('d-none');
+                    
+                    // Remove red border
+                    checkbox.closest('.vital-type-card').classList.remove('border-danger');
+                }
+            });
+            
+            // Prevent form submission if validation fails
+            if (!isValid) {
+                event.preventDefault();
+                alert("{{ _('Please select at least one time period for each selected vital type') }}");
+                window.scrollTo(0, 0);
+            }
         });
     });
 </script>
