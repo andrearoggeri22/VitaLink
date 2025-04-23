@@ -409,7 +409,7 @@ class EntityType(Enum):
     REPORT = "report"
     HEALTH_PLATFORM = "health_platform"
     HEALTH_LINK = "health_link"
-    OBSERVATION = "observation"
+    OBSERVATION = "observation" # Manteniamo minuscole per essere consistenti
     
 class HealthPlatformLink(db.Model):
     # Model for storing temporary links for health platform integration
