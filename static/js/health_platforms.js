@@ -34,7 +34,12 @@ function initHealthPlatforms() {
     // Initialize DOM references
     syncButton = document.getElementById('syncHealthBtn');
     
+    // Check if patient has an active connection
     if (syncButton) {
+        // First check connection status and update button text
+        checkConnectionStatus();
+        
+        // Add event listener based on current state
         syncButton.addEventListener('click', handleSyncButtonClick);
     }
     
@@ -63,7 +68,62 @@ function initHealthPlatforms() {
 }
 
 /**
+ * Check the connection status for the patient
+ * Updates button text based on connection status
+ */
+function checkConnectionStatus() {
+    const patientId = getPatientIdFromUrl();
+    if (!patientId) {
+        console.error('Could not determine patient ID');
+        return;
+    }
+    
+    fetch(`/health/check_connection/${patientId}`)
+    .then(response => response.json())
+    .then(data => {
+        if (data.connected) {
+            updateButtonToDisconnect(data.platform);
+        } else {
+            updateButtonToConnect();
+        }
+    })
+    .catch(error => {
+        console.error('Error checking connection status:', error);
+        // Default to Connect button in case of error
+        updateButtonToConnect();
+    });
+}
+
+/**
+ * Update button to show "Disconnetti" text and styling
+ * @param {string} platform Platform name
+ */
+function updateButtonToDisconnect(platform) {
+    if (syncButton) {
+        syncButton.innerHTML = `<i class="fas fa-unlink me-1"></i> ${translateText('Disconnetti')}`;
+        syncButton.classList.remove('btn-info');
+        syncButton.classList.add('btn-danger');
+        syncButton.setAttribute('data-connected', 'true');
+        syncButton.setAttribute('data-platform', platform);
+    }
+}
+
+/**
+ * Update button to show "Health Sync" text and styling
+ */
+function updateButtonToConnect() {
+    if (syncButton) {
+        syncButton.innerHTML = `<i class="fas fa-sync me-1"></i> ${translateText('Health Sync')}`;
+        syncButton.classList.remove('btn-danger');
+        syncButton.classList.add('btn-info');
+        syncButton.setAttribute('data-connected', 'false');
+        syncButton.removeAttribute('data-platform');
+    }
+}
+
+/**
  * Handle the click on the Sync button
+ * This handles both connection and disconnection based on the current state
  */
 function handleSyncButtonClick() {
     // Get the patient ID from the URL
@@ -73,8 +133,121 @@ function handleSyncButtonClick() {
         return;
     }
     
-    // Show platform selection modal or directly create a link
-    createHealthPlatformModal(patientId);
+    // Check if we're connected or not
+    const isConnected = syncButton.getAttribute('data-connected') === 'true';
+    
+    if (isConnected) {
+        // Handle disconnection
+        const platform = syncButton.getAttribute('data-platform');
+        disconnectHealthPlatform(patientId, platform);
+    } else {
+        // Handle connection - show platform selection modal
+        createHealthPlatformModal(patientId);
+    }
+}
+
+/**
+ * Disconnect from a health platform
+ * @param {number} patientId The patient ID
+ * @param {string} platform The platform name
+ */
+function disconnectHealthPlatform(patientId, platform) {
+    // Confirm before disconnecting
+    if (!confirm(translateText('Sei sicuro di voler disconnettere questa piattaforma? I dati non saranno più disponibili.'))) {
+        return;
+    }
+    
+    // Disable button during the request
+    if (syncButton) {
+        syncButton.disabled = true;
+        syncButton.innerHTML = `<i class="fas fa-spinner fa-spin me-1"></i> ${translateText('Disconnessione...')}`;
+    }
+    
+    // Make API request to disconnect
+    fetch(`/health/disconnect/${patientId}/${platform}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update UI
+            updateButtonToConnect();
+            
+            // Show success notification
+            showNotification(translateText('Disconnessione completata con successo'), 'success');
+            
+            // Clear any cached data
+            apiDataCache = {};
+            
+            // Refresh charts if present
+            const activeTab = document.querySelector('#vitalsChartTabs .nav-link.active');
+            if (activeTab) {
+                const dataType = activeTab.id.replace('tab-', '');
+                loadHealthPlatformData(dataType);
+            }
+        } else {
+            // Show error notification
+            showNotification(translateText('Errore durante la disconnessione: ') + data.message, 'danger');
+        }
+        
+        // Re-enable button
+        if (syncButton) {
+            syncButton.disabled = false;
+        }
+    })
+    .catch(error => {
+        console.error('Error disconnecting health platform:', error);
+        
+        // Show error notification
+        showNotification(translateText('Errore durante la disconnessione. Riprova più tardi.'), 'danger');
+        
+        // Re-enable button
+        if (syncButton) {
+            syncButton.disabled = false;
+        }
+    });
+}
+
+/**
+ * Show a temporary notification
+ * @param {string} message The message to display
+ * @param {string} type The type of notification (success, danger, etc.)
+ */
+function showNotification(message, type) {
+    // Create notification element if it doesn't exist
+    let notificationContainer = document.getElementById('notificationContainer');
+    if (!notificationContainer) {
+        notificationContainer = document.createElement('div');
+        notificationContainer.id = 'notificationContainer';
+        notificationContainer.style.position = 'fixed';
+        notificationContainer.style.top = '20px';
+        notificationContainer.style.right = '20px';
+        notificationContainer.style.zIndex = '9999';
+        document.body.appendChild(notificationContainer);
+    }
+    
+    // Create notification
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type} alert-dismissible fade show`;
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    
+    // Add to container
+    notificationContainer.appendChild(notification);
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            notification.remove();
+        }, 150);
+    }, 5000);
 }
 
 /**
@@ -194,18 +367,36 @@ function createHealthPlatformLink(patientId, platform) {
                 connectionStatusElem.innerHTML = `
                     <i class="fas fa-check-circle me-2"></i>
                     ${translateText('Link created successfully!')}
+                    <div class="mt-3">
+                        <p class="mb-1">${translateText('Link per la connessione (valido per 24 ore):')}</p>
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" id="linkCopyInput" value="${data.connect_url}" readonly>
+                            <button class="btn btn-outline-primary" type="button" id="copyLinkBtn">
+                                <i class="fas fa-copy"></i> ${translateText('Copia')}
+                            </button>
+                        </div>
+                        <small class="text-muted">${translateText('Fornisci questo link al paziente per connettere il suo account Fitbit.')}</small>
+                    </div>
                 `;
+                
+                // Add event listener for the copy button
+                const copyBtn = document.getElementById('copyLinkBtn');
+                const linkInput = document.getElementById('linkCopyInput');
+                
+                if (copyBtn && linkInput) {
+                    copyBtn.addEventListener('click', () => {
+                        linkInput.select();
+                        document.execCommand('copy');
+                        copyBtn.innerHTML = `<i class="fas fa-check"></i> ${translateText('Copiato')}`;
+                        setTimeout(() => {
+                            copyBtn.innerHTML = `<i class="fas fa-copy"></i> ${translateText('Copia')}`;
+                        }, 2000);
+                    });
+                }
             }
             
-            // Open the link in a new window/tab
-            setTimeout(() => {
-                window.open(data.connect_url, '_blank');
-                
-                // Close the modal
-                if (syncModal) {
-                    syncModal.hide();
-                }
-            }, 1000);
+            // Don't auto-close the modal or auto-open the link
+            // Let the user copy the link manually
         } else {
             // Show error message
             if (connectionStatusElem) {
