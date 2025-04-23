@@ -168,7 +168,7 @@
                         
                         <div class="py-4 text-center">
                             <p class="mb-4">{{ _('Connect to a health platform to automatically collect vital signs data.') }}</p>
-                            <button id="syncHealthBtn" class="btn btn-info btn-lg" onclick="document.getElementById('healthPlatformPopup').classList.remove('d-none');">
+                            <button id="syncHealthBtn" class="btn btn-info btn-lg" data-bs-toggle="modal" data-bs-target="#healthPlatformPopup">
                                 <i class="fas fa-sync me-1"></i> {{ _('Health Sync') }}
                             </button>
                         </div>
@@ -239,40 +239,44 @@
     </div>
 </div>
 
-<!-- Health Platform Selection Popup (Statico) -->
-<div id="healthPlatformPopup" class="position-fixed top-0 start-0 w-100 h-100 d-none" style="background-color: rgba(0,0,0,0.5); z-index: 1050;">
-    <div class="card rounded-3 shadow-lg position-absolute top-50 start-50 translate-middle" style="width: 92%; max-width: 600px;">
-        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <h5 class="mb-0"><i class="fas fa-link me-2"></i> {{ _('Connect Health Platform') }}</h5>
-            <button type="button" class="btn-close btn-close-white" id="closePopupBtn" onclick="document.getElementById('healthPlatformPopup').classList.add('d-none');" aria-label="{{ _('Close') }}"></button>
-        </div>
-        <div class="card-body p-4">
-            <div class="mb-4">
-                <h6 class="text-primary mb-3">{{ _('Choose a health platform to connect:') }}</h6>
-                <div id="platformOptions" class="row g-3">
-                    <div class="col-md-6">
-                        <button class="btn btn-outline-primary w-100 p-3 platform-btn" data-platform="fitbit" onclick="createPlatformLink({{ patient.id }}, 'fitbit')">
-                            <i class="fas fa-heartbeat fs-4 d-block mb-2"></i>
-                            <strong>Fitbit</strong>
-                        </button>
-                    </div>
-                    <div class="col-md-6">
-                        <button class="btn btn-outline-secondary w-100 p-3" disabled>
-                            <i class="fas fa-heartbeat fs-4 d-block mb-2"></i>
-                            <strong>Google Fit</strong>
-                            <small class="d-block mt-1 text-muted">{{ _('Coming Soon') }}</small>
-                        </button>
+<!-- Health Platform Selection Popup (Modal) -->
+<div id="healthPlatformPopup" class="modal fade" tabindex="-1" aria-labelledby="healthPlatformPopupLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="healthPlatformPopupLabel">
+                    <i class="fas fa-link me-2"></i> {{ _('Connect Health Platform') }}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="{{ _('Close') }}"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="mb-4">
+                    <h6 class="text-primary mb-3">{{ _('Choose a health platform to connect:') }}</h6>
+                    <div id="platformOptions" class="row g-3">
+                        <div class="col-md-6">
+                            <button class="btn btn-outline-primary w-100 p-3 platform-btn" data-platform="fitbit">
+                                <i class="fas fa-heartbeat fs-4 d-block mb-2"></i>
+                                <strong>Fitbit</strong>
+                            </button>
+                        </div>
+                        <div class="col-md-6">
+                            <button class="btn btn-outline-secondary w-100 p-3" disabled>
+                                <i class="fas fa-heartbeat fs-4 d-block mb-2"></i>
+                                <strong>Google Fit</strong>
+                                <small class="d-block mt-1 text-muted">{{ _('Coming Soon') }}</small>
+                            </button>
+                        </div>
                     </div>
                 </div>
+                <div id="connectionStatus" class="alert mt-3 d-none"></div>
+                <div class="mt-4 text-muted small">
+                    <i class="fas fa-info-circle me-1"></i> 
+                    {{ _('Connecting a health platform allows automatic syncing of health data directly from the patient\'s wearable device.') }}
+                </div>
             </div>
-            <div id="connectionStatus" class="alert rounded-3 shadow-sm mt-3 d-none"></div>
-            <div class="mt-4 text-muted small">
-                <i class="fas fa-info-circle me-1"></i> 
-                {{ _('Connecting a health platform allows automatic syncing of health data directly from the patient\'s wearable device.') }}
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('Cancel') }}</button>
             </div>
-        </div>
-        <div class="card-footer bg-light">
-            <button type="button" class="btn btn-secondary" id="cancelPopupBtn" onclick="document.getElementById('healthPlatformPopup').classList.add('d-none');">{{ _('Cancel') }}</button>
         </div>
     </div>
 </div>

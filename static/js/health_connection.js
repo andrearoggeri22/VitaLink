@@ -53,7 +53,7 @@ function initializeHealthPlatform() {
             const platform = this.getAttribute('data-platform');
             const patientId = getPatientIdFromUrl();
             console.log('Platform button clicked:', platform, 'for patient:', patientId);
-            createHealthPlatformLink(patientId, platform);
+            createPlatformLink(patientId, platform);
         });
     });
     
@@ -190,14 +190,12 @@ function showConnectionError() {
  * This handles both connection and disconnection based on the current state
  */
 function handleSyncButtonClick() {
-    console.log('Health Sync button clicked - DEBUG');
-    alert('Debug: Health Sync button clicked');
+    console.log('Health Sync button clicked');
     
     // Get the patient ID from the URL
     const patientId = getPatientIdFromUrl();
     if (!patientId) {
         console.error('Could not determine patient ID');
-        alert('Debug: Could not determine patient ID');
         return;
     }
     
@@ -211,28 +209,22 @@ function handleSyncButtonClick() {
         // Handle disconnection
         const platform = syncButton.getAttribute('data-platform');
         console.log('Disconnecting from platform:', platform);
-        alert('Debug: Disconnecting from platform: ' + platform);
         disconnectHealthPlatform(patientId, platform);
     } else {
         // Handle connection - show platform selection popup
         console.log('Showing health platform popup');
-        alert('Debug: Showing health platform popup');
         
-        try {
-            // Show the popup with a direct DOM manipulation
-            const popup = document.getElementById('healthPlatformPopup');
-            if (popup) {
-                popup.style.display = 'block';
-                popup.classList.remove('d-none');
-                console.log('Popup should be visible now');
-                alert('Debug: Popup should be visible now');
-            } else {
-                console.error('Popup element not found in DOM');
-                alert('Debug: Popup element not found in DOM');
+        // Use Bootstrap modal instead of direct DOM manipulation
+        const popupModal = new bootstrap.Modal(document.getElementById('healthPlatformPopup'));
+        if (popupModal) {
+            popupModal.show();
+            
+            // Clear any previous status
+            if (connectionStatusElem) {
+                connectionStatusElem.classList.add('d-none');
             }
-        } catch (e) {
-            console.error('Error showing popup:', e);
-            alert('Debug: Error showing popup: ' + e.message);
+        } else {
+            console.error('Could not initialize Bootstrap modal');
         }
     }
 }
