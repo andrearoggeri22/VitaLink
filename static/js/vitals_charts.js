@@ -689,4 +689,9 @@ function translateText(text) {
 // Inizializza i grafici quando il documento è caricato
 document.addEventListener('DOMContentLoaded', function() {
     initVitalsCharts();
+    
+    // Inizializza il modulo delle osservazioni dopo i grafici
+    if (typeof initObservations === 'function') {
+        initObservations();
+    }
 });
