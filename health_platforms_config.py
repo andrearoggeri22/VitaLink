@@ -58,8 +58,8 @@ FITBIT_ENDPOINTS = {
         'unit': 'km'
     },
     'active_minutes': {
-        'endpoint': '/1/user/-/activities/minutesActive/date/today/1w.json',
-        'response_key': 'activities-minutesActive',
+        'endpoint': '/1/user/-/activities/minutesVeryActive/date/today/1w.json',
+        'response_key': 'activities-minutesVeryActive',
         'value_key': 'value',
         'timestamp_key': 'dateTime',
         'unit': 'min'
@@ -80,10 +80,10 @@ FITBIT_ENDPOINTS = {
         'unit': 'floors'
     },
     'weight': {
-        'endpoint': '/1/user/-/body/log/weight/date/today/1m.json',
-        'response_key': 'weight',
-        'value_key': 'weight',
-        'timestamp_key': 'date',
+        'endpoint': '/1/user/-/body/weight/date/today/1m.json',
+        'response_key': 'body-weight',
+        'value_key': 'value',
+        'timestamp_key': 'dateTime',
         'unit': 'kg'
     }
 }
