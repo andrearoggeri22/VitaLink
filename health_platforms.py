@@ -112,7 +112,7 @@ def get_fitbit_authorization_url(link_uuid):
         'scope': FITBIT_CONFIG['scope'],
         'redirect_uri': FITBIT_CONFIG['redirect_uri'],
         'state': link_uuid,
-        'expires_in': 86400 * 30  # 30 days
+        'expires_in': 31536000  # 365 days (1 year) - massimo consentito da Fitbit
     }
     
     auth_url = f"{FITBIT_CONFIG['authorize_url']}?{urlencode(params)}"
@@ -217,7 +217,8 @@ def save_fitbit_tokens(patient, token_response):
         # Extract token data
         access_token = token_response.get('access_token')
         refresh_token = token_response.get('refresh_token')
-        expires_in = token_response.get('expires_in', 86400)  # Default to 24h if not provided
+        # Default to 1 year if not provided - il massimo possibile per Fitbit
+        expires_in = token_response.get('expires_in', 31536000)
         
         # Calculate expiry date
         expires_at = datetime.utcnow() + timedelta(seconds=expires_in)
@@ -705,7 +706,8 @@ def check_connection(patient_id):
                     return jsonify({
                         'connected': True,
                         'platform': patient.connected_platform.value,
-                        'connected_since': patient.platform_token_expires_at.isoformat() if patient.platform_token_expires_at else None
+                        'connected_since': patient.platform_token_expires_at.isoformat() if patient.platform_token_expires_at else None,
+                        'token_expires_at': patient.platform_token_expires_at.isoformat() if patient.platform_token_expires_at else None
                     })
                 else:
                     # Token is invalid, clear connection data
