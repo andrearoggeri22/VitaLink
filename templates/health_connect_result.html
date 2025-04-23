@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Health Platform Connection') }} - {{ _('Healthcare Monitoring Platform') }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header {% if success %}bg-success{% else %}bg-danger{% endif %} text-white">
+                    <h3 class="mb-0">
+                        {% if success %}
+                        <i class="fas fa-check-circle me-2"></i> {{ _('Connection Successful') }}
+                        {% else %}
+                        <i class="fas fa-times-circle me-2"></i> {{ _('Connection Failed') }}
+                        {% endif %}
+                    </h3>
+                </div>
+                <div class="card-body text-center p-5">
+                    {% if success %}
+                    <div class="mb-4">
+                        <i class="fas fa-check-circle text-success" style="font-size: 5rem;"></i>
+                    </div>
+                    <h4 class="mb-3">{{ _('Your health platform was successfully connected!') }}</h4>
+                    <p class="lead">{{ message }}</p>
+                    <p class="mt-4">{{ _('You can now close this window.') }}</p>
+                    <div class="d-grid mt-4">
+                        <button type="button" class="btn btn-lg btn-primary" onclick="window.close()">
+                            <i class="fas fa-times me-1"></i> {{ _('Close') }}
+                        </button>
+                    </div>
+                    {% else %}
+                    <div class="mb-4">
+                        <i class="fas fa-times-circle text-danger" style="font-size: 5rem;"></i>
+                    </div>
+                    <h4 class="mb-3">{{ _('There was an error connecting your health platform') }}</h4>
+                    <p class="lead">{{ message }}</p>
+                    <p class="mt-4">{{ _('Please try again or contact your healthcare provider.') }}</p>
+                    <div class="d-grid mt-4">
+                        <button type="button" class="btn btn-lg btn-primary" onclick="window.history.back()">
+                            <i class="fas fa-arrow-left me-1"></i> {{ _('Go Back') }}
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
