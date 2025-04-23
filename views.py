@@ -13,7 +13,7 @@ import json
 from app import db
 from models import Patient, Doctor, VitalSignType, DataOrigin, Note, DoctorPatient, ActionType, EntityType, VitalObservation
 from utils import parse_date, to_serializable_dict
-from reports import generate_patient_report, generate_vital_trends_report, generate_complete_report, generate_specific_report, create_vital_chart
+from reports import create_vital_chart
 from audit import (
     log_patient_creation, log_patient_update, log_patient_delete,
     log_vital_creation, log_note_creation, log_report_generation, log_patient_view,
@@ -465,6 +465,7 @@ def create_complete_patient_report(patient_id):
         
         logger.debug(f"Generating complete report with language: {current_language}")
         
+        from reports import generate_complete_report
         pdf_buffer = generate_complete_report(
             patient, 
             current_user, 
@@ -569,6 +570,7 @@ def create_specific_patient_report(patient_id):
             logger.debug(f"Generating specific report with language: {current_language}")
             
             # Generate the PDF report
+            from reports import generate_specific_report
             pdf_buffer = generate_specific_report(
                 patient, 
                 current_user, 
