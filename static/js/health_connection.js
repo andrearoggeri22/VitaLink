@@ -196,62 +196,83 @@ function updateButtonToConnect() {
  * @param {number} patientId The patient ID
  */
 function createHealthPlatformModal(patientId) {
-    // Create modal element if it doesn't exist
-    if (!document.getElementById('healthPlatformModal')) {
-        const modalHtml = `
-            <div class="modal fade" id="healthPlatformModal" tabindex="-1" aria-labelledby="healthPlatformModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="healthPlatformModalLabel">
-                                <i class="fas fa-link me-2"></i> ${translateText('Connect Health Platform')}
-                            </h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="${translateText('Close')}"></button>
-                        </div>
-                        <div class="modal-body">
-                            <p>${translateText('Choose a health platform to connect:')}</p>
-                            <div id="platformOptions" class="d-grid gap-2">
-                                <button class="btn btn-outline-primary platform-btn" data-platform="${PLATFORMS.FITBIT}">
-                                    <i class="fas fa-heartbeat me-2"></i> Fitbit
-                                </button>
-                            </div>
-                            <div id="connectionStatus" class="alert mt-3 d-none"></div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                ${translateText('Cancel')}
+    // Remove existing modal if it exists
+    const existingModal = document.getElementById('healthPlatformModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Create fresh modal element
+    const modalHtml = `
+        <div class="modal fade" id="healthPlatformModal" tabindex="-1" aria-labelledby="healthPlatformModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="healthPlatformModalLabel">
+                            <i class="fas fa-link me-2"></i> ${translateText('Connect Health Platform')}
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="${translateText('Close')}"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>${translateText('Choose a health platform to connect:')}</p>
+                        <div id="platformOptions" class="d-grid gap-2">
+                            <button class="btn btn-outline-primary platform-btn" data-platform="${PLATFORMS.FITBIT}">
+                                <i class="fas fa-heartbeat me-2"></i> Fitbit
                             </button>
                         </div>
+                        <div id="connectionStatus" class="alert mt-3 d-none"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            ${translateText('Cancel')}
+                        </button>
                     </div>
                 </div>
             </div>
-        `;
-        
-        // Add modal to the DOM
-        const modalContainer = document.createElement('div');
-        modalContainer.innerHTML = modalHtml;
-        document.body.appendChild(modalContainer.firstElementChild);
-        
-        // Initialize modal reference
-        syncModal = new bootstrap.Modal(document.getElementById('healthPlatformModal'));
-        
-        // Initialize platform buttons
-        platformButtons = document.querySelectorAll('.platform-btn');
-        platformButtons.forEach(btn => {
-            btn.addEventListener('click', function() {
-                const platform = this.getAttribute('data-platform');
-                createHealthPlatformLink(patientId, platform);
-            });
+        </div>
+    `;
+    
+    // Add modal to the DOM
+    const modalContainer = document.createElement('div');
+    modalContainer.innerHTML = modalHtml;
+    document.body.appendChild(modalContainer.firstElementChild);
+    
+    // Initialize modal reference using Bootstrap 5 Modal
+    const modalElement = document.getElementById('healthPlatformModal');
+    syncModal = new bootstrap.Modal(modalElement, {
+        backdrop: true,
+        keyboard: true,
+        focus: true
+    });
+    
+    // Initialize platform buttons
+    platformButtons = document.querySelectorAll('.platform-btn');
+    platformButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const platform = this.getAttribute('data-platform');
+            createHealthPlatformLink(patientId, platform);
         });
-        
-        // Initialize connection status element
-        connectionStatusElem = document.getElementById('connectionStatus');
-    } else {
-        syncModal = new bootstrap.Modal(document.getElementById('healthPlatformModal'));
+    });
+    
+    // Initialize connection status element
+    connectionStatusElem = document.getElementById('connectionStatus');
+    
+    // Make sure Bootstrap is initialized
+    if (typeof bootstrap === 'undefined') {
+        console.error('Bootstrap is not defined. Make sure it is properly loaded.');
+        alert('Error: Could not create popup. Please refresh the page and try again.');
+        return;
     }
     
-    // Show the modal
-    syncModal.show();
+    // Explicitly show the modal with a small delay to ensure DOM is ready
+    setTimeout(() => {
+        try {
+            syncModal.show();
+        } catch (e) {
+            console.error('Error showing modal:', e);
+            alert('Error: Could not display the popup. Please refresh the page and try again.');
+        }
+    }, 100);
 }
 
 /**
