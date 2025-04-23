@@ -25,6 +25,9 @@ health_bp = Blueprint('health', __name__, url_prefix='/health')
 
 logger = logging.getLogger(__name__)
 
+# Define cache for vitals data to avoid unnecessary API calls
+vitals_cache = {}
+
 # -------- Link generation for health platform connection --------
 
 def generate_platform_link(patient, doctor, platform):
@@ -413,6 +416,63 @@ def process_fitbit_data(data, data_type):
                 logger.error(f"Error processing Fitbit value: {str(e)}")
     
     return results
+
+def get_vitals_data(patient, data_type, start_date=None, end_date=None):
+    """
+    Get vital sign data for a patient from their connected health platform
+    This is the main function used by reports and charts to get vital sign data
+    
+    Args:
+        patient (Patient): Patient object
+        data_type (str): Type of data to retrieve (heart_rate, steps, etc.)
+        start_date (str, optional): Start date in YYYY-MM-DD format
+        end_date (str, optional): End date in YYYY-MM-DD format
+        
+    Returns:
+        list: Processed data in format [{'timestamp': ISO8601, 'value': 123, 'unit': 'xyz'}, ...]
+    """
+    # Check if we have cached data for this request
+    cache_key = f"{patient.id}_{data_type}_{start_date}_{end_date}"
+    if cache_key in vitals_cache:
+        # Check if the cache is still valid (less than 5 minutes old)
+        cache_entry = vitals_cache[cache_key]
+        cache_time = cache_entry.get('cache_time')
+        if cache_time and (datetime.utcnow() - cache_time).total_seconds() < 300:  # 5 minutes
+            return cache_entry.get('data', [])
+    
+    # No valid cache, need to get data from the platform
+    data = []
+    
+    # Check which platform the patient is connected to
+    if not patient.connected_platform:
+        logger.warning(f"Patient {patient.id} is not connected to any health platform")
+        return []
+    
+    try:
+        if patient.connected_platform == HealthPlatform.FITBIT:
+            data = get_processed_fitbit_data(patient, data_type, start_date, end_date)
+        elif patient.connected_platform == HealthPlatform.GOOGLE_FIT:
+            # Placeholder for Google Fit implementation
+            logger.warning("Google Fit integration not implemented yet")
+            data = []
+        elif patient.connected_platform == HealthPlatform.APPLE_HEALTH:
+            # Placeholder for Apple Health implementation
+            logger.warning("Apple Health integration not implemented yet")
+            data = []
+        else:
+            logger.warning(f"Unsupported health platform: {patient.connected_platform}")
+            data = []
+        
+        # Cache the data
+        vitals_cache[cache_key] = {
+            'data': data,
+            'cache_time': datetime.utcnow()
+        }
+        
+        return data
+    except Exception as e:
+        logger.error(f"Error getting vital data for patient {patient.id}, type {data_type}: {str(e)}")
+        return []
 
 def get_processed_fitbit_data(patient, data_type, start_date=None, end_date=None):
     """
