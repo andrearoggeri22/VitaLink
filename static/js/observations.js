@@ -61,7 +61,8 @@ function initObservations() {
 }
 
 /**
- * Carica le osservazioni per il periodo corrente
+ * Carica tutte le osservazioni per il paziente, senza filtri di periodo
+ * Tutte le osservazioni verranno mostrate indipendentemente dal periodo
  */
 function loadObservations() {
     const patientId = getPatientIdFromUrl();
@@ -76,17 +77,9 @@ function loadObservations() {
     document.getElementById('noObservations').classList.add('d-none');
     document.getElementById('observationsList').classList.add('d-none');
     
-    // Calcola date di inizio e fine in base al periodo corrente
-    const endDate = new Date();
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - currentPeriod);
-    
-    // Formato date per l'API
-    const startDateStr = formatDateForAPI(startDate);
-    const endDateStr = formatDateForAPI(endDate);
-    
-    // Costruisci l'URL dell'API
-    const apiUrl = `/web/observations/${patientId}?start_date=${startDateStr}&end_date=${endDateStr}`;
+    // Costruisci l'URL dell'API senza parametri di date
+    // per recuperare TUTTE le osservazioni per il paziente
+    const apiUrl = `/web/observations/${patientId}`;
     
     fetch(apiUrl)
         .then(response => {
