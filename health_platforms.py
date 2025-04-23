@@ -656,6 +656,176 @@ def oauth_callback():
                               success=False,
                               message=_('The platform is not supported'))
 
+@health_bp.route('/check_connection/<int:patient_id>')
+@login_required
+def check_connection(patient_id):
+    """
+    API endpoint to check if a patient is connected to a health platform
+    
+    Args:
+        patient_id (int): ID of the patient
+        
+    Returns:
+        Response: JSON with connection status
+    """
+    try:
+        patient = Patient.query.get_or_404(patient_id)
+        
+        # Ensure the doctor is associated with this patient
+        if patient not in current_user.patients.all():
+            return jsonify({
+                'connected': False,
+                'message': _('You are not authorized to view this patient\'s data')
+            }), 403
+        
+        # Check if patient has a connected platform
+        if patient.connected_platform:
+            # Verify token is still valid
+            if patient.platform_token_expires_at and patient.platform_access_token:
+                # Check if the token is still valid with the service
+                is_valid = False
+                
+                # Platform-specific validity check
+                if patient.connected_platform == HealthPlatform.FITBIT:
+                    # Try to make a simple API call to check if the token is still valid
+                    try:
+                        headers = {
+                            'Authorization': f'Bearer {patient.platform_access_token}'
+                        }
+                        response = requests.get(
+                            f"{FITBIT_CONFIG['api_base_url']}/1/user/-/profile.json",
+                            headers=headers
+                        )
+                        is_valid = response.status_code == 200
+                    except Exception as e:
+                        logger.error(f"Error checking Fitbit token validity: {str(e)}")
+                        is_valid = False
+                
+                if is_valid:
+                    return jsonify({
+                        'connected': True,
+                        'platform': patient.connected_platform.value,
+                        'connected_since': patient.platform_token_expires_at.isoformat() if patient.platform_token_expires_at else None
+                    })
+                else:
+                    # Token is invalid, clear connection data
+                    patient.connected_platform = None
+                    patient.platform_access_token = None
+                    patient.platform_refresh_token = None
+                    patient.platform_token_expires_at = None
+                    db.session.commit()
+                    
+                    # Log the disconnection due to invalid token
+                    try:
+                        log_action(
+                            doctor_id=current_user.id,
+                            action_type=ActionType.DISCONNECT,
+                            entity_type=EntityType.HEALTH_PLATFORM,
+                            entity_id=patient.id,
+                            details={
+                                'reason': 'invalid_token',
+                                'disconnected_at': datetime.utcnow().isoformat()
+                            },
+                            patient_id=patient.id
+                        )
+                    except Exception as log_error:
+                        logger.error(f"Error logging platform disconnection: {str(log_error)}")
+                    
+                    return jsonify({
+                        'connected': False,
+                        'message': _('Token has expired or been revoked')
+                    })
+            else:
+                return jsonify({
+                    'connected': False,
+                    'message': _('Incomplete token data')
+                })
+        else:
+            return jsonify({
+                'connected': False,
+                'message': _('Not connected to any health platform')
+            })
+    except Exception as e:
+        logger.error(f"Error checking connection status: {str(e)}")
+        return jsonify({
+            'connected': False,
+            'message': _('Error checking connection status')
+        }), 500
+
+@health_bp.route('/disconnect/<int:patient_id>/<string:platform>', methods=['POST'])
+@login_required
+def disconnect_platform(patient_id, platform):
+    """
+    API endpoint to disconnect a patient from a health platform
+    
+    Args:
+        patient_id (int): ID of the patient
+        platform (str): Name of the platform to disconnect
+        
+    Returns:
+        Response: JSON confirmation of disconnection
+    """
+    try:
+        patient = Patient.query.get_or_404(patient_id)
+        
+        # Ensure the doctor is associated with this patient
+        if patient not in current_user.patients.all():
+            return jsonify({
+                'success': False,
+                'message': _('You are not authorized to manage this patient\'s connections')
+            }), 403
+        
+        # Convert platform string to enum value
+        try:
+            platform_enum = HealthPlatform(platform)
+        except ValueError:
+            return jsonify({
+                'success': False,
+                'message': _('Invalid platform specified')
+            }), 400
+        
+        # Check if patient is actually connected to this platform
+        if patient.connected_platform != platform_enum:
+            return jsonify({
+                'success': False,
+                'message': _('Patient is not connected to the specified platform')
+            }), 400
+        
+        # Clear connection data
+        patient.connected_platform = None
+        patient.platform_access_token = None
+        patient.platform_refresh_token = None
+        patient.platform_token_expires_at = None
+        db.session.commit()
+        
+        # Log the disconnection
+        try:
+            log_action(
+                doctor_id=current_user.id,
+                action_type=ActionType.DISCONNECT,
+                entity_type=EntityType.HEALTH_PLATFORM,
+                entity_id=patient.id,
+                details={
+                    'platform': platform,
+                    'disconnected_at': datetime.utcnow().isoformat(),
+                    'reason': 'user_requested'
+                },
+                patient_id=patient.id
+            )
+        except Exception as log_error:
+            logger.error(f"Error logging platform disconnection: {str(log_error)}")
+        
+        return jsonify({
+            'success': True,
+            'message': _('Successfully disconnected from health platform')
+        })
+    except Exception as e:
+        logger.error(f"Error disconnecting from health platform: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': _('Error disconnecting from health platform')
+        }), 500
+
 @health_bp.route('/data/<string:data_type>/<int:patient_id>')
 @login_required
 def get_data(data_type, patient_id):
