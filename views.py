@@ -501,8 +501,10 @@ def create_complete_patient_report(patient_id):
         )
         
     except Exception as e:
-        logger.error(f"Error generating complete report: {str(e)}")
-        flash(_('An error occurred while generating the report'), 'danger')
+        import traceback
+        error_details = traceback.format_exc()
+        logger.error(f"Error generating complete report: {str(e)}\n{error_details}")
+        flash(_('An error occurred while generating the report: %(error)s', error=str(e)), 'danger')
         return redirect(url_for('views.patient_detail', patient_id=patient_id))
 
 @views_bp.route('/patients/<int:patient_id>/specific_report', methods=['GET', 'POST'])
@@ -727,6 +729,7 @@ def generate_vital_report(patient_id, vital_type):
             
         logger.debug(f"Generating vital report with language: {current_language}")
         
+        from reports import generate_vital_trends_report
         pdf_buffer = generate_vital_trends_report(
             patient=patient,
             vital_type=vital_type,
