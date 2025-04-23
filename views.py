@@ -628,6 +628,104 @@ def generate_report(patient_id):
         flash(_('An error occurred while generating the report'), 'danger')
         return redirect(url_for('views.patient_detail', patient_id=patient_id))
 
+@views_bp.route('/patients/<int:patient_id>/specific_report')
+@login_required
+def generate_specific_report(patient_id):
+    """Generate a specific vital parameter report in PDF format using health platform data."""
+    patient = Patient.query.get_or_404(patient_id)
+    
+    # Check if the current doctor is associated with this patient
+    if patient not in current_user.patients.all():
+        flash(_('You are not authorized to generate reports for this patient'), 'danger')
+        return redirect(url_for('views.patients'))
+    
+    # Get vital type parameter
+    vital_type = request.args.get('vital_type')
+    if not vital_type:
+        flash(_('No vital parameter type specified'), 'danger')
+        return redirect(url_for('views.patient_vitals', patient_id=patient_id))
+    
+    # Get period parameter (in days)
+    period = request.args.get('period', '7')  # Default to 7 days
+    try:
+        period_days = int(period)
+    except ValueError:
+        period_days = 7
+    
+    # Calculate date range
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=period_days)
+    
+    # Period description for the report
+    period_desc = f"{_('Last')} {period_days} {_('days')}"
+    
+    # Log the report generation attempt
+    log_report_generation(current_user.id, patient.id, 'specific_vital', {
+        'vital_type': vital_type,
+        'period': period_days
+    })
+    
+    try:
+        # Attempt to get data from the health platform
+        from health_platforms import get_processed_fitbit_data
+        
+        # Check if patient has Fitbit connection
+        if not patient.fitbit_access_token:
+            flash(_('This patient does not have an active health platform connection'), 'warning')
+            return redirect(url_for('views.patient_vitals', patient_id=patient_id))
+        
+        # Fetch data from Fitbit
+        vitals = get_processed_fitbit_data(
+            patient, 
+            vital_type, 
+            start_date=start_date.strftime('%Y-%m-%d'),
+            end_date=end_date.strftime('%Y-%m-%d')
+        )
+        
+        if not vitals:
+            flash(_('No data available for the selected vital parameter and time period'), 'warning')
+            return redirect(url_for('views.patient_vitals', patient_id=patient_id))
+        
+        # Get current language from session
+        current_language = session.get('language', 'en')
+            
+        logger.debug(f"Generating specific vital report with language: {current_language}")
+        
+        # Generate the PDF report
+        from reports import generate_vital_trends_report
+        
+        # Try to convert vital_type to enum if possible
+        try:
+            vital_type_enum = VitalSignType[vital_type.upper()]
+        except (KeyError, AttributeError):
+            vital_type_enum = None
+        
+        pdf_buffer = generate_vital_trends_report(
+            patient=patient,
+            vital_type=vital_type_enum or vital_type,  # Use enum if possible, otherwise string ID
+            vitals=vitals,
+            period_desc=period_desc,
+            language=current_language
+        )
+        
+        # Generate a filename for the report
+        vital_name = vital_type.replace('_', ' ').title()
+        filename = f"{vital_name}_report_{patient.last_name}_{datetime.now().strftime('%Y%m%d')}.pdf"
+        
+        # Return the PDF as a downloadable file
+        return send_file(
+            pdf_buffer,
+            as_attachment=True,
+            download_name=filename,
+            mimetype='application/pdf'
+        )
+        
+    except Exception as e:
+        logger.exception(f"Error generating specific report: {str(e)}")
+        flash(_('Error generating specific report: %(error)s', error=str(e)), 'danger')
+        return redirect(url_for('views.patient_vitals', patient_id=patient_id))
+
+
 @views_bp.route('/patients/<int:patient_id>/vital_report/<string:vital_type>')
 @login_required
 def generate_vital_report(patient_id, vital_type):
