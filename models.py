@@ -182,8 +182,8 @@ class Patient(db.Model):
     #   address: Address of the patient
     #   created_at: Record creation date
     #   updated_at: Record last update date
-    #   vital_signs: Relationship with patient's vital signs
     #   notes: Relationship with patient's medical notes
+    #   vital_observations: Relationship with patient's vital sign observations
     #   connected_platform: Health platform connected to this patient (Fitbit, Google Fit, etc.)
     #   platform_access_token: OAuth access token for the connected health platform
     #   platform_refresh_token: OAuth refresh token for the connected health platform
@@ -207,7 +207,6 @@ class Patient(db.Model):
     platform_token_expires_at = db.Column(db.DateTime, nullable=True)
     
     # Relationships
-    vital_signs = db.relationship('VitalSign', backref='patient', lazy='dynamic')
     notes = db.relationship('Note', backref='patient', lazy='dynamic')
     vital_observations = db.relationship('VitalObservation', backref='patient', lazy='dynamic')
     
@@ -229,28 +228,28 @@ class Patient(db.Model):
             'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }
     
-    def get_vital_signs(self, type=None, start_date=None, end_date=None):
-        # Get vital signs for this patient with optional filtering
+    def get_vital_observations(self, vital_type=None, start_date=None, end_date=None):
+        # Get vital observations for this patient with optional filtering
         #
         # Args:
-        #   type (VitalSignType, optional): Type of vital sign to filter by
+        #   vital_type (VitalSignType, optional): Type of vital sign to filter by
         #   start_date (datetime, optional): Start date for filtering
         #   end_date (datetime, optional): End date for filtering
         #            
         # Returns:
-        #   list: List of VitalSign objects that meet the filtering criteria
-        query = self.vital_signs
+        #   list: List of VitalObservation objects that meet the filtering criteria
+        query = self.vital_observations
         
-        if type:
-            query = query.filter_by(type=type)
+        if vital_type:
+            query = query.filter_by(vital_type=vital_type)
         
         if start_date:
-            query = query.filter(VitalSign.recorded_at >= start_date)
+            query = query.filter(VitalObservation.start_date >= start_date)
         
         if end_date:
-            query = query.filter(VitalSign.recorded_at <= end_date)
+            query = query.filter(VitalObservation.end_date <= end_date)
         
-        return query.order_by(VitalSign.recorded_at.desc()).all()
+        return query.order_by(VitalObservation.created_at.desc()).all()
     
     def get_notes(self):
         # Get all medical notes associated with this patient
