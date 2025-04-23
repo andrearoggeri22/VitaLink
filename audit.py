@@ -1,10 +1,14 @@
 from datetime import datetime, timedelta
+import logging
 from flask import request, current_app, jsonify, Blueprint, render_template
 from flask_login import current_user, login_required
 
 from models import AuditLog, ActionType, EntityType, Doctor, Patient, Note, DoctorPatient, HealthPlatformLink, HealthPlatform, VitalObservation
 from app import db
 from auth import doctor_required
+
+# Initialize logger
+logger = logging.getLogger(__name__)
 
 audit_bp = Blueprint('audit', __name__)
 
@@ -524,19 +528,25 @@ def log_platform_disconnection(doctor_id, patient, platform_name):
 
 def log_data_sync(doctor_id, patient, platform_name, data_type, result_summary):
     """Log health platform data synchronization."""
-    return log_action(
-        doctor_id=doctor_id,
-        action_type=ActionType.SYNC,
-        entity_type=EntityType.HEALTH_PLATFORM,
-        entity_id=0,  # Using 0 as placeholder since sync doesn't have an ID
-        details={
-            'platform': platform_name,
-            'data_type': data_type,
-            'sync_at': datetime.utcnow().isoformat(),
-            'result': result_summary
-        },
-        patient_id=patient.id
-    )
+    try:
+        # Utilizziamo ActionType("sync") per assicurarci di usare il valore minuscolo
+        sync_action = ActionType("sync")
+        return log_action(
+            doctor_id=doctor_id,
+            action_type=sync_action,
+            entity_type=EntityType.HEALTH_PLATFORM,
+            entity_id=0,  # Using 0 as placeholder since sync doesn't have an ID
+            details={
+                'platform': platform_name,
+                'data_type': data_type,
+                'sync_at': datetime.utcnow().isoformat(),
+                'result': result_summary
+            },
+            patient_id=patient.id
+        )
+    except Exception as e:
+        logger.error(f"Error logging data sync: {str(e)}")
+        return None
     
 def log_observation_creation(doctor_id, observation):
     """Log observation creation."""
