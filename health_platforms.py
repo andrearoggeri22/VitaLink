@@ -17,7 +17,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from app import app, db
 from models import Patient, HealthPlatform, HealthPlatformLink, VitalSignType, ActionType, EntityType
-from audit import log_action
+from audit import log_action, log_health_link_creation, log_platform_connection, log_platform_disconnection, log_data_sync
 from health_platforms_config import FITBIT_CONFIG, FITBIT_ENDPOINTS
 
 # Create the blueprint
@@ -62,17 +62,7 @@ def generate_platform_link(patient, doctor, platform):
         
         # Log the action
         try:
-            log_action(
-                doctor_id=doctor.id,
-                action_type=ActionType.GENERATE_LINK,
-                entity_type=EntityType.HEALTH_LINK,
-                entity_id=new_link.id,
-                details={
-                    'platform': platform.value,
-                    'expires_at': new_link.expires_at.isoformat() if new_link.expires_at else None,
-                },
-                patient_id=patient.id
-            )
+            log_health_link_creation(doctor.id, new_link)
         except Exception as log_error:
             logger.error(f"Error logging platform link creation: {str(log_error)}")
         
@@ -677,17 +667,7 @@ def oauth_callback():
             
             # Log the connection
             try:
-                log_action(
-                    doctor_id=link.doctor_id,
-                    action_type=ActionType.CONNECT,
-                    entity_type=EntityType.HEALTH_PLATFORM,
-                    entity_id=patient.id,  # Using patient ID since there's no specific health platform entity
-                    details={
-                        'platform': HealthPlatform.FITBIT.value,
-                        'connected_at': datetime.utcnow().isoformat()
-                    },
-                    patient_id=patient.id
-                )
+                log_platform_connection(link.doctor_id, patient, HealthPlatform.FITBIT.value)
             except Exception as log_error:
                 logger.error(f"Error logging platform connection: {str(log_error)}")
             
@@ -768,17 +748,7 @@ def check_connection(patient_id):
                     
                     # Log the disconnection due to invalid token
                     try:
-                        log_action(
-                            doctor_id=current_user.id,
-                            action_type=ActionType.DISCONNECT,
-                            entity_type=EntityType.HEALTH_PLATFORM,
-                            entity_id=patient.id,
-                            details={
-                                'reason': 'invalid_token',
-                                'disconnected_at': datetime.utcnow().isoformat()
-                            },
-                            patient_id=patient.id
-                        )
+                        log_platform_disconnection(current_user.id, patient, patient.connected_platform.value)
                     except Exception as log_error:
                         logger.error(f"Error logging platform disconnection: {str(log_error)}")
                     
@@ -851,18 +821,7 @@ def disconnect_platform(patient_id, platform):
         
         # Log the disconnection
         try:
-            log_action(
-                doctor_id=current_user.id,
-                action_type=ActionType.DISCONNECT,
-                entity_type=EntityType.HEALTH_PLATFORM,
-                entity_id=patient.id,
-                details={
-                    'platform': platform,
-                    'disconnected_at': datetime.utcnow().isoformat(),
-                    'reason': 'user_requested'
-                },
-                patient_id=patient.id
-            )
+            log_platform_disconnection(current_user.id, patient, platform)
         except Exception as log_error:
             logger.error(f"Error logging platform disconnection: {str(log_error)}")
         
@@ -920,6 +879,17 @@ def get_data(data_type, patient_id):
         # Get data based on the platform
         if patient.connected_platform == HealthPlatform.FITBIT:
             data = get_processed_fitbit_data(patient, data_type, start_date, end_date)
+            
+            # Log the data sync
+            try:
+                result_summary = {
+                    'data_points': len(data) if data else 0,
+                    'start_date': start_date,
+                    'end_date': end_date
+                }
+                log_data_sync(current_user.id, patient, patient.connected_platform.value, data_type, result_summary)
+            except Exception as log_error:
+                logger.error(f"Error logging data sync: {str(log_error)}")
             
             if data:
                 return jsonify(data)
