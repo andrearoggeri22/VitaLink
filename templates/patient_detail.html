@@ -210,12 +210,17 @@ document.addEventListener('DOMContentLoaded', function() {
     confirmDeleteNoteBtn.addEventListener('click', function() {
         if (!noteIdToDelete) return;
         
+        // Ottieni il token CSRF dal meta tag
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        
         // Effettua la richiesta DELETE all'API
         fetch(`/api/notes/${noteIdToDelete}`, {
             method: 'DELETE',
             headers: {
-                'Content-Type': 'application/json'
-            }
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': csrfToken
+            },
+            credentials: 'same-origin'
         })
         .then(response => {
             if (!response.ok) {

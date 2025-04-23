@@ -156,8 +156,7 @@ def get_audit_logs():
                     doctors=doctors,
                     request=request,
                     current_user=current_user,
-                    now=datetime.now(),
-                    message=f"Non ci sono risultati per il tipo di azione: {action_type}."
+                    now=datetime.now()
                 )
         except Exception as e:
             # In caso di errore, restituisci un insieme vuoto
@@ -201,8 +200,7 @@ def get_audit_logs():
                     doctors=doctors,
                     request=request,
                     current_user=current_user,
-                    now=datetime.now(),
-                    message=f"Non ci sono risultati per il tipo di entità: {entity_type}."
+                    now=datetime.now()
                 )
         except Exception as e:
             # In caso di errore, restituisci un insieme vuoto
