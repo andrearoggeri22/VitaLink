@@ -297,7 +297,7 @@
                 <h5 class="modal-title" id="completeReportModalLabel">{{ _('Generate Complete Report') }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form action="{{ url_for('views.generate_complete_report', patient_id=patient.id) }}" method="post" target="_blank">
+            <form action="{{ url_for('views.create_complete_patient_report', patient_id=patient.id) }}" method="post" target="_blank">
                 <div class="modal-body">
                     <p>{{ _('This report will include all medical notes, all vital signs charts for each time period, and all observations.') }}</p>
                     
@@ -324,7 +324,7 @@
                 <h5 class="modal-title" id="specificReportModalLabel">{{ _('Generate Specific Report') }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form action="{{ url_for('views.generate_specific_report', patient_id=patient.id) }}" method="post" target="_blank">
+            <form action="{{ url_for('views.create_specific_patient_report', patient_id=patient.id) }}" method="post" target="_blank">
                 <div class="modal-body">
                     <p>{{ _('Create a customized report by selecting specific elements to include:') }}</p>
                     
