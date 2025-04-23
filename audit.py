@@ -419,3 +419,71 @@ def log_data_sync(doctor_id, patient, platform_name, data_type, result_summary):
         },
         patient_id=patient.id
     )
+    
+def log_observation_creation(doctor_id, observation):
+    """Log observation creation."""
+    return log_action(
+        doctor_id=doctor_id,
+        action_type=ActionType.CREATE,
+        entity_type=EntityType.OBSERVATION,
+        entity_id=observation.id,
+        details={
+            'vital_type': observation.vital_type.value,
+            'content': observation.content[:100] + ('...' if len(observation.content) > 100 else ''),
+            'period': f"{observation.start_date.isoformat()} to {observation.end_date.isoformat()}",
+            'created_at': observation.created_at.isoformat() if observation.created_at else None,
+        },
+        patient_id=observation.patient_id
+    )
+    
+def log_observation_update(doctor_id, observation, old_data=None):
+    """Log observation update."""
+    details = {
+        'vital_type': observation.vital_type.value,
+        'content': observation.content[:100] + ('...' if len(observation.content) > 100 else ''),
+        'period': f"{observation.start_date.isoformat()} to {observation.end_date.isoformat()}",
+        'updated_at': observation.updated_at.isoformat() if observation.updated_at else None,
+    }
+    
+    # Add previous state information if provided
+    if old_data:
+        details['previous'] = old_data
+        
+    return log_action(
+        doctor_id=doctor_id,
+        action_type=ActionType.UPDATE,
+        entity_type=EntityType.OBSERVATION,
+        entity_id=observation.id,
+        details=details,
+        patient_id=observation.patient_id
+    )
+    
+def log_observation_delete(doctor_id, observation):
+    """Log observation deletion."""
+    return log_action(
+        doctor_id=doctor_id,
+        action_type=ActionType.DELETE,
+        entity_type=EntityType.OBSERVATION,
+        entity_id=observation.id,
+        details={
+            'vital_type': observation.vital_type.value,
+            'content': observation.content[:100] + ('...' if len(observation.content) > 100 else ''),
+            'period': f"{observation.start_date.isoformat()} to {observation.end_date.isoformat()}",
+            'deleted_at': datetime.utcnow().isoformat(),
+        },
+        patient_id=observation.patient_id
+    )
+    
+def log_note_delete(doctor_id, note):
+    """Log note deletion."""
+    return log_action(
+        doctor_id=doctor_id,
+        action_type=ActionType.DELETE,
+        entity_type=EntityType.NOTE,
+        entity_id=note.id,
+        details={
+            'content': note.content[:100] + ('...' if len(note.content) > 100 else ''),
+            'deleted_at': datetime.utcnow().isoformat(),
+        },
+        patient_id=note.patient_id
+    )
