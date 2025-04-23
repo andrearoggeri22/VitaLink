@@ -21,4 +21,6 @@ dependencies = [
     "polib>=1.2.0",
     "clicksend-client>=5.0.78",
     "flask-migrate>=4.1.0",
+    "notifications>=0.3.2",
+    "requests>=2.32.3",
 ]
