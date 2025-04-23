@@ -220,22 +220,30 @@ function updateButtonToConnect() {
  * @param {number} patientId The patient ID
  */
 function createHealthPlatformModal(patientId) {
-    // Remove existing modal if it exists
-    const existingModal = document.getElementById('healthPlatformModal');
-    if (existingModal) {
-        existingModal.remove();
+    console.log('Creating health platform modal, patient ID:', patientId);
+    
+    // Prima verifichiamo se jQuery è disponibile
+    if (typeof $ === 'undefined') {
+        console.error('jQuery non è disponibile. Impossibile creare il modal.');
+        alert('Errore: jQuery non disponibile. Impossibile visualizzare il popup.');
+        return;
     }
     
-    // Create fresh modal element
+    console.log('jQuery is available, creating jQuery modal');
+    
+    // Rimuovi il modal esistente se presente
+    $('#healthPlatformModal').remove();
+    
+    // Crea l'HTML del modal e aggiungilo alla pagina
     const modalHtml = `
-        <div class="modal fade" id="healthPlatformModal" tabindex="-1" aria-labelledby="healthPlatformModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
+        <div class="modal" id="healthPlatformModal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="healthPlatformModalLabel">
+                        <h5 class="modal-title">
                             <i class="fas fa-link me-2"></i> ${translateText('Connect Health Platform')}
                         </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="${translateText('Close')}"></button>
+                        <button type="button" class="btn-close" data-dismiss="modal" aria-label="${translateText('Close')}"></button>
                     </div>
                     <div class="modal-body">
                         <p>${translateText('Choose a health platform to connect:')}</p>
@@ -247,7 +255,7 @@ function createHealthPlatformModal(patientId) {
                         <div id="connectionStatus" class="alert mt-3 d-none"></div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
                             ${translateText('Cancel')}
                         </button>
                     </div>
@@ -256,55 +264,48 @@ function createHealthPlatformModal(patientId) {
         </div>
     `;
     
-    // Add modal to the DOM
-    const modalContainer = document.createElement('div');
-    modalContainer.innerHTML = modalHtml;
-    document.body.appendChild(modalContainer.firstElementChild);
+    // Aggiungi il modal al DOM
+    $('body').append(modalHtml);
     
-    // Initialize modal reference using Bootstrap 5 Modal
-    const modalElement = document.getElementById('healthPlatformModal');
-    syncModal = new bootstrap.Modal(modalElement, {
-        backdrop: true,
-        keyboard: true,
-        focus: true
+    // Salva il riferimento all'elemento del modal
+    const $modal = $('#healthPlatformModal');
+    
+    // Aggiungi event listener ai pulsanti delle piattaforme
+    $('.platform-btn').on('click', function() {
+        const platform = $(this).data('platform');
+        console.log('Platform button clicked:', platform);
+        createHealthPlatformLink(patientId, platform);
     });
     
-    // Initialize platform buttons
-    platformButtons = document.querySelectorAll('.platform-btn');
-    platformButtons.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const platform = this.getAttribute('data-platform');
-            createHealthPlatformLink(patientId, platform);
-        });
-    });
-    
-    // Initialize connection status element
+    // Salva il riferimento all'elemento dello stato della connessione
     connectionStatusElem = document.getElementById('connectionStatus');
     
-    // Make sure Bootstrap is initialized
-    console.log('Bootstrap object:', typeof bootstrap);
-    if (typeof bootstrap === 'undefined') {
-        console.error('Bootstrap is not defined. Make sure it is properly loaded.');
-        // Prova a usare un approccio alternativo: creare un jQuery modal se disponibile
-        if (typeof $ !== 'undefined' && typeof $('#healthPlatformModal').modal === 'function') {
-            console.log('Trying jQuery modal fallback');
-            $('#healthPlatformModal').modal('show');
-            return;
-        }
-        alert('Error: Could not create popup. Please refresh the page and try again.');
-        return;
-    }
-    console.log('Bootstrap Modal constructor:', typeof bootstrap.Modal);
+    // Gestisci la chiusura del modal con il pulsante Close
+    $('.btn-close, button[data-dismiss="modal"]').on('click', function() {
+        $modal.hide();
+    });
     
-    // Explicitly show the modal with a small delay to ensure DOM is ready
-    setTimeout(() => {
-        try {
-            syncModal.show();
-        } catch (e) {
-            console.error('Error showing modal:', e);
-            alert('Error: Could not display the popup. Please refresh the page and try again.');
-        }
-    }, 100);
+    // Visualizza il modal
+    console.log('Showing modal');
+    $modal.css({
+        'display': 'block',
+        'background-color': 'rgba(0,0,0,0.5)',
+        'position': 'fixed',
+        'top': 0,
+        'left': 0,
+        'width': '100%',
+        'height': '100%',
+        'z-index': 1050
+    });
+    
+    // Posiziona il dialogo al centro
+    $('.modal-dialog').css({
+        'margin': '10% auto',
+        'max-width': '500px'
+    });
+    
+    // Storica i riferimenti
+    platformButtons = $('.platform-btn');
 }
 
 /**
@@ -315,7 +316,13 @@ function createHealthPlatformModal(patientId) {
 function createHealthPlatformLink(patientId, platform) {
     // Disable platform buttons
     if (platformButtons) {
-        platformButtons.forEach(btn => btn.disabled = true);
+        if (platformButtons.jquery) {
+            // jQuery collection
+            platformButtons.prop('disabled', true);
+        } else {
+            // DOM collection
+            platformButtons.forEach(btn => btn.disabled = true);
+        }
     }
     
     // Show loading status
@@ -340,7 +347,13 @@ function createHealthPlatformLink(patientId, platform) {
     .then(data => {
         // Re-enable platform buttons
         if (platformButtons) {
-            platformButtons.forEach(btn => btn.disabled = false);
+            if (platformButtons.jquery) {
+                // jQuery collection
+                platformButtons.prop('disabled', false);
+            } else {
+                // DOM collection
+                platformButtons.forEach(btn => btn.disabled = false);
+            }
         }
         
         if (data.success) {
@@ -395,7 +408,13 @@ function createHealthPlatformLink(patientId, platform) {
         
         // Re-enable platform buttons
         if (platformButtons) {
-            platformButtons.forEach(btn => btn.disabled = false);
+            if (platformButtons.jquery) {
+                // jQuery collection
+                platformButtons.prop('disabled', false);
+            } else {
+                // DOM collection
+                platformButtons.forEach(btn => btn.disabled = false);
+            }
         }
         
         // Show error message
