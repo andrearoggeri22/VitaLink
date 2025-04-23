@@ -155,13 +155,15 @@ function checkConnectionStatus(patientId) {
                 
                 // Populate connection date
                 if (document.getElementById('connectionDate')) {
-                    document.getElementById('connectionDate').textContent = new Date(data.connection_date).toLocaleDateString();
+                    document.getElementById('connectionDate').textContent = data.connected_since ? 
+                        new Date(data.connected_since).toLocaleDateString() : 
+                        new Date().toLocaleDateString();
                 }
                 
                 // Populate expiration date
                 if (document.getElementById('expirationDate')) {
-                    document.getElementById('expirationDate').textContent = data.expiration_date ? 
-                        new Date(data.expiration_date).toLocaleDateString() : 
+                    document.getElementById('expirationDate').textContent = data.token_expires_at ? 
+                        new Date(data.token_expires_at).toLocaleDateString() : 
                         translateText('No expiration');
                 }
             }
@@ -258,6 +260,69 @@ function handleSyncButtonClick() {
 }
 
 /**
+ * Create a custom confirmation dialog
+ * @param {string} title The dialog title
+ * @param {string} message The confirmation message
+ * @param {Function} confirmCallback Function to call if user confirms
+ */
+function createConfirmDialog(title, message, confirmCallback) {
+    // Remove any existing confirmation dialogs
+    const existingDialog = document.getElementById('confirmationModal');
+    if (existingDialog) {
+        existingDialog.remove();
+    }
+    
+    // Create the modal HTML
+    const modalHtml = `
+        <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title" id="confirmationModalLabel">
+                            <i class="fas fa-exclamation-triangle me-2"></i> ${title}
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>${message}</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            ${translateText('Annulla')}
+                        </button>
+                        <button type="button" class="btn btn-danger" id="confirmBtn">
+                            <i class="fas fa-unlink me-1"></i> ${translateText('Disconnetti')}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Add the modal to the DOM
+    const modalContainer = document.createElement('div');
+    modalContainer.innerHTML = modalHtml;
+    document.body.appendChild(modalContainer.firstElementChild);
+    
+    // Initialize the modal
+    const modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+    
+    // Add event listener for the confirm button
+    document.getElementById('confirmBtn').addEventListener('click', function() {
+        // Hide the modal
+        modal.hide();
+        
+        // Call the callback function
+        if (confirmCallback && typeof confirmCallback === 'function') {
+            confirmCallback();
+        }
+    });
+    
+    // Show the modal
+    modal.show();
+}
+
+/**
  * Disconnect from a health platform
  * @param {number} patientId The patient ID
  * @param {string} platform The platform name
@@ -265,6 +330,23 @@ function handleSyncButtonClick() {
 function disconnectHealthPlatform(patientId, platform) {
     console.log('Disconnecting platform', platform, 'for patient', patientId);
     
+    // Show confirmation dialog
+    createConfirmDialog(
+        translateText('Disconnetti piattaforma'),
+        translateText('Sei sicuro di voler disconnettere questa piattaforma? I dati non saranno più disponibili.'),
+        function() {
+            // Execute disconnection after confirmation
+            executeDisconnection(patientId, platform);
+        }
+    );
+}
+
+/**
+ * Execute the disconnection from a health platform
+ * @param {number} patientId The patient ID
+ * @param {string} platform The platform name
+ */
+function executeDisconnection(patientId, platform) {
     // Disable buttons during the request
     if (syncButton) {
         syncButton.disabled = true;
@@ -277,7 +359,7 @@ function disconnectHealthPlatform(patientId, platform) {
     }
     
     // Make API request to disconnect
-    fetch(`/health/disconnect/${patientId}/${platform}`, {
+    fetch(`/health/disconnect/${patientId}/${platform.toLowerCase()}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
