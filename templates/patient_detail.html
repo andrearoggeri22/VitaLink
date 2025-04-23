@@ -211,7 +211,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!noteIdToDelete) return;
         
         // Effettua la richiesta DELETE all'API
-        fetch(`/api/notes/${noteIdToDelete}`, {
+        fetch(`/web/notes/${noteIdToDelete}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'

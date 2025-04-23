@@ -114,6 +114,16 @@ def get_audit_logs():
     if patient_id:
         query = query.filter_by(patient_id=patient_id)
     
+    # Get list of patients and doctors for filter dropdowns
+    patients = Patient.query.join(
+        DoctorPatient, Patient.id == DoctorPatient.patient_id
+    ).filter(
+        DoctorPatient.doctor_id == current_user.id
+    ).all()
+    
+    # For admin users, show all doctors. For regular doctors, only show themselves
+    doctors = [current_user]
+    
     if action_type:
         # Ottieni i valori delle enum dal database
         try:
