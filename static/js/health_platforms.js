@@ -35,13 +35,12 @@ let connectionStatusElem = null;
 function initHealthPlatforms() {
     // Initialize DOM references
     syncButton = document.getElementById('syncHealthBtn');
-    connectButton = document.getElementById('connectBtn');
-    disconnectButton = document.getElementById('disconnectBtn');
+    // I pulsanti connect e disconnect sono stati rimossi
+    connectButton = null;
+    disconnectButton = null;
     
     console.log('Initializing health platform...');
     console.log('Sync button found:', !!syncButton);
-    console.log('Connect button found:', !!connectButton);
-    console.log('Disconnect button found:', !!disconnectButton);
     
     // Find connection details section
     const connectionDetails = document.getElementById('connectionDetails');
@@ -53,29 +52,19 @@ function initHealthPlatforms() {
         console.log('Patient ID:', patientId);
         
         if (patientId) {
-            // Add click event to the sync button
+            // Add click event to the sync button (now handles both connect and disconnect)
             if (syncButton) {
                 console.log('Adding click event listener to sync button');
                 syncButton.addEventListener('click', function() {
-                    createHealthPlatformModal(patientId);
-                });
-            }
-            
-            // Add click event to the connect button if it exists
-            if (connectButton) {
-                console.log('Adding click event listener to connect button');
-                connectButton.addEventListener('click', function() {
-                    createHealthPlatformModal(patientId);
-                });
-            }
-            
-            // Add click event to the disconnect button if it exists
-            if (disconnectButton) {
-                console.log('Adding click event listener to disconnect button');
-                disconnectButton.addEventListener('click', function() {
-                    const platform = document.getElementById('platformName')?.textContent || 'fitbit';
-                    if (confirm(translateText('Sei sicuro di voler disconnettere questa piattaforma? I dati non saranno più disponibili.'))) {
-                        disconnectHealthPlatform(patientId, platform);
+                    const isConnected = this.getAttribute('data-connected') === 'true';
+                    const platform = this.getAttribute('data-platform');
+                    
+                    if (isConnected && platform) {
+                        // Se connesso, mostra il popup di conferma disconnessione
+                        confirmDisconnection(patientId, platform);
+                    } else {
+                        // Se non connesso, mostra il popup per la connessione
+                        createHealthPlatformModal(patientId);
                     }
                 });
             }
