@@ -61,7 +61,7 @@ function initHealthPlatforms() {
                     
                     if (isConnected && platform) {
                         // Se connesso, mostra il popup di conferma disconnessione
-                        confirmDisconnection(patientId, platform);
+                        disconnectHealthPlatform(patientId, platform);
                     } else {
                         // Se non connesso, mostra il popup per la connessione
                         createHealthPlatformModal(patientId);
