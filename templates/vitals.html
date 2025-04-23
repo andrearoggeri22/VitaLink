@@ -276,9 +276,12 @@
 <script src="{{ url_for('static', filename='js/vitals.js') }}"></script>
 <script src="{{ url_for('static', filename='js/health_platforms.js') }}"></script>
 <script src="{{ url_for('static', filename='js/vitals_charts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/observations.js') }}"></script>
 
 <script>
     // Base URL for the application
     const BASE_URL = "{{ url_for('views.index') }}";
+    // Patient ID per la pagina corrente
+    const PATIENT_ID = {{ patient.id }};
 </script>
 {% endblock %}
