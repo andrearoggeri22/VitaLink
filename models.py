@@ -1,6 +1,6 @@
 import uuid
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import Enum, auto
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -374,7 +374,7 @@ class HealthPlatformLink(db.Model):
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=False)
     doctor_id = db.Column(db.Integer, db.ForeignKey('doctor.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    expires_at = db.Column(db.DateTime, default=lambda: datetime.utcnow() + datetime.timedelta(hours=24))
+    expires_at = db.Column(db.DateTime, default=lambda: datetime.utcnow() + timedelta(hours=24))
     used = db.Column(db.Boolean, default=False)
     platform = db.Column(db.Enum(HealthPlatform), nullable=False)
     
