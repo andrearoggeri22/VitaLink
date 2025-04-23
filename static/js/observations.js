@@ -85,7 +85,7 @@ function loadObservations() {
     const endDateStr = formatDateForAPI(endDate);
     
     // Costruisci l'URL dell'API
-    const apiUrl = `/api/observations/${patientId}?start_date=${startDateStr}&end_date=${endDateStr}`;
+    const apiUrl = `/web/observations/${patientId}?start_date=${startDateStr}&end_date=${endDateStr}`;
     
     fetch(apiUrl)
         .then(response => {
@@ -342,7 +342,7 @@ function saveObservation() {
     };
     
     // URL e metodo dell'API
-    let apiUrl = `/api/observations`;
+    let apiUrl = `/web/observations`;
     let method = 'POST';
     
     // Se è un aggiornamento
