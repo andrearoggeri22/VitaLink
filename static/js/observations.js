@@ -335,7 +335,7 @@ function saveObservation() {
     const patientId = PATIENT_ID || getPatientIdFromUrl();
     const observationData = {
         patient_id: patientId,
-        vital_type: vitalType,
+        vital_type: vitalType.toUpperCase(), // Assicuriamo che sia in maiuscolo come nell'enum
         content: content,
         start_date: startDate,
         end_date: endDate

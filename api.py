@@ -356,8 +356,11 @@ def add_observation(doctor):
     
     # Validate vital type
     try:
+        logger.debug(f"Input vital_type: {data['vital_type']}")
+        logger.debug(f"Available VitalSignTypes: {[t.value for t in VitalSignType]}")
         vital_type = VitalSignType(data['vital_type'])
-    except ValueError:
+    except ValueError as e:
+        logger.error(f"Invalid vital sign type: {data['vital_type']}, error: {str(e)}")
         return jsonify({
             "error": _("Invalid vital sign type. Must be one of: %(types)s") % {
                 "types": ", ".join(t.value for t in VitalSignType)
