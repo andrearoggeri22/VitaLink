@@ -106,11 +106,19 @@
     <div class="card-body">
         {% if notes %}
             {% for note in notes %}
-            <div class="note-card card mb-3">
+            <div class="note-card card mb-3" id="note-{{ note.id }}">
                 <div class="card-body">
-                    <div class="note-meta">
-                        <strong>{{ note.doctor.first_name }} {{ note.doctor.last_name }}</strong> • 
-                        {{ note.created_at|format_datetime('%Y-%m-%d %H:%M') }}
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="note-meta">
+                            <strong>{{ note.doctor.first_name }} {{ note.doctor.last_name }}</strong> • 
+                            {{ note.created_at|format_datetime('%Y-%m-%d %H:%M') }}
+                        </div>
+                        {% if note.doctor_id == current_user.id %}
+                        <button type="button" class="btn btn-sm btn-danger delete-note-btn" 
+                                data-note-id="{{ note.id }}" title="{{ _('Delete Note') }}">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                        {% endif %}
                     </div>
                     <p class="card-text mb-0">{{ note.content }}</p>
                 </div>
@@ -156,9 +164,122 @@
 
 <!-- Health Platform Modal creato dinamicamente da JavaScript -->
 
+<!-- Delete Note Confirmation Modal -->
+<div class="modal fade" id="deleteNoteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ _('Confirm Deletion') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>{{ _('Are you sure you want to delete this note?') }}</p>
+                <p class="text-danger">{{ _('This action cannot be undone.') }}</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('Cancel') }}</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteNote">{{ _('Delete Note') }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/patients.js') }}"></script>
 <script src="{{ url_for('static', filename='js/health_platforms.js') }}"></script>
+
+<script>
+// Gestione eliminazione note
+document.addEventListener('DOMContentLoaded', function() {
+    // Riferimenti alle modali
+    const deleteNoteModal = new bootstrap.Modal(document.getElementById('deleteNoteModal'));
+    const confirmDeleteNoteBtn = document.getElementById('confirmDeleteNote');
+    let noteIdToDelete = null;
+
+    // Evento click sui pulsanti di eliminazione
+    document.querySelectorAll('.delete-note-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            noteIdToDelete = this.getAttribute('data-note-id');
+            deleteNoteModal.show();
+        });
+    });
+
+    // Azione di conferma dell'eliminazione
+    confirmDeleteNoteBtn.addEventListener('click', function() {
+        if (!noteIdToDelete) return;
+        
+        // Effettua la richiesta DELETE all'API
+        fetch(`/api/notes/${noteIdToDelete}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Errore durante l\'eliminazione della nota');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Nasconde la modale
+            deleteNoteModal.hide();
+            
+            // Rimuove la nota dalla pagina
+            const noteElement = document.getElementById(`note-${noteIdToDelete}`);
+            if (noteElement) {
+                noteElement.remove();
+            }
+            
+            // Mostra messaggio di successo
+            showAlert('success', 'Nota eliminata con successo.');
+            
+            // Controlla se non ci sono più note e mostra messaggio appropriato
+            const remainingNotes = document.querySelectorAll('.note-card');
+            if (remainingNotes.length === 0) {
+                const notesContainer = document.querySelector('.card-body');
+                notesContainer.innerHTML = `
+                    <div class="text-center py-4">
+                        <p class="text-muted mb-2">{{ _('No notes have been added yet') }}</p>
+                        <button type="button" class="btn btn-primary" 
+                                onclick="openAddNoteModal({{ patient.id }}, '{{ patient.first_name }} {{ patient.last_name }}')">
+                            <i class="fas fa-plus-circle me-1"></i> {{ _('Add First Note') }}
+                        </button>
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Errore:', error);
+            showAlert('danger', 'Si è verificato un errore durante l\'eliminazione della nota.');
+        })
+        .finally(() => {
+            noteIdToDelete = null;
+        });
+    });
+
+    // Funzione per mostrare alert
+    function showAlert(type, message) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.setAttribute('role', 'alert');
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        
+        // Inserisci l'alert all'inizio della pagina
+        const container = document.querySelector('.container');
+        container.insertBefore(alertDiv, container.firstChild);
+        
+        // Nascondi automaticamente dopo 5 secondi
+        setTimeout(() => {
+            const bsAlert = new bootstrap.Alert(alertDiv);
+            bsAlert.close();
+        }, 5000);
+    }
+});
+</script>
 {% endblock %}
