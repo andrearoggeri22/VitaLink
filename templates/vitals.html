@@ -21,7 +21,7 @@
     <div class="col-lg-4 mb-4">
         <!-- Health Platform Connection -->
         <div class="card shadow-sm">
-            <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="fas fa-link me-2"></i> {{ _('Health Platform') }}</h5>
                 <button id="syncHealthBtn" class="btn btn-light">
                     <i class="fas fa-sync me-1"></i> {{ _('Health Sync') }}
@@ -49,45 +49,45 @@
                         
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <div class="card border-0 bg-light">
+                                <div class="card border-0 bg-primary bg-opacity-10">
                                     <div class="card-body">
-                                        <h6 class="card-title">{{ _('Connected Platform') }}</h6>
+                                        <h6 class="card-title text-primary">{{ _('Connected Platform') }}</h6>
                                         <p class="card-text fs-5">
                                             <i class="fas fa-heartbeat me-2 text-danger"></i>
-                                            <span id="platformName">-</span>
+                                            <span id="platformName" class="fw-bold">-</span>
                                         </p>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <div class="card border-0 bg-light">
+                                <div class="card border-0 bg-success bg-opacity-10">
                                     <div class="card-body">
-                                        <h6 class="card-title">{{ _('Connection Date') }}</h6>
+                                        <h6 class="card-title text-success">{{ _('Connection Date') }}</h6>
                                         <p class="card-text fs-5">
-                                            <i class="fas fa-calendar-plus me-2 text-primary"></i>
-                                            <span id="connectionDate">-</span>
+                                            <i class="fas fa-calendar-plus me-2 text-success"></i>
+                                            <span id="connectionDate" class="fw-bold">-</span>
                                         </p>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <div class="card border-0 bg-light">
+                                <div class="card border-0 bg-warning bg-opacity-10">
                                     <div class="card-body">
-                                        <h6 class="card-title">{{ _('Token Expiration') }}</h6>
+                                        <h6 class="card-title text-warning">{{ _('Token Expiration') }}</h6>
                                         <p class="card-text fs-5">
                                             <i class="fas fa-hourglass-half me-2 text-warning"></i>
-                                            <span id="expirationDate">-</span>
+                                            <span id="expirationDate" class="fw-bold">-</span>
                                         </p>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <div class="card border-0 bg-light">
+                                <div class="card border-0 bg-success bg-opacity-10">
                                     <div class="card-body">
-                                        <h6 class="card-title">{{ _('Status') }}</h6>
+                                        <h6 class="card-title text-success">{{ _('Status') }}</h6>
                                         <p class="card-text fs-5">
                                             <i class="fas fa-circle text-success me-2"></i>
-                                            <span>{{ _('Active') }}</span>
+                                            <span class="fw-bold">{{ _('Active') }}</span>
                                         </p>
                                     </div>
                                 </div>
