@@ -438,7 +438,7 @@ def profile():
 
 @views_bp.route('/patients/<int:patient_id>/complete_report', methods=['GET', 'POST'])
 @login_required
-def generate_complete_report(patient_id):
+def create_complete_patient_report(patient_id):
     """Generate a comprehensive patient report in PDF format with all notes, charts and observations."""
     patient = Patient.query.get_or_404(patient_id)
     
@@ -506,7 +506,7 @@ def generate_complete_report(patient_id):
 
 @views_bp.route('/patients/<int:patient_id>/specific_report', methods=['GET', 'POST'])
 @login_required
-def generate_specific_report(patient_id):
+def create_specific_patient_report(patient_id):
     """Generate a specific report with selected notes, vital types, charts and observations."""
     patient = Patient.query.get_or_404(patient_id)
     
@@ -637,7 +637,7 @@ def generate_specific_report(patient_id):
 @login_required
 def generate_report(patient_id):
     """Legacy route - redirect to complete report for backward compatibility."""
-    return redirect(url_for('views.generate_complete_report', patient_id=patient_id))
+    return redirect(url_for('views.create_complete_patient_report', patient_id=patient_id))
 
 @views_bp.route('/patients/<int:patient_id>/vital_report/<string:vital_type>')
 @login_required
