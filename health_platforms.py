@@ -301,6 +301,12 @@ def get_fitbit_data(patient, data_type, start_date=None, end_date=None):
         elif data_type == 'sleep_duration':
             # Per sonno, usiamo un endpoint diverso che accetta un intervallo di date
             endpoint = f"/1.2/user/-/sleep/date/{start_date}/{end_date}.json"
+        elif data_type == 'weight':
+            # Per peso, usiamo un endpoint specifico
+            endpoint = f"/1/user/-/body/weight/date/{start_date}/{end_date}.json"
+        elif data_type == 'active_minutes':
+            # Per minuti attivi, usiamo l'endpoint minutesVeryActive
+            endpoint = f"/1/user/-/activities/minutesVeryActive/date/{start_date}/{end_date}.json"
         else:
             # Per altri tipi di dati (passi, calorie, ecc.)
             endpoint = f"/1/user/-/activities/{data_type.replace('_', '')}/date/{start_date}/{end_date}.json"
