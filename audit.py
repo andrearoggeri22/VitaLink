@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from flask import request, current_app, jsonify, Blueprint, render_template
 from flask_login import current_user, login_required
 
-from models import AuditLog, ActionType, EntityType, Doctor, Patient, VitalSign, Note, DoctorPatient
+from models import AuditLog, ActionType, EntityType, Doctor, Patient, VitalSign, Note, DoctorPatient, HealthPlatformLink, HealthPlatform
 from app import db
 from auth import doctor_required
 
@@ -360,4 +360,62 @@ def log_patient_view(doctor_id, patient_id):
         entity_type=EntityType.PATIENT,
         entity_id=patient_id,
         patient_id=patient_id
+    )
+
+def log_health_link_creation(doctor_id, link):
+    """Log health platform link creation."""
+    return log_action(
+        doctor_id=doctor_id,
+        action_type=ActionType.GENERATE_LINK,
+        entity_type=EntityType.HEALTH_LINK,
+        entity_id=link.id,
+        details={
+            'platform': link.platform.value,
+            'expires_at': link.expires_at.isoformat() if link.expires_at else None
+        },
+        patient_id=link.patient_id
+    )
+
+def log_platform_connection(doctor_id, patient, platform_name):
+    """Log health platform connection."""
+    return log_action(
+        doctor_id=doctor_id,
+        action_type=ActionType.CONNECT,
+        entity_type=EntityType.HEALTH_PLATFORM,
+        entity_id=0,  # Using 0 as placeholder since platform doesn't have an ID
+        details={
+            'platform': platform_name,
+            'connected_at': datetime.utcnow().isoformat()
+        },
+        patient_id=patient.id
+    )
+
+def log_platform_disconnection(doctor_id, patient, platform_name):
+    """Log health platform disconnection."""
+    return log_action(
+        doctor_id=doctor_id,
+        action_type=ActionType.DISCONNECT,
+        entity_type=EntityType.HEALTH_PLATFORM,
+        entity_id=0,  # Using 0 as placeholder since platform doesn't have an ID
+        details={
+            'platform': platform_name,
+            'disconnected_at': datetime.utcnow().isoformat()
+        },
+        patient_id=patient.id
+    )
+
+def log_data_sync(doctor_id, patient, platform_name, data_type, result_summary):
+    """Log health platform data synchronization."""
+    return log_action(
+        doctor_id=doctor_id,
+        action_type=ActionType.SYNC,
+        entity_type=EntityType.HEALTH_PLATFORM,
+        entity_id=0,  # Using 0 as placeholder since sync doesn't have an ID
+        details={
+            'platform': platform_name,
+            'data_type': data_type,
+            'sync_at': datetime.utcnow().isoformat(),
+            'result': result_summary
+        },
+        patient_id=patient.id
     )
