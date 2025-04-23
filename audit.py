@@ -151,7 +151,7 @@ def get_audit_logs():
                     'GENERATE_LINK': ActionType.GENERATE_LINK,
                     'CONNECT': ActionType.CONNECT,
                     'DISCONNECT': ActionType.DISCONNECT,
-                    'SYNC': ActionType.SYNC
+                    'SYNC': ActionType("sync")
                 }
                 
                 # Filtro solo se esiste nel database
