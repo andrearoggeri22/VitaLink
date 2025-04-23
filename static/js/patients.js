@@ -177,11 +177,19 @@ function initImportPatient() {
                                       (document.documentElement.lang === "it" ? "Importazione..." : "Importing...");
                 
                 // Make the request to import the patient
+                console.log("Sending import request to API", uuidInput.value.trim());
+                
+                // Get the CSRF token for the request
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                
                 fetch('/api/patients/import', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRFToken': csrfToken  // Include CSRF token for the API request
                     },
+                    credentials: 'same-origin',  // Include cookies
                     body: JSON.stringify({ patient_uuid: uuidInput.value.trim() })
                 })
                 .then(response => {
