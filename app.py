@@ -9,6 +9,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_login import LoginManager
 from flask_jwt_extended import JWTManager
 from flask_babel import Babel
+from flask_migrate import Migrate
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -61,6 +62,7 @@ def get_locale():
 
 # Initialize extensions
 db.init_app(app)
+migrate = Migrate(app, db)
 jwt = JWTManager(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'auth.login'
