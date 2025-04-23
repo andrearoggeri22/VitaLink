@@ -115,18 +115,34 @@ def get_audit_logs():
         query = query.filter_by(patient_id=patient_id)
     
     if action_type:
-        try:
-            action_type_enum = ActionType[action_type.upper()]
-            query = query.filter_by(action_type=action_type_enum)
-        except KeyError:
-            pass
+        # Mappa diretta dai valori delle stringhe agli enum
+        action_map = {
+            'CREATE': ActionType.CREATE,
+            'UPDATE': ActionType.UPDATE,
+            'DELETE': ActionType.DELETE,
+            'VIEW': ActionType.VIEW,
+            'EXPORT': ActionType.EXPORT,
+            'GENERATE_LINK': ActionType.GENERATE_LINK,
+            'CONNECT': ActionType.CONNECT,
+            'DISCONNECT': ActionType.DISCONNECT,
+            'SYNC': ActionType.SYNC
+        }
+        if action_type.upper() in action_map:
+            query = query.filter_by(action_type=action_map[action_type.upper()])
     
     if entity_type:
-        try:
-            entity_type_enum = EntityType[entity_type.upper()]
-            query = query.filter_by(entity_type=entity_type_enum)
-        except KeyError:
-            pass
+        # Mappa diretta dai valori delle stringhe agli enum
+        entity_map = {
+            'PATIENT': EntityType.PATIENT,
+            'NOTE': EntityType.NOTE,
+            'REPORT': EntityType.REPORT,
+            'HEALTH_PLATFORM': EntityType.HEALTH_PLATFORM,
+            'HEALTH_LINK': EntityType.HEALTH_LINK,
+            'OBSERVATION': EntityType.OBSERVATION,
+            'VITAL_SIGN': EntityType.VITAL_SIGN
+        }
+        if entity_type.upper() in entity_map:
+            query = query.filter_by(entity_type=entity_map[entity_type.upper()])
     
     # Get results ordered by timestamp (most recent first)
     logs = query.order_by(AuditLog.timestamp.desc()).all()
