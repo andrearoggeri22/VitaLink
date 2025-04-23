@@ -357,9 +357,12 @@ function executeDisconnection(patientId, platform) {
         disconnectButton.disabled = true;
         disconnectButton.innerHTML = `<i class="fas fa-spinner fa-spin me-1"></i> ${translateText('Disconnecting...')}`;
     }
+
+    // Log operation details
+    console.log(`Executing disconnection for patient ${patientId} from platform '${platform}'`);
     
     // Make API request to disconnect
-    fetch(`/health/disconnect/${patientId}/${platform.toLowerCase()}`, {
+    fetch(`/health/disconnect/${patientId}/fitbit`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
