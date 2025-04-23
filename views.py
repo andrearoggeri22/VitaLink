@@ -12,7 +12,7 @@ import json
 
 from app import db
 from models import Patient, Doctor, VitalSignType, DataOrigin, Note, DoctorPatient, ActionType, EntityType, VitalObservation
-from utils import parse_date, to_serializable_dict
+from utils import parse_date, to_serializable_dict, validate_uuid
 from reports import create_vital_chart
 from audit import (
     log_patient_creation, log_patient_update, log_patient_delete,
