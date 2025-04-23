@@ -4,9 +4,11 @@
 
 // Global variables
 let syncButton = null;
-let syncModal = null;
 let platformButtons = null;
 let connectionStatusElem = null;
+let healthPopup = null;
+let closePopupBtn = null;
+let cancelPopupBtn = null;
 
 // Constants
 const PLATFORMS = {
@@ -28,6 +30,32 @@ function initializeHealthPlatform() {
     // Initialize DOM references
     syncButton = document.getElementById('syncHealthBtn');
     console.log('Sync button found:', syncButton !== null);
+    
+    // Initialize popup elements
+    healthPopup = document.getElementById('healthPlatformPopup');
+    closePopupBtn = document.getElementById('closePopupBtn');
+    cancelPopupBtn = document.getElementById('cancelPopupBtn');
+    platformButtons = document.querySelectorAll('.platform-btn');
+    connectionStatusElem = document.getElementById('connectionStatus');
+    
+    // Add event listeners to popup buttons
+    if (closePopupBtn) {
+        closePopupBtn.addEventListener('click', hideHealthPlatformPopup);
+    }
+    
+    if (cancelPopupBtn) {
+        cancelPopupBtn.addEventListener('click', hideHealthPlatformPopup);
+    }
+    
+    // Add event listeners to platform buttons
+    platformButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const platform = this.getAttribute('data-platform');
+            const patientId = getPatientIdFromUrl();
+            console.log('Platform button clicked:', platform, 'for patient:', patientId);
+            createHealthPlatformLink(patientId, platform);
+        });
+    });
     
     // Initialize connection details section
     const connectionDetails = document.getElementById('connectionDetails');
@@ -219,95 +247,38 @@ function updateButtonToConnect() {
  * Create a modal dialog for selecting a health platform
  * @param {number} patientId The patient ID
  */
+/**
+ * Show the health platform selection popup
+ * @param {number} patientId The patient ID
+ */
 function createHealthPlatformModal(patientId) {
-    console.log('Creating health platform modal, patient ID:', patientId);
+    console.log('Showing health platform popup, patient ID:', patientId);
     
-    // Create modal element if it doesn't exist
-    if (!document.getElementById('healthPlatformModal')) {
-        const modalHtml = `
-            <div class="modal fade" id="healthPlatformModal" tabindex="-1" aria-labelledby="healthPlatformModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="healthPlatformModalLabel">
-                                <i class="fas fa-link me-2"></i> ${translateText('Connect Health Platform')}
-                            </h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="${translateText('Close')}"></button>
-                        </div>
-                        <div class="modal-body">
-                            <p>${translateText('Choose a health platform to connect:')}</p>
-                            <div id="platformOptions" class="d-grid gap-2">
-                                <button class="btn btn-outline-primary platform-btn" data-platform="${PLATFORMS.FITBIT}">
-                                    <i class="fas fa-heartbeat me-2"></i> Fitbit
-                                </button>
-                            </div>
-                            <div id="connectionStatus" class="alert mt-3 d-none"></div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                ${translateText('Cancel')}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        // Add modal to the DOM
-        const modalContainer = document.createElement('div');
-        modalContainer.innerHTML = modalHtml;
-        document.body.appendChild(modalContainer.firstElementChild);
-        
-        console.log('Modal element created, initializing bootstrap Modal');
-        
-        try {
-            // Initialize modal reference
-            syncModal = new bootstrap.Modal(document.getElementById('healthPlatformModal'), {
-                backdrop: true,
-                keyboard: true,
-                focus: true
-            });
-            
-            console.log('Bootstrap Modal initialized:', syncModal);
-            
-            // Initialize platform buttons
-            platformButtons = document.querySelectorAll('.platform-btn');
-            platformButtons.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const platform = this.getAttribute('data-platform');
-                    console.log('Platform button clicked:', platform);
-                    createHealthPlatformLink(patientId, platform);
-                });
-            });
-            
-            // Initialize connection status element
-            connectionStatusElem = document.getElementById('connectionStatus');
-        } catch (error) {
-            console.error('Error initializing Bootstrap Modal:', error);
-            alert('Error creating modal. Please try again later.');
-            return;
-        }
-    } else {
-        try {
-            syncModal = new bootstrap.Modal(document.getElementById('healthPlatformModal'));
-            console.log('Using existing modal element');
-        } catch (error) {
-            console.error('Error with existing modal:', error);
-            // Try to create a new one
-            document.getElementById('healthPlatformModal').remove();
-            createHealthPlatformModal(patientId);
-            return;
-        }
+    if (!healthPopup) {
+        console.error('Health platform popup not found in the DOM');
+        alert('Error showing connection options. Please refresh the page.');
+        return;
     }
     
-    console.log('Showing modal...');
+    // Clear any previous status messages
+    if (connectionStatusElem) {
+        connectionStatusElem.classList.add('d-none');
+    }
     
-    // Show the modal
-    try {
-        syncModal.show();
-    } catch (error) {
-        console.error('Error showing modal:', error);
-        alert('Error showing modal. Please refresh the page and try again.');
+    // Show the popup
+    healthPopup.classList.remove('d-none');
+    
+    console.log('Health platform popup is now visible');
+}
+
+/**
+ * Hide the health platform selection popup
+ */
+function hideHealthPlatformPopup() {
+    console.log('Hiding health platform popup');
+    
+    if (healthPopup) {
+        healthPopup.classList.add('d-none');
     }
 }
 
