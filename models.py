@@ -90,8 +90,9 @@ class Doctor(UserMixin, db.Model):
                               backref=db.backref('doctors', lazy='dynamic'),
                               lazy='dynamic')
     
-    # Notes created by this doctor
+    # Notes and observations created by this doctor
     notes = db.relationship('Note', backref='doctor', lazy='dynamic')
+    vital_observations = db.relationship('VitalObservation', backref='doctor', lazy='dynamic')
 
     def set_password(self, password):
         # Set the doctor's password hash
@@ -208,6 +209,7 @@ class Patient(db.Model):
     # Relationships
     vital_signs = db.relationship('VitalSign', backref='patient', lazy='dynamic')
     notes = db.relationship('Note', backref='patient', lazy='dynamic')
+    vital_observations = db.relationship('VitalObservation', backref='patient', lazy='dynamic')
     
     def to_dict(self):
         # Convert the object to a serializable dictionary
@@ -323,6 +325,47 @@ class Note(db.Model):
             'patient_id': self.patient_id,
             'doctor_id': self.doctor_id,
             'content': self.content,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+        }
+        
+class VitalObservation(db.Model):
+    # Model representing observations for vital sign data over specific time periods
+    #
+    # Attributes:
+    #   id: Unique identifier of the observation
+    #   patient_id: ID of the patient to whom the observation belongs
+    #   doctor_id: ID of the doctor who created the observation
+    #   vital_type: Type of vital sign (heart_rate, steps, etc.)
+    #   content: Textual content of the observation
+    #   start_date: Start date of the observation period
+    #   end_date: End date of the observation period
+    #   created_at: Observation creation date
+    #   updated_at: Observation last update date
+    __tablename__ = 'vital_observation'
+    id = db.Column(db.Integer, primary_key=True)
+    patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=False)
+    doctor_id = db.Column(db.Integer, db.ForeignKey('doctor.id'), nullable=False)
+    vital_type = db.Column(db.Enum(VitalSignType), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    start_date = db.Column(db.DateTime, nullable=False)
+    end_date = db.Column(db.DateTime, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def to_dict(self):
+        # Convert the object to a serializable dictionary
+        #
+        # Returns:
+        #   dict: Dictionary representation of the object
+        return {
+            'id': self.id,
+            'patient_id': self.patient_id,
+            'doctor_id': self.doctor_id,
+            'vital_type': self.vital_type.value,
+            'content': self.content,
+            'start_date': self.start_date.isoformat() if self.start_date else None,
+            'end_date': self.end_date.isoformat() if self.end_date else None,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }
