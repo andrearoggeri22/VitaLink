@@ -363,37 +363,13 @@ function executeDisconnection(patientId, platform) {
         console.log('Disconnect response:', data);
         
         if (data.success) {
-            // Update connection details UI if present
-            const connectionActive = document.getElementById('connectionActive');
-            const connectionInactive = document.getElementById('connectionInactive');
-            
-            if (connectionActive && connectionInactive) {
-                connectionActive.classList.add('d-none');
-                connectionInactive.classList.remove('d-none');
-            }
-            
-            // Update sync button if present
-            if (syncButton) {
-                syncButton.innerHTML = `<i class="fas fa-sync me-1"></i> ${translateText('Health Sync')}`;
-                syncButton.classList.remove('btn-danger');
-                syncButton.classList.add('btn-info');
-                syncButton.setAttribute('data-connected', 'false');
-                syncButton.removeAttribute('data-platform');
-                syncButton.disabled = false;
-            }
-            
-            // Clear any cached data
-            apiDataCache = {};
-            
-            // Refresh charts if present
-            const activeTab = document.querySelector('#vitalsChartTabs .nav-link.active');
-            if (activeTab) {
-                const dataType = activeTab.id.replace('tab-', '');
-                loadHealthPlatformData(dataType);
-            }
-            
-            // Show success notification
+            // Mostra notifica di successo
             showNotification(translateText('Successfully disconnected from health platform'), 'success');
+            
+            // Ricarica la pagina dopo un breve ritardo
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
         } else {
             // Re-enable buttons
             if (syncButton) syncButton.disabled = false;

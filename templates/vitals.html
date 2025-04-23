@@ -174,46 +174,30 @@
                 <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i> {{ _('Vital Signs Trends') }}</h5>
             </div>
             <div class="card-body">
-                <!-- I dati vengono caricati dinamicamente tramite API -->
+                <!-- Pulsanti per la selezione del periodo di tempo -->
+                <div class="mb-4">
+                    <div class="d-flex justify-content-center align-items-center">
+                        <span class="me-3 fw-bold">{{ _('Periodo:') }}</span>
+                        <div class="btn-group" role="group" aria-label="Periodo di tempo">
+                            <button type="button" class="btn btn-outline-primary period-btn" data-period="1">{{ _('1 Giorno') }}</button>
+                            <button type="button" class="btn btn-outline-primary period-btn" data-period="7">{{ _('7 Giorni') }}</button>
+                            <button type="button" class="btn btn-outline-primary period-btn" data-period="30">{{ _('1 Mese') }}</button>
+                            <button type="button" class="btn btn-outline-primary period-btn" data-period="90">{{ _('3 Mesi') }}</button>
+                            <button type="button" class="btn btn-outline-primary period-btn" data-period="365">{{ _('1 Anno') }}</button>
+                        </div>
+                    </div>
+                </div>
                 
                 <!-- Tabs for different vital sign types -->
                 <ul class="nav nav-tabs" id="vitalsChartTabs" role="tablist">
-                    {% for type in vitals_by_type %}
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link {% if loop.first %}active{% endif %}" 
-                                id="tab-{{ type }}" data-bs-toggle="tab" 
-                                data-bs-target="#chart-tab-{{ type }}" type="button" 
-                                role="tab" aria-controls="chart-tab-{{ type }}" 
-                                aria-selected="{% if loop.first %}true{% else %}false{% endif %}">
-                            {{ type|replace('_', ' ')|title }}
-                        </button>
-                    </li>
-                    {% endfor %}
+                    <!-- Verranno popolati dinamicamente con i dati disponibili dalla piattaforma collegata -->
                 </ul>
                 
                 <div class="tab-content" id="vitalsChartTabContent">
-                    {% for type in vitals_by_type %}
-                    <div class="tab-pane fade {% if loop.first %}show active{% endif %}" 
-                         id="chart-tab-{{ type }}" role="tabpanel" 
-                         aria-labelledby="tab-{{ type }}">
-                        
-                        <div class="vitals-chart-container">
-                            <canvas id="chart-{{ type }}"></canvas>
-                            <div class="text-end mt-2">
-                                <a href="{{ url_for('views.generate_vital_report', patient_id=patient.id, vital_type=type) }}" 
-                                   class="btn btn-sm btn-outline-info" target="_blank">
-                                    <i class="fas fa-file-pdf me-1"></i> {{ _('Generate') }} {{ type|replace('_', ' ')|title }} {{ _('Report') }}
-                                </a>
-                            </div>
-                        </div>
+                    <!-- Le tab verranno popolate dinamicamente -->
+                    <div class="text-center py-5" id="noDataMessage">
+                        <p class="text-muted mb-0">{{ _('Collegati ad una piattaforma di salute per visualizzare i dati.') }}</p>
                     </div>
-                    {% endfor %}
-                    
-                    {% if not vitals_by_type %}
-                    <div class="text-center py-5">
-                        <p class="text-muted mb-0">{{ _('No vital signs data available for visualization') }}</p>
-                    </div>
-                    {% endif %}
                 </div>
             </div>
         </div>
@@ -227,7 +211,7 @@
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover mb-0">
+            <table class="table table-hover mb-0" id="vitalsDataTable">
                 <thead>
                     <tr>
                         <th>{{ _('Type') }}</th>
@@ -237,34 +221,12 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% if vitals %}
-                        {% for vital in vitals %}
-                        <tr>
-                            <td>
-                                <span class="badge bg-info text-dark">
-                                    {{ vital.type.value|replace('_', ' ')|title }}
-                                </span>
-                            </td>
-                            <td>
-                                {{ vital.value }} {% if vital.unit %}{{ vital.unit }}{% endif %}
-                            </td>
-                            <td>{{ vital.recorded_at|format_datetime('%Y-%m-%d %H:%M') }}</td>
-                            <td>
-                                {% if vital.origin.value == 'manual' %}
-                                <span class="badge bg-secondary">{{ _('Manual') }}</span>
-                                {% else %}
-                                <span class="badge bg-primary">{{ _('Device') }}</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    {% else %}
-                        <tr>
-                            <td colspan="4" class="text-center py-3">
-                                <p class="text-muted mb-0">{{ _('No vital signs data found') }}</p>
-                            </td>
-                        </tr>
-                    {% endif %}
+                    <!-- I dati verranno caricati dinamicamente -->
+                    <tr id="noVitalsDataRow">
+                        <td colspan="4" class="text-center py-3">
+                            <p class="text-muted mb-0" id="vitalsTableMessage">{{ _('Caricamento dati...') }}</p>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -273,6 +235,9 @@
 {% endblock %}
 
 {% block scripts %}
+<!-- Chart.js per i grafici -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 <script src="{{ url_for('static', filename='js/vitals.js') }}"></script>
 <script src="{{ url_for('static', filename='js/health_platforms.js') }}"></script>
+<script src="{{ url_for('static', filename='js/vitals_charts.js') }}"></script>
 {% endblock %}
