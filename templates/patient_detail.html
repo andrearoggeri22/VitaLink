@@ -260,9 +260,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .finally(() => {
             noteIdToDelete = null;
         });
-    });
-
-    // Funzione per mostrare alert
+    });    // Funzione per mostrare alert
     function showAlert(type, message) {
         const alertDiv = document.createElement('div');
         alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
@@ -272,9 +270,16 @@ document.addEventListener('DOMContentLoaded', function() {
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         `;
         
-        // Inserisci l'alert all'inizio della pagina
-        const container = document.querySelector('.container');
-        container.insertBefore(alertDiv, container.firstChild);
+        // Inserisci l'alert nella stessa posizione dei flash messages di Flask (all'inizio del main container)
+        const mainContainer = document.querySelector('main.container');
+        // Controlliamo se esiste già un alert, in tal caso inseriamo prima di esso,
+        // altrimenti inseriamo prima del primo elemento nel main container
+        const existingAlert = mainContainer.querySelector('.alert');
+        if (existingAlert) {
+            mainContainer.insertBefore(alertDiv, existingAlert);
+        } else {
+            mainContainer.insertBefore(alertDiv, mainContainer.firstChild);
+        }
         
         // Nascondi automaticamente dopo 5 secondi
         setTimeout(() => {
