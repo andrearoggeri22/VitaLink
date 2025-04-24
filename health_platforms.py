@@ -297,19 +297,25 @@ def get_fitbit_data(patient, data_type, start_date=None, end_date=None):
         base_endpoint = endpoint_config.get('base_endpoint', endpoint_config['endpoint'])
         period = endpoint_config.get('period', '1d')  # periodo predefinito di 1 giorno
         detail_level = endpoint_config.get('detail_level', '')  # livello di dettaglio
-        
-        # Diversi tipi di dati hanno diverse strutture di endpoint
+          # Diversi tipi di dati hanno diverse strutture di endpoint
         if data_type == 'heart_rate':
-            endpoint = f"/1/user/-/activities/heart/date/{start_date}/{end_date}/{detail_level or '1min'}.json"
+            # Per la frequenza cardiaca, l'API richiede un endpoint specifico con periodo di 1 giorno
+            # Se abbiamo più giorni, dobbiamo richiedere un giorno specifico invece di un intervallo
+            # Usiamo l'ultimo giorno dell'intervallo per avere dati più recenti
+            detail_level = endpoint_config.get('detail_level', '1min')
+            endpoint = f"{endpoint_config.get('base_endpoint', '/1/user/-/activities/heart/date')}/{end_date}/1d/{detail_level}.json"
         elif data_type == 'sleep_duration':
             # Per sonno, usiamo un endpoint diverso che accetta un intervallo di date
-            endpoint = f"/1.2/user/-/sleep/date/{start_date}/{end_date}.json"
+            endpoint = f"/1.2/user/-/sleep/date/{start_date}/{end_date}.json"        
         elif data_type == 'weight':
             # Per peso, usiamo un endpoint specifico
             endpoint = f"/1/user/-/body/weight/date/{start_date}/{end_date}.json"
         elif data_type == 'active_minutes':
             # Per minuti attivi, usiamo l'endpoint minutesVeryActive
             endpoint = f"/1/user/-/activities/minutesVeryActive/date/{start_date}/{end_date}.json"
+        elif data_type == 'floors_climbed':
+            # Per i piani saliti, usiamo l'endpoint floors
+            endpoint = f"/1/user/-/activities/floors/date/{start_date}/{end_date}.json"
         else:
             # Per altri tipi di dati (passi, calorie, ecc.)
             endpoint = f"/1/user/-/activities/{data_type.replace('_', '')}/date/{start_date}/{end_date}.json"
@@ -355,9 +361,61 @@ def process_fitbit_data(data, data_type):
     value_key = endpoint_config['value_key']
     timestamp_key = endpoint_config['timestamp_key']
     unit = endpoint_config.get('unit', '')
-    transform = endpoint_config.get('transform', lambda x: x)  # Identity function if no transform
+    transform = endpoint_config.get('transform', lambda x: x)  # Identity function if no transform    # Handle heart rate data specially
+    if data_type == 'heart_rate' and 'activities-heart' in data:
+        # Stampiamo la risposta completa per debug
+        logger.info(f"Fitbit heart rate response: {json.dumps(data, indent=2)}")
+        
+        # Process intraday heart rate data
+        if 'activities-heart-intraday' in data and 'dataset' in data['activities-heart-intraday']:
+            dataset = data['activities-heart-intraday']['dataset']
+            date_info = data['activities-heart'][0]['dateTime'] if data['activities-heart'] else datetime.today().strftime('%Y-%m-%d')
+            
+            logger.info(f"Processing heart rate data: found {len(dataset)} readings for date {date_info}")
+            
+            # Se non ci sono letture nel dataset ma abbiamo un valore di frequenza cardiaca a riposo
+            # utilizziamo quel valore come fallback
+            results = []
+            if len(dataset) == 0 and 'activities-heart' in data and data['activities-heart']:
+                for heart_data in data['activities-heart']:
+                    if 'value' in heart_data and 'restingHeartRate' in heart_data['value']:
+                        resting_hr = heart_data['value']['restingHeartRate']
+                        date_str = heart_data['dateTime']
+                        logger.info(f"Using resting heart rate value: {resting_hr} for date {date_str}")
+                        
+                        # Utilizziamo mezzogiorno come orario predefinito
+                        results.append({
+                            'timestamp': f"{date_str} 12:00:00",
+                            'recorded_at': f"{date_str} 12:00:00",
+                            'value': float(resting_hr),
+                            'unit': unit,
+                            'note': 'Resting heart rate'  # Aggiungiamo una nota per indicare che è la frequenza cardiaca a riposo
+                        })
+            
+            # Processiamo comunque il dataset normale (anche se vuoto)
+            for item in dataset:
+                if value_key in item and timestamp_key in item:
+                    try:
+                        value = float(item[value_key])
+                        time_str = item[timestamp_key]
+                        # Combine date and time for a complete timestamp
+                        timestamp = f"{date_info} {time_str}"
+                        
+                        # Creiamo un formato compatibile con il frontend
+                        # La pagina vitals si aspetta 'recorded_at' invece di 'timestamp'
+                        results.append({
+                            'timestamp': timestamp,
+                            'recorded_at': timestamp,  # Aggiungiamo questo campo per compatibilità
+                            'value': value,
+                            'unit': unit
+                        })
+                    except (ValueError, TypeError) as e:
+                        logger.error(f"Error processing Fitbit heart rate value: {str(e)}")
+            
+            logger.info(f"Processed {len(results)} heart rate readings successfully")
+            return results
     
-    # Extract the data using the response key
+    # For other data types, extract using the response key path
     data_path = response_key.split('.')
     current_data = data
     

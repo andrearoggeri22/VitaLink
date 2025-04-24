@@ -98,8 +98,7 @@ function initVitalsCharts() {
                 throw new Error('Network response was not ok');
             }
             return response.json();
-        })
-        .then(vitalsData => {
+        })        .then(vitalsData => {
             // Create charts for each vital sign type
             for (const [type, values] of Object.entries(vitalsData)) {
                 if (!values || values.length === 0) continue;
@@ -111,7 +110,7 @@ function initVitalsCharts() {
                 if (!canvas) continue;
                 
                 // Prepare data for the chart
-                const labels = values.map(v => new Date(v.recorded_at));
+                const labels = values.map(v => new Date(v.recorded_at || v.timestamp));
                 const data = values.map(v => v.value);
                 const unit = values[0].unit || '';
                 
@@ -188,11 +187,39 @@ function initVitalsCharts() {
 }
 
 /**
+ * Display a message when no data is available for a chart
+ * 
+ * @param {HTMLCanvasElement} canvas - The canvas element where the chart would be displayed
+ * @param {string} message - The message to display
+ */
+function displayNoDataMessage(canvas, message) {
+    // Rimuovi qualsiasi grafico esistente
+    if (Chart.getChart(canvas)) {
+        Chart.getChart(canvas).destroy();
+    }
+    
+    // Ottieni il container del canvas
+    const container = canvas.parentElement;
+    
+    // Crea un elemento di messaggio
+    const messageElement = document.createElement('div');
+    messageElement.className = 'no-data-message';
+    messageElement.textContent = message;
+    messageElement.style.textAlign = 'center';
+    messageElement.style.padding = '20px';
+    messageElement.style.color = '#666';
+    messageElement.style.fontStyle = 'italic';
+    
+    // Nascondi il canvas e aggiungi il messaggio
+    canvas.style.display = 'none';
+    container.appendChild(messageElement);
+}
+
+/**
  * Initialize filter functionality for vital signs
  */
 function initVitalsFilter() {
     const filterForm = document.getElementById('vitalsFilterForm');
-    
     if (filterForm) {
         // Set max date for date inputs to today
         const startDateInput = document.getElementById('startDate');

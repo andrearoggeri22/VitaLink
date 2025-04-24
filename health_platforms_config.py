@@ -27,10 +27,12 @@ FITBIT_CONFIG = {
 }
 
 # Mapping of Fitbit endpoints to VitalSignType
-FITBIT_ENDPOINTS = {
-    'heart_rate': {
+FITBIT_ENDPOINTS = {    'heart_rate': {
         'endpoint': '/1/user/-/activities/heart/date/today/1d/1min.json',
-        'response_key': 'activities-heart-intraday.dataset',
+        'base_endpoint': '/1/user/-/activities/heart/date',
+        'detail_level': '1min',
+        'response_key': 'activities-heart-intraday',
+        'dataset_key': 'dataset',
         'value_key': 'value',
         'timestamp_key': 'time',
         'timestamp_format': '%H:%M:%S',
