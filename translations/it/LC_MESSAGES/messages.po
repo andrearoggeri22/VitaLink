@@ -1,15 +1,15 @@
-# Italian translations for VitaLink.
-# Copyright (C) 2025 andrearoggeri22
-# This file is distributed under the same license as the VitaLink project.
-# FIRST AUTHOR <andrearoggeri22@gmail.com>, 2025.
+# Italian translations for PROJECT.
+# Copyright (C) 2025 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: 1.0.0.0\n"
-"Report-Msgid-Bugs-To: andrearoggeri22@gmail.com\n"
-"POT-Creation-Date: 2025-04-21 17:35+0000\n"
-"PO-Revision-Date: 2025-04-21 17:20+0000\n"
-"Last-Translator: Andrea Roggeri <andrearoggeri22@gmail.com>\n"
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2025-04-23 10:29+0200\n"
+"PO-Revision-Date: 2025-04-23 10:29+0200\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: it\n"
 "Language-Team: it <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
@@ -18,884 +18,836 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: templates/base.html:6 templates/dashboard.html:3 templates/login.html:3
-#: templates/register.html:3
-msgid "VitaLink"
-msgstr "VitaLink"
+msgid "Invalid UUID format"
+msgstr "Formato UUID non valido"
 
-#: templates/base.html:30 templates/login.html:12
-msgid "VitaLink"
-msgstr "VitaLink"
+msgid "Patient not found"
+msgstr "Paziente non trovato"
 
-#: templates/base.html:44 templates/dashboard.html:3 templates/dashboard.html:7
-msgid "Dashboard"
-msgstr "Pannello di Controllo"
+msgid "You are not authorized to access this patient"
+msgstr "Non è autorizzato ad accedere a questo paziente"
 
-#: templates/base.html:50 templates/dashboard.html:16
-msgid "Patients"
-msgstr "Pazienti"
+msgid "Missing JSON in request"
+msgstr "JSON mancante nella richiesta"
 
-#: templates/base.html:56 templates/dashboard.html:62
-msgid "Audit Logs"
-msgstr "Registro Attività"
+msgid "Missing required field: {field}"
+msgstr "Campo obbligatorio mancante: {campo}"
 
-#: templates/base.html:71
-msgid "Language"
-msgstr "Lingua"
+msgid "Invalid vital sign type. Must be one of: %(types)s"
+msgstr "Tipo di parametro vitale non valido. Deve essere uno dei seguenti: %(types)s"
 
-#: templates/base.html:94
-msgid "Profile"
-msgstr "Profilo"
+msgid "Value must be a number"
+msgstr "Il valore deve essere un numero"
 
-#: templates/base.html:100
-msgid "Logout"
-msgstr "Disconnetti"
+msgid "Invalid date format. Use ISO format (YYYY-MM-DDTHH:MM:SS)"
+msgstr "Formato della data non valido. Utilizzare il formato ISO (YYYY-MM-DDTHH:MM:SS)."
 
-#: templates/base.html:132
-msgid "VitaLink. All rights reserved."
-msgstr "VitaLink. Tutti i diritti riservati."
+msgid "Vital sign recorded successfully"
+msgstr "Parametri vitali registrati con successo"
 
-#: templates/dashboard.html:18
-msgid "Total patients under your care"
-msgstr "Pazienti totali in cura"
+msgid "Patient has no contact number for notifications"
+msgstr "Il paziente non ha un numero di telefono per le notifiche"
 
-#: templates/dashboard.html:27
-msgid "View all patients"
-msgstr "Visualizza tutti i pazienti"
+msgid "An error occurred while recording the vital sign"
+msgstr "Si è verificato un errore durante la registrazione dei parametri vitali"
 
-#: templates/dashboard.html:38
-msgid "Quick Actions"
-msgstr "Azioni Rapide"
+msgid "Note content cannot be empty"
+msgstr "Il contenuto della nota non può essere vuoto"
 
-#: templates/dashboard.html:39
-msgid "Manage your patients and vital signs"
-msgstr "Gestisci i tuoi pazienti e segni vitali"
+msgid "Note added successfully"
+msgstr "Nota aggiunta con successo"
 
-#: templates/dashboard.html:48
-msgid "New Patient"
-msgstr "Nuovo Paziente"
+msgid "An error occurred while adding the note"
+msgstr "Si è verificato un errore durante l'aggiunta della nota"
 
-#: templates/dashboard.html:51
-msgid "Search Patients"
-msgstr "Cerca Pazienti"
-
-#: templates/dashboard.html:63
-msgid "Monitor changes and actions in the system"
-msgstr "Monitora modifiche e azioni nel sistema"
-
-#: templates/dashboard.html:72
-msgid "View activity logs"
-msgstr "Visualizza log attività"
-
-#: templates/dashboard.html:83
-msgid "System Status"
-msgstr "Stato del Sistema"
-
-#: templates/dashboard.html:84
-msgid "Active"
-msgstr "Attivo"
-
-#: templates/dashboard.html:85
-msgid "All systems operational"
-msgstr "Tutti i sistemi operativi"
-
-#: templates/dashboard.html:94
-msgid "Last updated"
-msgstr "Ultimo aggiornamento"
-
-#: templates/dashboard.html:107
-msgid "Recent Patients"
-msgstr "Pazienti Recenti"
-
-#: templates/dashboard.html:110
-msgid "View All"
-msgstr "Visualizza Tutti"
-
-#: templates/dashboard.html:118
-msgid "Name"
-msgstr "Nome"
-
-#: templates/dashboard.html:119
-msgid "ID"
-msgstr "ID"
-
-#: templates/dashboard.html:120
-msgid "Added"
-msgstr "Aggiunto"
-
-#: templates/dashboard.html:121
-msgid "Actions"
-msgstr "Azioni"
-
-#: templates/dashboard.html:142
-msgid "No patients added yet"
-msgstr "Nessun paziente aggiunto"
-
-#: templates/patients.html:43 templates/patients.html:109 templates/patients.html:169
-msgid "Date of Birth"
-msgstr "Data di Nascita"
-
-#: templates/patients.html:160
-msgid "Search by name or ID..."
-msgstr "Cerca per nome o ID..."
-
-#: templates/patients.html:151 templates/patients.html:152 templates/patients.html:212
-msgid "Add New Patient"
-msgstr "Aggiungi Nuovo Paziente"
-
-#: templates/patients.html:185
-msgid "View Patient"
-msgstr "Visualizza Paziente"
-
-#: templates/patients.html:189
-msgid "View Vitals"
-msgstr "Visualizza Parametri Vitali"
-
-#: templates/patients.html:193
-msgid "Edit Patient"
-msgstr "Modifica Paziente"
-
-#: templates/patients.html:198 templates/patients.html:232
-msgid "Delete Patient"
-msgstr "Elimina Paziente"
-
-#: templates/patients.html:233
-msgid "Are you sure you want to delete the patient {name}? This action cannot be undone."
-msgstr "Sei sicuro di voler eliminare il paziente {name}? Questa azione non può essere annullata."
-
-#: templates/patients.html:234 templates/patients.html:235
-msgid "Confirm"
-msgstr "Conferma"
-
-#: templates/patients.html:235
-msgid "Cancel"
-msgstr "Annulla"
-
-#: templates/dashboard.html:158
-msgid "Recent Vital Signs"
-msgstr "Segni Vitali Recenti"
-
-#: templates/patient_detail.html:14
-msgid "DOB"
-msgstr "Data di nascita"
-
-#: templates/patient_detail.html:15
-msgid "Age"
-msgstr "Età"
-
-#: templates/dashboard.html:166
-msgid "Patient"
-msgstr "Paziente"
-
-#: templates/dashboard.html:167
-msgid "Type"
-msgstr "Tipo"
-
-#: templates/dashboard.html:168
-msgid "Value"
-msgstr "Valore"
-
-#: templates/dashboard.html:169
-msgid "Time"
-msgstr "Ora"
-
-#: templates/dashboard.html:196
-msgid "No vital signs recorded yet"
-msgstr "Nessun segno vitale registrato"
-
-#: templates/login.html:3 templates/login.html:49
-msgid "Login"
-msgstr "Accedi"
-
-#: templates/login.html:13
-msgid "Please login to access the platform"
-msgstr "Accedi per utilizzare la piattaforma"
-
-#: templates/login.html:30 templates/register.html:29
-msgid "Email address"
-msgstr "Email"
-
-#: templates/login.html:39 templates/register.html:51
-msgid "Password"
-msgstr "Password"
-
-#: templates/patients.html:115 templates/patients.html:50
-msgid "Gender"
-msgstr "Genere"
-
-#: templates/patients.html:117 templates/patients.html:51
-msgid "Select gender"
-msgstr "Seleziona genere"
-
-#: templates/patients.html:118 templates/patients.html:52
-msgid "Male"
-msgstr "Maschio"
-
-#: templates/patients.html:119 templates/patients.html:53
-msgid "Female"
-msgstr "Femmina"
-
-#: templates/patients.html:120 templates/patients.html:54
-msgid "Other"
-msgstr "Altro"
-
-#: templates/patients.html:121 templates/patients.html:55
-msgid "Prefer not to say"
-msgstr "Preferisco non specificare"
-
-#: templates/patients.html:128 templates/patients.html:62
-msgid "Contact Number"
-msgstr "Numero di Contatto"
-
-#: templates/patients.html:141
-msgid "Update Patient"
-msgstr "Aggiorna Paziente"
-
-#: templates/patients.html:75
-msgid "Save Patient"
-msgstr "Salva Paziente"
-
-#: templates/patient_detail.html:206
-msgid "Delete Patient"
-msgstr "Elimina Paziente"
-
-#: templates/patient_detail.html:207
-msgid "Are you sure you want to delete the patient {name}? This action cannot be undone."
-msgstr "Sei sicuro di voler eliminare il paziente {name}? Questa azione non può essere annullata."
-
-#: templates/patient_detail.html:205
-msgid "Add Note for {name}"
-msgstr "Aggiungi Nota per {name}"
-
-#: templates/profile.html:3
-msgid "Profile"
-msgstr "Profilo"
-
-#: templates/profile.html:8
-msgid "Your Profile"
-msgstr "Il Tuo Profilo"
-
-#: templates/profile.html:12
-msgid "Account Information"
-msgstr "Informazioni Account"
-
-#: templates/profile.html:32
-msgid "Email Address"
-msgstr "Indirizzo Email"
-
-#: templates/profile.html:33
-msgid "You cannot change your email address"
-msgstr "Non puoi cambiare il tuo indirizzo email"
-
-#: templates/profile.html:37
-msgid "Specialty"
-msgstr "Specializzazione"
-
-#: templates/profile.html:44
-msgid "Update Profile"
-msgstr "Aggiorna Profilo"
-
-#: templates/profile.html:59
-msgid "Change Password"
-msgstr "Cambia Password"
-
-#: templates/profile.html:66
-msgid "Current Password"
-msgstr "Password Attuale"
-
-#: templates/profile.html:72
-msgid "New Password"
-msgstr "Nuova Password"
-
-#: templates/profile.html:79
-msgid "Confirm New Password"
-msgstr "Conferma Nuova Password"
-
-#: templates/profile.html:86
-msgid "Update Password"
-msgstr "Aggiorna Password"
-
-#: templates/login.html:57
-msgid "New doctor? Register here"
-msgstr "Nuovo medico? Registrati qui"
-
-#: templates/login.html:61
-msgid "This is a secure platform for healthcare professionals only."
-msgstr "Questa è una piattaforma sicura solo per professionisti sanitari."
-
-#: templates/login.html:62
-msgid "Unauthorized access is strictly prohibited."
-msgstr "L'accesso non autorizzato è severamente vietato."
-
-#: templates/register.html:3
-msgid "Register"
-msgstr "Registrati"
-
-#: templates/register.html:10
-msgid "Doctor Registration"
-msgstr "Registrazione Medico"
-
-#: templates/register.html:31
-msgid "We'll never share your email with anyone else."
-msgstr "Non condivideremo mai la tua email con nessun altro."
-
-#: templates/register.html:36
 msgid "First Name"
 msgstr "Nome"
 
-#: templates/register.html:40
 msgid "Last Name"
 msgstr "Cognome"
 
-#: templates/register.html:46
-msgid "Medical Specialty"
-msgstr "Specializzazione Medica"
+msgid "Specialty"
+msgstr "Specializzazione"
 
-#: templates/register.html:56
+msgid "Password"
+msgstr "Password"
+
+msgid "Password must be at least 8 characters long"
+msgstr "La password deve essere di almeno 8 caratteri"
+
 msgid "Confirm Password"
-msgstr "Conferma Password"
-
-#: templates/register.html:61
-msgid "Create Account"
-msgstr "Crea Account"
-
-#: templates/register.html:66
-msgid "Already have an account?"
-msgstr "Hai già un account?"
-
-#: templates/register.html:66
-msgid "Login here"
-msgstr "Accedi qui"
-
-#: templates/patient_detail.html:22
-msgid "Vital Signs"
-msgstr "Parametri Vitali"
-
-#: templates/patient_detail.html:25
-msgid "Generate Report"
-msgstr "Genera Rapporto"
-
-#: templates/patient_detail.html:28
-msgid "Edit"
-msgstr "Modifica"
-
-#: templates/patient_detail.html:32
-msgid "Delete"
-msgstr "Elimina"
-
-#: templates/patient_detail.html:45
-msgid "Patient Information"
-msgstr "Informazioni Paziente"
-
-#: templates/patient_detail.html:49
-msgid "Contact Information"
-msgstr "Informazioni di Contatto"
-
-#: templates/patient_detail.html:54
-msgid "No contact number"
-msgstr "Nessun numero di contatto"
-
-#: templates/patient_detail.html:60
-msgid "Address"
-msgstr "Indirizzo"
-
-#: templates/patient_detail.html:65
-msgid "No address provided"
-msgstr "Nessun indirizzo fornito"
-
-#: templates/patient_detail.html:71
-msgid "Registration Information"
-msgstr "Informazioni di Registrazione"
-
-#: templates/patient_detail.html:73
-msgid "Added on"
-msgstr "Aggiunto il"
-
-#: templates/patient_detail.html:74
-msgid "Last updated"
-msgstr "Ultimo aggiornamento"
-
-#: templates/patient_detail.html:85
-msgid "Recent Vital Signs"
-msgstr "Parametri Vitali Recenti"
-
-#: templates/patient_detail.html:87
-msgid "View All"
-msgstr "Visualizza Tutti"
-
-#: templates/patient_detail.html:95
-msgid "Type"
-msgstr "Tipo"
-
-#: templates/patient_detail.html:96
-msgid "Value"
-msgstr "Valore"
-
-#: templates/patient_detail.html:97
-msgid "Date & Time"
-msgstr "Data e Ora"
-
-#: templates/patient_detail.html:98
-msgid "Source"
-msgstr "Fonte"
-
-#: templates/patient_detail.html:116
-msgid "Manual"
-msgstr "Manuale"
-
-#: templates/patient_detail.html:118
-msgid "Device"
-msgstr "Dispositivo"
-
-#: templates/patient_detail.html:126
-msgid "No vital signs recorded yet"
-msgstr "Nessun parametro vitale registrato"
-
-#: templates/patient_detail.html:128
-msgid "Add Vital Signs"
-msgstr "Aggiungi Parametri Vitali"
-
-#: templates/patient_detail.html:144
-msgid "Medical Notes"
-msgstr "Note Mediche"
-
-#: templates/patient_detail.html:147
-msgid "Add Note"
-msgstr "Aggiungi Nota"
-
-#: templates/patient_detail.html:165
-msgid "No notes have been added yet"
-msgstr "Nessuna nota è stata ancora aggiunta"
-
-#: templates/patient_detail.html:168
-msgid "Add First Note"
-msgstr "Aggiungi Prima Nota"
-
-#: templates/patient_detail.html:180
-msgid "Add Note"
-msgstr "Aggiungi Nota"
-
-#: templates/patient_detail.html:187
-msgid "Note Content"
-msgstr "Contenuto Nota"
-
-#: templates/patient_detail.html:189
-msgid "Enter your medical observations, treatment plans, or other relevant information."
-msgstr "Inserisci le tue osservazioni mediche, piani di trattamento o altre informazioni rilevanti."
-
-#: templates/patient_detail.html:193
-msgid "Cancel"
-msgstr "Annulla"
-
-#: templates/patient_detail.html:194
-msgid "Save Note"
-msgstr "Salva Nota"
-
-#: templates/vitals.html:8
-msgid "Vital Signs"
-msgstr "Parametri Vitali"
-
-#: templates/vitals.html:15
-msgid "Back to Patient"
-msgstr "Torna al Paziente"
-
-#: templates/vitals.html:25
-msgid "Add Vital Sign"
-msgstr "Aggiungi Parametro Vitale"
-
-#: templates/vitals.html:30
-msgid "Type"
-msgstr "Tipo"
-
-#: templates/vitals.html:33
-msgid "Select type"
-msgstr "Seleziona tipo"
-
-#: templates/vitals.html:37
-msgid "Please select a vital sign type"
-msgstr "Seleziona un tipo di parametro vitale"
-
-#: templates/vitals.html:41
-msgid "Value"
-msgstr "Valore"
-
-#: templates/vitals.html:43
-msgid "Please enter a value"
-msgstr "Inserisci un valore"
-
-#: templates/vitals.html:47
-msgid "Unit"
-msgstr "Unità"
-
-#: templates/vitals.html:49
-msgid "Unit will be auto-filled based on the selected type"
-msgstr "L'unità sarà compilata automaticamente in base al tipo selezionato"
-
-#: templates/vitals.html:53
-msgid "Date & Time"
-msgstr "Data e Ora"
-
-#: templates/vitals.html:55
-msgid "If left empty, current date/time will be used"
-msgstr "Se lasciato vuoto, verrà utilizzata la data/ora corrente"
-
-#: templates/vitals.html:60
-msgid "Save Vital Sign"
-msgstr "Salva Parametro Vitale"
-
-#: templates/vitals.html:72
-msgid "Filter Vital Signs"
-msgstr "Filtra Parametri Vitali"
-
-#: templates/vitals.html:78
-msgid "Start Date"
-msgstr "Data di Inizio"
-
-#: templates/vitals.html:84
-msgid "End Date"
-msgstr "Data di Fine"
-
-#: templates/vitals.html:92
-msgid "All Types"
-msgstr "Tutti i Tipi"
-
-#: templates/vitals.html:104
-msgid "Complete Report"
-msgstr "Rapporto Completo"
-
-#: templates/vitals.html:108
-msgid "Clear Filters"
-msgstr "Cancella Filtri"
-
-#: templates/vitals.html:111
-msgid "Apply Filters"
-msgstr "Applica Filtri"
-
-#: templates/vitals.html:122
-msgid "Vital Signs Trends"
-msgstr "Tendenze Parametri Vitali"
-
-#: templates/vitals.html:154
-msgid "Generate"
-msgstr "Genera"
-
-#: templates/vitals.html:154
-msgid "Report"
-msgstr "Rapporto"
+msgstr "Conferma la password"
 
-#: templates/vitals.html:163
-msgid "No vital signs data available for visualization"
-msgstr "Nessun dato di parametri vitali disponibile per la visualizzazione"
+msgid "Passwords must match"
+msgstr "Le password devono corrispondere"
 
-#: templates/vitals.html:175
-msgid "Vital Signs History"
-msgstr "Storico Parametri Vitali"
+msgid "An account with this Email already exists"
+msgstr "Esiste già un account con questo indirizzo e-mail"
 
-#: templates/vitals.html:213
-msgid "No vital signs data found"
-msgstr "Nessun dato di parametri vitali trovato"
+msgid "Registration completed. Now you can access"
+msgstr "Registrazione completata. Ora è possibile accedere a"
 
-#: templates/vitals.html:27
-msgid "Fitbit Sync"
-msgstr "Sincronizza Fitbit"
+msgid "An error occurred. Please try again"
+msgstr "Si è verificato un errore. Si prega di riprovare"
 
-#: templates/fitbit_upload.html:3 templates/fitbit_upload.html:12 templates/fitbit_upload.html:23
-msgid "Upload Fitbit Data"
-msgstr "Carica Dati Fitbit"
+msgid "Please provide both email and password"
+msgstr "Si prega di fornire sia l'e-mail che la password"
 
-#: templates/fitbit_upload.html:25
-msgid "Instructions"
-msgstr "Istruzioni"
+msgid "Invalid email format"
+msgstr "Formato e-mail non valido"
 
-#: templates/fitbit_upload.html:26
-msgid "Connect your Fitbit device to your computer using a USB cable, then click the button below to upload the data."
-msgstr "Collega il tuo dispositivo Fitbit al computer usando un cavo USB, quindi clicca il pulsante qui sotto per caricare i dati."
+msgid "Invalid email or password"
+msgstr "Email o password non valide"
 
-#: templates/fitbit_upload.html:28
-msgid "The following data will be extracted and saved to the patient's record:"
-msgstr "I seguenti dati verranno estratti e salvati nella cartella del paziente:"
+msgid "You have been disconnected"
+msgstr "Siete stati disconnessi"
 
-#: templates/fitbit_upload.html:30
-msgid "Heart Rate"
-msgstr "Frequenza Cardiaca"
+msgid "Missing email or password"
+msgstr "Email o password mancanti"
 
-#: templates/fitbit_upload.html:31
-msgid "Steps"
-msgstr "Passi"
+msgid "Login successful"
+msgstr "Accesso riuscito"
 
-#: templates/fitbit_upload.html:32
-msgid "Calories Burned"
-msgstr "Calorie Bruciate"
+msgid "Doctor not found"
+msgstr "Medico non trovato"
 
-#: templates/fitbit_upload.html:33
-msgid "Distance"
-msgstr "Distanza"
+msgid "Authentication required"
+msgstr "È richiesta l'autenticazione"
 
-#: templates/fitbit_upload.html:34
-msgid "Active Minutes"
-msgstr "Minuti di Attività"
+msgid "Fitbit device connection check - simulation mode enabled"
+msgstr "Controllo della connessione del dispositivo Fitbit - modalità di simulazione attivata"
 
-#: templates/fitbit_upload.html:35
-msgid "Sleep Duration"
-msgstr "Durata del Sonno"
+msgid "No Fitbit device found in lsusb"
+msgstr "Nessun dispositivo Fitbit trovato in lsusb"
 
-#: templates/fitbit_upload.html:36
-msgid "Floors Climbed"
-msgstr "Piani Saliti"
+msgid "Unable to execute lsusb to find Fitbit devices"
+msgstr "Impossibile eseguire lsusb per trovare i dispositivi Fitbit"
 
-#: templates/fitbit_upload.html:42
-msgid "Device Connection Status"
-msgstr "Stato Connessione Dispositivo"
+msgid "Error during data extraction: %(error)s"
+msgstr "Errore durante l'estrazione dei dati: %(error)s"
 
-#: templates/fitbit_upload.html:45
-msgid "Checking for connected device..."
-msgstr "Verifica della connessione del dispositivo..."
+msgid "Unsupported data type: %(type)s"
+msgstr "Tipo di dati non supportato: %(type)s"
 
-#: templates/fitbit_upload.html:46
-msgid "Fitbit device connected"
-msgstr "Dispositivo Fitbit connesso"
+msgid "Error saving parameter %(type)s: %(error)s"
+msgstr "Errore nel salvataggio del parametro %(type)s: %(error)s"
 
-#: templates/fitbit_upload.html:47
-msgid "No Fitbit device detected"
-msgstr "Nessun dispositivo Fitbit rilevato"
+msgid "Database error: %(error)s"
+msgstr "Errore del database: %(error)"
 
-#: templates/fitbit_upload.html:54
-msgid "Upload Fitbit Data Now"
-msgstr "Carica Dati Fitbit Ora"
+msgid "Generic error: %(error)s"
+msgstr "Errore generico: %(error)s"
 
-#: templates/fitbit_upload.html:61
-msgid "Back to Vital Signs"
-msgstr "Torna ai Parametri Vitali"
+msgid "No Fitbit device connected. Connect the device via USB and try again."
+msgstr "Nessun dispositivo Fitbit collegato. Collegare il dispositivo via USB e riprovare."
 
-#: templates/fitbit_upload.html:76
-msgid "Uploading..."
-msgstr "Caricamento in corso..."
+msgid "Fitbit data successfully uploaded. %(count)s vital parameters saved."
+msgstr "Dati Fitbit caricati con successo. %(count)s parametri vitali salvati."
 
-#: notifications.py
-msgid "SMS notification not sent. Please check patient phone number format."
-msgstr "Notifica SMS non inviata. Verificare il formato del numero di telefono del paziente."
+msgid "Warning: %(msg)s"
+msgstr "Attenzione: %(msg)s"
 
-#: notifications.py
-msgid "SMS notification service temporarily unavailable."
-msgstr "Servizio di notifica SMS temporaneamente non disponibile."
+msgid "Error saving Fitbit data."
+msgstr "Errore nel salvataggio dei dati Fitbit."
 
-#: notifications.py
+msgid "Error during upload process: %(msg)s"
+msgstr "Errore durante il processo di caricamento: %(msg)s"
+
+msgid "Patient UUID required"
+msgstr "UUID del paziente richiesto"
+
+msgid "Invalid patient UUID"
+msgstr "UUID paziente non valido"
+
+msgid "Server error"
+msgstr "Errore del server"
+
+msgid "Data required"
+msgstr "Dati richiesti"
+
 msgid "SMS notification service not configured"
 msgstr "Servizio di notifica SMS non configurato"
 
-#: notifications.py
-msgid "Patient has no contact number"
-msgstr "Il paziente non ha un numero di contatto"
-
-#: notifications.py
 msgid "SMS sent successfully"
 msgstr "SMS inviato con successo"
 
-#: views.py
+msgid "SMS notification not sent. Please check patient phone number format."
+msgstr "La notifica via SMS non è stata inviata. Controllare il formato del numero di telefono del paziente."
+
+msgid "SMS notification service temporarily unavailable."
+msgstr "Servizio di notifica SMS temporaneamente non disponibile."
+
+msgid "Patient has no contact number"
+msgstr "Il paziente non ha un numero di telefono"
+
+msgid "The password must be at least 8 characters long"
+msgstr "La password deve essere lunga almeno 8 caratteri"
+
+msgid "The password must contain at least one uppercase letter"
+msgstr "La password deve contenere almeno una lettera maiuscola."
+
+msgid "The password must contain at least one lowercase letter"
+msgstr "La password deve contenere almeno una lettera minuscola."
+
+msgid "The password must contain at least one digit"
+msgstr "La password deve contenere almeno una cifra"
+
+msgid "The password must contain at least one special character"
+msgstr "La password deve contenere almeno un carattere speciale"
+
+msgid "The password is strong"
+msgstr "La password è forte"
+
+msgid "Invalid date format. Please use YYYY-MM-DD"
+msgstr "Formato della data non valido. Si prega di utilizzare YYYY-MM-DD"
+
+msgid "Name, surname and date of birth are mandatory fields"
+msgstr "Nome, cognome e data di nascita sono campi obbligatori."
+
+msgid "Invalid date format. Use YYYY-MM-DD"
+msgstr "Formato della data non valido. Utilizzare YYYY-MM-DD"
+
+msgid "An error occurred while creating the patient"
+msgstr "Si è verificato un errore durante la creazione del paziente"
+
+msgid "You are not authorized to view this patient."
+msgstr "Non siete autorizzati a vedere questo paziente."
+
+msgid "You are not authorized to modify this patient."
+msgstr "Non siete autorizzati a modificare questo paziente."
+
+msgid "Patient information updated successfully"
+msgstr "Informazioni sul paziente aggiornate con successo"
+
+msgid "An error occurred while updating the patient"
+msgstr "Si è verificato un errore durante l'aggiornamento del paziente"
+
+msgid "You are not authorized to delete this patient."
+msgstr "L'utente non è autorizzato a eliminare questo paziente."
+
+msgid "Patient successfully removed"
+msgstr "Paziente rimosso con successo"
+
+msgid "An error occurred while removing the patient"
+msgstr "Si è verificato un errore durante la rimozione del paziente"
+
+msgid "Nou are not authorized to view this patient"
+msgstr "Non sei autorizzato a visualizzare questo paziente"
+
+msgid "Vital parameter type and value are mandatory fields"
+msgstr "Il tipo di parametro vitale e il valore sono campi obbligatori"
+
+msgid "Invalid date/time format. Use YYYY-MM-DDTHH:MM"
+msgstr "Formato data/ora non valido. Utilizzare YYYY-MM-DDTHH:MM"
+
 msgid "Abnormal value detected"
 msgstr "Valore anomalo rilevato"
 
-#: views.py
 msgid "Patient notification sent"
-msgstr "Notifica al paziente inviata"
+msgstr "Invio della notifica al paziente"
 
-#: views.py
 msgid "Failed to send notification"
-msgstr "Impossibile inviare la notifica"
+msgstr "Invio di notifica non riuscito"
 
-#: views.py
 msgid "patient has no contact number for notifications"
-msgstr "il paziente non ha un numero di contatto per le notifiche"
+msgstr "il paziente non ha un numero di telefono per le notifiche"
 
-#: fitbit_integration.py
-msgid "Fitbit device connection check - simulation mode enabled"
-msgstr "Verifica connessione dispositivo Fitbit - modalità simulazione attivata"
+msgid "Invalid value format"
+msgstr "Formato del valore non valido"
 
-#: views.py
-msgid "Vital sign recorded successfully"
-msgstr "Parametro vitale registrato con successo"
+msgid "Invalid start date format. Use YYYY-MM-DD"
+msgstr "Formato della data di inizio non valido. Utilizzare AAAA-MM-GG"
 
-#: templates/audit_logs.html:10
+msgid "Invalid end date format. Use YYYY-MM-DD"
+msgstr "Formato della data di fine non valido. Utilizzare AAAA-MM-GG"
+
+msgid "Invalid vital sign type"
+msgstr "Tipo di parametro vitale non valido"
+
+msgid "You are not allowed to add notes for this patient"
+msgstr "Non è possibile aggiungere note per questo paziente."
+
+msgid "Profile updated successfully"
+msgstr "Profilo aggiornato con successo"
+
+msgid "The current password is incorrect"
+msgstr "La password corrente non è corretta"
+
+msgid "New passwords do not match"
+msgstr "Le nuove password non corrispondono"
+
+msgid "Password updated successfully"
+msgstr "Password aggiornata con successo"
+
+msgid "You are not authorized to generate reports for this patient"
+msgstr "Non si è autorizzati a generare rapporti per questo paziente."
+
+msgid "An error occurred while generating the report"
+msgstr "Si è verificato un errore durante la generazione del rapporto"
+
+msgid "You are not authorized to generate reports for this patient."
+msgstr "Non si è autorizzati a generare rapporti per questo paziente."
+
+msgid "From %(start_date)s"
+msgstr "Da %(start_date)s"
+
+msgid "%(period_desc)s to %(end_date)s"
+msgstr "Da %(period_desc)s a %(end_date)s"
+
+msgid "Until %(end_date)s"
+msgstr "Fino a %(end_date)s"
+
+msgid "No data available for the selected vital parameter and time period"
+msgstr "Nessun dato disponibile per il parametro vitale e il periodo di tempo selezionati"
+
+msgid "vital_%(vital_type)s"
+msgstr "vital_%(vital_type)s"
+
+msgid "Audit Logs"
+msgstr "Registri di controllo"
+
+msgid "VitaLink"
+msgstr "VitaLink"
+
 msgid "Back to Dashboard"
-msgstr "Torna al Pannello di Controllo"
+msgstr "Torna alla Dashboard"
 
-#: templates/audit_logs.html:18
 msgid "Filter Logs"
-msgstr "Filtra Log"
+msgstr "Filtrare i registri"
 
-#: templates/audit_logs.html:25
 msgid "Start Date"
 msgstr "Data di inizio"
 
-#: templates/audit_logs.html
 msgid "End Date"
 msgstr "Data di fine"
 
-#: templates/audit_logs.html
 msgid "Action Type"
 msgstr "Tipo di azione"
 
-#: templates/audit_logs.html
-msgid "Entity Type"
-msgstr "Tipo di entità"
-
-#: templates/audit_logs.html
 msgid "All Actions"
 msgstr "Tutte le azioni"
 
-#: templates/audit_logs.html
 msgid "Create"
 msgstr "Crea"
 
-#: templates/audit_logs.html
 msgid "Update"
-msgstr "Aggiorna"
+msgstr "Aggiornamento"
 
-#: templates/audit_logs.html
 msgid "Delete"
 msgstr "Elimina"
 
-#: templates/audit_logs.html
 msgid "View"
-msgstr "Visualizza"
+msgstr "Vista"
 
-#: templates/audit_logs.html
 msgid "Export"
-msgstr "Esporta"
+msgstr "Esportazione"
 
-#: templates/audit_logs.html
+msgid "Entity Type"
+msgstr "Tipo di entità"
+
 msgid "All Entities"
 msgstr "Tutte le entità"
 
-#: templates/audit_logs.html
 msgid "Patient"
 msgstr "Paziente"
 
-#: templates/audit_logs.html
 msgid "Vital Sign"
-msgstr "Parametro vitale"
+msgstr "Parametri vitali"
 
-#: templates/audit_logs.html
 msgid "Note"
 msgstr "Nota"
 
-#: templates/audit_logs.html
 msgid "Report"
 msgstr "Rapporto"
 
-#: templates/audit_logs.html
 msgid "Doctor"
-msgstr "Medico"
+msgstr "Il medico"
 
-#: templates/audit_logs.html
 msgid "All Doctors"
 msgstr "Tutti i medici"
 
-#: templates/audit_logs.html
 msgid "All Patients"
 msgstr "Tutti i pazienti"
 
-#: templates/audit_logs.html
 msgid "Clear Filters"
-msgstr "Cancella filtri"
+msgstr "Elimina i filtri"
 
-#: templates/audit_logs.html
 msgid "Apply Filters"
-msgstr "Applica filtri"
+msgstr "Applica i filtri"
 
-#: templates/audit_logs.html
 msgid "Audit History"
-msgstr "Cronologia audit"
+msgstr "Cronologia dell'audit"
 
-#: templates/audit_logs.html
+msgid "Records"
+msgstr "Registrazioni"
+
 msgid "Date & Time"
 msgstr "Data e ora"
 
-#: templates/audit_logs.html
 msgid "User"
 msgstr "Utente"
 
-#: templates/audit_logs.html
 msgid "Action"
 msgstr "Azione"
 
-#: templates/audit_logs.html
 msgid "Entity"
 msgstr "Entità"
 
-#: templates/audit_logs.html
 msgid "IP Address"
 msgstr "Indirizzo IP"
 
-#: templates/audit_logs.html
 msgid "Details"
 msgstr "Dettagli"
 
-#: templates/audit_logs.html
 msgid "View Details"
 msgstr "Visualizza dettagli"
 
-#: templates/audit_logs.html
 msgid "Audit Log Details"
-msgstr "Dettagli log di audit"
+msgstr "Dettagli del registro di audit"
 
-#: templates/audit_logs.html
 msgid "Timestamp"
-msgstr "Data e ora"
+msgstr "Timestamp"
 
-#: templates/audit_logs.html
-msgid "Close"
-msgstr "Chiudi"
-
-#: templates/audit_logs.html
-msgid "Actions by Type"
-msgstr "Azioni per tipo"
-
-#: templates/audit_logs.html
-msgid "Entities by Type"
-msgstr "Entità per tipo"
-
-#: templates/audit_logs.html
-msgid "Activity Timeline"
-msgstr "Cronologia attività"
-
-#: templates/audit_logs.html
-msgid "No audit logs found matching your criteria"
-msgstr "Nessun log di audit trovato corrispondente ai tuoi criteri"
-
-#: templates/audit_logs.html
-msgid "Records"
-msgstr "Record"
-
-#: templates/audit_logs.html
-msgid "Date & Time"
-msgstr "Data e ora"
-
-#: templates/audit_logs.html
-msgid "View Details"
-msgstr "Visualizza dettagli"
-
-#: templates/audit_logs.html
-msgid "Audit Log Details"
-msgstr "Dettagli log di audit"
-
-#: templates/audit_logs.html
 msgid "Entity ID"
 msgstr "ID entità"
 
-#: templates/audit_logs.html
+msgid "Close"
+msgstr "Chiudere"
+
+msgid "No audit logs found matching your criteria"
+msgstr "Non sono stati trovati registri di audit che corrispondono ai criteri richiesti"
+
 msgid "Actions by Type"
 msgstr "Azioni per tipo"
 
-#: templates/audit_logs.html
 msgid "Entities by Type"
 msgstr "Entità per tipo"
 
-#: templates/audit_logs.html
 msgid "Activity Timeline"
-msgstr "Cronologia attività"
+msgstr "Cronologia delle attività"
 
-#: templates/audit_logs.html
 msgid "Number of Actions"
 msgstr "Numero di azioni"
 
+msgid "Dashboard"
+msgstr "Dashboard"
+
+msgid "Patients"
+msgstr "Pazienti"
+
+msgid "Language"
+msgstr "Lingua"
+
+msgid "Profile"
+msgstr "Profilo"
+
+msgid "Logout"
+msgstr "Disconnessione"
+
+msgid "VitaLink. All rights reserved."
+msgstr "VitaLink. Tutti i diritti riservati."
+
+msgid "Healthcare Monitoring Platform"
+msgstr "Piattaforma di monitoraggio sanitario"
+
+msgid "Total patients under your care"
+msgstr "Totale pazienti in cura seguiti"
+
+msgid "View all patients"
+msgstr "Visualizza tutti i pazienti"
+
+msgid "Quick Actions"
+msgstr "Azioni rapide"
+
+msgid "Manage your patients and vital signs"
+msgstr "Gestire i pazienti e i parametri vitali"
+
+msgid "New Patient"
+msgstr "Nuovo paziente"
+
+msgid "Search Patients"
+msgstr "Ricerca pazienti"
+
+msgid "Monitor changes and actions in the system"
+msgstr "Monitorare le modifiche e le azioni nel sistema"
+
+msgid "View activity logs"
+msgstr "Visualizzare i registri delle attività"
+
+msgid "System Status"
+msgstr "Stato del sistema"
+
+msgid "Active"
+msgstr "Attivo"
+
+msgid "All systems operational"
+msgstr "Tutti i sistemi sono operativi"
+
+msgid "Last updated"
+msgstr "Ultimo aggiornamento"
+
+msgid "Recent Patients"
+msgstr "Pazienti recenti"
+
+msgid "View All"
+msgstr "Visualizza tutti"
+
+msgid "Name"
+msgstr "Nome"
+
+msgid "ID"
+msgstr "ID"
+
+msgid "Added"
+msgstr "Aggiunto"
+
+msgid "Actions"
+msgstr "Azioni"
+
+msgid "No patients added yet"
+msgstr "Nessun paziente aggiunto"
+
+msgid "Recent Vital Signs"
+msgstr "Parametri vitali recenti"
+
+msgid "Type"
+msgstr "Tipo"
+
+msgid "Value"
+msgstr "Valore"
+
+msgid "Time"
+msgstr "Tempo"
+
+msgid "No vital signs recorded yet"
+msgstr "Non sono ancora stati registrati i parametri vitali"
+
+msgid "Upload Fitbit Data"
+msgstr "Caricare i dati Fitbit"
+
+msgid "Instructions"
+msgstr "Istruzioni"
+
+msgid "Connect your Fitbit device to your computer using a USB cable, then click the button below to upload the data."
+msgstr "Collegare il dispositivo Fitbit al computer tramite un cavo USB, quindi fare clic sul pulsante sottostante per caricare i dati."
+
+msgid "The following data will be extracted and saved to the patient's record:"
+msgstr "I seguenti dati vengono estratti e salvati nella cartella clinica del paziente:"
+
+msgid "Heart Rate"
+msgstr "Frequenza cardiaca"
+
+msgid "Steps"
+msgstr "Passi"
+
+msgid "Calories Burned"
+msgstr "Calorie bruciate"
+
+msgid "Distance"
+msgstr "Distanza"
+
+msgid "Active Minutes"
+msgstr "Verbale attivo"
+
+msgid "Sleep Duration"
+msgstr "Durata del sonno"
+
+msgid "Floors Climbed"
+msgstr "Pavimenti scalati"
+
+msgid "Device Connection Status"
+msgstr "Stato della connessione del dispositivo"
+
+msgid "Checking for connected device..."
+msgstr "Controllo del dispositivo collegato..."
+
+msgid "Fitbit device connected"
+msgstr "Dispositivo Fitbit collegato"
+
+msgid "No Fitbit device detected"
+msgstr "Nessun dispositivo Fitbit rilevato"
+
+msgid "Upload Fitbit Data Now"
+msgstr "Caricare ora i dati Fitbit"
+
+msgid "Back to Vital Signs"
+msgstr "Torna a parametri vitali"
+
+msgid "Uploading..."
+msgstr "Caricamento..."
+
+msgid "Login"
+msgstr "Accedi"
+
+msgid "Healthcare Monitor"
+msgstr "Healthcare Monitor"
+
+msgid "Please login to access the platform"
+msgstr "Effettuare il login per accedere alla piattaforma"
+
+msgid "Email address"
+msgstr "Indirizzo e-mail"
+
+msgid "New doctor? Register here"
+msgstr "Nuovo medico? Registrati qui"
+
+msgid "This is a secure platform for healthcare professionals only."
+msgstr "Si tratta di una piattaforma sicura riservata agli operatori sanitari."
+
+msgid "Unauthorized access is strictly prohibited."
+msgstr "L'accesso non autorizzato è severamente vietato."
+
+msgid "DOB"
+msgstr "Data di nascita"
+
+msgid "Age"
+msgstr "Età"
+
+msgid "Vital Signs"
+msgstr "Parametri vitali"
+
+msgid "Generate Report"
+msgstr "Generare un rapporto"
+
+msgid "Edit"
+msgstr "Modifica"
+
+msgid "Patient Information"
+msgstr "Informazioni per il paziente"
+
+msgid "Contact Information"
+msgstr "Informazioni di contatto"
+
+msgid "No contact number"
+msgstr "Nessun numero di telefono"
+
+msgid "Address"
+msgstr "Indirizzo"
+
+msgid "No address provided"
+msgstr "Non è stato fornito alcun indirizzo"
+
+msgid "Registration Information"
+msgstr "Informazioni sulla registrazione"
+
+msgid "Added on"
+msgstr "Aggiunto il"
+
+msgid "Source"
+msgstr "Fonte"
+
+msgid "Manual"
+msgstr "Manuale"
+
+msgid "Device"
+msgstr "Dispositivo"
+
+msgid "Add Vital Signs"
+msgstr "Aggiungi i parametri vitali"
+
+msgid "Medical Notes"
+msgstr "Note mediche"
+
+msgid "Add Note"
+msgstr "Aggiungi nota"
+
+msgid "No notes have been added yet"
+msgstr "Non sono state ancora aggiunte note"
+
+msgid "Add First Note"
+msgstr "Aggiungi la prima nota"
+
+msgid "Note Content"
+msgstr "Nota Contenuto"
+
+msgid "Enter your medical observations, treatment plans, or other relevant information."
+msgstr "Inserire le osservazioni mediche, i piani di trattamento o altre informazioni rilevanti."
+
+msgid "Cancel"
+msgstr "Annulla"
+
+msgid "Save Note"
+msgstr "Salva nota"
+
+msgid "Delete Patient"
+msgstr "Eliminare il paziente"
+
+msgid "Add New Patient"
+msgstr "Aggiungi un nuovo paziente"
+
+msgid "Edit Patient"
+msgstr "Modifica del paziente"
+
+msgid "Back to Patients"
+msgstr "Torna ai pazienti"
+
+msgid "Name is mandatory"
+msgstr "Il nome è obbligatorio"
+
+msgid "Surname"
+msgstr "Cognome"
+
+msgid "Surname is mandatory"
+msgstr "Il cognome è obbligatorio"
+
+msgid "Date of birth"
+msgstr "Data di nascita"
+
+msgid "Date of birth is mandatory"
+msgstr "La data di nascita è obbligatoria"
+
+msgid "Gender"
+msgstr "Genere"
+
+msgid "Select gender"
+msgstr "Selezionare il genere"
+
+msgid "Male"
+msgstr "Uomo"
+
+msgid "Female"
+msgstr "Donna"
+
+msgid "Other"
+msgstr "Altro"
+
+msgid "Prefer not to say"
+msgstr "Preferisco non dirlo"
+
+msgid "Contact Number"
+msgstr "Numero di telefono"
+
+msgid "Save Patient"
+msgstr "Salva il paziente"
+
+msgid "Back to Patient"
+msgstr "Torna al paziente"
+
+msgid "Phone Number"
+msgstr "Numero di telefono"
+
+msgid "Update Patient"
+msgstr "Aggiornamento paziente"
+
+msgid "Add new Patient"
+msgstr "Aggiungi un nuovo paziente"
+
+msgid "Search by name or ID..."
+msgstr "Ricerca per nome o ID..."
+
+msgid "Date of Birth"
+msgstr "Data di nascita"
+
+msgid "View Patient"
+msgstr "Visualizza il paziente"
+
+msgid "View Vitals"
+msgstr "Visualizza i dati vitali"
+
+msgid "No patient found"
+msgstr "Nessun paziente trovato"
+
+msgid "No patients match your search"
+msgstr "Nessun paziente corrisponde alla ricerca"
+
+msgid "Your Profile"
+msgstr "Il vostro profilo"
+
+msgid "Account Information"
+msgstr "Informazioni sul conto"
+
+msgid "Email Address"
+msgstr "Indirizzo e-mail"
+
+msgid "You cannot change your email address"
+msgstr "Non è possibile modificare il proprio indirizzo e-mail"
+
+msgid "Update Profile"
+msgstr "Aggiornamento del profilo"
+
+msgid "Change Password"
+msgstr "Modifica della password"
+
+msgid "Current Password"
+msgstr "Password corrente"
+
+msgid "New Password"
+msgstr "Nuova password"
+
+msgid "Password must be at least 8 characters"
+msgstr "La password deve essere di almeno 8 caratteri"
+
+msgid "Confirm New Password"
+msgstr "Conferma la nuova password"
+
+msgid "Register"
+msgstr "Registro"
+
+msgid "Doctor Registration"
+msgstr "Registrazione del medico"
+
+msgid "We'll never share your email with anyone else."
+msgstr "Non condivideremo mai il vostro indirizzo e-mail con nessun altro."
+
+msgid "Medical Specialty"
+msgstr "Specializzazione medica"
+
+msgid "Create Account"
+msgstr "Crea Account"
+
+msgid "Already have an account?"
+msgstr "Hai già un account?"
+
+msgid "Login here"
+msgstr "Accedi qui"
+
+msgid "Add Vital Sign"
+msgstr "Aggiungi un parametro vitale"
+
+msgid "Fitbit Sync"
+msgstr "Sincronizzazione Fitbit"
+
+msgid "Select type"
+msgstr "Selezionare il tipo"
+
+msgid "Please select a vital sign type"
+msgstr "Selezionare un tipo di parametro vitale"
+
+msgid "Please enter a value"
+msgstr "Inserire un valore"
+
+msgid "Unit"
+msgstr "Unità"
+
+msgid "Unit will be auto-filled based on the selected type"
+msgstr "L'unità viene compilata automaticamente in base al tipo selezionato."
+
+msgid "If left empty, current date/time will be used"
+msgstr "Se lasciata vuota, verrà utilizzata la data/ora corrente."
+
+msgid "Save Vital Sign"
+msgstr "Salva il parametro vitale"
+
+msgid "Filter Vital Signs"
+msgstr "Filtrare i parametri vitali"
+
+msgid "All Types"
+msgstr "Tutti i tipi"
+
+msgid "Complete Report"
+msgstr "Rapporto completo"
+
+msgid "Vital Signs Trends"
+msgstr "Tendenze dei parametri vitali"
+
+msgid "Generate"
+msgstr "Generare"
+
+msgid "No vital signs data available for visualization"
+msgstr "Non sono disponibili dati sui parametri vitali per la visualizzazione"
+
+msgid "Vital Signs History"
+msgstr "Anamnesi dei parametri vitali"
+
+msgid "No vital signs data found"
+msgstr "Non sono stati trovati dati sui parametri vitali"

@@ -8,7 +8,8 @@ from flask_jwt_extended import create_access_token, create_refresh_token, jwt_re
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, EmailField
 from wtforms.validators import DataRequired, Email, EqualTo, Length
-from flask_babel import _
+from flask_babel import lazy_gettext as _
+from flask_babel import Babel
 
 from app import db
 from models import Doctor
@@ -20,16 +21,16 @@ logger = logging.getLogger(__name__)
 # Registration form
 class RegistrationForm(FlaskForm):
     email = EmailField('Email', validators=[DataRequired(), Email()])
-    first_name = StringField('Nome', validators=[DataRequired(), Length(min=2, max=100)])
-    last_name = StringField('Cognome', validators=[DataRequired(), Length(min=2, max=100)])
-    specialty = StringField('Specialità')
-    password = PasswordField('Password', validators=[
+    first_name = StringField(_('First Name'), validators=[DataRequired(), Length(min=2, max=100)])
+    last_name = StringField(_('Last Name'), validators=[DataRequired(), Length(min=2, max=100)])
+    specialty = StringField(_('Specialty'))
+    password = PasswordField(_('Password'), validators=[
         DataRequired(),
-        Length(min=8, message="La password deve essere di almeno 8 caratteri")
+        Length(min=8, message=_("Password must be at least 8 characters long"))
     ])
-    confirm_password = PasswordField('Conferma Password', validators=[
+    confirm_password = PasswordField(_('Confirm Password'), validators=[
         DataRequired(),
-        EqualTo('password', message="Le password devono corrispondere")
+        EqualTo('password', message=_("Passwords must match"))
     ])
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
@@ -45,7 +46,7 @@ def register():
         # Check if email already exists
         existing_doctor = Doctor.query.filter_by(email=email).first()
         if existing_doctor:
-            flash(_('Un account con questa email esiste già'), 'danger')
+            flash(_('An account with this Email already exists'), 'danger')
             return render_template('register.html', form=form, now=datetime.now())
         
         # Check password strength
@@ -66,12 +67,12 @@ def register():
         try:
             db.session.add(doctor)
             db.session.commit()
-            flash(_('Registrazione completata con successo! Ora puoi accedere.'), 'success')
+            flash(_('Registration completed. Now you can access'), 'success')
             logger.info(f"New doctor registered: {email}")
             return redirect(url_for('auth.login'))
         except:
             db.session.rollback()
-            flash(_('Si è verificato un errore durante la registrazione. Riprova.'), 'danger')
+            flash(_('An error occurred. Please try again'), 'danger')
     
     return render_template('register.html', form=form, now=datetime.now())
     
@@ -85,11 +86,11 @@ def login():
         password = request.form.get('password')
         
         if not email or not password:
-            flash('Please provide both email and password', 'danger')
+            flash(_('Please provide both email and password'), 'danger')
             return render_template('login.html', now=datetime.now())
         
         if not validate_email(email):
-            flash('Invalid email format', 'danger')
+            flash(_('Invalid email format'), 'danger')
             return render_template('login.html', now=datetime.now())
         
         doctor = Doctor.query.filter_by(email=email).first()
@@ -99,7 +100,7 @@ def login():
             logger.info(f"Doctor {doctor.id} logged in successfully")
             return redirect(url_for('views.dashboard'))
         else:
-            flash(_('Email o password non validi'), 'danger')
+            flash(_('Invalid email or password'), 'danger')
             
     return render_template('login.html', now=datetime.now())
 
@@ -108,25 +109,25 @@ def login():
 def logout():
     logger.info(f"Doctor {current_user.id} logged out")
     logout_user()
-    flash(_('Sei stato disconnesso con successo'), 'success')
+    flash(_('You have been disconnected'), 'success')
     return redirect(url_for('auth.login'))
 
 # API endpoints for JWT authentication
 @auth_bp.route('/api/login', methods=['POST'])
 def api_login():
     if not request.is_json:
-        return jsonify({"error": "Missing JSON in request"}), 400
+        return jsonify({"error": _("Missing JSON in request")}), 400
     
     email = request.json.get('email', None)
     password = request.json.get('password', None)
     
     if not email or not password:
-        return jsonify({"error": "Missing email or password"}), 400
+        return jsonify({"error": _("Missing email or password")}), 400
     
     doctor = Doctor.query.filter_by(email=email).first()
     
     if not doctor or not doctor.check_password(password):
-        return jsonify({"error": "Invalid email or password"}), 401
+        return jsonify({"error": _("Invalid email or password")}), 401
     
     # Create access token and refresh token
     access_token = create_access_token(identity=doctor.id)
@@ -135,7 +136,7 @@ def api_login():
     logger.info(f"API login successful for doctor {doctor.id}")
     
     return jsonify({
-        "message": "Login successful",
+        "message": _("Login successful"),
         "doctor": doctor.to_dict(),
         "access_token": access_token,
         "refresh_token": refresh_token
@@ -162,7 +163,7 @@ def api_doctor_required(f):
         doctor = Doctor.query.get(doctor_id)
         
         if not doctor:
-            return jsonify({"error": "Doctor not found"}), 404
+            return jsonify({"error": _("Doctor not found")}), 404
             
         return f(doctor, *args, **kwargs)
     
@@ -176,7 +177,7 @@ def doctor_required(f):
         # Flask-Login already ensures the user is authenticated
         # We just need to check if the user is a doctor
         if not hasattr(current_user, 'id'):
-            flash(_('Autenticazione richiesta'), 'danger')
+            flash(_('Authentication required'), 'danger')
             return redirect(url_for('auth.login'))
         
         return f(*args, **kwargs)

@@ -1,5 +1,63 @@
 // main.js - Common JavaScript functions for the application
 
+// Function to delete a note with confirmation
+function deleteNote(noteId, patientId) {
+    const lang = document.documentElement.lang || 'en';
+    let confirmMessage = 'Are you sure you want to delete this note? This action cannot be undone.';
+    let confirmTitle = 'Confirm Deletion';
+    let confirmButton = 'Delete';
+    let cancelButton = 'Cancel';
+    
+    // Messages per language
+    if (lang === 'it') {
+        confirmMessage = 'Sei sicuro di voler eliminare questa nota? Questa azione non può essere annullata.';
+        confirmTitle = 'Conferma Eliminazione';
+        confirmButton = 'Elimina';
+        cancelButton = 'Annulla';
+    }
+    
+    showConfirmationModal(confirmTitle, confirmMessage, confirmButton, cancelButton, function() {
+        // Send DELETE request to delete the note
+        fetch(`/notes/${noteId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to delete note');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Remove the note from the DOM
+            const noteElement = document.querySelector(`#note-${noteId}`);
+            if (noteElement) {
+                noteElement.remove();
+            }
+            
+            // Show success message
+            showToast(data.message || 'Note deleted successfully', 'success');
+            
+            // If we're on the patient detail page, update the note count
+            const noteCountElement = document.querySelector('#note-count');
+            if (noteCountElement) {
+                const currentCount = parseInt(noteCountElement.textContent);
+                if (!isNaN(currentCount)) {
+                    noteCountElement.textContent = (currentCount - 1).toString();
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting note:', error);
+            showToast('Error deleting note. Please try again.', 'danger');
+        });
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize Bootstrap tooltips
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
@@ -95,6 +153,127 @@ function getRandomColor() {
 }
 
 /**
+ * Show a toast notification
+ * @param {string} message - Toast message
+ * @param {string} type - Toast type (success, danger, warning, info)
+ */
+function showToast(message, type = 'info') {
+    // Create toast container if it doesn't exist
+    let toastContainer = document.getElementById('toast-container');
+    
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toast-container';
+        toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+        document.body.appendChild(toastContainer);
+    }
+    
+    // Create toast element
+    const toastId = 'toast-' + Date.now();
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.id = toastId;
+    toast.setAttribute('role', 'alert');
+    toast.setAttribute('aria-live', 'assertive');
+    toast.setAttribute('aria-atomic', 'true');
+    
+    // Set toast content
+    const bgColor = type === 'danger' ? 'bg-danger' : 
+                    type === 'success' ? 'bg-success' : 
+                    type === 'warning' ? 'bg-warning' : 'bg-info';
+    
+    toast.innerHTML = `
+        <div class="toast-header ${bgColor} text-white">
+            <strong class="me-auto">${type.charAt(0).toUpperCase() + type.slice(1)}</strong>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            ${message}
+        </div>
+    `;
+    
+    // Add toast to container
+    toastContainer.appendChild(toast);
+    
+    // Initialize and show the toast
+    const bsToast = new bootstrap.Toast(toast, { autohide: true, delay: 5000 });
+    bsToast.show();
+    
+    // Remove toast from DOM after it's hidden
+    toast.addEventListener('hidden.bs.toast', function() {
+        toast.remove();
+    });
+}
+
+/**
+ * Show a confirmation modal
+ * @param {string} title - Modal title
+ * @param {string} message - Modal message
+ * @param {string} confirmButtonText - Text for the confirm button
+ * @param {string} cancelButtonText - Text for the cancel button
+ * @param {Function} onConfirm - Callback function on confirmation
+ */
+function showConfirmationModal(title, message, confirmButtonText, cancelButtonText, onConfirm) {
+    // Check if a modal already exists
+    let modal = document.getElementById('confirmModal');
+    
+    if (!modal) {
+        // Create modal element
+        modal = document.createElement('div');
+        modal.className = 'modal fade';
+        modal.id = 'confirmModal';
+        modal.tabIndex = '-1';
+        modal.setAttribute('aria-labelledby', 'confirmModalLabel');
+        modal.setAttribute('aria-hidden', 'true');
+        
+        modal.innerHTML = `
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="confirmModalLabel">${title}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        ${message}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">${cancelButtonText}</button>
+                        <button type="button" class="btn btn-danger" id="confirmButton">${confirmButtonText}</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+    } else {
+        // Update existing modal
+        modal.querySelector('.modal-title').textContent = title;
+        modal.querySelector('.modal-body').textContent = message;
+        modal.querySelector('.modal-footer .btn-secondary').textContent = cancelButtonText;
+        modal.querySelector('#confirmButton').textContent = confirmButtonText;
+    }
+    
+    // Initialize Bootstrap modal
+    const modalInstance = new bootstrap.Modal(modal);
+    
+    // Set up confirm button action
+    const confirmButton = document.getElementById('confirmButton');
+    
+    // Remove any existing event listeners
+    const newConfirmButton = confirmButton.cloneNode(true);
+    confirmButton.parentNode.replaceChild(newConfirmButton, confirmButton);
+    
+    // Add new event listener
+    newConfirmButton.addEventListener('click', function() {
+        modalInstance.hide();
+        onConfirm();
+    });
+    
+    // Show the modal
+    modalInstance.show();
+}
+
+/**
  * Create confirmation modal
  * @param {string} title - Modal title
  * @param {string} message - Modal message
@@ -124,8 +303,8 @@ function confirmAction(title, message, onConfirm) {
                         ${message}
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">${window.cancelButtonText || 'Cancel'}</button>
-                        <button type="button" class="btn btn-danger" id="confirmButton">${window.confirmButtonText || 'Confirm'}</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">${document.documentElement.lang === "it" ? "Annulla" : 'Cancel'}</button>
+                        <button type="button" class="btn btn-danger" id="confirmButton">${document.documentElement.lang === "it" ? "Conferma" : 'Confirm'}</button>
                     </div>
                 </div>
             </div>
@@ -153,16 +332,6 @@ function confirmAction(title, message, onConfirm) {
         modalInstance.hide();
         onConfirm();
     });
-    
-    // Set up button text based on language
-    const lang = document.documentElement.lang || 'en';
-    if (lang === 'it') {
-        modal.querySelector('.btn-secondary').textContent = 'Annulla';
-        modal.querySelector('.btn-danger').textContent = 'Conferma';
-    } else {
-        modal.querySelector('.btn-secondary').textContent = 'Cancel';
-        modal.querySelector('.btn-danger').textContent = 'Confirm';
-    }
     
     // Show the modal
     modalInstance.show();
