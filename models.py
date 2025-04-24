@@ -1,6 +1,6 @@
 import uuid
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import Enum, auto
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -9,13 +9,6 @@ from app import db
 
 # Models for the VitaLink application
 # Defines the main data entities and their relationships
-
-class DataOrigin(Enum):
-    # Origin of the vital signs data
-    # MANUAL: Data entered manually by the doctor
-    # AUTOMATIC: Data collected automatically from devices
-    MANUAL = "manual"
-    AUTOMATIC = "automatic"
 
 class VitalSignType(Enum):
     # Types of vital signs supported in the system
@@ -90,8 +83,9 @@ class Doctor(UserMixin, db.Model):
                               backref=db.backref('doctors', lazy='dynamic'),
                               lazy='dynamic')
     
-    # Notes created by this doctor
+    # Notes and observations created by this doctor
     notes = db.relationship('Note', backref='doctor', lazy='dynamic')
+    vital_observations = db.relationship('VitalObservation', backref='doctor', lazy='dynamic')
 
     def set_password(self, password):
         # Set the doctor's password hash
@@ -161,6 +155,12 @@ class Doctor(UserMixin, db.Model):
             db.session.delete(association)
             db.session.commit()
 
+class HealthPlatform(Enum):
+    # Types of health platforms that can be integrated
+    FITBIT = "fitbit"
+    GOOGLE_HEALTH_CONNECT = "google_health_connect"
+    APPLE_HEALTH = "apple_health"
+
 class Patient(db.Model):
     # Model representing a patient in the system
     #
@@ -175,8 +175,12 @@ class Patient(db.Model):
     #   address: Address of the patient
     #   created_at: Record creation date
     #   updated_at: Record last update date
-    #   vital_signs: Relationship with patient's vital signs
     #   notes: Relationship with patient's medical notes
+    #   vital_observations: Relationship with patient's vital sign observations
+    #   connected_platform: Health platform connected to this patient (Fitbit, Google Fit, etc.)
+    #   platform_access_token: OAuth access token for the connected health platform
+    #   platform_refresh_token: OAuth refresh token for the connected health platform
+    #   platform_token_expires_at: Expiration date of the current access token
     __tablename__ = 'patient'
     id = db.Column(db.Integer, primary_key=True)
     uuid = db.Column(db.String(36), unique=True, nullable=False, default=lambda: str(uuid.uuid4()))
@@ -189,9 +193,15 @@ class Patient(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
+    # Health platform integration
+    connected_platform = db.Column(db.Enum(HealthPlatform), nullable=True)
+    platform_access_token = db.Column(db.String(1024), nullable=True)
+    platform_refresh_token = db.Column(db.String(1024), nullable=True)
+    platform_token_expires_at = db.Column(db.DateTime, nullable=True)
+    
     # Relationships
-    vital_signs = db.relationship('VitalSign', backref='patient', lazy='dynamic')
     notes = db.relationship('Note', backref='patient', lazy='dynamic')
+    vital_observations = db.relationship('VitalObservation', backref='patient', lazy='dynamic')
     
     def to_dict(self):
         # Convert the object to a serializable dictionary
@@ -211,28 +221,28 @@ class Patient(db.Model):
             'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }
     
-    def get_vital_signs(self, type=None, start_date=None, end_date=None):
-        # Get vital signs for this patient with optional filtering
+    def get_vital_observations(self, vital_type=None, start_date=None, end_date=None):
+        # Get vital observations for this patient with optional filtering
         #
         # Args:
-        #   type (VitalSignType, optional): Type of vital sign to filter by
+        #   vital_type (VitalSignType, optional): Type of vital sign to filter by
         #   start_date (datetime, optional): Start date for filtering
         #   end_date (datetime, optional): End date for filtering
         #            
         # Returns:
-        #   list: List of VitalSign objects that meet the filtering criteria
-        query = self.vital_signs
+        #   list: List of VitalObservation objects that meet the filtering criteria
+        query = self.vital_observations
         
-        if type:
-            query = query.filter_by(type=type)
+        if vital_type:
+            query = query.filter_by(vital_type=vital_type)
         
         if start_date:
-            query = query.filter(VitalSign.recorded_at >= start_date)
+            query = query.filter(VitalObservation.start_date >= start_date)
         
         if end_date:
-            query = query.filter(VitalSign.recorded_at <= end_date)
+            query = query.filter(VitalObservation.end_date <= end_date)
         
-        return query.order_by(VitalSign.recorded_at.desc()).all()
+        return query.order_by(VitalObservation.created_at.desc()).all()
     
     def get_notes(self):
         # Get all medical notes associated with this patient
@@ -241,43 +251,6 @@ class Patient(db.Model):
         #   list: List of Note objects ordered by creation date (most recent first)
         return self.notes.order_by(Note.created_at.desc()).all()
 
-class VitalSign(db.Model):
-    # Model representing a vital sign of a patient
-    #
-    # Attributes:
-    #   id: Unique identifier of the vital sign
-    #   patient_id: ID of the patient to whom the parameter belongs
-    #   type: Type of vital sign (from VitalSignType enum)
-    #   value: Numeric value of the parameter
-    #   unit: Unit of measurement of the value
-    #   recorded_at: Date and time when the parameter was recorded
-    #   origin: Origin of the data (manual or automatic)
-    #   created_at: Record creation date
-    __tablename__ = 'vital_sign'
-    id = db.Column(db.Integer, primary_key=True)
-    patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=False)
-    type = db.Column(db.Enum(VitalSignType), nullable=False)
-    value = db.Column(db.Float, nullable=False)
-    unit = db.Column(db.String(20))
-    recorded_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-    origin = db.Column(db.Enum(DataOrigin), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    def to_dict(self):
-        # Convert the object to a serializable dictionary
-        #
-        # Returns:
-        #   dict: Dictionary representation of the object
-        return {
-            'id': self.id,
-            'patient_id': self.patient_id,
-            'type': self.type.value,
-            'value': self.value,
-            'unit': self.unit,
-            'recorded_at': self.recorded_at.isoformat() if self.recorded_at else None,
-            'origin': self.origin.value,
-            'created_at': self.created_at.isoformat() if self.created_at else None
-        }
 
 class Note(db.Model):
     # Model representing a medical note for a patient
@@ -310,6 +283,47 @@ class Note(db.Model):
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }
+        
+class VitalObservation(db.Model):
+    # Model representing observations for vital sign data over specific time periods
+    #
+    # Attributes:
+    #   id: Unique identifier of the observation
+    #   patient_id: ID of the patient to whom the observation belongs
+    #   doctor_id: ID of the doctor who created the observation
+    #   vital_type: Type of vital sign (heart_rate, steps, etc.)
+    #   content: Textual content of the observation
+    #   start_date: Start date of the observation period
+    #   end_date: End date of the observation period
+    #   created_at: Observation creation date
+    #   updated_at: Observation last update date
+    __tablename__ = 'vital_observation'
+    id = db.Column(db.Integer, primary_key=True)
+    patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=False)
+    doctor_id = db.Column(db.Integer, db.ForeignKey('doctor.id'), nullable=False)
+    vital_type = db.Column(db.Enum(VitalSignType), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    start_date = db.Column(db.DateTime, nullable=False)
+    end_date = db.Column(db.DateTime, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def to_dict(self):
+        # Convert the object to a serializable dictionary
+        #
+        # Returns:
+        #   dict: Dictionary representation of the object
+        return {
+            'id': self.id,
+            'patient_id': self.patient_id,
+            'doctor_id': self.doctor_id,
+            'vital_type': self.vital_type.value,
+            'content': self.content,
+            'start_date': self.start_date.isoformat() if self.start_date else None,
+            'end_date': self.end_date.isoformat() if self.end_date else None,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+        }
 
 class ActionType(Enum):
     # Enumeration defining the types of actions for the audit log system
@@ -320,11 +334,21 @@ class ActionType(Enum):
     #   DELETE: Action of deleting an entity
     #   VIEW: Action of viewing an entity
     #   EXPORT: Action of exporting an entity (e.g., report generation)
-    CREATE = "create"
-    UPDATE = "update"
-    DELETE = "delete"
-    VIEW = "view"
-    EXPORT = "export"
+    #   GENERATE_LINK: Action of generating a link for health platform integration
+    #   CONNECT: Action of connecting a health platform
+    #   DISCONNECT: Action of disconnecting a health platform
+    #   SYNC: Action of synchronizing data from a health platform
+    #   IMPORT: Action of importing an existing entity
+    CREATE = "CREATE"
+    UPDATE = "UPDATE"
+    DELETE = "DELETE"
+    VIEW = "VIEW"
+    EXPORT = "EXPORT"
+    GENERATE_LINK = "GENERATE_LINK"
+    CONNECT = "CONNECT"
+    DISCONNECT = "DISCONNECT"
+    SYNC = "SYNC" # Nota: questo è in minuscolo perché è così nel database
+    IMPORT = "IMPORT"
 
 class EntityType(Enum):
     # Enumeration defining the types of entities that can be tracked in the audit log system
@@ -334,10 +358,58 @@ class EntityType(Enum):
     #   VITAL_SIGN: Vital sign entity
     #   NOTE: Medical note entity
     #   REPORT: Report/document entity
+    #   HEALTH_PLATFORM: Health platform entity
+    #   HEALTH_LINK: Health platform link entity
+    #   OBSERVATION: Vital observation entity
     PATIENT = "patient"
     VITAL_SIGN = "vital_sign"
     NOTE = "note"
     REPORT = "report"
+    HEALTH_PLATFORM = "health_platform"
+    HEALTH_LINK = "health_link"
+    OBSERVATION = "observation" # Manteniamo minuscole per essere consistenti
+    
+class HealthPlatformLink(db.Model):
+    # Model for storing temporary links for health platform integration
+    # These links expire after 24 hours and are used for patients to connect their health devices
+    #
+    # Attributes:
+    #   id: Unique identifier of the link
+    #   uuid: Unique UUID for the link, used in URLs
+    #   patient_id: ID of the patient this link is for
+    #   doctor_id: ID of the doctor who created the link
+    #   created_at: Link creation date/time
+    #   expires_at: Link expiration date/time (24 hours after creation)
+    #   used: Whether the link has been used
+    #   platform: The health platform this link is for (Fitbit, Google Fit, etc.)
+    __tablename__ = 'health_platform_link'
+    id = db.Column(db.Integer, primary_key=True)
+    uuid = db.Column(db.String(36), unique=True, nullable=False, default=lambda: str(uuid.uuid4()))
+    patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=False)
+    doctor_id = db.Column(db.Integer, db.ForeignKey('doctor.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    expires_at = db.Column(db.DateTime, default=lambda: datetime.utcnow() + timedelta(hours=24))
+    used = db.Column(db.Boolean, default=False)
+    platform = db.Column(db.Enum(HealthPlatform), nullable=False)
+    
+    # Relationships
+    patient = db.relationship('Patient', backref=db.backref('health_platform_links', lazy='dynamic'))
+    doctor = db.relationship('Doctor', backref=db.backref('health_platform_links', lazy='dynamic'))
+    
+    def is_expired(self):
+        return datetime.utcnow() > self.expires_at
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'uuid': self.uuid,
+            'patient_id': self.patient_id,
+            'doctor_id': self.doctor_id,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'expires_at': self.expires_at.isoformat() if self.expires_at else None,
+            'used': self.used,
+            'platform': self.platform.value if self.platform else None,
+        }
 
 class AuditLog(db.Model):
     # Model for storing audit logs of all actions performed in the system

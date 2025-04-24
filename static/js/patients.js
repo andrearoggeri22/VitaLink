@@ -9,6 +9,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Set up delete patient confirmation
     initDeleteConfirmation();
+    
+    // Set up import patient functionality
+    initImportPatient();
 });
 
 /**
@@ -89,8 +92,8 @@ function initDeleteConfirmation() {
             const patientName = this.getAttribute('data-name');
             
             confirmAction(
-                window.deletePatientTitle || 'Delete Patient',
-                window.deletePatientMessage ? window.deletePatientMessage.replace('{name}', patientName) : `Are you sure you want to delete the patient ${patientName}? This action cannot be undone.`,
+                document.documentElement.lang === "it" ? "Elimina paziente" : 'Delete Patient',
+                document.documentElement.lang === "it" ? "Sei sicuro di voler eliminare il paziente? L'azione non può essere cancellata." : 'Are you sure you want to delete the patient? This action cannot be undone.',
                 function() {
                     // Submit the delete form
                     const form = document.getElementById(`deleteForm${patientId}`);
@@ -116,7 +119,7 @@ function openAddNoteModal(patientId, patientName) {
         const patientIdField = document.getElementById('notePatientId');
         const form = document.getElementById('addNoteForm');
         
-        modalTitle.textContent = window.addNoteForText ? window.addNoteForText.replace('{name}', patientName) : `Add Note for ${patientName}`;
+        modalTitle.textContent = document.documentElement.lang === "it" ? "Aggiungi nota" : 'Add note';
         
         if (patientIdField) {
             patientIdField.value = patientId;
@@ -128,5 +131,92 @@ function openAddNoteModal(patientId, patientName) {
         
         const bsModal = new bootstrap.Modal(modal);
         bsModal.show();
+    }
+}
+
+/**
+ * Initialize the import patient functionality
+ */
+function initImportPatient() {
+    const importBtn = document.getElementById('importPatientBtn');
+    const importModal = document.getElementById('importPatientModal');
+    const submitBtn = document.getElementById('importPatientSubmit');
+    
+    if (importBtn && importModal) {
+        // Show the modal when the import button is clicked
+        importBtn.addEventListener('click', function() {
+            const modal = new bootstrap.Modal(importModal);
+            modal.show();
+        });
+        
+        // Handle form submission
+        if (submitBtn) {
+            submitBtn.addEventListener('click', function() {
+                const uuidInput = document.getElementById('patientUUID');
+                const errorDiv = document.getElementById('importPatientError');
+                
+                if (uuidInput.value.trim() === '') {
+                    // Show error if the UUID is empty
+                    if (errorDiv) {
+                        errorDiv.textContent = document.documentElement.lang === "it" 
+                            ? "Inserisci un UUID valido" 
+                            : "Please enter a valid UUID";
+                        errorDiv.style.display = 'block';
+                    }
+                    return;
+                }
+                
+                // Clear previous errors
+                if (errorDiv) {
+                    errorDiv.style.display = 'none';
+                }
+                
+                // Disable the submit button and show loading state
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>' + 
+                                      (document.documentElement.lang === "it" ? "Importazione..." : "Importing...");
+                
+                // Make the request to import the patient
+                console.log("Sending import request", uuidInput.value.trim());
+                
+                fetch('/patients/import', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    credentials: 'same-origin',  // Include cookies
+                    body: JSON.stringify({ patient_uuid: uuidInput.value.trim() })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => {
+                            throw new Error(err.error || 'Errore durante l\'importazione del paziente');
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Reload the page on success to show the newly imported patient
+                    window.location.reload();
+                })
+                .catch(error => {
+                    console.error('Error importing patient:', error);
+                    
+                    // Show error message
+                    if (errorDiv) {
+                        errorDiv.textContent = error.message || (document.documentElement.lang === "it"
+                            ? "Si è verificato un errore durante l'importazione del paziente. Riprova più tardi."
+                            : "An error occurred while importing the patient. Please try again later.");
+                        errorDiv.style.display = 'block';
+                    }
+                    
+                    // Reset button state
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-file-import me-1"></i>' + 
+                                         (document.documentElement.lang === "it" ? "Importa Paziente" : "Import Patient");
+                });
+            });
+        }
     }
 }

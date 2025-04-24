@@ -1,152 +1,133 @@
 import os
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from io import BytesIO
 import tempfile
+import json
 from flask import session
+from flask_babel import gettext as _
 
-from reportlab.lib.pagesizes import letter
+from reportlab.lib.pagesizes import letter, A4
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import inch
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
+from reportlab.lib.units import inch, cm
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image, PageBreak
 from reportlab.graphics.shapes import Drawing
 from reportlab.graphics.charts.linecharts import HorizontalLineChart
 from reportlab.graphics.charts.legends import Legend
 
-from models import VitalSignType
-from utils import get_vital_reference_range, get_vital_sign_unit
+from models import VitalSignType, VitalObservation
+import health_platforms
 
 # Setup logger
 logger = logging.getLogger(__name__)
 
-def get_report_translations(lang=None):
+# Define days for each period string
+PERIOD_DAYS = {
+    '1d': 1,
+    '7d': 7,
+    '1m': 30,
+    '3m': 90,
+    '1y': 365
+}
+
+def create_vital_chart(vitals_data, period_name, vital_type):
     """
-    Get translations for report text based on the selected language.
+    Create a chart drawing for a specific vital sign and time period
     
     Args:
-        lang: Optional language code override. If not provided, uses session language.
-    
+        vitals_data: List of data points
+        period_name: Name of the time period for the chart title
+        vital_type: Type of vital sign
+        
     Returns:
-        dict: Dictionary of translated strings
+        Drawing: ReportLab Drawing object containing the chart
     """
-    language = lang or session.get('language', 'en')
-    logger.debug(f"Report language: {language}")
+    # Sort data by timestamp
+    sorted_data = sorted(vitals_data, key=lambda v: v.get('timestamp', ''))
     
-    if language == 'it':
-        return {
-            # Common terms
-            'report_title': 'Rapporto di Monitoraggio Sanitario',
-            'generated_on': 'Generato il',
-            'patient_info': 'Informazioni sul Paziente',
-            'attending_physician': 'Medico Curante',
-            'vital_signs': 'Parametri Vitali',
-            'clinical_notes': 'Note Cliniche',
-            'no_vitals': 'Nessun parametro vitale registrato per questo periodo.',
-            'no_notes': 'Nessuna nota clinica registrata per questo paziente.',
-            
-            # Patient/Doctor info
-            'name': 'Nome',
-            'date_of_birth': 'Data di Nascita',
-            'gender': 'Genere',
-            'contact': 'Contatto',
-            'specialty': 'Specialità',
-            'email': 'Email',
-            'not_specified': 'Non specificato',
-            'not_provided': 'Non fornito',
-            'general_practice': 'Medicina Generale',
-            
-            # Vital signs
-            'period_from_to': 'Periodo: Dal {} al {}',
-            'period_from': 'Periodo: Dal {}',
-            'period_until': 'Periodo: Fino al {}',
-            'normal_range': 'Intervallo Normale: {} - {} {}',
-            'datetime': 'Data e Ora',
-            'value': 'Valore',
-            'status': 'Stato',
-            'normal': 'Normale',
-            'high': 'Alto',
-            'low': 'Basso',
-            
-            # Trend analysis
-            'trend_analysis': 'Analisi dei Trend',
-            'patient': 'Paziente',
-            'period': 'Periodo',
-            'statistics': 'Statistiche',
-            'detailed_readings': 'Letture Dettagliate',
-            'average': 'Media',
-            'minimum': 'Minimo',
-            'maximum': 'Massimo',
-            'normal_readings': 'Letture Normali',
-            'high_readings': 'Letture Alte',
-            'low_readings': 'Letture Basse',
-            'no_vital_data': 'Nessun dato vitale disponibile per questo periodo.',
-            'recommendations': 'Raccomandazioni',
-            'consult_doctor': 'Si prega di consultare il medico per discutere questi risultati. Questo rapporto è generato automaticamente e deve essere interpretato da un professionista medico qualificato.'
-        }
-    else:
-        return {
-            # Common terms
-            'report_title': 'Healthcare Monitoring Report',
-            'generated_on': 'Generated on',
-            'patient_info': 'Patient Information',
-            'attending_physician': 'Attending Physician',
-            'vital_signs': 'Vital Signs',
-            'clinical_notes': 'Clinical Notes',
-            'no_vitals': 'No vital signs recorded for this period.',
-            'no_notes': 'No clinical notes recorded for this patient.',
-            
-            # Patient/Doctor info
-            'name': 'Name',
-            'date_of_birth': 'Date of Birth',
-            'gender': 'Gender',
-            'contact': 'Contact',
-            'specialty': 'Specialty',
-            'email': 'Email',
-            'not_specified': 'Not specified',
-            'not_provided': 'Not provided',
-            'general_practice': 'General Practice',
-            
-            # Vital signs
-            'period_from_to': 'Period: From {} to {}',
-            'period_from': 'Period: From {}',
-            'period_until': 'Period: Until {}',
-            'normal_range': 'Normal Range: {} - {} {}',
-            'datetime': 'Date & Time',
-            'value': 'Value',
-            'status': 'Status',
-            'normal': 'Normal',
-            'high': 'High',
-            'low': 'Low',
-            
-            # Trend analysis
-            'trend_analysis': 'Trend Analysis',
-            'patient': 'Patient',
-            'period': 'Period',
-            'statistics': 'Statistics',
-            'detailed_readings': 'Detailed Readings',
-            'average': 'Average',
-            'minimum': 'Minimum',
-            'maximum': 'Maximum',
-            'normal_readings': 'Normal Readings',
-            'high_readings': 'High Readings',
-            'low_readings': 'Low Readings',
-            'no_vital_data': 'No vital data available for this period.',
-            'recommendations': 'Recommendations',
-            'consult_doctor': 'Please consult with your healthcare provider to discuss these results. This report is generated automatically and should be interpreted by a qualified medical professional.'
-        }
+    # Extract values and dates for chart
+    values = [float(v.get('value', 0)) for v in sorted_data]
+    timestamps = [v.get('timestamp', '') for v in sorted_data]
+    
+    # Format dates for display
+    dates = []
+    for ts in timestamps:
+        if ts:
+            try:
+                dt = datetime.fromisoformat(ts.replace('Z', '+00:00'))
+                dates.append(dt.strftime('%m/%d'))
+            except (ValueError, AttributeError):
+                dates.append('')
+        else:
+            dates.append('')
+    
+    # Limit number of data points to make chart readable
+    max_points = 20
+    if len(values) > max_points:
+        step = len(values) // max_points
+        values = values[::step]
+        dates = dates[::step]
+    
+    # Create drawing and chart
+    drawing = Drawing(450, 200)
+    
+    chart = HorizontalLineChart()
+    chart.width = 400
+    chart.height = 150
+    chart.x = 25
+    chart.y = 25
+    
+    # Set data
+    if values:
+        chart.data = [values]
+        chart.categoryAxis.categoryNames = dates
+        chart.valueAxis.valueMin = min(values) * 0.9 if values else 0
+        chart.valueAxis.valueMax = max(values) * 1.1 if values else 100
+        
+        # Ensure min and max are float
+        chart.valueAxis.valueMin = float(chart.valueAxis.valueMin)
+        chart.valueAxis.valueMax = float(chart.valueAxis.valueMax)
+        
+        # Style the chart
+        chart.lines[0].strokeWidth = 2
+        chart.lines[0].strokeColor = colors.blue
+        
+        # Add title
+        vital_name = vital_type.replace('_', ' ').title()
+        title = f"{vital_name} - {period_name}"
+        
+        drawing.add(chart)
+        
+        # Add legend with title
+        legend = Legend()
+        legend.alignment = 'right'
+        legend.x = 25
+        legend.y = 180
+        legend.columnMaximum = 1
+        legend.fontName = 'Helvetica'
+        legend.fontSize = 8
+        legend.dxTextSpace = 5
+        legend.dy = 5
+        legend.dx = 10
+        legend.deltay = 10
+        legend.colorNamePairs = [(colors.blue, title)]
+        drawing.add(legend)
+    
+    return drawing
 
-def generate_patient_report(patient, doctor, vitals, notes, start_date=None, end_date=None, language=None):
+def generate_specific_report(patient, doctor, selected_notes, selected_vital_types, selected_charts, selected_observations, summary=None, language=None):
     """
-    Generate a PDF report for a patient's vital signs and notes
+    Generate a specific PDF report with only selected data
     
     Args:
         patient: Patient object
         doctor: Doctor object
-        vitals: List of VitalSign objects
-        notes: List of Note objects
-        start_date: Optional start date for filtering
-        end_date: Optional end date for filtering
+        selected_notes: List of selected Note objects
+        selected_vital_types: List of selected vital types
+        selected_charts: Dict mapping vital type to list of selected time periods
+        selected_observations: List of selected VitalObservation objects
+        summary: Optional summary text provided by the doctor (not saved to database)
         language: Optional language code override (it/en)
         
     Returns:
@@ -154,8 +135,255 @@ def generate_patient_report(patient, doctor, vitals, notes, start_date=None, end
     """
     buffer = BytesIO()
     
-    # Get translations
-    t = get_report_translations(language)
+    # Set language if provided (Flask-Babel handles this automatically if None)
+    if language:
+        # Qui potrebbe essere necessario un meccanismo per impostare la lingua temporaneamente
+        pass
+    
+    # Create the PDF document
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=letter,
+        rightMargin=72,
+        leftMargin=72,
+        topMargin=72,
+        bottomMargin=72
+    )
+    
+    # Get styles
+    styles = getSampleStyleSheet()
+    styles.add(ParagraphStyle(
+        name='Heading1Center',
+        parent=styles['Heading1'],
+        alignment=1  # 0=left, 1=center, 2=right
+    ))
+    styles.add(ParagraphStyle(
+        name='Normal-Center',
+        parent=styles['Normal'],
+        alignment=1
+    ))
+    styles.add(ParagraphStyle(
+        name='Normal-Bold',
+        parent=styles['Normal'],
+        fontName='Helvetica-Bold'
+    ))
+    
+    # Build content
+    content = []
+    
+    # Report Header
+    content.append(Paragraph(_('Specific Report'), styles['Heading1Center']))
+    content.append(Spacer(1, 12))
+    
+    # Date of report
+    content.append(Paragraph(f"{_('Generated on')}: {datetime.now().strftime('%Y-%m-%d %H:%M')}", styles['Normal-Center']))
+    content.append(Spacer(1, 24))
+    
+    # Patient Information
+    content.append(Paragraph(_('Patient Information'), styles['Heading2']))
+    content.append(Spacer(1, 6))
+    
+    patient_data = [
+        [f"{_('Name')}:", f"{patient.first_name} {patient.last_name}"],
+        [f"{_('Date of Birth')}:", patient.date_of_birth.strftime('%Y-%m-%d')],
+        [f"{_('Gender')}:", patient.gender or _('Not specified')],
+        [f"{_('Contact')}:", patient.contact_number or _('Not provided')]
+    ]
+    
+    patient_table = Table(patient_data, colWidths=[1.5*inch, 4*inch])
+    patient_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (0, -1), colors.lightgrey),
+        ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+        ('TOPPADDING', (0, 0), (-1, -1), 5),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black)
+    ]))
+    
+    content.append(patient_table)
+    content.append(Spacer(1, 12))
+    
+    # Doctor Information
+    content.append(Paragraph(_('Attending Physician'), styles['Heading2']))
+    content.append(Spacer(1, 6))
+    
+    doctor_data = [
+        [f"{_('Name')}:", f"Dr. {doctor.first_name} {doctor.last_name}"],
+        [f"{_('Specialty')}:", doctor.specialty or _('General Practice')],
+        [f"{_('Email')}:", doctor.email]
+    ]
+    
+    doctor_table = Table(doctor_data, colWidths=[1.5*inch, 4*inch])
+    doctor_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (0, -1), colors.lightgrey),
+        ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+        ('TOPPADDING', (0, 0), (-1, -1), 5),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black)
+    ]))
+    
+    content.append(doctor_table)
+    content.append(Spacer(1, 24))
+    
+    # Summary section (if provided)
+    if summary:
+        content.append(Paragraph(_('Summary'), styles['Heading2']))
+        content.append(Spacer(1, 6))
+        content.append(Paragraph(summary, styles['Normal']))
+        content.append(Spacer(1, 24))
+    
+    # Selected notes section
+    if selected_notes:
+        content.append(Paragraph(_('Clinical Notes'), styles['Heading2']))
+        content.append(Spacer(1, 6))
+        
+        for i, note in enumerate(selected_notes):
+            date_str = note.created_at.strftime('%Y-%m-%d %H:%M')
+            doctor_name = f"Dr. {note.doctor.first_name} {note.doctor.last_name}"
+            content.append(Paragraph(f"<b>{date_str} - {doctor_name}</b>", styles['Normal']))
+            content.append(Paragraph(note.content, styles['Normal']))
+            content.append(Spacer(1, 6))
+            
+            # Add a divider between notes except for the last one
+            if i < len(selected_notes) - 1:
+                content.append(Spacer(1, 6))
+                content.append(Paragraph("_" * 80, styles['Normal']))
+                content.append(Spacer(1, 6))
+        
+        content.append(Spacer(1, 24))
+    
+    # Selected vital signs section
+    if selected_vital_types and selected_charts:
+        content.append(Paragraph(_('Vital Signs'), styles['Heading2']))
+        content.append(Spacer(1, 6))
+        
+        from health_platforms import get_vitals_data
+        
+        # Map period strings to days and display names
+        period_display = {
+            '1d': (1, _('1 Day')),
+            '7d': (7, _('7 Days')),
+            '1m': (30, _('1 Month')),
+            '3m': (90, _('3 Months')),
+            '1y': (365, _('1 Year'))
+        }
+        
+        for vital_type in selected_vital_types:
+            vital_type_value = vital_type.value
+            content.append(Paragraph(f"{vital_type_value.replace('_', ' ').title()}", styles['Heading3']))
+            content.append(Spacer(1, 6))
+            
+            # Check if this vital type has selected charts
+            if vital_type_value in selected_charts and selected_charts[vital_type_value]:
+                periods = selected_charts[vital_type_value]
+                
+                for period_days in periods:
+                    # Get period display name
+                    if period_days == 1:
+                        period_name = _('1 Day')
+                    elif period_days == 7:
+                        period_name = _('7 Days')
+                    elif period_days == 30:
+                        period_name = _('1 Month')
+                    elif period_days == 90:
+                        period_name = _('3 Months')
+                    elif period_days == 365:
+                        period_name = _('1 Year')
+                    else:
+                        period_name = f"{period_days} days"
+                    
+                    # Calculate date range
+                    end_date = datetime.now()
+                    start_date = end_date - timedelta(days=period_days)
+                    
+                    try:
+                        # Try to get data from health platform
+                        vitals_data = get_vitals_data(
+                            patient,
+                            vital_type_value,
+                            start_date.strftime('%Y-%m-%d'),
+                            end_date.strftime('%Y-%m-%d')
+                        )
+                        
+                        if vitals_data and len(vitals_data) > 0:
+                            # Create chart
+                            chart = create_vital_chart(vitals_data, period_name, vital_type_value)
+                            content.append(chart)
+                            content.append(Spacer(1, 12))
+                            
+                        else:
+                            content.append(Paragraph(f"{period_name}: {_('No vital data available for this period.')}", styles['Normal']))
+                            content.append(Spacer(1, 6))
+                            
+                    except Exception as e:
+                        logger.error(f"Error getting data for {vital_type_value}: {str(e)}")
+                        content.append(Paragraph(f"{period_name}: {_('No vital data available for this period.')}", styles['Normal']))
+                        content.append(Spacer(1, 6))
+            else:
+                content.append(Paragraph(_('No vital data available for this period.'), styles['Normal']))
+                
+            content.append(Spacer(1, 18))
+    
+    # Selected observations section
+    if selected_observations:
+        content.append(PageBreak())
+        content.append(Paragraph(_('Observations'), styles['Heading2']))
+        content.append(Spacer(1, 6))
+        
+        # Group observations by vital type
+        obs_by_type = {}
+        for obs in selected_observations:
+            vital_type = obs.vital_type.value
+            if vital_type not in obs_by_type:
+                obs_by_type[vital_type] = []
+            obs_by_type[vital_type].append(obs)
+        
+        # Add observations for each vital type
+        for vital_type, obs_list in obs_by_type.items():
+            content.append(Paragraph(f"{vital_type.replace('_', ' ').title()}", styles['Heading3']))
+            content.append(Spacer(1, 6))
+            
+            for i, obs in enumerate(obs_list):
+                # Format the date range
+                date_range = f"{obs.start_date.strftime('%Y-%m-%d')} - {obs.end_date.strftime('%Y-%m-%d')}"
+                doctor_name = f"Dr. {obs.doctor.first_name} {obs.doctor.last_name}"
+                
+                content.append(Paragraph(f"<b>{date_range} - {doctor_name}</b>", styles['Normal']))
+                content.append(Paragraph(obs.content, styles['Normal']))
+                content.append(Spacer(1, 6))
+                
+                # Add a divider between observations except for the last one
+                if i < len(obs_list) - 1:
+                    content.append(Spacer(1, 3))
+                    content.append(Paragraph("_" * 40, styles['Normal']))
+                    content.append(Spacer(1, 3))
+            
+            content.append(Spacer(1, 12))
+    
+    # Build PDF
+    doc.build(content)
+    buffer.seek(0)
+    return buffer
+
+def generate_vital_trends_report(patient, doctor, vital_type, period='1m'):
+    """
+    Generate a trend analysis report for a specific vital sign
+    
+    Args:
+        patient: Patient object
+        doctor: Doctor object
+        vital_type: Type of vital sign
+        period: Time period to analyze (1d, 7d, 1m, 3m, 1y)
+        
+    Returns:
+        BytesIO: PDF file as a binary stream
+    """
+    buffer = BytesIO()
     
     # Create the PDF document
     doc = SimpleDocTemplate(
@@ -184,22 +412,20 @@ def generate_patient_report(patient, doctor, vitals, notes, start_date=None, end
     content = []
     
     # Report Header
-    content.append(Paragraph(t['report_title'], styles['Heading1Center']))
+    content.append(Paragraph(_('Trend Analysis'), styles['Heading1Center']))
     content.append(Spacer(1, 12))
     
     # Date of report
-    content.append(Paragraph(f"{t['generated_on']}: {datetime.now().strftime('%Y-%m-%d %H:%M')}", styles['Normal-Center']))
+    content.append(Paragraph(f"{_('Generated on')}: {datetime.now().strftime('%Y-%m-%d %H:%M')}", styles['Normal-Center']))
     content.append(Spacer(1, 24))
     
     # Patient Information
-    content.append(Paragraph(t['patient_info'], styles['Heading2']))
+    content.append(Paragraph(_('Patient'), styles['Heading2']))
     content.append(Spacer(1, 6))
     
     patient_data = [
-        [f"{t['name']}:", f"{patient.first_name} {patient.last_name}"],
-        [f"{t['date_of_birth']}:", patient.date_of_birth.strftime('%Y-%m-%d')],
-        [f"{t['gender']}:", patient.gender or t['not_specified']],
-        [f"{t['contact']}:", patient.contact_number or t['not_provided']]
+        [f"{_('Name')}:", f"{patient.first_name} {patient.last_name}"],
+        [f"{_('Date of Birth')}:", patient.date_of_birth.strftime('%Y-%m-%d')]
     ]
     
     patient_table = Table(patient_data, colWidths=[1.5*inch, 4*inch])
@@ -217,366 +443,192 @@ def generate_patient_report(patient, doctor, vitals, notes, start_date=None, end
     content.append(patient_table)
     content.append(Spacer(1, 12))
     
-    # Doctor Information
-    content.append(Paragraph(t['attending_physician'], styles['Heading2']))
+    # Vital Sign Information
+    days = PERIOD_DAYS.get(period, 30)
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=days)
+    
+    # Mapping of vital types to names
+    vital_names = {
+        'heart_rate': _('Heart Rate'),
+        'blood_pressure': _('Blood Pressure'),
+        'temperature': _('Temperature'),
+        'respiratory_rate': _('Respiratory Rate'),
+        'oxygen_saturation': _('Oxygen Saturation'),
+        'weight': _('Weight'),
+        'steps': _('Steps'),
+        'sleep_duration': _('Sleep Duration'),
+    }
+    
+    # Mapping of vital types to units
+    vital_units = {
+        'heart_rate': 'bpm',
+        'blood_pressure': 'mmHg',
+        'temperature': '°C',
+        'respiratory_rate': 'breaths/min',
+        'oxygen_saturation': '%',
+        'weight': 'kg',
+        'steps': 'steps',
+        'sleep_duration': 'hours',
+    }
+    
+    vital_name = vital_names.get(vital_type, vital_type.replace('_', ' ').title())
+    vital_unit = vital_units.get(vital_type, '')
+    
+    content.append(Paragraph(f"{vital_name} - {_('Period')}: {days} {_('days')}", styles['Heading2']))
     content.append(Spacer(1, 6))
     
-    doctor_data = [
-        [f"{t['name']}:", f"Dr. {doctor.first_name} {doctor.last_name}"],
-        [f"{t['specialty']}:", doctor.specialty or t['general_practice']],
-        [f"{t['email']}:", doctor.email]
-    ]
-    
-    doctor_table = Table(doctor_data, colWidths=[1.5*inch, 4*inch])
-    doctor_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (0, -1), colors.lightgrey),
-        ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
-        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-        ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 0), (-1, -1), 10),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
-        ('TOPPADDING', (0, 0), (-1, -1), 5),
-        ('GRID', (0, 0), (-1, -1), 1, colors.black)
-    ]))
-    
-    content.append(doctor_table)
-    content.append(Spacer(1, 24))
-    
-    # Vital Signs
-    content.append(Paragraph(t['vital_signs'], styles['Heading2']))
-    content.append(Spacer(1, 6))
-    
-    if vitals:
-        # Filter period explanation
-        if start_date and end_date:
-            period_text = t['period_from_to'].format(start_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d'))
-            content.append(Paragraph(period_text, styles['Normal']))
-        elif start_date:
-            period_text = t['period_from'].format(start_date.strftime('%Y-%m-%d'))
-            content.append(Paragraph(period_text, styles['Normal']))
-        elif end_date:
-            period_text = t['period_until'].format(end_date.strftime('%Y-%m-%d'))
-            content.append(Paragraph(period_text, styles['Normal']))
-            
-        content.append(Spacer(1, 12))
-        
-        # Group vitals by type
-        vitals_by_type = {}
-        for vital in vitals:
-            type_name = vital.type.value
-            if type_name not in vitals_by_type:
-                vitals_by_type[type_name] = []
-            vitals_by_type[type_name].append(vital)
-        
-        # Create a table for each vital type
-        for vital_type, type_vitals in vitals_by_type.items():
-            # Get reference range
-            reference = get_vital_reference_range(vital_type)
-            unit = get_vital_sign_unit(vital_type)
-            
-            content.append(Paragraph(f"{reference['name']}", styles['Heading3']))
-            content.append(Spacer(1, 3))
-            
-            # Reference range info
-            if reference['min'] is not None and reference['max'] is not None:
-                range_text = t['normal_range'].format(reference['min'], reference['max'], unit)
-                content.append(Paragraph(range_text, styles['Normal']))
-                content.append(Spacer(1, 6))
-            
-            # Table header
-            vitals_data = [[t['datetime'], t['value'], t['status']]]
-            
-            # Add data rows
-            for vital in sorted(type_vitals, key=lambda v: v.recorded_at, reverse=True):
-                # Determine status
-                status = t['normal']
-                status_color = colors.black
-                
-                if vital_type == 'blood_pressure':
-                    # Special case for blood pressure
-                    value_display = vital.value
-                else:
-                    value_display = f"{vital.value} {unit}"
-                    # Check if value is outside normal range
-                    if reference['min'] is not None and reference['max'] is not None:
-                        if vital.value < reference['min']:
-                            status = t['low']
-                            status_color = colors.blue
-                        elif vital.value > reference['max']:
-                            status = t['high']
-                            status_color = colors.red
-                
-                vitals_data.append([
-                    vital.recorded_at.strftime('%Y-%m-%d %H:%M'),
-                    value_display,
-                    status
-                ])
-            
-            # Create table
-            vitals_table = Table(vitals_data, colWidths=[2*inch, 2*inch, 1.5*inch])
-            vitals_table.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
-                ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
-                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (-1, 0), 10),
-                ('BOTTOMPADDING', (0, 0), (-1, 0), 5),
-                ('ALIGN', (0, 1), (-1, -1), 'LEFT'),
-                ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-                ('FONTSIZE', (0, 1), (-1, -1), 9),
-                ('GRID', (0, 0), (-1, -1), 1, colors.black),
-                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ]))
-            
-            # Add status color coding
-            for i in range(1, len(vitals_data)):
-                if vitals_data[i][2] == t['high']:
-                    vitals_table.setStyle(TableStyle([
-                        ('TEXTCOLOR', (2, i), (2, i), colors.red),
-                        ('FONTNAME', (2, i), (2, i), 'Helvetica-Bold')
-                    ]))
-                elif vitals_data[i][2] == t['low']:
-                    vitals_table.setStyle(TableStyle([
-                        ('TEXTCOLOR', (2, i), (2, i), colors.blue),
-                        ('FONTNAME', (2, i), (2, i), 'Helvetica-Bold')
-                    ]))
-            
-            content.append(vitals_table)
-            content.append(Spacer(1, 18))
-    else:
-        content.append(Paragraph(t['no_vitals'], styles['Normal']))
-        content.append(Spacer(1, 12))
-    
-    # Notes
-    content.append(Paragraph(t['clinical_notes'], styles['Heading2']))
-    content.append(Spacer(1, 6))
-    
-    if notes:
-        for i, note in enumerate(notes):
-            doctor_name = f"Dr. {note.doctor.first_name} {note.doctor.last_name}"
-            note_header = f"{note.created_at.strftime('%Y-%m-%d %H:%M')} - {doctor_name}"
-            content.append(Paragraph(note_header, styles['Heading4']))
-            content.append(Paragraph(note.content, styles['Normal']))
-            content.append(Spacer(1, 12))
-    else:
-        content.append(Paragraph(t['no_notes'], styles['Normal']))
-    
-    # Build the PDF
-    doc.build(content)
-    buffer.seek(0)
-    
-    return buffer
-
-
-def generate_vital_trends_report(patient, vital_type, vitals, period_desc, language=None):
-    """
-    Generate a PDF report showing trends for a specific vital sign
-    
-    Args:
-        patient: Patient object
-        vital_type: Type of vital sign (string)
-        vitals: List of VitalSign objects
-        period_desc: Description of the time period
-        language: Optional language code override (it/en)
-        
-    Returns:
-        BytesIO: PDF file as a binary stream
-    """
-    buffer = BytesIO()
-    
-    # Get translations
-    t = get_report_translations(language)
-    
-    # Create the PDF document
-    doc = SimpleDocTemplate(
-        buffer,
-        pagesize=letter,
-        rightMargin=72,
-        leftMargin=72,
-        topMargin=72,
-        bottomMargin=72
-    )
-    
-    # Get styles
-    styles = getSampleStyleSheet()
-    styles.add(ParagraphStyle(
-        name='Heading1Center',
-        parent=styles['Heading1'],
-        alignment=1
-    ))
-    
-    # Get reference range and unit
-    reference = get_vital_reference_range(vital_type)
-    unit = get_vital_sign_unit(vital_type)
-    
-    # Build content
-    content = []
-    
-    # Report Header
-    content.append(Paragraph(f"{reference['name']} {t['trend_analysis']}", styles['Heading1Center']))
+    content.append(Paragraph(f"{_('period_from_to').format(start_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d'))}", styles['Normal']))
     content.append(Spacer(1, 12))
     
-    # Patient info
-    content.append(Paragraph(f"{t['patient']}: {patient.first_name} {patient.last_name}", styles['Heading3']))
-    content.append(Paragraph(f"{t['period']}: {period_desc}", styles['Normal']))
-    content.append(Spacer(1, 24))
+    # Try to get data from health platforms
+    from health_platforms import get_vitals_data
     
-    if vitals:
-        # Sort vitals by date
-        sorted_vitals = sorted(vitals, key=lambda v: v.recorded_at)
+    try:
+        vitals_data = get_vitals_data(
+            patient,
+            vital_type,
+            start_date.strftime('%Y-%m-%d'),
+            end_date.strftime('%Y-%m-%d')
+        )
         
-        # Create a line chart for the vitals trend
-        drawing = Drawing(400, 200)
-        
-        chart = HorizontalLineChart()
-        chart.width = 350
-        chart.height = 150
-        chart.x = 25
-        chart.y = 25
-        
-        # Prepare data
-        dates = [v.recorded_at.strftime('%m/%d') for v in sorted_vitals]
-        values = [v.value for v in sorted_vitals]
-        
-        chart.data = [values]
-        chart.categoryAxis.categoryNames = dates
-        chart.valueAxis.valueMin = min(values) * 0.9 if values else 0
-        chart.valueAxis.valueMax = max(values) * 1.1 if values else 100
-        
-        # Assicuriamoci che i valori min e max siano float
-        chart.valueAxis.valueMin = float(chart.valueAxis.valueMin)
-        chart.valueAxis.valueMax = float(chart.valueAxis.valueMax)
-        
-        # Add reference lines if available
-        if reference['min'] is not None:
-            chart.valueAxis.valueMin = min(chart.valueAxis.valueMin, reference['min'] * 0.9)
-            # Inizializza valueSteps se non esiste
-            if not hasattr(chart.valueAxis, 'valueSteps'):
-                chart.valueAxis.valueSteps = []
-            chart.valueAxis.valueSteps.append(reference['min'])
-        
-        if reference['max'] is not None:
-            chart.valueAxis.valueMax = max(chart.valueAxis.valueMax, reference['max'] * 1.1)
-            # Inizializza valueSteps se non esiste
-            if not hasattr(chart.valueAxis, 'valueSteps'):
-                chart.valueAxis.valueSteps = []
-            chart.valueAxis.valueSteps.append(reference['max'])
-        
-        # Style the chart
-        chart.lines[0].strokeWidth = 2
-        chart.lines[0].strokeColor = colors.blue
-        
-        # Add the chart to the drawing
-        drawing.add(chart)
-        
-        # Add drawing to content
-        content.append(drawing)
-        content.append(Spacer(1, 12))
-        
-        # Add a statistics table
-        content.append(Paragraph(t['statistics'], styles['Heading3']))
-        content.append(Spacer(1, 6))
-        
-        # Calculate statistics
-        avg_value = sum(values) / len(values)
-        min_value = min(values)
-        max_value = max(values)
-        
-        # Count abnormal readings
-        high_count = sum(1 for v in values if reference['max'] is not None and v > reference['max'])
-        low_count = sum(1 for v in values if reference['min'] is not None and v < reference['min'])
-        normal_count = len(values) - high_count - low_count
-        
-        # Create statistics table
-        stats_data = [
-            [t['average'], f"{avg_value:.1f} {unit}"],
-            [t['minimum'], f"{min_value} {unit}"],
-            [t['maximum'], f"{max_value} {unit}"],
-            [t['normal_readings'], f"{normal_count} ({normal_count/len(values)*100:.1f}%)"],
-            [t['high_readings'], f"{high_count} ({high_count/len(values)*100:.1f}%)"],
-            [t['low_readings'], f"{low_count} ({low_count/len(values)*100:.1f}%)"]
-        ]
-        
-        stats_table = Table(stats_data, colWidths=[2*inch, 3*inch])
-        stats_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (0, -1), colors.lightgrey),
-            ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
-            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 0), (-1, -1), 10),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
-            ('TOPPADDING', (0, 0), (-1, -1), 5),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black)
-        ]))
-        
-        content.append(stats_table)
-        content.append(Spacer(1, 18))
-        
-        # Detailed readings
-        content.append(Paragraph(t['detailed_readings'], styles['Heading3']))
-        content.append(Spacer(1, 6))
-        
-        # Table header
-        readings_data = [[t['datetime'], t['value'], t['status']]]
-        
-        # Add data rows
-        for vital in sorted_vitals:
-            # Determine status
-            status = t['normal']
+        if not vitals_data or len(vitals_data) == 0:
+            content.append(Paragraph(_('No vital data available for this period.'), styles['Normal']))
+        else:
+            # Create chart
+            period_name = {
+                '1d': _('One Day'),
+                '7d': _('Seven Days'),
+                '1m': _('One Month'),
+                '3m': _('Three Months'),
+                '1y': _('One Year')
+            }.get(period, str(days) + ' ' + _('days'))
             
-            if reference['min'] is not None and reference['max'] is not None:
-                if vital.value < reference['min']:
-                    status = t['low']
-                elif vital.value > reference['max']:
-                    status = t['high']
+            chart = create_vital_chart(vitals_data, period_name, vital_type)
+            content.append(chart)
+            content.append(Spacer(1, 24))
             
-            readings_data.append([
-                vital.recorded_at.strftime('%Y-%m-%d %H:%M'),
-                f"{vital.value} {unit}",
-                status
-            ])
-        
-        # Create table
-        readings_table = Table(readings_data, colWidths=[2*inch, 2*inch, 1.5*inch])
-        readings_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
-            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, 0), 10),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 5),
-            ('ALIGN', (0, 1), (-1, -1), 'LEFT'),
-            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 1), (-1, -1), 9),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black),
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ]))
-        
-        # Add status color coding
-        for i in range(1, len(readings_data)):
-            if readings_data[i][2] == t['high']:
-                readings_table.setStyle(TableStyle([
-                    ('TEXTCOLOR', (2, i), (2, i), colors.red),
-                    ('FONTNAME', (2, i), (2, i), 'Helvetica-Bold')
+            # Statistics section
+            content.append(Paragraph(_('Statistics'), styles['Heading2']))
+            content.append(Spacer(1, 6))
+            
+            # Calculate statistics
+            values = [float(v.get('value', 0)) for v in vitals_data]
+            
+            if values:
+                avg_value = sum(values) / len(values)
+                min_value = min(values)
+                max_value = max(values)
+                
+                # Get normal ranges
+                normal_ranges = {
+                    'heart_rate': (60, 100),
+                    'blood_pressure_systolic': (90, 120),
+                    'blood_pressure_diastolic': (60, 80),
+                    'temperature': (36.1, 37.2),
+                    'respiratory_rate': (12, 20),
+                    'oxygen_saturation': (95, 100),
+                }
+                
+                # Count readings in each range
+                normal_range = normal_ranges.get(vital_type, (0, 0))
+                normal_count = sum(1 for v in values if normal_range[0] <= v <= normal_range[1])
+                high_count = sum(1 for v in values if v > normal_range[1])
+                low_count = sum(1 for v in values if v < normal_range[0])
+                
+                # Create statistics table
+                stats_data = [
+                    [_('Average'), f"{avg_value:.1f} {vital_unit}"],
+                    [_('Minimum'), f"{min_value:.1f} {vital_unit}"],
+                    [_('Maximum'), f"{max_value:.1f} {vital_unit}"],
+                    [_('Normal Readings'), f"{normal_count} ({normal_count/len(values)*100:.1f}%)"],
+                    [_('High Readings'), f"{high_count} ({high_count/len(values)*100:.1f}%)"],
+                    [_('Low Readings'), f"{low_count} ({low_count/len(values)*100:.1f}%)"],
+                ]
+                
+                stats_table = Table(stats_data, colWidths=[2*inch, 2*inch])
+                stats_table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (0, -1), colors.lightgrey),
+                    ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
+                    ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                    ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+                    ('FONTSIZE', (0, 0), (-1, -1), 10),
+                    ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+                    ('TOPPADDING', (0, 0), (-1, -1), 5),
+                    ('GRID', (0, 0), (-1, -1), 1, colors.black)
                 ]))
-            elif readings_data[i][2] == t['low']:
-                readings_table.setStyle(TableStyle([
-                    ('TEXTCOLOR', (2, i), (2, i), colors.blue),
-                    ('FONTNAME', (2, i), (2, i), 'Helvetica-Bold')
-                ]))
-        
-        content.append(readings_table)
-    else:
-        content.append(Paragraph(t['no_vital_data'], styles['Normal']))
+                
+                content.append(stats_table)
+                content.append(Spacer(1, 24))
+                
+                # Detailed readings section
+                content.append(Paragraph(_('Detailed Readings'), styles['Heading2']))
+                content.append(Spacer(1, 6))
+                
+                # Limit to the most recent 20 readings if there are many
+                display_data = vitals_data
+                if len(display_data) > 20:
+                    display_data = sorted(vitals_data, key=lambda v: v.get('timestamp', ''), reverse=True)[:20]
+                    content.append(Paragraph(_('Showing the 20 most recent readings'), styles['Normal']))
+                    content.append(Spacer(1, 6))
+                
+                # Create table headers
+                readings_data = [[_('Date/Time'), _('Value'), _('Status')]]
+                
+                # Add each reading
+                for v in sorted(display_data, key=lambda v: v.get('timestamp', ''), reverse=True):
+                    timestamp = v.get('timestamp', '')
+                    value = float(v.get('value', 0))
+                    
+                    # Format date
+                    date_str = ""
+                    if timestamp:
+                        try:
+                            dt = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+                            date_str = dt.strftime('%Y-%m-%d %H:%M')
+                        except (ValueError, AttributeError):
+                            date_str = timestamp
+                    
+                    # Determine status
+                    status = _('Normal')
+                    status_color = colors.green
+                    if value > normal_range[1]:
+                        status = _('High')
+                        status_color = colors.red
+                    elif value < normal_range[0]:
+                        status = _('Low')
+                        status_color = colors.orange
+                    
+                    readings_data.append([date_str, f"{value:.1f} {vital_unit}", status])
+                
+                readings_table = Table(readings_data, colWidths=[2*inch, 1.5*inch, 1*inch])
+                
+                # Create table style with colors
+                table_style = [
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                    ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 0), (-1, -1), 10),
+                    ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+                    ('TOPPADDING', (0, 0), (-1, -1), 5),
+                    ('GRID', (0, 0), (-1, -1), 1, colors.black)
+                ]
+                
+                readings_table.setStyle(TableStyle(table_style))
+                
+                content.append(readings_table)
+                content.append(Spacer(1, 24))
+            
+            # Recommendations
+            content.append(Paragraph(_('Recommendations'), styles['Heading2']))
+            content.append(Spacer(1, 6))
+            content.append(Paragraph(_('Consult your doctor to discuss these results. This report is generated automatically and should be interpreted by a qualified medical professional.'), styles['Normal']))
+    except Exception as e:
+        logger.error(f"Error generating vital trend report: {str(e)}")
+        content.append(Paragraph(f"{_('Error generating report')}: {str(e)}", styles['Normal']))
     
-    # Recommendations section - Now using prepared translations
-    content.append(Spacer(1, 24))
-    content.append(Paragraph(t['recommendations'], styles['Heading3']))
-    content.append(Spacer(1, 6))
-    content.append(Paragraph(t['consult_doctor'], styles['Normal']))
-    
-    # Build the PDF
+    # Build PDF
     doc.build(content)
     buffer.seek(0)
-    
     return buffer

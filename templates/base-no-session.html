@@ -36,32 +36,9 @@
             </button>
             
             <div class="collapse navbar-collapse" id="navbarNav">
-                {% if current_user.is_authenticated %}
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.path == url_for('views.dashboard') %}active{% endif %}" 
-                           href="{{ url_for('views.dashboard') }}">
-                            <i class="fas fa-tachometer-alt me-1"></i> {{ _('Dashboard') }}
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if '/patients' in request.path and not '/vitals' in request.path %}active{% endif %}" 
-                           href="{{ url_for('views.patients') }}">
-                            <i class="fas fa-users me-1"></i> {{ _('Patients') }}
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if '/audit' in request.path %}active{% endif %}" 
-                           href="{{ url_for('audit.get_audit_logs') }}">
-                            <i class="fas fa-history me-1"></i> {{ _('Audit Logs') }}
-                        </a>
-                    </li>
-                </ul>
-                {% else %}
                 <ul class="navbar-nav me-auto">
                     <!-- Empty space for non-authenticated users -->
                 </ul>
-                {% endif %}
                 
                 <ul class="navbar-nav">
                     <!-- Language Selector - Always visible -->
@@ -81,28 +58,6 @@
                             {% endfor %}
                         </ul>
                     </li>
-                    
-                    {% if current_user.is_authenticated %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                           data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-user-md me-1"></i> {{ current_user.first_name }} {{ current_user.last_name }}
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                            <li>
-                                <a class="dropdown-item" href="{{ url_for('views.profile') }}">
-                                    <i class="fas fa-id-card me-1"></i> {{ _('Profile') }}
-                                </a>
-                            </li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <a class="dropdown-item" href="{{ url_for('auth.logout') }}">
-                                    <i class="fas fa-sign-out-alt me-1"></i> {{ _('Logout') }}
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    {% endif %}
                 </ul>
             </div>
         </div>

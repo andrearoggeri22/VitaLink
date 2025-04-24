@@ -44,6 +44,10 @@
                             <option value="DELETE" {% if request.args.get('action_type') == 'DELETE' %}selected{% endif %}>{{ _('Delete') }}</option>
                             <option value="VIEW" {% if request.args.get('action_type') == 'VIEW' %}selected{% endif %}>{{ _('View') }}</option>
                             <option value="EXPORT" {% if request.args.get('action_type') == 'EXPORT' %}selected{% endif %}>{{ _('Export') }}</option>
+                            <option value="GENERATE_LINK" {% if request.args.get('action_type') == 'GENERATE_LINK' %}selected{% endif %}>{{ _('Generate Link') }}</option>
+                            <option value="CONNECT" {% if request.args.get('action_type') == 'CONNECT' %}selected{% endif %}>{{ _('Connect') }}</option>
+                            <option value="DISCONNECT" {% if request.args.get('action_type') == 'DISCONNECT' %}selected{% endif %}>{{ _('Disconnect') }}</option>
+                            <option value="SYNC" {% if request.args.get('action_type') == 'SYNC' %}selected{% endif %}>{{ _('Sync') }}</option>
                         </select>
                     </div>
                 </div>
@@ -53,9 +57,11 @@
                         <select class="form-select" id="entity_type" name="entity_type">
                             <option value="">{{ _('All Entities') }}</option>
                             <option value="PATIENT" {% if request.args.get('entity_type') == 'PATIENT' %}selected{% endif %}>{{ _('Patient') }}</option>
-                            <option value="VITAL_SIGN" {% if request.args.get('entity_type') == 'VITAL_SIGN' %}selected{% endif %}>{{ _('Vital Sign') }}</option>
                             <option value="NOTE" {% if request.args.get('entity_type') == 'NOTE' %}selected{% endif %}>{{ _('Note') }}</option>
                             <option value="REPORT" {% if request.args.get('entity_type') == 'REPORT' %}selected{% endif %}>{{ _('Report') }}</option>
+                            <option value="HEALTH_PLATFORM" {% if request.args.get('entity_type') == 'HEALTH_PLATFORM' %}selected{% endif %}>{{ _('Health Platform') }}</option>
+                            <option value="HEALTH_LINK" {% if request.args.get('entity_type') == 'HEALTH_LINK' %}selected{% endif %}>{{ _('Health Link') }}</option>
+                            <option value="OBSERVATION" {% if request.args.get('entity_type') == 'OBSERVATION' %}selected{% endif %}>{{ _('Observation') }}</option>
                         </select>
                     </div>
                 </div>
@@ -107,6 +113,11 @@
         <span class="badge bg-primary">{{ logs|length }} {{ _('Records') }}</span>
     </div>
     <div class="card-body p-0">
+        {% if message %}
+        <div class="alert alert-info m-3" role="alert">
+            {{ message }}
+        </div>
+        {% endif %}
         <div class="table-responsive">
             <table class="table table-hover mb-0">
                 <thead>
@@ -127,8 +138,18 @@
                             <td>{{ log.timestamp }}</td>
                             <td>{{ log.doctor_name }}</td>
                             <td>
-                                <span class="badge {% if log.action_type == 'create' %}bg-success{% elif log.action_type == 'update' %}bg-info{% elif log.action_type == 'delete' %}bg-danger{% elif log.action_type == 'view' %}bg-secondary{% elif log.action_type == 'export' %}bg-primary{% endif %}">
-                                    {{ log.action_type|title }}
+                                <span class="badge 
+                                    {% if log.action_type == 'create' %}bg-success
+                                    {% elif log.action_type == 'update' %}bg-info
+                                    {% elif log.action_type == 'delete' %}bg-danger
+                                    {% elif log.action_type == 'view' %}bg-secondary
+                                    {% elif log.action_type == 'export' %}bg-primary
+                                    {% elif log.action_type == 'generate_link' %}bg-warning text-dark
+                                    {% elif log.action_type == 'connect' %}bg-success
+                                    {% elif log.action_type == 'disconnect' %}bg-danger
+                                    {% elif log.action_type == 'sync' %}bg-info
+                                    {% else %}bg-secondary{% endif %}">
+                                    {{ log.action_type|replace('_', ' ')|title }}
                                 </span>
                             </td>
                             <td>
@@ -277,11 +298,15 @@ function createActionTypeChart(actionStats) {
     const labels = actionStats.map(item => item.type.charAt(0).toUpperCase() + item.type.slice(1).toLowerCase());
     const counts = actionStats.map(item => item.count);
     const colors = [
-        'rgba(54, 162, 235, 0.7)',  // Create - Blue
-        'rgba(255, 206, 86, 0.7)',  // Update - Yellow
-        'rgba(255, 99, 132, 0.7)',  // Delete - Red
-        'rgba(75, 192, 192, 0.7)',  // View - Green
-        'rgba(153, 102, 255, 0.7)'  // Export - Purple
+        'rgba(54, 162, 235, 0.7)',   // Create - Blue
+        'rgba(255, 206, 86, 0.7)',   // Update - Yellow
+        'rgba(255, 99, 132, 0.7)',   // Delete - Red
+        'rgba(75, 192, 192, 0.7)',   // View - Green
+        'rgba(153, 102, 255, 0.7)',  // Export - Purple
+        'rgba(255, 159, 64, 0.7)',   // Generate Link - Orange
+        'rgba(40, 167, 69, 0.7)',    // Connect - Green
+        'rgba(220, 53, 69, 0.7)',    // Disconnect - Red
+        'rgba(23, 162, 184, 0.7)'    // Sync - Cyan
     ];
     
     new Chart(ctx, {
@@ -317,10 +342,12 @@ function createEntityTypeChart(entityStats) {
     const labels = entityStats.map(item => item.type.replace('_', ' ').replace(/(^\w{1})|(\s+\w{1})/g, letter => letter.toUpperCase()));
     const counts = entityStats.map(item => item.count);
     const colors = [
-        'rgba(255, 99, 132, 0.7)',    // Patient - Red
-        'rgba(54, 162, 235, 0.7)',    // Vital Sign - Blue
-        'rgba(255, 206, 86, 0.7)',    // Note - Yellow
-        'rgba(75, 192, 192, 0.7)'     // Report - Green
+        'rgba(255, 99, 132, 0.7)',     // Patient - Red
+        'rgba(255, 206, 86, 0.7)',     // Note - Yellow
+        'rgba(75, 192, 192, 0.7)',     // Report - Green
+        'rgba(153, 102, 255, 0.7)',    // Health Platform - Purple
+        'rgba(255, 159, 64, 0.7)',     // Health Link - Orange
+        'rgba(54, 162, 235, 0.7)'      // Observation - Blue
     ];
     
     new Chart(ctx, {
