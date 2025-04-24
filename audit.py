@@ -283,8 +283,7 @@ def get_audit_stats():
     
     # Base query for the time period
     base_query = AuditLog.query.filter(AuditLog.timestamp >= start_date)
-    
-    # Count actions by type
+      # Count actions by type
     action_stats = []
     # Get only the action types that exist in the database to avoid InvalidTextRepresentation errors
     existing_action_types = db.session.query(db.distinct(AuditLog.action_type)).all()
@@ -293,8 +292,14 @@ def get_audit_stats():
     for action_type in existing_action_types:
         count = base_query.filter_by(action_type=action_type).count()
         if count > 0:
+            # Se action_type è già una stringa, usarla direttamente
+            # altrimenti se è un enum, accedere alla proprietà value
+            action_type_value = action_type
+            if hasattr(action_type, 'value'):
+                action_type_value = action_type.value
+                
             action_stats.append({
-                'type': action_type.value,
+                'type': action_type_value.lower(),
                 'count': count
             })
     
@@ -307,8 +312,14 @@ def get_audit_stats():
     for entity_type in existing_entity_types:
         count = base_query.filter_by(entity_type=entity_type).count()
         if count > 0:
+            # Se entity_type è già una stringa, usarla direttamente
+            # altrimenti se è un enum, accedere alla proprietà value
+            entity_type_value = entity_type
+            if hasattr(entity_type, 'value'):
+                entity_type_value = entity_type.value
+                
             entity_stats.append({
-                'type': entity_type.value,
+                'type': entity_type_value.lower(),
                 'count': count
             })
     
@@ -377,10 +388,15 @@ def get_audit_stats():
     ).group_by(
         'date'
     ).all()
-    
-    # Fill in the actual counts
+      # Fill in the actual counts
     for date_str, count in timeline_data:
-        date_key = date_str.strftime('%Y-%m-%d')
+        # Se date_str è già una stringa, usarla direttamente
+        # altrimenti, se è un oggetto datetime, formattarlo come stringa
+        if isinstance(date_str, str):
+            date_key = date_str
+        else:
+            date_key = date_str.strftime('%Y-%m-%d')
+            
         if date_key in date_counts:
             date_counts[date_key] = count
     
