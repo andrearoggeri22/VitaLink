@@ -8,13 +8,13 @@ import os
 # Fitbit API configuration
 FITBIT_CONFIG = {
     'client_id':
-    os.environ.get('FITBIT_CLIENT_ID', '23Q8NH'),
+    os.environ.get('FITBIT_CLIENT_ID', '23Q88S'),
     'client_secret':
-    os.environ.get('FITBIT_CLIENT_SECRET', '0894b4d7af0eb48122ce91d9046a9eb5'),
+    os.environ.get('FITBIT_CLIENT_SECRET', '255d300e5671fe7667ade5d12a83ee85'),
     'redirect_uri':
     os.environ.get(
         'FITBIT_REDIRECT_URI',
-        'https://b5973165-82eb-4185-9ea7-9d814abb3f4c-00-q21nx7fgkw84.worf.replit.dev/health/oauth_callback'
+        'http://localhost:5000/health/oauth_callback'
     ),
     'authorize_url':
     'https://www.fitbit.com/oauth2/authorize',

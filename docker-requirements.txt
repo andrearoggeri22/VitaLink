@@ -14,3 +14,5 @@ clicksend-client>=5.0.78
 wtforms>=3.2.1
 reportlab>=4.4.0
 polib>=1.2.0
+requests>=2.31.0
+flask_migrate>=4.0.0
