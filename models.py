@@ -307,16 +307,21 @@ class VitalObservation(db.Model):
     end_date = db.Column(db.DateTime, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
     def to_dict(self):
         # Convert the object to a serializable dictionary
         #
         # Returns:
         #   dict: Dictionary representation of the object
+        # Carica il dottore per ottenere i dettagli
+        from app import db
+        from sqlalchemy.orm import joinedload
+        doctor = db.session.query(Doctor).get(self.doctor_id)
+        
         return {
             'id': self.id,
             'patient_id': self.patient_id,
             'doctor_id': self.doctor_id,
+            'doctor_name': f"{doctor.first_name} {doctor.last_name}" if doctor else "Unknown Doctor",
             'vital_type': self.vital_type.value,
             'content': self.content,
             'start_date': self.start_date.isoformat() if self.start_date else None,

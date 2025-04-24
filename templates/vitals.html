@@ -2,6 +2,14 @@
 
 {% block title %}{{ _('Vital Signs') }} - {{ patient.first_name }} {{ patient.last_name }} - {{ _('Healthcare Monitoring Platform') }}{% endblock %}
 
+{% block head %}
+<meta name="current-doctor-id" content="{{ current_user.id }}">
+<script>
+    // Definisci l'ID del medico attuale come variabile globale
+    const CURRENT_DOCTOR_ID = {{ current_user.id }};
+</script>
+{% endblock %}
+
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>

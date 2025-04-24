@@ -415,35 +415,40 @@ function executeDisconnection(patientId, platform) {
  * @param {string} type The type of notification (success, danger, etc.)
  */
 function showNotification(message, type) {
-    // Create notification element if it doesn't exist
-    let notificationContainer = document.getElementById('notificationContainer');
-    if (!notificationContainer) {
-        notificationContainer = document.createElement('div');
-        notificationContainer.id = 'notificationContainer';
-        notificationContainer.style.position = 'fixed';
-        notificationContainer.style.top = '20px';
-        notificationContainer.style.right = '20px';
-        notificationContainer.style.zIndex = '9999';
-        document.body.appendChild(notificationContainer);
-    }
+    // Invece di creare un container personalizzato, utilizziamo lo stesso metodo di showAlert
+    // Crea l'elemento alert
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.setAttribute('role', 'alert');
     
-    // Create notification
-    const notification = document.createElement('div');
-    notification.className = `alert alert-${type} alert-dismissible fade show`;
-    notification.innerHTML = `
+    alertDiv.innerHTML = `
         ${message}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     `;
     
-    // Add to container
-    notificationContainer.appendChild(notification);
+    // Inserisci l'alert nella stessa posizione dei flash messages di Flask (all'inizio del main container)
+    const mainContainer = document.querySelector('main.container');
+    if (mainContainer) {
+        // Controlliamo se esiste già un alert, in tal caso inseriamo prima di esso,
+        // altrimenti inseriamo prima del primo elemento nel main container
+        const existingAlert = mainContainer.querySelector('.alert');
+        if (existingAlert) {
+            mainContainer.insertBefore(alertDiv, existingAlert);
+        } else {
+            mainContainer.insertBefore(alertDiv, mainContainer.firstChild);
+        }
+    } else {
+        // Fallback: usa il container standard se main.container non esiste
+        const container = document.querySelector('.container');
+        if (container) {
+            container.insertBefore(alertDiv, container.firstChild);
+        }
+    }
     
-    // Auto-dismiss after 5 seconds
+    // Rimuovi automaticamente dopo 5 secondi
     setTimeout(() => {
-        notification.classList.remove('show');
-        setTimeout(() => {
-            notification.remove();
-        }, 150);
+        alertDiv.classList.remove('show');
+        setTimeout(() => alertDiv.remove(), 150);
     }, 5000);
 }
 
@@ -473,12 +478,11 @@ function createHealthPlatformModal(patientId) {
                                 <i class="fas fa-link me-2"></i> ${translateText('Connect Health Platform')}
                             </h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="${translateText('Close')}"></button>
-                        </div>
-                        <div class="modal-body">
-                            <p>${translateText('Choose a health platform to connect:')}</p>
+                        </div>                        <div class="modal-body">
+                            <p>${translateText('Generate a connection link for health data:')}</p>
                             <div id="platformOptions" class="d-grid gap-2">
                                 <button class="btn btn-outline-primary platform-btn" data-platform="${PLATFORMS.FITBIT}">
-                                    <i class="fas fa-heartbeat me-2"></i> Fitbit
+                                    <i class="fas fa-link me-2"></i> ${translateText('Generate Link')}
                                 </button>
                             </div>
                             <div id="connectionStatus" class="alert mt-3 d-none"></div>
@@ -555,26 +559,36 @@ function createHealthPlatformLink(patientId, platform) {
         if (platformButtons) {
             platformButtons.forEach(btn => btn.disabled = false);
         }
-        
-        if (data.success) {
+          if (data.success) {
             // Show success message
-            if (connectionStatusElem) {
-                connectionStatusElem.classList.remove('alert-info', 'alert-danger');
+            if (connectionStatusElem) {                // Rimuovi le classi esistenti e aggiungi la classe di successo
+                connectionStatusElem.classList.remove('alert-info', 'alert-danger', 'd-none');
                 connectionStatusElem.classList.add('alert-success');
+                
+                // Crea un div separato per il messaggio di successo (senza il link)
                 connectionStatusElem.innerHTML = `
                     <i class="fas fa-check-circle me-2"></i>
                     ${translateText('Link created successfully!')}
-                    <div class="mt-3">
-                        <p class="mb-1">${translateText('Link per la connessione (valido per 24 ore):')}</p>
-                        <div class="input-group mb-3">
-                            <input type="text" class="form-control" id="linkCopyInput" value="${data.connect_url}" readonly>
-                            <button class="btn btn-outline-primary" type="button" id="copyLinkBtn">
-                                <i class="fas fa-copy"></i> ${translateText('Copia')}
-                            </button>
-                        </div>
-                        <small class="text-muted">${translateText('Fornisci questo link al paziente per connettere il suo account Fitbit.')}</small>
-                    </div>
                 `;
+                
+                // Crea un nuovo elemento fuori dall'alert per contenere il link
+                // Questo elemento non sarà affetto da eventuali comportamenti automatici dell'alert
+                const linkContainer = document.createElement('div');
+                linkContainer.id = 'healthPlatformLinkContainer';
+                linkContainer.className = 'mt-3';
+                linkContainer.innerHTML = `
+                    <p class="mb-1">${translateText('Link per la connessione (valido per 24 ore):')}</p>
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" id="linkCopyInput" value="${data.connect_url}" readonly>
+                        <button class="btn btn-outline-primary" type="button" id="copyLinkBtn">
+                            <i class="fas fa-copy"></i> ${translateText('Copia')}
+                        </button>
+                    </div>
+                    <small class="text-muted">${translateText('Fornisci questo link al paziente per connettere il suo servizio di raccolta dati.')}</small>
+                `;
+                
+                // Inserisci il nuovo contenitore dopo l'elemento connectionStatusElem
+                connectionStatusElem.parentNode.insertBefore(linkContainer, connectionStatusElem.nextSibling);
                 
                 // Add event listener for the copy button
                 const copyBtn = document.getElementById('copyLinkBtn');
@@ -590,10 +604,20 @@ function createHealthPlatformLink(patientId, platform) {
                         }, 2000);
                     });
                 }
+                
+                // Modifica il footer del modale per renderlo chiaro che l'utente deve chiudere manualmente
+                const modalFooter = document.querySelector('#healthPlatformModal .modal-footer');
+                if (modalFooter) {
+                    modalFooter.innerHTML = `
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                            ${translateText('Close')}
+                        </button>
+                    `;
+                }
             }
             
-            // Don't auto-close the modal or auto-open the link
-            // Let the user copy the link manually
+            // Imposta esplicitamente che non vogliamo chiusure automatiche
+            // Non chiudere automaticamente il modale e non aprire automaticamente il link
         } else {
             // Show error message
             if (connectionStatusElem) {
