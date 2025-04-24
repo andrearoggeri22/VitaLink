@@ -410,15 +410,6 @@
     // Patient ID per la pagina corrente
     const PATIENT_ID = {{ patient.id }};
     
-    // Handle complete report modal
-    document.getElementById('generateCompleteReportBtn').addEventListener('click', function(e) {
-        e.preventDefault();
-        
-        // Open the complete report modal
-        const completeReportModal = new bootstrap.Modal(document.getElementById('completeReportModal'));
-        completeReportModal.show();
-    });
-    
     // Handle specific report modal
     document.getElementById('generateSpecificReportBtn').addEventListener('click', function(e) {
         e.preventDefault();
