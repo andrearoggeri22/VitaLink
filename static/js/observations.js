@@ -171,11 +171,8 @@ function updateObservationsUI(observations) {
             <div class="card-body p-0">
                 <ul class="list-group list-group-flush observation-list" data-type="${type}"></ul>
             </div>
-        `;
-        
-        // Aggiungi le singole osservazioni alla lista
-        const observationList = observationGroup.querySelector('.observation-list');
-        typeObservations.forEach(obs => {
+        `;            // Aggiungi le singole osservazioni alla lista
+        const observationList = observationGroup.querySelector('.observation-list');        typeObservations.forEach(obs => {
             const item = document.createElement('li');
             item.className = 'list-group-item';
             item.setAttribute('data-id', obs.id);
@@ -183,27 +180,60 @@ function updateObservationsUI(observations) {
             // Formatta le date
             const startDate = new Date(obs.start_date);
             const endDate = new Date(obs.end_date);
-            const dateStr = `${formatDateForDisplay(startDate)} - ${formatDateForDisplay(endDate)}`;
-            
+            const dateStr = `${formatDateForDisplay(startDate)} - ${formatDateForDisplay(endDate)}`;            // Verifica se l'osservazione appartiene al medico corrente
+            let isCurrentDoctorObservation = false;
+              try {
+                // Recupera l'ID del medico corrente dal meta tag
+                const currentDoctorIdElement = document.querySelector('meta[name="current-doctor-id"]');
+                const currentDoctorId = currentDoctorIdElement ? parseInt(currentDoctorIdElement.getAttribute('content')) : null;
+                
+                console.log('Controllo proprietà:', obs.id, '- Medico attuale:', currentDoctorId, '- Medico osservazione:', obs.doctor_id);
+                
+                // Converti entrambi gli ID in numeri interi per fare un confronto coerente
+                // Se entrambi gli ID sono disponibili, confrontali
+                if (currentDoctorId && obs.doctor_id) {
+                    const doctorIdFromObs = parseInt(obs.doctor_id);
+                    isCurrentDoctorObservation = doctorIdFromObs === currentDoctorId;
+                    console.log('Confronto ID:', doctorIdFromObs, '===', currentDoctorId, '=', isCurrentDoctorObservation);
+                } else {
+                    // Se mancano gli ID, mostriamo sempre il pulsante per mantenere la funzionalità esistente
+                    // Questo è un fallback che assicura di non bloccare le funzionalità base
+                    isCurrentDoctorObservation = true;
+                    console.log('ID mancanti, mostrando pulsante per sicurezza');
+                }
+            } catch (error) {
+                // In caso di errore, mostriamo il pulsante per mantenere la funzionalità
+                isCurrentDoctorObservation = true;
+                console.error('Errore nel controllo del proprietario dell\'osservazione:', error);
+            }
+              // HTML con nome del dottore e pulsante di eliminazione solo se è il proprietario
             item.innerHTML = `
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
                         <p class="mb-1">${obs.content}</p>
-                        <small class="text-muted">
-                            <i class="fas fa-calendar-alt me-1"></i> ${dateStr}
-                        </small>
+                        <div class="d-flex align-items-center text-muted small">
+                            <span class="me-3">
+                                <i class="fas fa-calendar-alt me-1"></i> ${dateStr}
+                            </span>
+                            <span>
+                                <i class="fas fa-user-md me-1"></i> ${obs.doctor_name || 'Unknown Doctor'}
+                            </span>
+                        </div>
                     </div>
-                    <button class="btn btn-sm btn-outline-danger delete-observation-btn">
-                        <i class="fas fa-trash-alt"></i>
-                    </button>
+                    ${isCurrentDoctorObservation ? 
+                      `<button class="btn btn-sm btn-outline-danger delete-observation-btn">
+                         <i class="fas fa-trash-alt"></i>
+                       </button>` : ''}
                 </div>
             `;
             
-            // Aggiungi event listener al pulsante di eliminazione
+            // Aggiungi event listener al pulsante di eliminazione solo se esiste
             const deleteBtn = item.querySelector('.delete-observation-btn');
-            deleteBtn.addEventListener('click', function() {
-                openObservationModal(obs);
-            });
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', function() {
+                    openObservationModal(obs);
+                });
+            }
             
             observationList.appendChild(item);
         });
@@ -224,15 +254,32 @@ function openObservationModal(observation = null) {
     const deleteBtn = document.getElementById('deleteObservationBtn');
     const saveBtn = document.getElementById('saveObservationBtn');
     const form = document.getElementById('observationForm');
-    const observationIdInput = document.getElementById('observationId');
-    
-    if (observation) {
+    const observationIdInput = document.getElementById('observationId');    if (observation) {
         // Se è un'osservazione esistente, mostra solo la conferma di eliminazione
         modalTitle.textContent = translateText('Elimina osservazione');
         
         // Mostra il contenuto di eliminazione e nascondi il form
         addContent.classList.add('d-none');
         deleteContent.classList.remove('d-none');
+        
+        // Completa sostituzione e pulizia del contenuto di eliminazione
+        // Rimuovi tutti i contenuti precedenti e crea un nuovo messaggio di conferma
+        if (deleteContent) {
+            // Prima di tutto, assicurati che il contenitore sia visibile
+            deleteContent.classList.remove('d-none');
+            
+            // Svuota il contenuto precedente e inserisci il nuovo messaggio
+            deleteContent.innerHTML = `
+                <div>
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>${translateText('Attenzione')}</strong>: ${translateText('Sei sicuro di voler eliminare questa osservazione?')}
+                </div>
+            `;
+            
+            console.log('Contenuto del modale impostato:', deleteContent.innerHTML);
+        } else {
+            console.error('Elemento deleteContent non trovato');
+        }
         
         // Mostra solo il pulsante Elimina
         deleteBtn.classList.remove('d-none');
@@ -437,18 +484,30 @@ function showAlert(message, type = 'info') {
         ${message}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     `;
-    
-    // Aggiungi alla pagina
-    const container = document.querySelector('.container');
-    if (container) {
-        container.insertBefore(alertDiv, container.firstChild);
-        
-        // Rimuovi automaticamente dopo 5 secondi
-        setTimeout(() => {
-            alertDiv.classList.remove('show');
-            setTimeout(() => alertDiv.remove(), 150);
-        }, 5000);
+      // Inserisci l'alert nella stessa posizione dei flash messages di Flask (all'inizio del main container)
+    const mainContainer = document.querySelector('main.container');
+    if (mainContainer) {
+        // Controlliamo se esiste già un alert, in tal caso inseriamo prima di esso,
+        // altrimenti inseriamo prima del primo elemento nel main container
+        const existingAlert = mainContainer.querySelector('.alert');
+        if (existingAlert) {
+            mainContainer.insertBefore(alertDiv, existingAlert);
+        } else {
+            mainContainer.insertBefore(alertDiv, mainContainer.firstChild);
+        }
+    } else {
+        // Fallback: usa il container standard se main.container non esiste
+        const container = document.querySelector('.container');
+        if (container) {
+            container.insertBefore(alertDiv, container.firstChild);
+        }
     }
+    
+    // Rimuovi automaticamente dopo 5 secondi
+    setTimeout(() => {
+        alertDiv.classList.remove('show');
+        setTimeout(() => alertDiv.remove(), 150);
+    }, 5000);
 }
 
 /**
