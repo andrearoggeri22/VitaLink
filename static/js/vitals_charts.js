@@ -129,7 +129,18 @@ function updateUIForNoConnection() {
         vitalsTableMessage.textContent = translateText('Nessun dato disponibile. Collega una piattaforma di salute.');
     }
     
-    // Disabilita i pulsanti del periodo
+    // Nascondi il contenitore dei pulsanti del periodo
+    try {
+        const periodContainer = document.querySelector('.btn-group[role="group"][aria-label="Periodo di tempo"]').closest('.mb-4');
+        if (periodContainer) {
+            periodContainer.classList.add('d-none');
+            console.log('Periodo nascosto: nessuna connessione attiva');
+        }
+    } catch (error) {
+        console.error('Errore nel nascondere i pulsanti del periodo:', error);
+    }
+    
+    // Disabilita i pulsanti del periodo (per sicurezza)
     const periodButtons = document.querySelectorAll('.period-btn');
     periodButtons.forEach(btn => {
         btn.disabled = true;
@@ -141,6 +152,17 @@ function updateUIForNoConnection() {
  * @param {string} platform Nome della piattaforma connessa
  */
 function updateUIForConnectedPlatform(platform) {
+    try {
+        // Mostra il contenitore dei pulsanti del periodo
+        const periodContainer = document.querySelector('.btn-group[role="group"][aria-label="Periodo di tempo"]').closest('.mb-4');
+        if (periodContainer) {
+            periodContainer.classList.remove('d-none');
+            console.log('Periodo mostrato: connessione attiva con', platform);
+        }
+    } catch (error) {
+        console.error('Errore nel mostrare i pulsanti del periodo:', error);
+    }
+    
     // Abilita i pulsanti del periodo
     const periodButtons = document.querySelectorAll('.period-btn');
     periodButtons.forEach(btn => {
@@ -357,7 +379,7 @@ function showChartLoading(typeId) {
         loadingOverlay.style.left = '0';
         loadingOverlay.style.width = '100%';
         loadingOverlay.style.height = '100%';
-        loadingOverlay.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+        loadingOverlay.style.backgroundColor = 'transparent';
         loadingOverlay.style.display = 'flex';
         loadingOverlay.style.justifyContent = 'center';
         loadingOverlay.style.alignItems = 'center';
