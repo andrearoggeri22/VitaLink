@@ -21,7 +21,7 @@ FITBIT_CONFIG = {
     'token_url':
     'https://api.fitbit.com/oauth2/token',
     'scope':
-    'activity heartrate sleep weight profile',
+    'activity heartrate sleep weight profile electrocardiogram cardio_fitness irregular_rhythm_notifications location nutrition oxygen_saturation respiratory_rate temperature',
     'api_base_url':
     'https://api.fitbit.com'
 }
