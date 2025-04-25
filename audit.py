@@ -299,7 +299,7 @@ def get_audit_stats():
                 action_type_value = action_type.value
                 
             action_stats.append({
-                'type': action_type_value.lower(),
+                'type': action_type_value,
                 'count': count
             })
     
@@ -319,7 +319,7 @@ def get_audit_stats():
                 entity_type_value = entity_type.value
                 
             entity_stats.append({
-                'type': entity_type_value.lower(),
+                'type': entity_type_value,
                 'count': count
             })
     
