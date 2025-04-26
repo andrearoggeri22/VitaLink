@@ -47,24 +47,23 @@ function initVitalsCharts() {
         
         // Imposta il pulsante attivo in base al periodo corrente
         if (period === currentPeriod) {
-            btn.classList.remove('btn-outline-primary');
-            btn.classList.add('btn-primary');
+            btn.classList.remove('btn-light');
+            btn.classList.add('btn-primary', 'active');
         }
         
         // Aggiungi event listener
         btn.addEventListener('click', function() {
             // Aggiorna lo stile dei pulsanti
             periodButtons.forEach(b => {
-                b.classList.remove('btn-primary');
-                b.classList.add('btn-outline-primary');
+                b.classList.remove('btn-primary', 'active');
+                b.classList.add('btn-light');
             });
-            this.classList.remove('btn-outline-primary');
-            this.classList.add('btn-primary');
+            this.classList.remove('btn-light');
+            this.classList.add('btn-primary', 'active');
             
-            // Aggiorna il periodo corrente
+            // Imposta il nuovo periodo
             currentPeriod = period;
             
-            // Ricarica i dati per tutti i grafici attivi
             reloadAllCharts();
         });
     });
