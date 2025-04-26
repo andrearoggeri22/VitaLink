@@ -1,0 +1,296 @@
+{% extends "base-no-session.html" %}
+
+{% block title %}{{ _('Genera Report Paziente') }} - {{ patient.first_name }} {{ patient.last_name }}{% endblock %}
+
+{% block head %}
+<style>
+    .vital-type-card {
+        transition: all 0.3s ease;
+        border-radius: 0.5rem;
+    }
+    
+    .vital-type-card.selected {
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    
+    .vital-type-card.border-danger {
+        border-color: #dc3545 !important;
+        box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+    }
+    
+    .period-error {
+        color: #dc3545;
+        font-size: 0.875em;
+        margin-top: 0.25rem;
+    }
+    
+    .charts-selection {
+        border-top: 1px solid rgba(255,255,255,.1);
+        padding-top: 1rem;
+    }
+    
+    .card-header.with-checkbox {
+        padding-bottom: 0.75rem;
+    }
+    
+    .card-body-scrollable {
+        max-height: 300px;
+        overflow-y: auto;
+        scrollbar-width: thin;
+    }
+    
+    .data-timestamp {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+    
+    .data-author {
+        font-size: 0.85rem;
+        color: #20c997;
+        font-style: italic;
+    }
+    
+    .selected-item {
+        background-color: rgba(13, 110, 253, 0.1);
+    }
+    
+    .form-check-input:checked ~ .form-check-label {
+        font-weight: bold;
+    }
+    
+    .section-divider {
+        position: relative;
+        text-align: center;
+        margin: 2rem 0;
+    }
+    
+    .section-divider::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        width: 100%;
+        height: 1px;
+        background: rgba(255,255,255,.1);
+        z-index: 0;
+    }
+    
+    .section-divider span {
+        position: relative;
+        background: var(--bs-body-bg);
+        padding: 0 1rem;
+        color: #6c757d;
+        font-weight: 500;
+        z-index: 1;
+    }
+    
+    .period-badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">
+            <i class="fas fa-file-medical me-2 text-info"></i>
+            {{ _('Genera Report Paziente') }}
+        </h1>
+        <div>
+            <span class="badge bg-info text-dark">
+                <i class="fas fa-user"></i> {{ patient.first_name }} {{ patient.last_name }}
+            </span>
+        </div>
+    </div>
+    
+    <div class="card shadow-sm">
+        <div class="card-header bg-info bg-opacity-75 text-white">
+            <h5 class="mb-0">
+                <i class="fas fa-file-medical-alt me-2"></i>
+                {{ _('Crea Report Personalizzato') }}
+            </h5>
+        </div>
+        <div class="card-body">
+            <!-- Report Form -->
+            <form action="{{ url_for('views.create_specific_patient_report', patient_id=patient.id) }}" method="post" id="specificReportForm">
+                <!-- Summary section -->
+                <div class="mb-4">
+                    <label for="summary" class="form-label">
+                        <i class="fas fa-pen-fancy me-1"></i> 
+                        {{ _('Sommario (Opzionale)') }}
+                    </label>
+                    <textarea class="form-control" id="summary" name="summary" rows="3" 
+                        placeholder="{{ _('Aggiungi un sommario opzionale per questo report. Apparirà nel report ma non sarà salvato nel database.') }}"></textarea>
+                    <div class="form-text">{{ _('Questo sommario sarà incluso solo in questo report e non sarà salvato.') }}</div>
+                </div>
+                
+                <div class="section-divider">
+                    <span><i class="fas fa-clipboard-list me-1"></i> {{ _('CONTENUTI DEL REPORT') }}</span>
+                </div>
+                
+                <div class="row">
+                    <!-- Notes section -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0"><i class="fas fa-notes-medical me-1"></i> {{ _('Note Mediche') }}</h5>
+                                <div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-outline-secondary" id="selectAllNotes">{{ _('Seleziona Tutto') }}</button>
+                                    <button type="button" class="btn btn-outline-secondary" id="deselectAllNotes">{{ _('Deseleziona') }}</button>
+                                </div>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="card-body-scrollable p-3">
+                                    {% if notes %}
+                                        {% for note in notes %}
+                                        <div class="form-check mb-3 p-2 border-bottom">
+                                            <input class="form-check-input note-checkbox" type="checkbox" id="note{{ note.id }}" name="selected_notes" value="{{ note.id }}">
+                                            <label class="form-check-label w-100" for="note{{ note.id }}">
+                                                <div class="d-flex justify-content-between">
+                                                    <span class="fw-bold text-info">{{ note.created_at.strftime('%d/%m/%Y') }}</span>
+                                                    <span class="data-timestamp">{{ note.created_at.strftime('%H:%M') }}</span>
+                                                </div>
+                                                <p class="mb-1">{{ note.content|truncate(80) }}</p>
+                                                <div class="data-author text-end">
+                                                    <i class="fas fa-user-md me-1"></i> {{ note.doctor.last_name }} {{ note.doctor.first_name[0] }}.
+                                                </div>
+                                            </label>
+                                        </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <p class="text-center text-muted py-4">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            {{ _('Nessuna nota disponibile') }}
+                                        </p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Observations section -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0"><i class="fas fa-chart-line me-1"></i> {{ _('Osservazioni') }}</h5>
+                                <div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-outline-secondary" id="selectAllObservations">{{ _('Seleziona Tutto') }}</button>
+                                    <button type="button" class="btn btn-outline-secondary" id="deselectAllObservations">{{ _('Deseleziona') }}</button>
+                                </div>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="card-body-scrollable p-3">
+                                    {% set has_any_observations = false %}
+                                    {% for vital_type, observations in observations_by_type.items() %}
+                                        {% if observations|length > 0 %}
+                                            {% set has_any_observations = true %}
+                                            <h6 class="border-bottom pb-2 pt-2 ps-1 bg-dark bg-opacity-25">
+                                                {{ _(vital_type|replace('_', ' ')|title) }}
+                                            </h6>
+                                            {% for obs in observations %}
+                                            <div class="form-check mb-3 p-2 border-bottom">
+                                                <input class="form-check-input observation-checkbox" type="checkbox" id="obs{{ obs.id }}" name="selected_observations" value="{{ obs.id }}">
+                                                <label class="form-check-label w-100" for="obs{{ obs.id }}">
+                                                    <div class="d-flex justify-content-between">
+                                                        <span class="fw-bold text-info">{{ obs.start_date.strftime('%d/%m/%Y') }} - {{ obs.end_date.strftime('%d/%m/%Y') }}</span>
+                                                        <span class="data-timestamp">{{ obs.created_at.strftime('%d/%m/%Y %H:%M') }}</span>
+                                                    </div>
+                                                    <p class="mb-1">{{ obs.content|truncate(80) }}</p>
+                                                    <div class="data-author text-end">
+                                                        <i class="fas fa-user-md me-1"></i> {{ obs.doctor.last_name }} {{ obs.doctor.first_name[0] }}.
+                                                    </div>
+                                                </label>
+                                            </div>
+                                            {% endfor %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% if not has_any_observations %}
+                                        <p class="text-center text-muted py-4">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            {{ _('Nessuna osservazione disponibile') }}
+                                        </p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section-divider">
+                    <span><i class="fas fa-chart-bar me-1"></i> {{ _('GRAFICI E PARAMETRI VITALI') }}</span>
+                </div>
+                
+                <!-- Vital Types and Charts section -->
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center bg-dark bg-opacity-25">
+                        <h5 class="mb-0"><i class="fas fa-heartbeat me-1"></i> {{ _('Parametri Vitali') }}</h5>
+                        <div class="btn-group btn-group-sm">
+                            <button type="button" class="btn btn-outline-secondary" id="selectAllVitalTypes">{{ _('Seleziona Tutti') }}</button>
+                            <button type="button" class="btn btn-outline-secondary" id="deselectAllVitalTypes">{{ _('Deseleziona') }}</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            {% for vital_type in vital_types %}
+                            <div class="col-lg-4 col-md-6 mb-3">
+                                <div class="card vital-type-card" id="vitalTypeCard_{{ vital_type.value }}">
+                                    <div class="card-header with-checkbox">
+                                        <div class="form-check">
+                                            <input class="form-check-input vital-type-checkbox" type="checkbox" id="vitalType{{ loop.index }}" name="selected_vital_types" value="{{ vital_type.value }}">
+                                            <label class="form-check-label fw-bold" for="vitalType{{ loop.index }}">
+                                                {{ _(vital_type.value|replace('_', ' ')|title) }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="card-body charts-selection d-none">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <div class="form-text mb-0">{{ _('Seleziona i periodi:') }}</div>
+                                            <div class="btn-group btn-group-sm">
+                                                <button type="button" class="btn btn-outline-secondary btn-sm select-all-periods" data-vital-type="{{ vital_type.value }}">{{ _('Tutti') }}</button>
+                                                <button type="button" class="btn btn-outline-secondary btn-sm deselect-all-periods" data-vital-type="{{ vital_type.value }}">{{ _('Nessuno') }}</button>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex flex-wrap gap-2 mt-2">                                            <div class="form-check">
+                                                <input class="form-check-input period-checkbox" type="checkbox" id="chart1d{{ loop.index }}" name="charts_{{ vital_type.value }}" value="1d" data-vital-type="{{ vital_type.value }}">
+                                                <label class="form-check-label" for="chart1d{{ loop.index }}">{{ _('1 Giorno') }}</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input period-checkbox" type="checkbox" id="chart7d{{ loop.index }}" name="charts_{{ vital_type.value }}" value="7d" data-vital-type="{{ vital_type.value }}">
+                                                <label class="form-check-label" for="chart7d{{ loop.index }}">{{ _('7 Giorni') }}</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input period-checkbox" type="checkbox" id="chart1m{{ loop.index }}" name="charts_{{ vital_type.value }}" value="1m" data-vital-type="{{ vital_type.value }}">
+                                                <label class="form-check-label" for="chart1m{{ loop.index }}">{{ _('1 Mese') }}</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input period-checkbox" type="checkbox" id="chart3m{{ loop.index }}" name="charts_{{ vital_type.value }}" value="3m" data-vital-type="{{ vital_type.value }}">
+                                                <label class="form-check-label" for="chart3m{{ loop.index }}">{{ _('3 Mesi') }}</label>
+                                            </div>
+                                        </div>
+                                        <div class="invalid-feedback d-none period-error">{{ _('Seleziona almeno un periodo') }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary btn-lg px-4">
+                        <i class="fas fa-file-pdf me-1"></i> {{ _('Genera Report PDF') }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/specific_report_new.js') }}"></script>
+{% endblock %}

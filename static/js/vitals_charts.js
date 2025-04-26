@@ -44,6 +44,7 @@ const SUPPORTED_DATA_TYPES = {
 let currentPeriod = 7; // Default: 7 giorni
 let activeCharts = {}; // Memorizza i riferimenti ai grafici attivi
 let currentPlatform = null; // Piattaforma attualmente connessa
+let currentVitalType = null; // Tipo di parametro vitale attualmente visualizzato
 
 /**
  * Inizializza i grafici e gli eventi associati
@@ -57,6 +58,9 @@ function initVitalsCharts() {
         currentPeriod = parseInt(urlParams.get('period')) || 7;
     }
     
+    // Aggiorna tutti i link dei report con il periodo corrente all'inizializzazione
+    updateAllReportLinks();
+    
     // Gestisce click sui pulsanti del periodo
     const periodButtons = document.querySelectorAll('.period-btn');
     periodButtons.forEach(btn => {
@@ -67,8 +71,7 @@ function initVitalsCharts() {
             btn.classList.remove('btn-light');
             btn.classList.add('btn-primary', 'active');
         }
-        
-        // Aggiungi event listener
+          // Aggiungi event listener
         btn.addEventListener('click', function() {
             // Aggiorna lo stile dei pulsanti
             periodButtons.forEach(b => {
@@ -81,6 +84,10 @@ function initVitalsCharts() {
             // Imposta il nuovo periodo
             currentPeriod = period;
             
+            // Aggiorna tutti i link dei report con il nuovo periodo
+            updateAllReportLinks();
+            
+            // Ricarica tutti i grafici
             reloadAllCharts();
         });
     });
@@ -175,6 +182,7 @@ function updateUIForConnectedPlatform(platform) {
             periodContainer.classList.remove('d-none');
             console.log('Periodo mostrato: connessione attiva con', platform);
         }
+        
     } catch (error) {
         console.error('Errore nel mostrare i pulsanti del periodo:', error);
     }
@@ -291,8 +299,7 @@ function updateChartTabs(dataTypes) {
         tabPane.appendChild(chartContainer);
         tabContent.appendChild(tabPane);
     });
-    
-    // Aggiungi event listener per le tab
+      // Aggiungi event listener per le tab
     const tabButtons = tabsContainer.querySelectorAll('.nav-link');
     tabButtons.forEach(tab => {
         tab.addEventListener('shown.bs.tab', function(event) {
@@ -819,6 +826,46 @@ function setupSpecificReportButton() {
         // Apri l'URL in una nuova finestra/tab
         window.open(reportUrl, '_blank');
     });
+}
+
+/**
+ * Aggiorna tutti i link dei report con il periodo corrente
+ */
+function updateAllReportLinks() {
+    // Aggiorna il link del report completo
+    const completeReportLink = document.querySelector('a[href*="select_all=true"]');
+    if (completeReportLink) {
+        const patientId = getPatientIdFromUrl();
+        if (patientId) {
+            completeReportLink.href = `/patients/${patientId}/specific_report?select_all=true&period=${currentPeriod}`;
+        }
+    }
+    
+    // Aggiorna tutti i link dei report specifici per parametro
+    const vitalReportLinks = document.querySelectorAll('.vital-report-link');
+    if (vitalReportLinks && vitalReportLinks.length > 0) {
+        vitalReportLinks.forEach(link => {
+            const vitalType = link.getAttribute('data-vital-type');
+            if (vitalType) {
+                const patientId = getPatientIdFromUrl();
+                if (patientId) {
+                    link.href = `/patients/${patientId}/specific_report?vital_type=${vitalType}&period=${currentPeriod}`;
+                }
+            }
+        });
+    }
+}
+
+/**
+ * Trova le informazioni per un tipo di parametro vitale
+ * @param {string} vitalType ID del tipo di parametro vitale
+ * @returns {Object} Informazioni sul tipo di parametro vitale
+ */
+function findVitalTypeInfo(vitalType) {
+    if (currentPlatform && SUPPORTED_DATA_TYPES[currentPlatform]) {
+        return SUPPORTED_DATA_TYPES[currentPlatform].find(type => type.id === vitalType);
+    }
+    return null;
 }
 
 // Inizializza i grafici quando il documento è caricato

@@ -318,14 +318,17 @@ def patient_vitals(patient_id):
     if patient not in current_user.patients.all():
         flash(_('You are not authorized to view this patient'), 'danger')
         return redirect(url_for('views.patients'))
-    
-    # Get observations
+      # Get observations
     observations = VitalObservation.query.filter_by(patient_id=patient_id).order_by(VitalObservation.created_at.desc()).all()
+    
+    # Get current period from query parameters or default to 7
+    current_period = request.args.get('period', 7, type=int)
     
     return render_template('vitals.html', 
                           patient=patient,
                           observations=observations,
                           vital_types=[type.value for type in VitalSignType],
+                          currentPeriod=current_period,
                           now=datetime.now())
                           
 @views_bp.route('/api/patients/<int:patient_id>/vitals')
@@ -536,8 +539,6 @@ def create_specific_patient_report(patient_id):
                         days_periods.append(30)
                     elif period == '3m':
                         days_periods.append(90)
-                    elif period == '1y':
-                        days_periods.append(365)
                 
                 selected_charts[vital_type] = days_periods
                 
@@ -596,8 +597,7 @@ def create_specific_patient_report(patient_id):
             logger.exception(f"Error generating specific report: {str(e)}")
             flash(_('Error generating specific report: %(error)s', error=str(e)), 'danger')
             return redirect(url_for('views.patient_vitals', patient_id=patient_id))
-    
-    # GET request - load data for the form
+      # GET request - load data for the form
     notes = patient.notes.order_by(Note.created_at.desc()).all()
     observations = VitalObservation.query.filter_by(patient_id=patient_id).all()
     
@@ -608,13 +608,22 @@ def create_specific_patient_report(patient_id):
         if vital_type not in observations_by_type:
             observations_by_type[vital_type] = []
         observations_by_type[vital_type].append(obs)
+      # Check for specific vital type in query parameters
+    vital_type_param = request.args.get('vital_type')
+    period_param = request.args.get('period')
+    select_all_param = request.args.get('select_all')
+    
+    logger.info(f"Loading report form with parameters: vital_type={vital_type_param}, period={period_param}, select_all={select_all_param}")
     
     return render_template(
-        'specific_report_form.html',
+        'specific_report_form_new.html',  # Utilizziamo il nuovo template
         patient=patient,
         notes=notes,
         vital_types=list(VitalSignType),
         observations_by_type=observations_by_type,
+        vital_type_param=vital_type_param,
+        period_param=period_param,
+        select_all_param=select_all_param,
         now=datetime.now()
     )
 
