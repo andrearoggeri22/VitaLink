@@ -13,14 +13,31 @@
 // Costanti e variabili globali
 const SUPPORTED_DATA_TYPES = {
     FITBIT: [
-        { id: 'HEART_RATE', name: 'Frequenza cardiaca', unit: 'bpm', color: '#FF5252' },
-        { id: 'STEPS', name: 'Passi', unit: 'passi', color: '#2196F3' },
-        { id: 'DISTANCE', name: 'Distanza', unit: 'km', color: '#4CAF50' },
-        { id: 'CALORIES', name: 'Calorie', unit: 'kcal', color: '#FF9800' },
-        { id: 'ACTIVE_MINUTES', name: 'Minuti attivi', unit: 'min', color: '#9C27B0' },
-        { id: 'SLEEP_DURATION', name: 'Durata sonno', unit: 'ore', color: '#3F51B5' },
-        { id: 'FLOORS_CLIMBED', name: 'Piani saliti', unit: 'piani', color: '#795548' },
-        { id: 'WEIGHT', name: 'Peso', unit: 'kg', color: '#607D8B' }
+        // Parametri vitali principali
+        { id: 'HEART_RATE', name: 'Frequenza cardiaca', unit: 'bpm', color: '#FF5252', chartType: 'line' },
+        { id: 'OXYGEN_SATURATION', name: 'Ossigenazione', unit: '%', color: '#3F51B5', chartType: 'line' },
+        { id: 'WEIGHT', name: 'Peso', unit: 'kg', color: '#607D8B', chartType: 'line' },
+        { id: 'BREATHING_RATE', name: 'Freq. respiratoria', unit: 'resp/min', color: '#00BCD4', chartType: 'line' },
+        
+        // Parametri di attività fisica
+        { id: 'STEPS', name: 'Passi', unit: 'passi', color: '#2196F3', chartType: 'bar' },
+        { id: 'DISTANCE', name: 'Distanza', unit: 'km', color: '#4CAF50', chartType: 'bar' },
+        { id: 'CALORIES', name: 'Calorie bruciate', unit: 'kcal', color: '#FF9800', chartType: 'bar' },
+        { id: 'ACTIVE_MINUTES', name: 'Minuti attivi', unit: 'min', color: '#9C27B0', chartType: 'bar' },
+        { id: 'SLEEP_DURATION', name: 'Durata sonno', unit: 'ore', color: '#3F51B5', chartType: 'bar' },
+        { id: 'FLOORS_CLIMBED', name: 'Piani saliti', unit: 'piani', color: '#795548', chartType: 'bar' },
+        { id: 'ELEVATION', name: 'Dislivello', unit: 'm', color: '#795548', chartType: 'bar' },
+        
+        // Metabolismo e attività dettagliata
+        { id: 'ACTIVITY_CALORIES', name: 'Calorie attività', unit: 'kcal', color: '#FF5722', chartType: 'bar' },
+        { id: 'CALORIES_BMR', name: 'Metabolismo basale', unit: 'kcal', color: '#FF5722', chartType: 'line' },
+        { id: 'MINUTES_SEDENTARY', name: 'Tempo sedentario', unit: 'min', color: '#9E9E9E', chartType: 'bar' },
+        { id: 'MINUTES_LIGHTLY_ACTIVE', name: 'Attività leggera', unit: 'min', color: '#8BC34A', chartType: 'bar' },
+        { id: 'MINUTES_FAIRLY_ACTIVE', name: 'Attività moderata', unit: 'min', color: '#FFC107', chartType: 'bar' },
+        
+        // Nutrizione e idratazione
+        { id: 'CALORIES_IN', name: 'Calorie assunte', unit: 'kcal', color: '#F44336', chartType: 'bar' },
+        { id: 'WATER', name: 'Consumo acqua', unit: 'ml', color: '#03A9F4', chartType: 'bar' }
     ]
 };
 

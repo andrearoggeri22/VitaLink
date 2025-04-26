@@ -24,6 +24,7 @@ function initVitalsForm() {
         
         if (typeSelect && unitInput) {
             const units = {
+                // Parametri vitali principali
                 'heart_rate': 'bpm',
                 'blood_pressure': 'mmHg',
                 'oxygen_saturation': '%',
@@ -31,13 +32,29 @@ function initVitalsForm() {
                 'respiratory_rate': 'breaths/min',
                 'glucose': 'mg/dL',
                 'weight': 'kg',
-                // Nuovi parametri Fitbit
+                
+                // Parametri di attività fisica
                 'steps': 'steps',
                 'calories': 'kcal',
                 'distance': 'km',
                 'active_minutes': 'min',
                 'sleep_duration': 'hours',
-                'floors_climbed': 'floors'
+                'floors_climbed': 'floors',
+                'elevation': 'm',
+                
+                // Parametri di metabolismo e attività dettagliata
+                'activity_calories': 'kcal',
+                'calories_bmr': 'kcal',
+                'minutes_sedentary': 'min',
+                'minutes_lightly_active': 'min',
+                'minutes_fairly_active': 'min',
+                
+                // Nutrizione e idratazione
+                'calories_in': 'kcal',
+                'water': 'ml',
+                
+                // Parametri respiratori avanzati
+                'breathing_rate': 'resp/min'
             };
             
             // Set initial unit
