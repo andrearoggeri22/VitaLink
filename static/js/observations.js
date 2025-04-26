@@ -254,10 +254,16 @@ function openObservationModal(observation = null) {
     const deleteBtn = document.getElementById('deleteObservationBtn');
     const saveBtn = document.getElementById('saveObservationBtn');
     const form = document.getElementById('observationForm');
-    const observationIdInput = document.getElementById('observationId');    if (observation) {
+    const addObs = document.getElementById('modal-footer-add');
+    const delObs = document.getElementById('modal-footer-delete');
+    const observationIdInput = document.getElementById('observationId');    
+    if (observation) {
         // Se è un'osservazione esistente, mostra solo la conferma di eliminazione
         modalTitle.textContent = translateText('Elimina osservazione');
-        
+        addObs.classList.add('d-none');
+        delObs.classList.remove('d-none');
+
+
         // Mostra il contenuto di eliminazione e nascondi il form
         addContent.classList.add('d-none');
         deleteContent.classList.remove('d-none');
@@ -292,7 +298,10 @@ function openObservationModal(observation = null) {
     } else {
         // Se è una nuova osservazione
         modalTitle.textContent = translateText('Aggiungi osservazione');
-        
+        delObs.classList.add('d-none');
+        addObs.classList.remove('d-none');
+
+
         // Mostra il form e nascondi il contenuto di eliminazione
         addContent.classList.remove('d-none');
         deleteContent.classList.add('d-none');
@@ -342,8 +351,6 @@ function populateVitalTypeOptions() {
     const typeSelect = document.getElementById('observationType');
     if (!typeSelect) return;
     
-    // Mantieni l'opzione vuota
-    typeSelect.innerHTML = '<option value="">Seleziona parametro</option>';
     
     // Aggiungi opzioni per i tipi supportati dalla piattaforma attuale
     if (currentPlatform && SUPPORTED_DATA_TYPES[currentPlatform.toUpperCase()]) {
@@ -372,7 +379,6 @@ function saveObservation() {
     
     // Validazione base
     if (!vitalType || !content || !startDate || !endDate) {
-        showAlert('Compila tutti i campi obbligatori', 'danger');
         return;
     }
     

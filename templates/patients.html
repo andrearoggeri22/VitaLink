@@ -23,7 +23,7 @@
     
     <div class="card shadow-sm">
         <div class="card-body">
-            <form id="patientForm" method="post" action="{{ url_for('views.new_patient') }}" class="needs-validation" novalidate>
+            <form id="patientForm" method="post" action="{{ url_for('views.new_patient') }}" class="needs-validation">
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="first_name" class="form-label">{{ _('Name') }} <span class="text-danger">*</span></label>
@@ -89,7 +89,7 @@
     
     <div class="card shadow-sm">
         <div class="card-body">
-            <form id="patientForm" method="post" action="{{ url_for('views.edit_patient', patient_id=patient.id) }}" class="needs-validation" novalidate>
+            <form id="patientForm" method="post" action="{{ url_for('views.edit_patient', patient_id=patient.id) }}" class="needs-validation">
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="first_name" class="form-label">{{ _('Name') }} <span class="text-danger">*</span></label>
@@ -169,21 +169,22 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="importPatientForm">
+                    <form id="importPatientForm" action ="initImportPatient">
                         <div class="mb-3">
                             <label for="patientUUID" class="form-label">{{ _('Patient UUID') }}</label>
                             <input type="text" class="form-control" id="patientUUID" placeholder="{{ _('Enter patient UUID...') }}" required>
                             <div class="form-text">{{ _('Enter the UUID of the patient you want to import. The patient will be linked to your account.') }}</div>
                         </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('Cancel') }}</button>
+                            <button type="submit" id="importPatientSubmit" class="btn btn-primary">
+                                <i class="fas fa-file-import me-1"></i> {{ _('Import Patient') }}
+                            </button>
+                </div>
                     </form>
                     <div id="importPatientError" class="alert alert-danger mt-3" style="display: none;"></div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('Cancel') }}</button>
-                    <button type="button" id="importPatientSubmit" class="btn btn-primary">
-                        <i class="fas fa-file-import me-1"></i> {{ _('Import Patient') }}
-                    </button>
-                </div>
+                
             </div>
         </div>
     </div>

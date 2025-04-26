@@ -156,13 +156,6 @@ function initImportPatient() {
                 const errorDiv = document.getElementById('importPatientError');
                 
                 if (uuidInput.value.trim() === '') {
-                    // Show error if the UUID is empty
-                    if (errorDiv) {
-                        errorDiv.textContent = document.documentElement.lang === "it" 
-                            ? "Inserisci un UUID valido" 
-                            : "Please enter a valid UUID";
-                        errorDiv.style.display = 'block';
-                    }
                     return;
                 }
                 
