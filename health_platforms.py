@@ -649,23 +649,27 @@ def connect_platform(link_uuid):
     """
     # Get the link
     link = get_link_by_uuid(link_uuid)
-    
     if not link:
         flash(_('Invalid or expired link'), 'danger')
-        return render_template('error.html', 
-                              message=_('The link you are trying to use is invalid or has expired'))
-    
-    # Check if link is expired
+        return render_template('health_connect_result.html', 
+                              success=False,
+                              message=_('The link you are trying to use is invalid or has expired'),
+                              now=datetime.now())
+      # Check if link is expired
     if link.is_expired():
         flash(_('This link has expired'), 'danger')
-        return render_template('error.html', 
-                              message=_('The link you are trying to use has expired'))
+        return render_template('health_connect_result.html',
+                              success=False,
+                              message=_('The link you are trying to use has expired'),
+                              now=datetime.now())
     
     # Check if link was already used
     if link.used:
         flash(_('This link has already been used'), 'danger')
-        return render_template('error.html', 
-                              message=_('The link you are trying to use has already been used'))
+        return render_template('health_connect_result.html',
+                              success=False,
+                              message=_('The link you are trying to use has already been used'),
+                              now=datetime.now())
     
     # Store link UUID in session for the callback
     session['link_uuid'] = link_uuid
@@ -690,30 +694,34 @@ def start_auth(platform_name):
         
     Returns:
         Response: Redirect to OAuth provider
-    """
-    # Check if we have a link UUID in the session
+    """    # Check if we have a link UUID in the session
     link_uuid = session.get('link_uuid')
     if not link_uuid:
         flash(_('Invalid session'), 'danger')
-        return render_template('error.html', 
-                              message=_('Your session is invalid or has expired'))
+        return render_template('health_connect_result.html',
+                              success=False,
+                              message=_('Your session is invalid or has expired'),
+                              now=datetime.now())
     
     # Get the link
     link = get_link_by_uuid(link_uuid)
     
     if not link or link.is_expired() or link.used:
         flash(_('Invalid or expired link'), 'danger')
-        return render_template('error.html', 
-                              message=_('The link you are trying to use is invalid or has expired'))
-    
-    # Generate the authorization URL based on the platform
+        return render_template('health_connect_result.html',
+                              success=False,
+                              message=_('The link you are trying to use is invalid or has expired'),
+                              now=datetime.now())
+      # Generate the authorization URL based on the platform
     if platform_name == 'fitbit':
         auth_url = get_fitbit_authorization_url(link_uuid)
         return redirect(auth_url)
     else:
         flash(_('Unsupported platform'), 'danger')
-        return render_template('error.html', 
-                              message=_('The platform you selected is not supported'))
+        return render_template('health_connect_result.html',
+                              success=False,
+                              message=_('The platform you selected is not supported'),
+                              now=datetime.now())
 
 @health_bp.route('/oauth_callback')
 def oauth_callback():
@@ -729,7 +737,8 @@ def oauth_callback():
         flash(_('Authentication failed: %(error)s', error=error), 'danger')
         return render_template('health_connect_result.html',
                               success=False,
-                              message=_('The health platform authentication failed'))
+                              message=_('The health platform authentication failed'),
+                              now=datetime.now())
     
     # Get the authorization code
     code = request.args.get('code')
@@ -737,15 +746,16 @@ def oauth_callback():
         flash(_('No authorization code received'), 'danger')
         return render_template('health_connect_result.html',
                               success=False,
-                              message=_('No authorization code was received from the health platform'))
-    
-    # Get the state (link UUID)
+                              message=_('No authorization code was received from the health platform'),
+                              now=datetime.now())
+      # Get the state (link UUID)
     state = request.args.get('state')
     if not state:
         flash(_('Invalid state parameter'), 'danger')
         return render_template('health_connect_result.html',
                               success=False,
-                              message=_('The state parameter is missing from the callback'))
+                              message=_('The state parameter is missing from the callback'),
+                              now=datetime.now())
     
     # Get the link
     link = get_link_by_uuid(state)
@@ -754,21 +764,23 @@ def oauth_callback():
         flash(_('Invalid link'), 'danger')
         return render_template('health_connect_result.html',
                               success=False,
-                              message=_('The link is invalid'))
-    
-    # Check if link is expired
+                              message=_('The link is invalid'),
+                              now=datetime.now())
+      # Check if link is expired
     if link.is_expired():
         flash(_('This link has expired'), 'danger')
         return render_template('health_connect_result.html',
                               success=False,
-                              message=_('The link has expired'))
+                              message=_('The link has expired'),
+                              now=datetime.now())
     
     # Check if link was already used
     if link.used:
         flash(_('This link has already been used'), 'danger')
         return render_template('health_connect_result.html',
                               success=False,
-                              message=_('The link has already been used'))
+                              message=_('The link has already been used'),
+                              now=datetime.now())
     
     # Get the patient
     patient = Patient.query.get(link.patient_id)
@@ -788,8 +800,7 @@ def oauth_callback():
             # Mark the link as used
             link.used = True
             db.session.commit()
-            
-            # Log the connection
+              # Log the connection
             try:
                 log_platform_connection(link.doctor_id, patient, HealthPlatform.FITBIT.value)
             except Exception as log_error:
@@ -798,17 +809,20 @@ def oauth_callback():
             flash(_('Successfully connected to Fitbit'), 'success')
             return render_template('health_connect_result.html',
                                   success=True,
-                                  message=_('Your Fitbit account has been successfully connected'))
+                                  message=_('Your Fitbit account has been successfully connected'),
+                                  now=datetime.now())
         else:
             flash(_('Failed to save token data'), 'danger')
             return render_template('health_connect_result.html',
                                   success=False,
-                                  message=_('Failed to save the token data'))
+                                  message=_('Failed to save the token data'),
+                                  now=datetime.now())
     else:
         flash(_('Unsupported platform'), 'danger')
         return render_template('health_connect_result.html',
                               success=False,
-                              message=_('The platform is not supported'))
+                              message=_('The platform is not supported'),
+                              now=datetime.now())
 
 @health_bp.route('/check_connection/<int:patient_id>')
 @login_required
