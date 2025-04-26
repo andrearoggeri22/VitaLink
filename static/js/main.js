@@ -300,7 +300,11 @@ function confirmAction(title, message, onConfirm) {
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        ${message}
+                    <div class="mb-1">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                ${message}
+                            </div>
+                        
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">${document.documentElement.lang === "it" ? "Annulla" : 'Cancel'}</button>

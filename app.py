@@ -1,6 +1,6 @@
 import os
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 from flask import Flask, request, session
 from flask_sqlalchemy import SQLAlchemy
@@ -71,9 +71,20 @@ babel = Babel(app, locale_selector=get_locale)
 # Custom template filters
 @app.template_filter('format_datetime')
 def format_datetime(value, format='%Y-%m-%d %H:%M:%S'):
-    """Format a datetime to a readable string."""
+    """Format a datetime to a readable string in UTC+2."""
     if value is None:
         return ""
+
+    # Definisci il timezone UTC+2
+    utc_plus_2 = timezone(timedelta(hours=2))
+
+    # Se il valore non ha timezone, assumiamo che sia UTC
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=timezone.utc)
+
+    # Converti in UTC+2
+    value = value.astimezone(utc_plus_2)
+
     return value.strftime(format)
 
 # Inject common variables into templates

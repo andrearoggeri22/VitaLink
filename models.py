@@ -1,7 +1,8 @@
 import uuid
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum, auto
+from zoneinfo import ZoneInfo
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -492,11 +493,22 @@ class AuditLog(db.Model):
         #
         # Returns:
         #   dict: Dictionary representation of the object
+        utc_plus_2 = timezone(timedelta(hours=2))
+        timestamp = self.timestamp
+        if timestamp:
+            if timestamp.tzinfo is None:
+                timestamp = timestamp.replace(tzinfo=timezone.utc)
+            timestamp = timestamp.astimezone(utc_plus_2)
+            timestamp = timestamp.replace(microsecond=0)
+            timestamp_str = timestamp.strftime('%Y-%m-%dT%H:%M:%S')
+            timestamp_str = timestamp_str.replace('T', ' ')  # Convert to UTC format
+        else:
+            timestamp_str = None
         return {
             'id': self.id,
             'doctor_id': self.doctor_id,
             'doctor_name': f"{self.doctor.first_name} {self.doctor.last_name}" if self.doctor else None,
-            'timestamp': self.timestamp.isoformat() if self.timestamp else None,
+            'timestamp': timestamp_str,
             'action_type': self.action_type.value,
             'entity_type': self.entity_type.value,
             'entity_id': self.entity_id,
