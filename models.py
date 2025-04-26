@@ -13,19 +13,7 @@ from app import db
 
 class VitalSignType(Enum):
     # Types of vital signs supported in the system
-    # HEART_RATE: Heart rate
-    # BLOOD_PRESSURE: Blood pressure
-    # OXYGEN_SATURATION: Oxygen saturation
-    # TEMPERATURE: Body temperature
-    # RESPIRATORY_RATE: Respiratory rate
-    # GLUCOSE: Glucose level
-    # WEIGHT: Body weight
-    # STEPS: Step count (fitness devices)
-    # CALORIES: Calories burned (fitness devices)
-    # DISTANCE: Distance traveled (fitness devices)
-    # ACTIVE_MINUTES: Active minutes (fitness devices)
-    # SLEEP_DURATION: Sleep duration (fitness devices)
-    # FLOORS_CLIMBED: Floors climbed (fitness devices)
+    # Parametri vitali principali
     HEART_RATE = "heart_rate"
     BLOOD_PRESSURE = "blood_pressure"
     OXYGEN_SATURATION = "oxygen_saturation"
@@ -33,12 +21,29 @@ class VitalSignType(Enum):
     RESPIRATORY_RATE = "respiratory_rate"
     GLUCOSE = "glucose"
     WEIGHT = "weight"
+    
+    # Parametri di attività fisica
     STEPS = "steps"
     CALORIES = "calories"
     DISTANCE = "distance"
     ACTIVE_MINUTES = "active_minutes"
     SLEEP_DURATION = "sleep_duration"
     FLOORS_CLIMBED = "floors_climbed"
+    ELEVATION = "elevation"
+    
+    # Metabolismo e attività dettagliata
+    ACTIVITY_CALORIES = "activity_calories"
+    CALORIES_BMR = "calories_bmr"
+    MINUTES_SEDENTARY = "minutes_sedentary"
+    MINUTES_LIGHTLY_ACTIVE = "minutes_lightly_active"
+    MINUTES_FAIRLY_ACTIVE = "minutes_fairly_active"
+    
+    # Nutrizione e idratazione
+    CALORIES_IN = "calories_in"
+    WATER = "water"
+    
+    # Parametri respiratori avanzati
+    BREATHING_RATE = "breathing_rate"
 
 class DoctorPatient(db.Model):
     # Association table for the many-to-many relationship between doctors and patients
