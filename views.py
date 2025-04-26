@@ -614,9 +614,8 @@ def create_specific_patient_report(patient_id):
     select_all_param = request.args.get('select_all')
     
     logger.info(f"Loading report form with parameters: vital_type={vital_type_param}, period={period_param}, select_all={select_all_param}")
-    
     return render_template(
-        'specific_report_form_new.html',  # Utilizziamo il nuovo template
+        'specific_report_form.html',  # Utilizziamo il template aggiornato
         patient=patient,
         notes=notes,
         vital_types=list(VitalSignType),
