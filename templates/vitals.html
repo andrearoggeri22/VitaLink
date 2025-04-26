@@ -121,18 +121,33 @@
                     </div>
                 </div>
             </div>
-        </div>
-        
-        <!-- Reports Section -->
+        </div>          <!-- Reports Section -->
         <div class="card shadow-sm mt-4">
-            <div class="card-header">
+            <div class="card-header bg-info bg-opacity-75 text-white">
                 <h5 class="mb-0"><i class="fas fa-file-medical-alt me-2"></i> {{ _('Reports') }}</h5>
-            </div>
-            <div class="card-body">
+            </div>            <div class="card-body">
                 <div class="d-flex flex-column gap-2">
-                    <a href="#" id="generateSpecificReportBtn" class="btn btn-outline-info">
-                        <i class="fas fa-file-medical me-1"></i> {{ _('Generate Specific Report') }}
-                    </a>
+                    <div class="row g-2">
+                        <div class="col-12 mb-3">
+                            <a href="{{ url_for('views.create_specific_patient_report', patient_id=patient.id) }}?select_all=true&period={{currentPeriod|default(7)}}" 
+                               class="btn btn-primary w-100" target="_blank">
+                                <i class="fas fa-file-pdf me-1"></i> {{ _('Report Completo (Seleziona tutto automaticamente)') }}
+                            </a>
+                        </div>
+                    </div>
+                      <div>
+                        <h6 class="mb-2"><i class="fas fa-chart-bar me-1"></i> {{ _('Specific Parameter Reports') }}</h6>
+                        <div class="row g-2">
+                            
+                            {% for vital_type in vital_types %}                                <div class="col-md-6">
+                                    <a href="{{ url_for('views.create_specific_patient_report', patient_id=patient.id) }}?vital_type={{ vital_type }}&period={{currentPeriod|default(7)}}" 
+                                       class="btn btn-sm btn-outline-info text-start w-100 vital-report-link" data-vital-type="{{ vital_type }}" target="_blank">
+                                        <i class="fas fa-file-medical me-1"></i> {{ _(vital_type|replace('_', ' ')|title) }}
+                                    </a>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -173,11 +188,12 @@
                         </div>
                     </div>
                 </div>
-                
-                <!-- Tabs for different vital sign types -->
-                <ul class="nav nav-tabs" id="vitalsChartTabs" role="tablist">
-                    <!-- Verranno popolati dinamicamente con i dati disponibili dalla piattaforma collegata -->
-                </ul>
+                  <div class="d-flex justify-content-between align-items-start mb-3">
+                    <!-- Tabs for different vital sign types -->
+                    <ul class="nav nav-tabs flex-grow-1" id="vitalsChartTabs" role="tablist">
+                        <!-- Verranno popolati dinamicamente con i dati disponibili dalla piattaforma collegata -->
+                    </ul>
+                </div>
                 
                 <div class="tab-content" id="vitalsChartTabContent">
                     <!-- Le tab verranno popolate dinamicamente -->

@@ -263,14 +263,12 @@ def generate_specific_report(patient, doctor, selected_notes, selected_vital_typ
         content.append(Spacer(1, 6))
         
         from health_platforms import get_vitals_data
-        
-        # Map period strings to days and display names
+          # Map period strings to days and display names
         period_display = {
             '1d': (1, _('1 Day')),
             '7d': (7, _('7 Days')),
             '1m': (30, _('1 Month')),
-            '3m': (90, _('3 Months')),
-            '1y': (365, _('1 Year'))
+            '3m': (90, _('3 Months'))
         }
         
         for vital_type in selected_vital_types:
@@ -292,8 +290,6 @@ def generate_specific_report(patient, doctor, selected_notes, selected_vital_typ
                         period_name = _('1 Month')
                     elif period_days == 90:
                         period_name = _('3 Months')
-                    elif period_days == 365:
-                        period_name = _('1 Year')
                     else:
                         period_name = f"{period_days} days"
                     
