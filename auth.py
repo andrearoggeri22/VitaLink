@@ -63,7 +63,7 @@ def register():
                 return render_template('register.html', form=form, now=datetime.now())
           # Create new doctor account
         doctor = Doctor(
-            email=email,
+            email=form.email.data,
             first_name=form.first_name.data,
             last_name=form.last_name.data,
             specialty=form.specialty.data
