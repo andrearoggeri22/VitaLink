@@ -247,13 +247,12 @@
             <div class="modal-body">
                 <!-- Form normale per aggiunta osservazione -->
                 <div id="addObservationContent">
-                    <form id="observationForm">
+                    <form id="observationForm" action = "saveObservation">
                         <input type="hidden" id="observationId" name="id">
                         
                         <div class="mb-3">
                             <label for="observationType" class="form-label">{{ _('Vital Parameter') }}</label>
                             <select class="form-select" id="observationType" name="vital_type" required>
-                                <option value="">{{ _('Select parameter') }}</option>
                                 <!-- These options will be populated dynamically based on available chart data -->
                             </select>
                         </div>
@@ -273,6 +272,10 @@
                                 <input type="date" class="form-control" id="observationEndDate" name="end_date" required>
                             </div>
                         </div>
+                        <div class="modal-footer" id="modal-footer-add">
+                            <button type="submit" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('Cancel') }}</button>
+                            <button type="button" class="btn btn-primary" id="saveObservationBtn">{{ _('Save') }}</button>
+                        </div>
                     </form>
                 </div>
                 
@@ -284,10 +287,9 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('Cancel') }}</button>
-                <button type="button" class="btn btn-danger d-none" id="deleteObservationBtn">{{ _('Delete') }}</button>
-                <button type="button" class="btn btn-primary" id="saveObservationBtn">{{ _('Save') }}</button>
+            <div class="modal-footer" id ="modal-footer-delete">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('Cancel') }}</button>
+                    <button type="button" class="btn btn-danger d-none" id="deleteObservationBtn">{{ _('Delete') }}</button>
             </div>
         </div>
     </div>
