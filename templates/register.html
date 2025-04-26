@@ -14,18 +14,18 @@
                     {{ form.hidden_tag() }}
                     
                     <div class="mb-3">
-                        <label for="email" class="form-label">{{ _('Email address') }}</label>
+                        <label for="email" class="form-label">{{ _('Email address') }} <span class="text-danger">*</span></label>
                         <input type="email" class="form-control" id="email" name="email" required>
                         <div class="form-text">{{ _("We'll never share your email with anyone else.") }}</div>
                     </div>
                     
                     <div class="row mb-3">
                         <div class="col">
-                            <label for="first_name" class="form-label">{{ _('First Name') }}</label>
+                            <label for="first_name" class="form-label">{{ _('First Name') }} <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="first_name" name="first_name" required>
                         </div>
                         <div class="col">
-                            <label for="last_name" class="form-label">{{ _('Last Name') }}</label>
+                            <label for="last_name" class="form-label">{{ _('Last Name') }} <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="last_name" name="last_name" required>
                         </div>
                     </div>
@@ -36,13 +36,13 @@
                     </div>
                     
                     <div class="mb-3">
-                        <label for="password" class="form-label">{{ _('Password') }}</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
+                        <label for="password" class="form-label">{{ _('Password') }} <span class="text-danger">*</span></label>
+                        <input type="password" class="form-control" id="password" name="password" minlength="8" required>
                     </div>
                     
                     <div class="mb-3">
-                        <label for="confirm_password" class="form-label">{{ _('Confirm Password') }}</label>
-                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                        <label for="confirm_password" class="form-label">{{ _('Confirm Password') }} <span class="text-danger">*</span></label>
+                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" minlength="8" required>
                     </div>
                     
                     <div class="d-grid">

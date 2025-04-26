@@ -29,13 +29,18 @@ function initObservations() {
         addObservationBtn.addEventListener('click', function() {
             openObservationModal();
         });
-    }
-    
-    // Aggiungi event listener al pulsante di salvataggio
-    const saveObservationBtn = document.getElementById('saveObservationBtn');
-    if (saveObservationBtn) {
-        saveObservationBtn.addEventListener('click', function() {
-            saveObservation();
+    }    // Gestisci il submit del form per aggiunta
+    const observationForm = document.getElementById('observationForm');
+    if (observationForm) {
+        observationForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            // Controlla l'azione da eseguire (add o delete)
+            const action = document.getElementById('formAction').value;
+            
+            if (action === 'add') {
+                submitAddObservation(this);
+            }
         });
     }
     
@@ -251,27 +256,28 @@ function openObservationModal(observation = null) {
     const modalTitle = document.getElementById('observationModalLabel');
     const addContent = document.getElementById('addObservationContent');
     const deleteContent = document.getElementById('deleteObservationContent');
-    const deleteBtn = document.getElementById('deleteObservationBtn');
-    const saveBtn = document.getElementById('saveObservationBtn');
     const form = document.getElementById('observationForm');
+    const formAction = document.getElementById('formAction');
     const addObs = document.getElementById('modal-footer-add');
     const delObs = document.getElementById('modal-footer-delete');
-    const observationIdInput = document.getElementById('observationId');    
+    const observationIdInput = document.getElementById('observationId');
+    
     if (observation) {
-        // Se è un'osservazione esistente, mostra solo la conferma di eliminazione
+        // Se è un'osservazione esistente, mostra la conferma di eliminazione
         modalTitle.textContent = translateText('Elimina osservazione');
+        
+        // Impostazione per eliminazione
+        formAction.value = 'delete';
         addObs.classList.add('d-none');
         delObs.classList.remove('d-none');
-
-
-        // Mostra il contenuto di eliminazione e nascondi il form
+        
+        // Mostra il contenuto di eliminazione e nascondi il form di aggiunta
         addContent.classList.add('d-none');
         deleteContent.classList.remove('d-none');
         
-        // Completa sostituzione e pulizia del contenuto di eliminazione
-        // Rimuovi tutti i contenuti precedenti e crea un nuovo messaggio di conferma
+        // Prepara il contenuto di eliminazione
         if (deleteContent) {
-            // Prima di tutto, assicurati che il contenitore sia visibile
+            // Assicurati che il contenitore sia visibile
             deleteContent.classList.remove('d-none');
             
             // Svuota il contenuto precedente e inserisci il nuovo messaggio
@@ -281,15 +287,7 @@ function openObservationModal(observation = null) {
                     <strong>${translateText('Attenzione')}</strong>: ${translateText('Sei sicuro di voler eliminare questa osservazione?')}
                 </div>
             `;
-            
-            console.log('Contenuto del modale impostato:', deleteContent.innerHTML);
-        } else {
-            console.error('Elemento deleteContent non trovato');
         }
-        
-        // Mostra solo il pulsante Elimina
-        deleteBtn.classList.remove('d-none');
-        saveBtn.classList.add('d-none');
         
         // Salva l'ID dell'osservazione
         if (observationIdInput) {
@@ -298,17 +296,15 @@ function openObservationModal(observation = null) {
     } else {
         // Se è una nuova osservazione
         modalTitle.textContent = translateText('Aggiungi osservazione');
+        
+        // Impostazione per aggiunta
+        formAction.value = 'add';
         delObs.classList.add('d-none');
         addObs.classList.remove('d-none');
-
-
-        // Mostra il form e nascondi il contenuto di eliminazione
+        
+        // Mostra il form di aggiunta e nascondi il contenuto di eliminazione
         addContent.classList.remove('d-none');
         deleteContent.classList.add('d-none');
-        
-        // Mostra solo il pulsante Salva
-        deleteBtn.classList.add('d-none');
-        saveBtn.classList.remove('d-none');
         
         // Reset form
         if (form) {
@@ -365,48 +361,75 @@ function populateVitalTypeOptions() {
 }
 
 /**
- * Salva una nuova osservazione
+ * Invia il form per aggiungere una nuova osservazione
+ * @param {HTMLFormElement} form - Il form da inviare
  */
-function saveObservation() {
-    // Recupera dati dal form
-    const form = document.getElementById('observationForm');
+function submitAddObservation(form) {
     if (!form) return;
     
-    const vitalType = document.getElementById('observationType').value;
-    const content = document.getElementById('observationContent').value;
-    const startDate = document.getElementById('observationStartDate').value;
-    const endDate = document.getElementById('observationEndDate').value;
+    const errorDiv = document.getElementById('observationError');
+    // Nascondi eventuali messaggi di errore precedenti nel div di errore
+    if (errorDiv) {
+        errorDiv.style.display = 'none';
+    }
+      // Ottieni i valori dal form
+    const formData = new FormData(form);
+    const vitalType = formData.get('vital_type');
+    const content = formData.get('content');
+    const startDate = formData.get('start_date');
+    const endDate = formData.get('end_date');
     
-    // Validazione base
+    // Reset di eventuali messaggi di validazione personalizzati precedenti
+    const inputs = form.querySelectorAll('input, textarea, select');
+    inputs.forEach(input => {
+        input.setCustomValidity('');
+    });
+      // Validazione base - utilizziamo la validazione HTML5 per questi campi
     if (!vitalType || !content || !startDate || !endDate) {
         return;
-    }
-    
-    // Verifica che la data di inizio sia precedente alla data di fine
+    }// Verifica che la data di inizio sia precedente alla data di fine
     if (new Date(startDate) > new Date(endDate)) {
-        showAlert('La data di inizio deve essere precedente alla data di fine', 'danger');
+        // Ottieni i riferimenti ai campi data
+        const startDateInput = document.getElementById('observationStartDate');
+        
+        // Imposta la validità personalizzata sul campo della data di fine
+        startDateInput.setCustomValidity(document.documentElement.lang === "it"
+            ? "La data di inizio deve essere precedente alla data di fine"
+            : "Start date must be before end date");
+            
+        // Forza la visualizzazione del messaggio di errore
+        startDateInput.reportValidity();
+        
+        // Aggiungi un listener per ripulire l'errore quando il valore cambia
+        startDateInput.addEventListener('input', function() {
+            this.setCustomValidity('');
+            const today = new Date();
+            const isoToday = today.toISOString().split('T')[0];
+            observationStartDate.max = isoToday;
+            observationEndDate.max = isoToday;
+        }, { once: true });
+        
         return;
     }
     
-    // Prepara i dati per l'invio
+    // Aggiungi l'ID del paziente ai dati
     const patientId = PATIENT_ID || getPatientIdFromUrl();
     const observationData = {
         patient_id: patientId,
-        vital_type: vitalType.toLowerCase(), // Assicuriamo che sia in minuscolo come nell'enum
+        vital_type: vitalType.toLowerCase(),
         content: content,
         start_date: startDate,
         end_date: endDate
     };
     
-    // URL e metodo dell'API - sempre POST per una nuova osservazione
+    // URL per la richiesta API
     const apiUrl = `/web/observations`;
-    const method = 'POST';
     
-    console.log('Saving observation:', observationData);
+    console.log('Invio osservazione:', observationData);
     
     // Chiamata API
     fetch(apiUrl, {
-        method: method,
+        method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
@@ -429,10 +452,20 @@ function saveObservation() {
         
         // Ricarica le osservazioni
         loadObservations();
-    })
-    .catch(error => {
+    })    .catch(error => {
         console.error('Errore nel salvataggio dell\'osservazione:', error);
-        showAlert('Errore nel salvataggio dell\'osservazione. Riprova più tardi.', 'danger');
+        // Mostra l'errore di API come messaggio personalizzato visibile nella parte superiore del form
+        const errorMessage = error.message || (document.documentElement.lang === "it"
+            ? "Errore nel salvataggio dell'osservazione. Riprova più tardi."
+            : "Error saving observation. Please try again later.");
+            
+        // Mostra l'errore nella parte alta del form
+        if (errorDiv) {
+            errorDiv.textContent = errorMessage;
+            errorDiv.style.display = 'block';
+            errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            console.log('Mostro errore API:', errorDiv.textContent);
+        }
     });
 }
 
@@ -446,6 +479,15 @@ function deleteObservation() {
     
     // URL dell'API (non serve più la conferma del browser, abbiamo già la conferma nel modal)
     const apiUrl = `/web/observations/${id}`;
+    const errorDiv = document.getElementById('observationError');
+    
+    // Nascondi eventuali messaggi di errore precedenti
+    if (errorDiv) {
+        errorDiv.textContent = '';
+        errorDiv.style.display = 'none';
+    }
+    
+    console.log('Eliminando osservazione con ID:', id);
     
     // Chiamata API
     fetch(apiUrl, {
@@ -468,10 +510,18 @@ function deleteObservation() {
         
         // Ricarica le osservazioni
         loadObservations();
-    })
-    .catch(error => {
+    })    .catch(error => {
         console.error('Errore nell\'eliminazione dell\'osservazione:', error);
-        showAlert('Errore nell\'eliminazione dell\'osservazione. Riprova più tardi.', 'danger');
+        
+        if (errorDiv) {
+            errorDiv.textContent = error.message || (document.documentElement.lang === "it"
+                ? "Errore nell'eliminazione dell'osservazione. Riprova più tardi."
+                : "Error deleting observation. Please try again later.");
+            errorDiv.style.display = 'block';
+            errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+            showAlert('Errore nell\'eliminazione dell\'osservazione. Riprova più tardi.', 'danger');
+        }
     });
 }
 
