@@ -46,9 +46,9 @@
                     </div>
                     
                     <div class="col-md-6 mb-3">
-                        <label for="gender" class="form-label">{{ _('Gender') }}</label>
-                        <select class="form-select" id="gender" name="gender">
-                            <option value="" selected>{{ _('Select gender') }}</option>
+                        <label for="gender" class="form-label">{{ _('Gender') }} <span class="text-danger">*</span></label>
+                        <select class="form-select" id="gender" name="gender" required>
+                            <option disabled selected value style="display:none"></option>
                             <option value="Male">{{ _('Male') }}</option>
                             <option value="Female">{{ _('Female') }}</option>
                             <option value="Other">{{ _('Other') }}</option>
@@ -59,8 +59,8 @@
                 
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label for="contact_number" class="form-label">{{ _('Contact Number') }}</label>
-                        <input type="tel" class="form-control" id="contact_number" name="contact_number">
+                        <label for="contact_number" class="form-label">{{ _('Contact Number') }} <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="contact_number" name="contact_number" required>
                     </div>
                 </div>
                 
@@ -112,9 +112,8 @@
                     </div>
                     
                     <div class="col-md-6 mb-3">
-                        <label for="gender" class="form-label">{{ _('Gender') }}</label>
-                        <select class="form-select" id="gender" name="gender">
-                            <option value="" {% if not patient.gender %}selected{% endif %}>{{ _('Select gender') }}</option>
+                        <label for="gender" class="form-label">{{ _('Gender') }} <span class="text-danger">*</span></label>
+                        <select class="form-select" id="gender" name="gender" required>
                             <option value="Male" {% if patient.gender == 'Male' %}selected{% endif %}>{{ _('Male') }}</option>
                             <option value="Female" {% if patient.gender == 'Female' %}selected{% endif %}>{{ _('Female') }}</option>
                             <option value="Other" {% if patient.gender == 'Other' %}selected{% endif %}>{{ _('Other') }}</option>
@@ -125,8 +124,8 @@
                 
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label for="contact_number" class="form-label">{{ _('Phone Number') }}</label>
-                        <input type="tel" class="form-control" id="contact_number" name="contact_number" value="{{ patient.contact_number }}">
+                        <label for="contact_number" class="form-label">{{ _('Phone Number') }} <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="contact_number" name="contact_number" value="{{ patient.contact_number }}" required>
                     </div>
                 </div>
                 
@@ -171,7 +170,7 @@
                 <div class="modal-body">
                     <form id="importPatientForm" action ="initImportPatient">
                         <div class="mb-3">
-                            <label for="patientUUID" class="form-label">{{ _('Patient UUID') }}</label>
+                            <label for="patientUUID" class="form-label">{{ _('Patient UUID') }} <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="patientUUID" placeholder="{{ _('Enter patient UUID...') }}" required>
                             <div class="form-text">{{ _('Enter the UUID of the patient you want to import. The patient will be linked to your account.') }}</div>
                         </div>
@@ -180,7 +179,7 @@
                             <button type="submit" id="importPatientSubmit" class="btn btn-primary">
                                 <i class="fas fa-file-import me-1"></i> {{ _('Import Patient') }}
                             </button>
-                </div>
+                        </div>
                     </form>
                     <div id="importPatientError" class="alert alert-danger mt-3" style="display: none;"></div>
                 </div>
@@ -263,5 +262,9 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/patients.js') }}"></script>
+<script src="{{ url_for('static', filename='js/patients.js') }}">
+    const today = new Date();
+    const isoToday = today.toISOString().split('T')[0];
+    date_of_birth.max = isoToday;
+</script>
 {% endblock %}

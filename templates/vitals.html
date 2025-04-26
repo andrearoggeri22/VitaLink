@@ -244,52 +244,60 @@
                 <h5 class="modal-title" id="observationModalLabel">{{ _('Add Observation') }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <!-- Form normale per aggiunta osservazione -->
-                <div id="addObservationContent">
-                    <form id="observationForm" action = "saveObservation">
+            <div class="modal-body">                <!-- Form unificato per aggiunta e eliminazione osservazione -->
+                <div id="observationFormContainer">
+                    <form id="observationForm" method="post">
                         <input type="hidden" id="observationId" name="id">
+                        <input type="hidden" id="formAction" name="action" value="add">
                         
-                        <div class="mb-3">
-                            <label for="observationType" class="form-label">{{ _('Vital Parameter') }}</label>
-                            <select class="form-select" id="observationType" name="vital_type" required>
-                                <!-- These options will be populated dynamically based on available chart data -->
-                            </select>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="observationContent" class="form-label">{{ _('Observation') }}</label>
-                            <textarea class="form-control" id="observationContent" name="content" rows="4" required></textarea>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="observationStartDate" class="form-label">{{ _('Start Date') }}</label>
-                                <input type="date" class="form-control" id="observationStartDate" name="start_date" required>
+                        <!-- Contenuto per aggiunta/modifica osservazione -->
+                        <div id="addObservationContent">
+                            <div class="mb-3">
+                                <label for="observationType" class="form-label">{{ _('Vital Parameter') }} <span class="text-danger">*</span></label>
+                                <select class="form-select" id="observationType" name="vital_type" required>
+                                    <!-- These options will be populated dynamically based on available chart data -->
+                                </select>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="observationEndDate" class="form-label">{{ _('End Date') }}</label>
-                                <input type="date" class="form-control" id="observationEndDate" name="end_date" required>
+                            
+                            <div class="mb-3">
+                                <label for="observationContent" class="form-label">{{ _('Observation') }} <span class="text-danger">*</span></label>
+                                <textarea class="form-control" id="observationContent" name="content" rows="4" required></textarea>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="observationStartDate" class="form-label">{{ _('Start Date') }} <span class="text-danger">*</span></label>
+                                    <input type="date" class="form-control" id="observationStartDate" name="start_date" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="observationEndDate" class="form-label">{{ _('End Date') }} <span class="text-danger">*</span></label>
+                                    <input type="date" class="form-control" id="observationEndDate" name="end_date" required>
+                                </div>
                             </div>
                         </div>
+                        
+                        <!-- Contenuto per eliminazione -->
+                        <div id="deleteObservationContent" class="d-none">
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                {{ _('Are you sure you want to delete this observation?') }}
+                            </div>
+                        </div>
+                        
+                        <div id="observationError" class="alert alert-danger mt-3" style="display: none;"></div>
+
+                        <!-- Footer per aggiunta/modifica -->
                         <div class="modal-footer" id="modal-footer-add">
-                            <button type="submit" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('Cancel') }}</button>
-                            <button type="button" class="btn btn-primary" id="saveObservationBtn">{{ _('Save') }}</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('Cancel') }}</button>
+                            <button type="submit" class="btn btn-primary" id="saveObservationBtn">{{ _('Save') }}</button>
+                        </div>                        
+                        <!-- Footer per eliminazione -->
+                        <div class="modal-footer d-none" id="modal-footer-delete">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('Cancel') }}</button>
+                            <button type="button" class="btn btn-danger" id="deleteObservationBtn">{{ _('Delete') }}</button>
                         </div>
                     </form>
                 </div>
-                
-                <!-- Contenuto semplificato per eliminazione -->
-                <div id="deleteObservationContent" class="d-none">
-                    <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        {{ _('Are you sure you want to delete this observation?') }}
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer" id ="modal-footer-delete">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('Cancel') }}</button>
-                    <button type="button" class="btn btn-danger d-none" id="deleteObservationBtn">{{ _('Delete') }}</button>
             </div>
         </div>
     </div>
@@ -412,8 +420,14 @@
 <script src="{{ url_for('static', filename='js/vitals.js') }}"></script>
 <script src="{{ url_for('static', filename='js/health_platforms.js') }}"></script>
 <script src="{{ url_for('static', filename='js/vitals_charts.js') }}"></script>
-<script src="{{ url_for('static', filename='js/observations.js') }}"></script>
-
+<script src="{{ url_for('static', filename='js/observations.js') }}">
+</script>
+<script>
+    const today = new Date();
+    const isoToday = today.toISOString().split('T')[0];
+    observationEndDate.max = isoToday;
+    observationStartDate.max = isoToday;
+</script>
 <script>
     // Base URL for the application
     const BASE_URL = "{{ url_for('views.index') }}";

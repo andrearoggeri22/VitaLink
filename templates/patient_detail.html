@@ -148,7 +148,7 @@
                 <div class="modal-body">
                     <input type="hidden" id="notePatientId" name="patient_id" value="{{ patient.id }}">
                     <div class="mb-3">
-                        <label for="content" class="form-label">{{ _('Note Content') }}</label>
+                        <label for="content" class="form-label">{{ _('Note Content') }} <span class="text-danger">*</span></label>
                         <textarea class="form-control" id="content" name="content" rows="5" required></textarea>
                         <div class="form-text">{{ _('Enter your medical observations, treatment plans, or other relevant information.') }}</div>
                     </div>

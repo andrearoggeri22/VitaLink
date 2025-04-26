@@ -277,6 +277,44 @@
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
 <script>
+    const today = new Date();
+    const isoToday = today.toISOString().split('T')[0];
+    start_date.max = isoToday;
+    end_date.max = isoToday;
+</script>
+<script>
+    // Verifica validità delle date quando il form viene inviato
+    document.getElementById('filterForm').addEventListener('submit', function(event) {
+        const startDate = document.getElementById('start_date').value;
+        const endDate = document.getElementById('end_date').value;
+        
+        // Verifica che entrambe le date siano inserite e che la data di inizio sia precedente alla data di fine
+        if (startDate && endDate && (new Date(startDate) > new Date(endDate))) {
+            // Impedisci l'invio del form
+            event.preventDefault();
+            
+            // Ottieni i riferimenti ai campi data
+            const startDateInput = document.getElementById('start_date');
+            
+            // Imposta la validità personalizzata sul campo della data di fine
+            startDateInput.setCustomValidity(document.documentElement.lang === "it"
+                ? "La data di inizio deve essere precedente alla data di fine"
+                : "Start date must be before end date");
+                
+            // Forza la visualizzazione del messaggio di errore
+            startDateInput.reportValidity();
+            
+            // Aggiungi un listener per ripulire l'errore quando il valore cambia
+            startDateInput.addEventListener('input', function() {
+                this.setCustomValidity('');
+                const today = new Date();
+                const isoToday = today.toISOString().split('T')[0];
+                start_date.max = isoToday;
+                end_date.max = isoToday;
+            }, { once: true });
+        }
+    });
+    
 document.addEventListener('DOMContentLoaded', function() {
     // Fetch statistics data
     fetch('{{ url_for("audit.get_audit_stats") }}')

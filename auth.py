@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 # Registration form
 class RegistrationForm(FlaskForm):
-    email = EmailField('Email', validators=[DataRequired(), Email()])
+    email = EmailField(_('Email'), validators=[DataRequired(), Email()])
     first_name = StringField(_('First Name'), validators=[DataRequired(), Length(min=2, max=100)])
     last_name = StringField(_('Last Name'), validators=[DataRequired(), Length(min=2, max=100)])
     specialty = StringField(_('Specialty'))
@@ -28,9 +28,9 @@ class RegistrationForm(FlaskForm):
         DataRequired(),
         Length(min=8, message=_("Password must be at least 8 characters long"))
     ])
+    # Rimuoviamo il validator EqualTo poiché verifichiamo manualmente nel controller
     confirm_password = PasswordField(_('Confirm Password'), validators=[
-        DataRequired(),
-        EqualTo('password', message=_("Passwords must match"))
+        DataRequired()
     ])
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
@@ -40,22 +40,28 @@ def register():
     
     form = RegistrationForm()
     
-    if request.method == 'POST' and form.validate_on_submit():
-        email = form.email.data
-        
-        # Check if email already exists
-        existing_doctor = Doctor.query.filter_by(email=email).first()
-        if existing_doctor:
-            flash(_('An account with this Email already exists'), 'danger')
+    if request.method == 'POST':
+        # Verifica la corrispondenza delle password manualmente prima della validazione del form
+        if form.password.data != form.confirm_password.data:
+            logger.info("Password mismatch during registration")
+            flash(_('Passwords do not match'), 'danger')
             return render_template('register.html', form=form, now=datetime.now())
-        
-        # Check password strength
-        is_strong, message = is_valid_password(form.password.data)
-        if not is_strong:
-            flash(message, 'danger')
-            return render_template('register.html', form=form, now=datetime.now())
-        
-        # Create new doctor account
+    
+        if form.validate_on_submit():
+            email = form.email.data
+            
+            # Check if email already exists
+            existing_doctor = Doctor.query.filter_by(email=email).first()
+            if existing_doctor:
+                flash(_('An account with this Email already exists'), 'danger')
+                return render_template('register.html', form=form, now=datetime.now())
+            
+            # Check password strength
+            is_strong, message = is_valid_password(form.password.data)
+            if not is_strong:
+                flash(message, 'danger')
+                return render_template('register.html', form=form, now=datetime.now())
+          # Create new doctor account
         doctor = Doctor(
             email=email,
             first_name=form.first_name.data,
@@ -70,8 +76,9 @@ def register():
             flash(_('Registration completed. Now you can access'), 'success')
             logger.info(f"New doctor registered: {email}")
             return redirect(url_for('auth.login'))
-        except:
+        except Exception as e:
             db.session.rollback()
+            logger.error(f"Error during registration: {str(e)}")
             flash(_('An error occurred. Please try again'), 'danger')
     
     return render_template('register.html', form=form, now=datetime.now())
