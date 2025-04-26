@@ -31,7 +31,7 @@
         <div class="card shadow-sm">
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="fas fa-link me-2"></i> {{ _('Health Platform') }}</h5>
-                <button id="syncHealthBtn" class="btn btn-light">
+                <button id="syncHealthBtn" class="btn btn-light sync-button">
                     <i class="fas fa-sync me-1"></i> {{ _('Health Sync') }}
                 </button>
             </div>
@@ -59,10 +59,9 @@
                             <div class="col-md-6 mb-3">
                                 <div class="card border-0 bg-primary bg-opacity-10">
                                     <div class="card-body">
-                                        <h6 class="card-title text-primary">{{ _('Connected Platform') }}</h6>
-                                        <p class="card-text fs-5">
+                                        <h6 class="card-title text-primary">{{ _('Connected Platform') }}</h6>                                        <p class="card-text fs-5">
                                             <i class="fas fa-heartbeat me-2 text-danger"></i>
-                                            <span id="platformName" class="fw-bold">-</span>
+                                            <span id="platformName" class="platform-name">-</span>
                                         </p>
                                     </div>
                                 </div>

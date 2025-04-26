@@ -3,21 +3,23 @@
 {% block title %}{{ _('Error') }} - {{ _('Healthcare Monitoring Platform') }}{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow-sm border-danger">
-                <div class="card-header bg-danger text-white">
-                    <h3 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i> {{ _('Error') }}</h3>
-                </div>
-                <div class="card-body text-center p-5">
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>{{ _('Error') }}</h1>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i> {{ _('Error') }}</h5>
+            </div>
+                <div class="card-body text-center p-4">
                     <div class="mb-4">
-                        <i class="fas fa-exclamation-circle text-danger" style="font-size: 5rem;"></i>
+                        <i class="fas fa-exclamation-circle result-icon result-failure"></i>
                     </div>
                     <h4 class="mb-3">{{ _('Something went wrong') }}</h4>
-                    <p class="lead">{{ message }}</p>
-                    <div class="d-grid mt-4">
-                        <button type="button" class="btn btn-lg btn-danger" onclick="window.history.back()">
+                    <p class="lead">{{ message }}</p>                    <div class="d-grid gap-2 mt-4">
+                        <button type="button" class="btn btn-danger" onclick="window.history.back()">
                             <i class="fas fa-arrow-left me-1"></i> {{ _('Go Back') }}
                         </button>
                     </div>
