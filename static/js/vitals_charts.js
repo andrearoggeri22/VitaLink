@@ -447,7 +447,7 @@ function showChartError(typeId) {
         errorOverlay.style.left = '0';
         errorOverlay.style.width = '100%';
         errorOverlay.style.height = '100%';
-        errorOverlay.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+        errorOverlay.style.backgroundColor = 'transparent';
         errorOverlay.style.display = 'flex';
         errorOverlay.style.justifyContent = 'center';
         errorOverlay.style.alignItems = 'center';
