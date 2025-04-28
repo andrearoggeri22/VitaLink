@@ -12,7 +12,7 @@
 // Variabili globali
 let currentObservations = [];
 let observationModal = null;
-let currentVitalType = null; // Tipo di parametro vitale correntemente selezionato
+// Utilizziamo la variabile currentVitalType definita in vitals_charts.js
 
 /**
  * Inizializza la gestione delle osservazioni
@@ -70,6 +70,12 @@ function initObservations() {
  * Tutte le osservazioni verranno mostrate indipendentemente dal periodo
  */
 function loadObservations() {
+    // Verifica che la variabile currentVitalType sia disponibile (definita in vitals_charts.js)
+    if (typeof currentVitalType === 'undefined') {
+        console.error('La variabile currentVitalType non è disponibile');
+        // Non blocchiamo l'esecuzione, poiché il caricamento dovrebbe funzionare lo stesso
+    }
+    
     const patientId = getPatientIdFromUrl();
     if (!patientId) {
         console.error('Impossibile determinare l\'ID del paziente');
@@ -112,14 +118,38 @@ function updateObservationsUI(observations) {
     // Nascondi loading
     document.getElementById('observationsLoading').classList.add('d-none');
     
-    // Container per la lista delle osservazioni
-    const observationsList = document.getElementById('observationsList');
+    // Assicuriamoci che observations sia un array
+    if (!Array.isArray(observations)) {
+        console.error('updateObservationsUI: observations non è un array', observations);
+        observations = [];
+    }
     
-    // Filtra le osservazioni in base al tipo di parametro vitale correntemente selezionato
+    // Container per la lista delle osservazioni
+    const observationsList = document.getElementById('observationsList');      // Filtra le osservazioni in base al tipo di parametro vitale correntemente selezionato
     let filteredObservations = observations;
-    if (currentVitalType) {
-        filteredObservations = observations.filter(obs => obs.vital_type === currentVitalType.toLowerCase());
-        console.log(`Mostrando solo osservazioni per il tipo: ${currentVitalType.toLowerCase()}`);
+    try {
+        if (typeof currentVitalType !== 'undefined' && currentVitalType !== null) {
+            console.log("Tipo corrente:", currentVitalType, typeof currentVitalType);
+            
+            // Estrai l'ID del tipo di parametro vitale (gestisci sia stringa che oggetto)
+            let vitalTypeId;
+            if (typeof currentVitalType === 'string') {
+                vitalTypeId = currentVitalType.toLowerCase();
+            } else if (typeof currentVitalType === 'object' && currentVitalType !== null) {
+                vitalTypeId = currentVitalType.id ? currentVitalType.id.toLowerCase() : '';
+            } else {
+                vitalTypeId = '';
+            }
+            
+            if (vitalTypeId) {
+                filteredObservations = observations.filter(obs => obs.vital_type === vitalTypeId);
+                console.log(`Mostrando solo osservazioni per il tipo: ${vitalTypeId}`);
+            }
+        }
+    } catch (error) {
+        console.error('Errore nel filtraggio delle osservazioni:', error);
+        // In caso di errore, mostra tutte le osservazioni
+        filteredObservations = observations;
     }
     
     if (filteredObservations.length === 0) {
@@ -313,26 +343,43 @@ function openObservationModal(observation = null) {
         
         // Popola le opzioni per i tipi di vitali disponibili
         populateVitalTypeOptions();
-        
-        // Date predefinite in base al periodo corrente
+          // Date predefinite in base al periodo corrente
         const startDateInput = document.getElementById('observationStartDate');
         const endDateInput = document.getElementById('observationEndDate');
         
         if (startDateInput && endDateInput) {
             const endDate = new Date();
             const startDate = new Date();
-            startDate.setDate(startDate.getDate() - currentPeriod);
+            
+            // Usa il periodo corrente se disponibile, altrimenti usa 7 giorni come default
+            const period = (typeof currentPeriod !== 'undefined' && currentPeriod) ? currentPeriod : 7;
+            startDate.setDate(startDate.getDate() - period);
             
             startDateInput.value = formatDateForInput(startDate);
             endDateInput.value = formatDateForInput(endDate);
-        }
-        
-        // Seleziona automaticamente il tipo di parametro vitale corrente
-        if (currentVitalType) {
-            const typeSelect = document.getElementById('observationType');
-            if (typeSelect) {
-                typeSelect.value = currentVitalType.toLowerCase();
+        }// Seleziona automaticamente il tipo di parametro vitale corrente
+        try {
+            if (typeof currentVitalType !== 'undefined' && currentVitalType !== null) {
+                const typeSelect = document.getElementById('observationType');
+                if (typeSelect) {
+                    // Estrai l'ID del tipo vitale (gestisci sia stringa che oggetto)
+                    let vitalTypeId;
+                    if (typeof currentVitalType === 'string') {
+                        vitalTypeId = currentVitalType.toLowerCase();
+                    } else if (typeof currentVitalType === 'object' && currentVitalType !== null) {
+                        vitalTypeId = currentVitalType.id ? currentVitalType.id.toLowerCase() : '';
+                    } else {
+                        vitalTypeId = '';
+                    }
+                    
+                    if (vitalTypeId) {
+                        typeSelect.value = vitalTypeId;
+                    }
+                }
             }
+        } catch (error) {
+            console.error('Errore nella selezione del tipo vitale:', error);
+            // In caso di errore, non impostiamo alcun valore predefinito
         }
     }
     
@@ -347,16 +394,25 @@ function populateVitalTypeOptions() {
     const typeSelect = document.getElementById('observationType');
     if (!typeSelect) return;
     
+    // Pulisci le opzioni esistenti, tranne la prima (selezione vuota)
+    while (typeSelect.options.length > 1) {
+        typeSelect.remove(1);
+    }
     
-    // Aggiungi opzioni per i tipi supportati dalla piattaforma attuale
-    if (currentPlatform && SUPPORTED_DATA_TYPES[currentPlatform.toUpperCase()]) {
-        const types = SUPPORTED_DATA_TYPES[currentPlatform.toUpperCase()];
-        types.forEach(type => {
-            const option = document.createElement('option');
-            option.value = type.id;
-            option.textContent = type.name;
-            typeSelect.appendChild(option);
-        });
+    try {
+        // Aggiungi opzioni per i tipi supportati dalla piattaforma attuale
+        // Verifica che currentPlatform sia definita (potrebbe essere definita in vitals_charts.js)
+        if (typeof currentPlatform !== 'undefined' && currentPlatform && typeof SUPPORTED_DATA_TYPES !== 'undefined' && SUPPORTED_DATA_TYPES[currentPlatform.toUpperCase()]) {
+            const types = SUPPORTED_DATA_TYPES[currentPlatform.toUpperCase()];
+            types.forEach(type => {
+                const option = document.createElement('option');
+                option.value = type.id;
+                option.textContent = type.name;
+                typeSelect.appendChild(option);
+            });
+        }
+    } catch (error) {
+        console.error('Errore nel popolamento delle opzioni:', error);
     }
 }
 

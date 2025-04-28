@@ -83,8 +83,7 @@ function initVitalsForm() {
 /**
  * Initialize charts for vital signs visualization
  */
-function initVitalsCharts() {
-    // Controlla se siamo nella pagina dei parametri vitali
+function initVitalsCharts() {    // Controlla se siamo nella pagina dei parametri vitali
     const patientIdMatch = window.location.pathname.match(/\/patients\/(\d+)\/vitals/);
     if (!patientIdMatch) return;
     

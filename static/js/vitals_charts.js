@@ -301,11 +301,11 @@ function updateChartTabs(dataTypes) {
     });
       // Aggiungi event listener per le tab
     const tabButtons = tabsContainer.querySelectorAll('.nav-link');
-    tabButtons.forEach(tab => {
-        tab.addEventListener('shown.bs.tab', function(event) {
+    tabButtons.forEach(tab => {        tab.addEventListener('shown.bs.tab', function(event) {
             const typeId = event.target.id.replace('tab-', '');
             
             // Aggiorna il tipo di parametro vitale corrente
+            // Assicurati che sia sempre una stringa
             currentVitalType = typeId;
             console.log(`Tipo vitale corrente impostato a: ${currentVitalType}`);
             
@@ -365,13 +365,13 @@ function loadDataForType(typeId) {
 /**
  * Ricarica tutti i grafici attivi
  */
-function reloadAllCharts() {
-    // Trova la tab attiva
+function reloadAllCharts() {    // Trova la tab attiva
     const activeTab = document.querySelector('#vitalsChartTabs .nav-link.active');
     if (activeTab) {
         const typeId = activeTab.id.replace('tab-', '');
         
         // Aggiorna il tipo di parametro vitale corrente
+        // Assicurati che sia sempre una stringa
         currentVitalType = typeId;
         
         // Carica i dati per il grafico
@@ -810,8 +810,7 @@ function translateText(text) {
 function setupSpecificReportButton() {
     const reportBtn = document.getElementById('generateSpecificReportBtn');
     if (!reportBtn) return;
-    
-    reportBtn.addEventListener('click', function(e) {
+      reportBtn.addEventListener('click', function(e) {
         e.preventDefault();
         
         // Verifica che ci sia un tipo vitale attualmente selezionato
@@ -820,8 +819,14 @@ function setupSpecificReportButton() {
             return;
         }
         
+        // Estrai l'ID del tipo vitale se necessario
+        let vitalTypeId = currentVitalType;
+        if (typeof currentVitalType === 'object' && currentVitalType !== null && currentVitalType.id) {
+            vitalTypeId = currentVitalType.id;
+        }
+        
         // Crea l'URL per il report specifico
-        const reportUrl = `${BASE_URL}patients/${PATIENT_ID}/specific_report?vital_type=${currentVitalType}&period=${currentPeriod}`;
+        const reportUrl = `${BASE_URL}patients/${PATIENT_ID}/specific_report?vital_type=${vitalTypeId}&period=${currentPeriod}`;
         
         // Apri l'URL in una nuova finestra/tab
         window.open(reportUrl, '_blank');
@@ -870,11 +875,27 @@ function findVitalTypeInfo(vitalType) {
 
 // Inizializza i grafici quando il documento è caricato
 document.addEventListener('DOMContentLoaded', function() {
+    // Inizializza le variabili globali
+    console.log('Inizializzazione delle variabili globali...');
+    
+    // Inizializza i grafici
+    console.log('Avvio initVitalsCharts...');
     initVitalsCharts();
+    console.log('Stato dopo initVitalsCharts:', {
+        currentPeriod,
+        currentPlatform,
+        currentVitalType
+    });
     
     // Inizializza il modulo delle osservazioni dopo i grafici
     if (typeof initObservations === 'function') {
+        console.log('Avvio initObservations...');
         initObservations();
+        console.log('Stato dopo initObservations:', {
+            currentPeriod,
+            currentPlatform,
+            currentVitalType
+        });
     }
     
     // Inizializza il pulsante per il report specifico
