@@ -192,14 +192,14 @@ FITBIT_ENDPOINTS = {
         'chart_color': '#795548'
     },
     'weight': {
-        'endpoint': '/1/user/-/body/weight/date/today/1m.json',
+        'endpoint': '/1/user/-/body/log/weight/date/today/1m.json',
         'base_endpoint': '/1/user/-/body/log/weight/date',
         'daily_endpoint': '/1/user/-/body/log/weight/date/{date}.json',
         'range_endpoint': '/1/user/-/body/log/weight/date/{start}/{end}.json',
         'max_range_days': 31,
-        'response_key': 'body-weight',
-        'value_key': 'value',
-        'timestamp_key': 'dateTime',
+        'response_key': 'weight',
+        'value_key': 'weight',
+        'timestamp_key': 'date',
         'unit': 'kg',
         'description': 'Peso',
         'oauth_scope': 'weight',
