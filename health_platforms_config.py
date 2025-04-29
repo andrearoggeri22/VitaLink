@@ -4,7 +4,6 @@ Contains API keys, credentials, and other settings needed for integrating with e
 """
 
 import os
-from flask_babel import gettext as _
 
 # Fitbit API configuration
 FITBIT_CONFIG = {
@@ -38,8 +37,7 @@ FITBIT_ENDPOINTS = {
         'response_key': 'activities-heart',
         'value_key': 'value.restingHeartRate',
         'timestamp_key': 'dateTime',
-        'unit': _('bpm'),
-        'description': _('Heart Rate'),
+        'unit': 'bpm',
         'oauth_scope': 'heartrate',
         'value_transform': lambda x: x,
         'chart_color': '#FF5252'
@@ -53,8 +51,7 @@ FITBIT_ENDPOINTS = {
         'response_key': 'activities-steps',
         'value_key': 'value',
         'timestamp_key': 'dateTime',
-        'unit': _('steps'),
-        'description': _('Steps'),
+        'unit': 'steps',
         'oauth_scope': 'activity',
         'value_transform': lambda x: x,
         'chart_color': '#2196F3'
@@ -68,8 +65,7 @@ FITBIT_ENDPOINTS = {
         'response_key': 'activities-calories',
         'value_key': 'value',
         'timestamp_key': 'dateTime',
-        'unit': _('kcal'),
-        'description': _('Calories'),
+        'unit': 'kcal',
         'oauth_scope': 'activity',
         'value_transform': lambda x: x,
         'chart_color': '#FF9800'
@@ -83,8 +79,7 @@ FITBIT_ENDPOINTS = {
         'response_key': 'activities-distance',
         'value_key': 'value',
         'timestamp_key': 'dateTime',
-        'unit': _('km'),
-        'description': _('Distance'),
+        'unit': 'km',
         'oauth_scope': 'activity',
         'value_transform': lambda x: x,
         'chart_color': '#4CAF50'
@@ -98,8 +93,7 @@ FITBIT_ENDPOINTS = {
         'response_key': 'activities-minutesVeryActive',
         'value_key': 'value',
         'timestamp_key': 'dateTime',
-        'unit': _('min'),
-        'description': _('Active Minutes'),
+        'unit': 'min',
         'oauth_scope': 'activity',
         'value_transform': lambda x: x,
         'chart_color': '#9C27B0'
@@ -113,8 +107,7 @@ FITBIT_ENDPOINTS = {
         'response_key': 'sleep',
         'value_key': 'minutesAsleep',
         'timestamp_key': 'startTime',
-        'unit': _('min'),
-        'description': _('Sleep'),
+        'unit': 'min',
         'oauth_scope': 'sleep',
         'value_transform': lambda x: x / 60,  # convert minutes to hours
         'chart_color': '#3F51B5'
@@ -128,8 +121,7 @@ FITBIT_ENDPOINTS = {
         'response_key': 'activities-floors',
         'value_key': 'value',
         'timestamp_key': 'dateTime',
-        'unit': _('floors'),
-        'description': _('Floors Climbed'),
+        'unit': 'floors',
         'oauth_scope': 'activity',
         'value_transform': lambda x: x,
         'chart_color': '#795548'
@@ -143,8 +135,7 @@ FITBIT_ENDPOINTS = {
         'response_key': 'activities-elevation',
         'value_key': 'value',
         'timestamp_key': 'dateTime',
-        'unit': _('m'),
-        'description': _('Elevation'),
+        'unit': 'm',
         'oauth_scope': 'activity',
         'value_transform': lambda x: x,
         'chart_color': '#795548'
@@ -158,8 +149,7 @@ FITBIT_ENDPOINTS = {
         'response_key': 'weight',
         'value_key': 'weight',
         'timestamp_key': 'date',
-        'unit': _('kg'),
-        'description': _('Weight'),
+        'unit': 'kg',
         'oauth_scope': 'weight',
         'value_transform': lambda x: x,
         'chart_color': '#607D8B'
@@ -173,8 +163,7 @@ FITBIT_ENDPOINTS = {
         'response_key': 'activities-activityCalories',
         'value_key': 'value',
         'timestamp_key': 'dateTime',
-        'unit': _('kcal'),
-        'description': _('Activity Calories'),
+        'unit': 'kcal',
         'oauth_scope': 'activity',
         'value_transform': lambda x: x,
         'chart_color': '#FF5722'
@@ -188,8 +177,7 @@ FITBIT_ENDPOINTS = {
         'response_key': 'activities-caloriesBMR',
         'value_key': 'value',
         'timestamp_key': 'dateTime',
-        'unit': _('kcal'),
-        'description': _('Basal Metabolism'),
+        'unit': 'kcal',
         'oauth_scope': 'activity',
         'value_transform': lambda x: x,
         'chart_color': '#FF5722'
@@ -203,8 +191,7 @@ FITBIT_ENDPOINTS = {
         'response_key': 'activities-minutesSedentary',
         'value_key': 'value',
         'timestamp_key': 'dateTime',
-        'unit': _('min'),
-        'description': _('Sedentary Time'),
+        'unit': 'min',
         'oauth_scope': 'activity',
         'value_transform': lambda x: x,
         'chart_color': '#9E9E9E'
@@ -218,8 +205,7 @@ FITBIT_ENDPOINTS = {
         'response_key': 'activities-minutesLightlyActive',
         'value_key': 'value',
         'timestamp_key': 'dateTime',
-        'unit': _('min'),
-        'description': _('Light Activity'),
+        'unit': 'min',
         'oauth_scope': 'activity',
         'value_transform': lambda x: x,
         'chart_color': '#8BC34A'
@@ -233,8 +219,7 @@ FITBIT_ENDPOINTS = {
         'response_key': 'activities-minutesFairlyActive',
         'value_key': 'value',
         'timestamp_key': 'dateTime',
-        'unit': _('min'),
-        'description': _('Moderate Activity'),
+        'unit': 'min',
         'oauth_scope': 'activity',
         'value_transform': lambda x: x,
         'chart_color': '#FFC107'
@@ -248,8 +233,7 @@ FITBIT_ENDPOINTS = {
         'response_key': 'foods-log-caloriesIn',
         'value_key': 'value',
         'timestamp_key': 'dateTime',
-        'unit': _('kcal'),
-        'description': _('Calories Intake'),
+        'unit': 'kcal',
         'oauth_scope': 'nutrition',
         'value_transform': lambda x: x,
         'chart_color': '#F44336'
@@ -263,8 +247,7 @@ FITBIT_ENDPOINTS = {
         'response_key': 'foods-log-water',
         'value_key': 'value',
         'timestamp_key': 'dateTime',
-        'unit': _('ml'),
-        'description': _('Water Consumption'),
+        'unit': 'ml',
         'oauth_scope': 'nutrition',
         'value_transform': lambda x: x,
         'chart_color': '#03A9F4'
@@ -278,8 +261,7 @@ FITBIT_ENDPOINTS = {
         'response_key': 'br',
         'value_key': 'value.breathingRate',
         'timestamp_key': 'dateTime',
-        'unit': _('resp/min'),
-        'description': _('Breathing Rate'),
+        'unit': 'resp/min',
         'oauth_scope': 'respiratory_rate',
         'value_transform': lambda x: x,
         'chart_color': '#00BCD4'
@@ -293,8 +275,7 @@ FITBIT_ENDPOINTS = {
         'response_key': 'spo2',
         'value_key': 'value.avg',
         'timestamp_key': 'dateTime',
-        'unit': _('%'),
-        'description': _('Oxygen Saturation'),
+        'unit': '%',
         'oauth_scope': 'oxygen_saturation',
         'value_transform': lambda x: x,
         'chart_color': '#3F51B5'
@@ -308,8 +289,7 @@ FITBIT_ENDPOINTS = {
         'response_key': 'tempCore',
         'value_key': 'value',
         'timestamp_key': 'dateTime',
-        'unit': _('°C'),
-        'description': _('Core Temperature'),
+        'unit': '°C',
         'oauth_scope': 'temperature',
         'value_transform': lambda x: x,
         'chart_color': '#3F51B5'
@@ -323,8 +303,7 @@ FITBIT_ENDPOINTS = {
         'response_key': 'tempSkin',
         'value_key': 'value.nightlyRelative',
         'timestamp_key': 'dateTime',
-        'unit': _('°C'),
-        'description': _('Skin Temperature'),
+        'unit': '°C',
         'oauth_scope': 'temperature',
         'value_transform': lambda x: x,
         'chart_color': '#3F51B5'
