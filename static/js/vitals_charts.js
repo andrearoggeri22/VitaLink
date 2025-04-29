@@ -1,168 +1,172 @@
 /**
  * Vitals Charts JavaScript
  * 
- * Gestisce la visualizzazione dei grafici delle tendenze dei parametri vitali
- * e la tabella dei dati storici ottenuti dalle piattaforme di salute
+ * Manages the visualization of vital signs trend charts
+ * and the historical data table obtained from health platforms
  * 
- * Funzionalità:
- * - Caricamento dati dalle API delle piattaforme (Fitbit, ecc.)
- * - Visualizzazione grafici con periodi personalizzabili
- * - Aggiornamento tabella dati storici
+ * Features:
+ * - Loading data from platform APIs (Fitbit, etc.)
+ * - Displaying charts with customizable periods
+ * - Updating the historical data table
  */
 
-// Costanti e variabili globali
+// Constants and global variables
 const SUPPORTED_DATA_TYPES = {
     FITBIT: [
-        // Parametri vitali principali
-        { id: 'HEART_RATE', name: 'Frequenza cardiaca', unit: 'bpm', color: '#FF5252', chartType: 'line' },
-        { id: 'OXYGEN_SATURATION', name: 'Ossigenazione', unit: '%', color: '#3F51B5', chartType: 'line' },
-        { id: 'WEIGHT', name: 'Peso', unit: 'kg', color: '#607D8B', chartType: 'line' },
-        { id: 'BREATHING_RATE', name: 'Freq. respiratoria', unit: 'resp/min', color: '#00BCD4', chartType: 'line' },
-        { id: 'TEMPERATURE_CORE', name: 'Temperatura core', unit: '°C', color: '#FF9800', chartType: 'line' },
-        { id: 'TEMPERATURE_SKIN', name: 'Temperatura cutanea', unit: '°C', color: '#FF9800', chartType: 'line' },
-        
-        // Parametri di attività fisica
-        { id: 'STEPS', name: 'Passi', unit: 'passi', color: '#2196F3', chartType: 'bar' },
-        { id: 'DISTANCE', name: 'Distanza', unit: 'km', color: '#4CAF50', chartType: 'bar' },
-        { id: 'CALORIES', name: 'Calorie bruciate', unit: 'kcal', color: '#FF9800', chartType: 'bar' },
-        { id: 'ACTIVE_MINUTES', name: 'Minuti attivi', unit: 'min', color: '#9C27B0', chartType: 'bar' },
-        { id: 'SLEEP_DURATION', name: 'Durata sonno', unit: 'ore', color: '#3F51B5', chartType: 'bar' },
-        { id: 'FLOORS_CLIMBED', name: 'Piani saliti', unit: 'piani', color: '#795548', chartType: 'bar' },
-        { id: 'ELEVATION', name: 'Dislivello', unit: 'm', color: '#795548', chartType: 'bar' },
-        
-        // Metabolismo e attività dettagliata
-        { id: 'ACTIVITY_CALORIES', name: 'Calorie attività', unit: 'kcal', color: '#FF5722', chartType: 'bar' },
-        { id: 'CALORIES_BMR', name: 'Metabolismo basale', unit: 'kcal', color: '#FF5722', chartType: 'line' },
-        { id: 'MINUTES_SEDENTARY', name: 'Tempo sedentario', unit: 'min', color: '#9E9E9E', chartType: 'bar' },
-        { id: 'MINUTES_LIGHTLY_ACTIVE', name: 'Attività leggera', unit: 'min', color: '#8BC34A', chartType: 'bar' },
-        { id: 'MINUTES_FAIRLY_ACTIVE', name: 'Attività moderata', unit: 'min', color: '#FFC107', chartType: 'bar' },
-        
-        // Nutrizione e idratazione
-        { id: 'CALORIES_IN', name: 'Calorie assunte', unit: 'kcal', color: '#F44336', chartType: 'bar' },
-        { id: 'WATER', name: 'Consumo acqua', unit: 'ml', color: '#03A9F4', chartType: 'bar' }
+        // Main vital parameters
+        { id: 'HEART_RATE', name: translateText('Heart Rate'), unit: 'bpm', color: '#FF5252', chartType: 'line' },
+        { id: 'OXYGEN_SATURATION', name: translateText('Oxygen Saturation'), unit: '%', color: '#3F51B5', chartType: 'line' },
+        { id: 'WEIGHT', name: translateText('Weight'), unit: 'kg', color: '#607D8B', chartType: 'line' },
+        { id: 'BREATHING_RATE', name: translateText('Breathing Rate'), unit: 'resp/min', color: '#00BCD4', chartType: 'line' },
+        { id: 'TEMPERATURE_CORE', name: translateText('Core Temperature'), unit: '°C', color: '#FF9800', chartType: 'line' },
+        { id: 'TEMPERATURE_SKIN', name: translateText('Skin Temperature'), unit: '°C', color: '#FF9800', chartType: 'line' },
+
+        // Physical activity parameters
+        { id: 'STEPS', name: translateText('Steps'), unit: translateText('steps'), color: '#2196F3', chartType: 'bar' },
+        { id: 'DISTANCE', name: translateText('Distance'), unit: 'km', color: '#4CAF50', chartType: 'bar' },
+        { id: 'CALORIES', name: translateText('Calories Burned'), unit: 'kcal', color: '#FF9800', chartType: 'bar' },
+        { id: 'ACTIVE_MINUTES', name: translateText('Active Minutes'), unit: 'min', color: '#9C27B0', chartType: 'bar' },
+        { id: 'SLEEP_DURATION', name: translateText('Sleep Duration'), unit: translateText('hours'), color: '#3F51B5', chartType: 'bar' },
+        { id: 'FLOORS_CLIMBED', name: translateText('Floors Climbed'), unit: translateText('floors'), color: '#795548', chartType: 'bar' },
+        { id: 'ELEVATION', name: translateText('Elevation'), unit: 'm', color: '#795548', chartType: 'bar' },
+
+        // Metabolism and detailed activity
+        { id: 'ACTIVITY_CALORIES', name: translateText('Activity Calories'), unit: 'kcal', color: '#FF5722', chartType: 'bar' },
+        { id: 'CALORIES_BMR', name: translateText('Basal Metabolism'), unit: 'kcal', color: '#FF5722', chartType: 'line' },
+        { id: 'MINUTES_SEDENTARY', name: translateText('Sedentary Time'), unit: 'min', color: '#9E9E9E', chartType: 'bar' },
+        { id: 'MINUTES_LIGHTLY_ACTIVE', name: translateText('Light Activity'), unit: 'min', color: '#8BC34A', chartType: 'bar' },
+        { id: 'MINUTES_FAIRLY_ACTIVE', name: translateText('Moderate Activity'), unit: 'min', color: '#FFC107', chartType: 'bar' },
+
+        // Nutrition and hydration
+        { id: 'CALORIES_IN', name: translateText('Calories Intake'), unit: 'kcal', color: '#F44336', chartType: 'bar' },
+        { id: 'WATER', name: translateText('Water Consumption'), unit: 'ml', color: '#03A9F4', chartType: 'bar' }
     ]
 };
 
 
-let currentPeriod = 7; // Default: 7 giorni
-let activeCharts = {}; // Memorizza i riferimenti ai grafici attivi
-let currentPlatform = null; // Piattaforma attualmente connessa
-let currentVitalType = null; // Tipo di parametro vitale attualmente visualizzato
+let currentPeriod = 7; // Default: 7 days
+let activeCharts = {}; // Stores references to active charts
+let currentPlatform = null; // Currently connected platform
+let currentVitalType = null; // Currently displayed vital parameter type
 
 /**
- * Inizializza i grafici e gli eventi associati
+ * Initializes the charts and related events
  */
 function initVitalsCharts() {
-    console.log('Inizializzazione grafici parametri vitali');
-    
-    // Recupera il periodo dai parametri URL o usa il default
+    console.log(translateText('Initializing vital parameters charts'));
+
+    // Get period from URL parameters or use default
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.has('period')) {
         currentPeriod = parseInt(urlParams.get('period')) || 7;
     }
-    
-    // Aggiorna tutti i link dei report con il periodo corrente all'inizializzazione
+
+    // Update all report links with the current period at initialization
     updateAllReportLinks();
-    
-    // Gestisce click sui pulsanti del periodo
+
+    // Handle period button clicks
     const periodButtons = document.querySelectorAll('.period-btn');
     periodButtons.forEach(btn => {
         const period = parseInt(btn.getAttribute('data-period'));
-        
-        // Imposta il pulsante attivo in base al periodo corrente
+
+        // Set the active button based on current period
         if (period === currentPeriod) {
             btn.classList.remove('btn-light');
             btn.classList.add('btn-primary', 'active');
         }
-          // Aggiungi event listener
-        btn.addEventListener('click', function() {
-            // Aggiorna lo stile dei pulsanti
+        // Add event listener
+        btn.addEventListener('click', function () {
+            // Update button styles
             periodButtons.forEach(b => {
                 b.classList.remove('btn-primary', 'active');
                 b.classList.add('btn-light');
             });
             this.classList.remove('btn-light');
             this.classList.add('btn-primary', 'active');
-            
-            // Imposta il nuovo periodo
+
+            // Set the new period
             currentPeriod = period;
-            
-            // Aggiorna tutti i link dei report con il nuovo periodo
+
+            // Update all report links with the new period
             updateAllReportLinks();
-            
-            // Ricarica tutti i grafici
+
+            // Reload all charts
             reloadAllCharts();
         });
     });
-    
-    // Controlla lo stato della connessione per caricare i dati
+
+    // Check connection status to load data
     checkPlatformConnection();
 }
 
 /**
- * Controlla se è attiva una connessione con una piattaforma
+ * Check if there's an active connection with a health platform
  */
 function checkPlatformConnection() {
     const patientId = getPatientIdFromUrl();
-    if (!patientId) {        console.error('Unable to determine patient ID');
+    if (!patientId) {
+        console.error(translateText('Unable to determine patient ID'));
         updateUIForNoConnection();
         return;
     }
-    
+
     fetch(`/health/check_connection/${patientId}`)
         .then(response => response.json())
         .then(data => {
             if (data.connected) {
-                // Salva la piattaforma connessa
+                // Save the connected platform
                 currentPlatform = data.platform;
-                
-                // Aggiorna l'interfaccia per la piattaforma connessa
+
+                // Update the interface for the connected platform
                 updateUIForConnectedPlatform(data.platform);
-                
-                // Carica i dati disponibili per la piattaforma
+
+                // Load available data types for the platform
                 loadAvailableDataTypes(data.platform);
             } else {
-                // Aggiorna l'interfaccia per nessuna connessione
+                // Update the interface for no connection
                 updateUIForNoConnection();
             }
         })
-        .catch(error => {            console.error(translateText('Error checking connection') + ':', error);
+        .catch(error => {
+            console.error(translateText('Error checking connection') + ':', error);
             updateUIForNoConnection();
         });
 }
 
 /**
- * Aggiorna l'interfaccia quando non c'è una connessione attiva
+ * Update the interface when there's no active connection
  */
 function updateUIForNoConnection() {
-    // Mostra il messaggio di nessun dato
+    // Show no data message
     const noDataMessage = document.getElementById('noDataMessage');
     if (noDataMessage) {
-        noDataMessage.classList.remove('d-none');        noDataMessage.innerHTML = `
+        noDataMessage.classList.remove('d-none');
+        noDataMessage.innerHTML = `
             <div class="alert alert-info">
                 <i class="fas fa-info-circle me-2"></i>
                 ${translateText('Connect to a health platform to view vital signs data.')}
             </div>
         `;
     }
-      // Aggiorna il messaggio nella tabella
+
+    // Update message in the table
     const vitalsTableMessage = document.getElementById('vitalsTableMessage');
     if (vitalsTableMessage) {
         vitalsTableMessage.textContent = translateText('No data available. Connect a health platform.');
     }
-    
-    // Nascondi il contenitore dei pulsanti del periodo
+
+    // Hide period buttons container
     try {
-        const periodContainer = document.querySelector('.btn-group[role="group"][aria-label="Periodo di tempo"]').closest('.mb-4');
+        const periodContainer = document.querySelector('.btn-group[role="group"][aria-label="Time Period"]').closest('.mb-4');
         if (periodContainer) {
             periodContainer.classList.add('d-none');
-            console.log('Periodo nascosto: nessuna connessione attiva');
+            console.log(translateText('Period hidden: no active connection'));
         }
     } catch (error) {
-        console.error('Errore nel nascondere i pulsanti del periodo:', error);
+        console.error(translateText('Error hiding period buttons:'), error);
     }
-    
-    // Disabilita i pulsanti del periodo (per sicurezza)
+
+    // Disable period buttons (for safety)
     const periodButtons = document.querySelectorAll('.period-btn');
     periodButtons.forEach(btn => {
         btn.disabled = true;
@@ -170,29 +174,29 @@ function updateUIForNoConnection() {
 }
 
 /**
- * Aggiorna l'interfaccia quando c'è una connessione attiva
- * @param {string} platform Nome della piattaforma connessa
+ * Update the interface when there's an active connection
+ * @param {string} platform Name of the connected platform
  */
 function updateUIForConnectedPlatform(platform) {
     try {
-        // Mostra il contenitore dei pulsanti del periodo
-        const periodContainer = document.querySelector('.btn-group[role="group"][aria-label="Periodo di tempo"]').closest('.mb-4');
+        // Show period buttons container
+        const periodContainer = document.querySelector('.btn-group[role="group"][aria-label="Time Period"]').closest('.mb-4');
         if (periodContainer) {
             periodContainer.classList.remove('d-none');
-            console.log('Periodo mostrato: connessione attiva con', platform);
+            console.log(translateText('Period shown: active connection with'), platform);
         }
-        
+
     } catch (error) {
-        console.error(translateText('Error showing period buttons') + ':', error);
+        console.error(translateText('Error showing period buttons:'), error);
     }
-    
-    // Abilita i pulsanti del periodo
+
+    // Enable period buttons
     const periodButtons = document.querySelectorAll('.period-btn');
     periodButtons.forEach(btn => {
         btn.disabled = false;
     });
-    
-    // Nascondi il messaggio di nessun dato
+
+    // Hide no data message
     const noDataMessage = document.getElementById('noDataMessage');
     if (noDataMessage) {
         noDataMessage.classList.add('d-none');
@@ -200,33 +204,34 @@ function updateUIForConnectedPlatform(platform) {
 }
 
 /**
- * Carica i tipi di dati disponibili per la piattaforma specificata
- * @param {string} platform Nome della piattaforma
+ * Load available data types for the specified platform
+ * @param {string} platform Platform name
  */
-function loadAvailableDataTypes(platform) {    platform = platform.toUpperCase();
-    
-    // Controlla se la piattaforma è supportata
+function loadAvailableDataTypes(platform) {
+    platform = platform.toUpperCase();
+
+    // Check if platform is supported
     if (!SUPPORTED_DATA_TYPES[platform]) {
         console.error(translateText(`Unsupported platform:`) + ` ${platform}`);
         return;
     }
-    
-    // Recupera i tipi di dati supportati per questa piattaforma
+
+    // Get supported data types for this platform
     const dataTypes = SUPPORTED_DATA_TYPES[platform];
-    
-    // Aggiorna le tab per i grafici
+
+    // Update chart tabs
     updateChartTabs(dataTypes);
-    
-    // Carica i dati per il primo tipo
+
+    // Load data for first type
     if (dataTypes.length > 0) {
-        // Imposta il tipo di parametro vitale iniziale
+        // Set initial vital parameter type
         currentVitalType = dataTypes[0].id;
-        console.log(`Tipo vitale iniziale impostato a: ${currentVitalType}`);
-        
-        // Carica i dati per il grafico
+        console.log(translateText(`Initial vital type set to:`) + ` ${currentVitalType}`);
+
+        // Load data for the chart
         loadDataForType(dataTypes[0].id);
-        
-        // Ricarica le osservazioni con il filtro del tipo corrente
+
+        // Reload observations with current type filter
         if (typeof loadObservations === 'function') {
             setTimeout(loadObservations, 500);
         }
@@ -234,36 +239,36 @@ function loadAvailableDataTypes(platform) {    platform = platform.toUpperCase()
 }
 
 /**
- * Aggiorna le schede dei grafici con i tipi di dati disponibili
- * @param {Array} dataTypes Array di tipi di dati disponibili
+ * Update chart tabs with available data types
+ * @param {Array} dataTypes Array of available data types
  */
 function updateChartTabs(dataTypes) {
     const tabsContainer = document.getElementById('vitalsChartTabs');
     const tabContent = document.getElementById('vitalsChartTabContent');
-    
+
     if (!tabsContainer || !tabContent) {
-        console.error('Container delle tab non trovato');
+        console.error(translateText('Tab container not found'));
         return;
     }
-    
-    // Pulisci le tab esistenti
+
+    // Clear existing tabs
     tabsContainer.innerHTML = '';
-    
-    // Pulisci il contenuto delle tab esistenti
-    // Mantieni il messaggio di nessun dato
+
+    // Clear existing tab content
+    // Keep no data message
     const noDataMessage = document.getElementById('noDataMessage');
     tabContent.innerHTML = '';
     if (noDataMessage) {
         tabContent.appendChild(noDataMessage);
     }
-    
-    // Crea le nuove tab
+
+    // Create new tabs
     dataTypes.forEach((type, index) => {
-        // Crea la tab
+        // Create tab
         const tabItem = document.createElement('li');
         tabItem.className = 'nav-item';
         tabItem.setAttribute('role', 'presentation');
-        
+
         const tabButton = document.createElement('button');
         tabButton.className = `nav-link ${index === 0 ? 'active' : ''}`;
         tabButton.id = `tab-${type.id}`;
@@ -274,45 +279,47 @@ function updateChartTabs(dataTypes) {
         tabButton.setAttribute('aria-controls', `chart-tab-${type.id}`);
         tabButton.setAttribute('aria-selected', index === 0 ? 'true' : 'false');
         tabButton.textContent = type.name;
-        
+
         tabItem.appendChild(tabButton);
         tabsContainer.appendChild(tabItem);
-        
-        // Crea il contenuto della tab
+
+        // Create tab content
         const tabPane = document.createElement('div');
         tabPane.className = `tab-pane fade ${index === 0 ? 'show active' : ''}`;
         tabPane.id = `chart-tab-${type.id}`;
         tabPane.setAttribute('role', 'tabpanel');
         tabPane.setAttribute('aria-labelledby', `tab-${type.id}`);
-        
+
         const chartContainer = document.createElement('div');
         chartContainer.className = 'vitals-chart-container';
         chartContainer.style.height = '400px';
         chartContainer.style.position = 'relative';
-        
+
         const canvas = document.createElement('canvas');
         canvas.id = `chart-${type.id}`;
-        
+
         chartContainer.appendChild(canvas);
         tabPane.appendChild(chartContainer);
         tabContent.appendChild(tabPane);
     });
-      // Aggiungi event listener per le tab
+
+    // Add event listeners for tabs
     const tabButtons = tabsContainer.querySelectorAll('.nav-link');
-    tabButtons.forEach(tab => {        tab.addEventListener('shown.bs.tab', function(event) {
+    tabButtons.forEach(tab => {
+        tab.addEventListener('shown.bs.tab', function (event) {
             const typeId = event.target.id.replace('tab-', '');
-            
-            // Aggiorna il tipo di parametro vitale corrente
-            // Assicurati che sia sempre una stringa
+
+            // Update current vital parameter type
+            // Ensure it's always a string
             currentVitalType = typeId;
-            console.log(`Tipo vitale corrente impostato a: ${currentVitalType}`);
-            
-            // Carica i dati per il grafico
+            console.log(translateText(`Current vital type set to:`) + ` ${currentVitalType}`);
+
+            // Load data for the chart
             loadDataForType(typeId);
-            
-            // Ricarica le osservazioni con il filtro aggiornato (se la funzione esiste)
+
+            // Reload observations with updated filter (if function exists)
             if (typeof loadObservations === 'function') {
-                console.log('Ricarica osservazioni con filtro sul tipo vitale corrente');
+                console.log(translateText('Reloading observations with filter on current vital type'));
                 loadObservations();
             }
         });
@@ -320,62 +327,63 @@ function updateChartTabs(dataTypes) {
 }
 
 /**
- * Carica i dati per un tipo specifico e li visualizza nel grafico
- * @param {string} typeId ID del tipo di dati
+ * Load data for specific type and display on chart
+ * @param {string} typeId Data type ID
  */
 function loadDataForType(typeId) {
     const patientId = getPatientIdFromUrl();
     if (!patientId || !typeId) {
-        console.error('Impossibile determinare l\'ID del paziente o il tipo di dati');
+        console.error(translateText('Unable to determine patient ID or data type'));
         return;
     }
-    
-    // Mostra indicatore di caricamento
+
+    // Show loading indicator
     showChartLoading(typeId);
-    
-    // Calcola date di inizio e fine in base al periodo corrente
+
+    // Calculate start and end dates based on current period
     const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - currentPeriod);
-    
-    // Formato date per l'API
+
+    // Format dates for API
     const startDateStr = formatDateForAPI(startDate);
     const endDateStr = formatDateForAPI(endDate);
-    
-    // Costruisci l'URL dell'API
+
+    // Build API URL
     const apiUrl = `/health/data/${typeId}/${patientId}?start_date=${startDateStr}&end_date=${endDateStr}`;
-    
+
     fetch(apiUrl)
         .then(response => response.json())
         .then(data => {
-            // Aggiorna il grafico con i dati
+            // Update chart with data
             updateChart(typeId, data);
-            
-            // Aggiorna la tabella dei dati
+
+            // Update data table
             updateDataTable(typeId, data);
         })
         .catch(error => {
-            console.error(`Errore nel caricamento dei dati per ${typeId}:`, error);
+            console.error(translateText(`Error loading data for`) + ` ${typeId}:`, error);
             showChartError(typeId);
         });
 }
 
 /**
- * Ricarica tutti i grafici attivi
+ * Reload all active charts
  */
-function reloadAllCharts() {    // Trova la tab attiva
+function reloadAllCharts() {
+    // Find the active tab
     const activeTab = document.querySelector('#vitalsChartTabs .nav-link.active');
     if (activeTab) {
         const typeId = activeTab.id.replace('tab-', '');
-        
-        // Aggiorna il tipo di parametro vitale corrente
-        // Assicurati che sia sempre una stringa
+
+        // Update current vital parameter type
+        // Ensure it's always a string
         currentVitalType = typeId;
-        
-        // Carica i dati per il grafico
+
+        // Load data for the chart
         loadDataForType(typeId);
-        
-        // Ricarica le osservazioni con il filtro del tipo corrente
+
+        // Reload observations with current type filter
         if (typeof loadObservations === 'function') {
             setTimeout(loadObservations, 500);
         }
@@ -383,14 +391,14 @@ function reloadAllCharts() {    // Trova la tab attiva
 }
 
 /**
- * Mostra indicatore di caricamento nel grafico
- * @param {string} typeId ID del tipo di dati
+ * Show loading indicator on chart
+ * @param {string} typeId Data type ID
  */
 function showChartLoading(typeId) {
     const chartContainer = document.querySelector(`#chart-tab-${typeId} .vitals-chart-container`);
     if (!chartContainer) return;
-    
-    // Aggiungi overlay di caricamento
+
+    // Add loading overlay
     let loadingOverlay = chartContainer.querySelector('.chart-loading-overlay');
     if (!loadingOverlay) {
         loadingOverlay = document.createElement('div');
@@ -405,16 +413,16 @@ function showChartLoading(typeId) {
         loadingOverlay.style.justifyContent = 'center';
         loadingOverlay.style.alignItems = 'center';
         loadingOverlay.style.zIndex = '10';
-        
+
         loadingOverlay.innerHTML = `
             <div class="text-center">
                 <div class="spinner-border text-primary mb-2" role="status">
-                    <span class="visually-hidden">Caricamento...</span>
+                    <span class="visually-hidden">${translateText('Loading...')}</span>
                 </div>
                 <p class="mb-0">${translateText('Loading data...')}</p>
             </div>
         `;
-        
+
         chartContainer.appendChild(loadingOverlay);
     } else {
         loadingOverlay.style.display = 'flex';
@@ -422,20 +430,20 @@ function showChartLoading(typeId) {
 }
 
 /**
- * Mostra errore nel grafico
- * @param {string} typeId ID del tipo di dati
+ * Show error on chart
+ * @param {string} typeId Data type ID
  */
 function showChartError(typeId) {
     const chartContainer = document.querySelector(`#chart-tab-${typeId} .vitals-chart-container`);
     if (!chartContainer) return;
-    
-    // Rimuovi overlay di caricamento
+
+    // Remove loading overlay
     const loadingOverlay = chartContainer.querySelector('.chart-loading-overlay');
     if (loadingOverlay) {
         loadingOverlay.remove();
     }
-    
-    // Aggiungi overlay di errore
+
+    // Add error overlay
     let errorOverlay = chartContainer.querySelector('.chart-error-overlay');
     if (!errorOverlay) {
         errorOverlay = document.createElement('div');
@@ -450,7 +458,7 @@ function showChartError(typeId) {
         errorOverlay.style.justifyContent = 'center';
         errorOverlay.style.alignItems = 'center';
         errorOverlay.style.zIndex = '10';
-        
+
         errorOverlay.innerHTML = `
             <div class="text-center">
                 <i class="fas fa-exclamation-circle text-danger fa-3x mb-3"></i>                <p class="mb-0">${translateText('Error loading data. Try again later.')}</p>
@@ -459,10 +467,10 @@ function showChartError(typeId) {
                 </button>
             </div>
         `;
-        
+
         chartContainer.appendChild(errorOverlay);
-        
-        // Aggiungi event listener per il pulsante di ripetizione
+
+        // Add event listener for the retry button
         const retryBtn = errorOverlay.querySelector('.retry-btn');
         if (retryBtn) {
             retryBtn.addEventListener('click', function() {
@@ -475,12 +483,12 @@ function showChartError(typeId) {
 }
 
 /**
- * Aggiorna il grafico con i dati ricevuti
- * @param {string} typeId ID del tipo di dati
- * @param {Array} data Dati ricevuti dall'API
+ * Update the chart with received data
+ * @param {string} typeId ID of the data type
+ * @param {Array} data Data received from the API
  */
 function updateChart(typeId, data) {
-    // Trova le informazioni sul tipo di dati
+    // Find information about the data type
     let typeInfo = null;
     for (const platform in SUPPORTED_DATA_TYPES) {
         const types = SUPPORTED_DATA_TYPES[platform];
@@ -490,128 +498,128 @@ function updateChart(typeId, data) {
             break;
         }
     }
-    
+
     if (!typeInfo) {
-        console.error(`Tipo di dati non supportato: ${typeId}`);
+        console.error(translateText(`Unsupported data type:`) + ` ${typeId}`);
         return;
     }
-    
-    // Rimuovi overlay di caricamento
+
+    // Remove loading overlay
     const chartContainer = document.querySelector(`#chart-tab-${typeId} .vitals-chart-container`);
     if (chartContainer) {
         const loadingOverlay = chartContainer.querySelector('.chart-loading-overlay');
         if (loadingOverlay) {
             loadingOverlay.style.display = 'none';
         }
-        
+
         const errorOverlay = chartContainer.querySelector('.chart-error-overlay');
         if (errorOverlay) {
             errorOverlay.style.display = 'none';
         }
     }
-    
-    // Prepara i dati per il grafico
+
+    // Prepare data for the chart
     const chartData = prepareChartData(data, typeInfo);
-    
-    // Aggiorna o crea il grafico
+
+    // Update or create the chart
     updateOrCreateChart(typeId, chartData, typeInfo);
 }
 
 /**
- * Prepara i dati per il grafico
- * Genera un array di date per il periodo selezionato, anche se non ci sono dati per tutte le date
- * @param {Array} data Dati ricevuti dall'API
- * @param {Object} typeInfo Informazioni sul tipo di dati
- * @returns {Object} Dati formattati per Chart.js
+ * Prepare data for the chart
+ * Generate an array of dates for the selected period, even if there's no data for all dates
+ * @param {Array} data Data received from the API
+ * @param {Object} typeInfo Information about the data type
+ * @returns {Object} Data formatted for Chart.js
  */
 function prepareChartData(data, typeInfo) {
-    // Genera array di date per il periodo selezionato
+    // Generate array of dates for the selected period
     const today = new Date();
     const startDate = new Date();
     startDate.setDate(today.getDate() - currentPeriod);
-    
-    // Crea array con tutte le date del periodo
+
+    // Create array with all dates in the period
     const allDates = [];
     const allLabels = [];
     const currentDate = new Date(startDate);
-    
-    // Aggiungi tutte le date dal periodo di inizio a oggi
+
+    // Add all dates from start period to today
     while (currentDate <= today) {
         allDates.push(new Date(currentDate));
         allLabels.push(formatTimestamp(currentDate));
         currentDate.setDate(currentDate.getDate() + 1);
     }
-    
-    // Se i dati sono vuoti, restituisci un set di dati vuoto ma con le date del periodo
+
+    // If data is empty, return an empty dataset but with dates for the period
     if (!data || !data.length) {
-        // Crea array di valori nulli per tutte le date
+        // Create array of null values for all dates
         const emptyValues = allDates.map(() => null);
-        
+
         return {
             labels: allLabels,
             datasets: [{
                 label: `${typeInfo.name} (${typeInfo.unit})`,
                 data: emptyValues,
                 borderColor: typeInfo.color,
-                backgroundColor: `${typeInfo.color}33`, // Colore con opacità 0.2
+                backgroundColor: `${typeInfo.color}33`, // Color with 0.2 opacity
                 fill: true,
                 tension: 0.4
             }]
         };
     }
-    
-    // Ordina i dati per timestamp
+
+    // Sort data by timestamp
     data.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-    
-    // Crea un mapping dei dati per data
+
+    // Create a mapping of data by date
     const dataByDate = {};
     data.forEach(item => {
         const date = new Date(item.timestamp);
         const dateKey = formatDateForAPI(date);
         dataByDate[dateKey] = item.value;
     });
-    
-    // Prepara i valori per tutte le date del periodo
-    // Importante: se il valore è 0, deve essere visualizzato come 0 e non come null
+
+    // Prepare values for all dates in the period
+    // Important: if the value is 0, it should be displayed as 0 and not as null
     const values = allDates.map(date => {
         const dateKey = formatDateForAPI(date);
         return dataByDate[dateKey] !== undefined ? dataByDate[dateKey] : null;
     });
-    
+
     return {
         labels: allLabels,
         datasets: [{
             label: `${typeInfo.name} (${typeInfo.unit})`,
             data: values,
             borderColor: typeInfo.color,
-            backgroundColor: `${typeInfo.color}33`, // Colore con opacità 0.2
+            backgroundColor: `${typeInfo.color}33`, // Color with 0.2 opacity
             fill: true,
             tension: 0.4,
-            // Importante: consenti la visualizzazione della linea anche con valori nulli/mancanti
+            // Important: allow line display even with null/missing values
             spanGaps: true
         }]
     };
 }
 
 /**
- * Aggiorna o crea un grafico
- * @param {string} typeId ID del tipo di dati
- * @param {Object} chartData Dati formattati per Chart.js
- * @param {Object} typeInfo Informazioni sul tipo di dati
+ * Update or create a chart
+ * @param {string} typeId Data type ID
+ * @param {Object} chartData Data formatted for Chart.js
+ * @param {Object} typeInfo Information about the data type
  */
 function updateOrCreateChart(typeId, chartData, typeInfo) {
     const canvas = document.getElementById(`chart-${typeId}`);
     if (!canvas) {
-        console.error(`Canvas non trovato per il grafico ${typeId}`);
+        console.error(translateText(`Canvas not found for chart ${typeId}`));
         return;
     }
-    
-    // Distruggi il grafico esistente se presente
+
+    // Destroy existing chart if present
     if (activeCharts[typeId]) {
         activeCharts[typeId].destroy();
     }
-    
-    // Crea un nuovo grafico
+
+    // Create a new chart
     activeCharts[typeId] = new Chart(canvas, {
         type: 'line',
         data: chartData,
@@ -621,7 +629,7 @@ function updateOrCreateChart(typeId, chartData, typeInfo) {
             plugins: {
                 title: {
                     display: true,
-                    text: `${typeInfo.name} - Ultimi ${currentPeriod} giorni`,
+                    text: `${typeInfo.name} - ${translateText('Last')} ${currentPeriod} ${translateText(currentPeriod === 1 ? 'day' : 'days')}`,
                     font: {
                         size: 16
                     }
@@ -639,7 +647,7 @@ function updateOrCreateChart(typeId, chartData, typeInfo) {
                 x: {
                     title: {
                         display: true,
-                        text: 'Data'
+                        text: translateText('Date')
                     },
                     ticks: {
                         maxRotation: 45,
@@ -659,21 +667,21 @@ function updateOrCreateChart(typeId, chartData, typeInfo) {
 }
 
 /**
- * Aggiorna la tabella dei dati in "Anamnesi dei parametri vitali"
- * Mostra solo i dati del tipo correntemente selezionato, per sincronizzare con il grafico
- * @param {string} typeId ID del tipo di dati
- * @param {Array} data Dati ricevuti dall'API
+ * Update the data table in "Vital Parameters History"
+ * Shows only data of currently selected type, to sync with chart
+ * @param {string} typeId Data type ID
+ * @param {Array} data Data received from API
  */
 function updateDataTable(typeId, data) {
     const tableBody = document.querySelector('#vitalsDataTable tbody');
     const noDataRow = document.getElementById('noVitalsDataRow');
-    
+
     if (!tableBody) {
-        console.error('Corpo della tabella dati non trovato');
+        console.error(translateText('Data table body not found'));
         return;
     }
-    
-    // Trova le informazioni sul tipo di dati
+
+    // Find information about data type
     let typeInfo = null;
     for (const platform in SUPPORTED_DATA_TYPES) {
         const types = SUPPORTED_DATA_TYPES[platform];
@@ -683,13 +691,13 @@ function updateDataTable(typeId, data) {
             break;
         }
     }
-    
+
     if (!typeInfo) {
-        console.error(`Tipo di dati non supportato: ${typeId}`);
+        console.error(translateText(`Unsupported data type: ${typeId}`));
         return;
     }
-    
-    // Se i dati sono vuoti, mostra un messaggio
+
+    // If data is empty, show a message
     if (!data || !data.length) {
         if (noDataRow) {
             const message = document.getElementById('vitalsTableMessage');
@@ -698,30 +706,30 @@ function updateDataTable(typeId, data) {
             }
             noDataRow.style.display = 'table-row';
         }
-        
-        // Rimuovi tutte le righe esistenti
+
+        // Remove all existing rows
         const existingRows = tableBody.querySelectorAll('tr:not(#noVitalsDataRow)');
         existingRows.forEach(row => row.remove());
         return;
     }
-    
-    // Nascondi la riga di nessun dato
+
+    // Hide no data row
     if (noDataRow) {
         noDataRow.style.display = 'none';
     }
-    
-    // Ordina i dati per timestamp (più recenti prima)
+
+    // Sort data by timestamp (most recent first)
     data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-    
-    // Limita a 50 righe per non rallentare il browser
+
+    // Limit to 50 rows to prevent browser slowdown
     const maxRows = 50;
     const limitedData = data.slice(0, maxRows);
-    
-    // Crea le righe della tabella
+
+    // Create table rows
     const rows = limitedData.map(item => {
         const date = new Date(item.timestamp);
         const formattedDate = date.toLocaleString();
-        
+
         return `
             <tr>
                 <td>
@@ -742,28 +750,18 @@ function updateDataTable(typeId, data) {
             </tr>
         `;
     }).join('');
-    
-    // Rimuovi tutte le righe esistenti e aggiungi le nuove
+
+    // Remove all existing rows and add new ones
     const existingRows = tableBody.querySelectorAll('tr:not(#noVitalsDataRow)');
     existingRows.forEach(row => row.remove());
-    
+
     tableBody.insertAdjacentHTML('afterbegin', rows);
 }
 
 /**
- * Estrae l'ID del paziente dall'URL
- * @returns {number|null} ID del paziente o null se non trovato
- */
-function getPatientIdFromUrl() {
-    const urlPath = window.location.pathname;
-    const matches = urlPath.match(/\/patients\/(\d+)/);
-    return matches && matches.length > 1 ? parseInt(matches[1]) : null;
-}
-
-/**
- * Formatta una data per l'API (YYYY-MM-DD)
- * @param {Date} date Data da formattare
- * @returns {string} Data formattata
+ * Format a date for API (YYYY-MM-DD)
+ * @param {Date} date Date to format
+ * @returns {string} Formatted date
  */
 function formatDateForAPI(date) {
     const year = date.getFullYear();
@@ -773,64 +771,58 @@ function formatDateForAPI(date) {
 }
 
 /**
- * Formatta un timestamp per le etichette del grafico
- * @param {string} timestamp Timestamp in formato ISO
- * @returns {string} Data formattata
+ * Format a timestamp for chart labels
+ * @param {string} timestamp Timestamp in ISO format
+ * @returns {string} Formatted date
  */
 function formatTimestamp(timestamp) {
     const date = new Date(timestamp);
-    
-    // Se il periodo è 1 giorno, mostra solo l'ora
+
+    // If the period is 1 day, show only the time
     if (currentPeriod === 1) {
         return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
-    
-    // Altrimenti mostra la data
+
+    // Otherwise show the date
     return date.toLocaleDateString();
 }
 
 /**
- * Funzione di traduzione (segnaposto, da sostituire con la funzione reale)
- * @param {string} text Testo da tradurre
- * @returns {string} Testo tradotto
- */
-// translateText function is now imported from translations.js
-
-/**
- * Gestisce il clic sul pulsante per generare un report specifico
- * Reindirizza alla URL per generare il PDF con il tipo vitale e periodo correnti
+ * Handle click on the button to generate a specific report
+ * Redirects to the URL to generate PDF with current vital type and period
  */
 function setupSpecificReportButton() {
     const reportBtn = document.getElementById('generateSpecificReportBtn');
     if (!reportBtn) return;
-      reportBtn.addEventListener('click', function(e) {
+
+    reportBtn.addEventListener('click', function (e) {
         e.preventDefault();
-        
-        // Verifica che ci sia un tipo vitale attualmente selezionato
+
+        // Check that there is a currently selected vital type
         if (!currentVitalType) {
             alert(translateText('Please select a vital sign type first.'));
             return;
         }
-        
-        // Estrai l'ID del tipo vitale se necessario
+
+        // Extract the vital type ID if necessary
         let vitalTypeId = currentVitalType;
         if (typeof currentVitalType === 'object' && currentVitalType !== null && currentVitalType.id) {
             vitalTypeId = currentVitalType.id;
         }
-        
-        // Crea l'URL per il report specifico
+
+        // Create the URL for the specific report
         const reportUrl = `${BASE_URL}patients/${PATIENT_ID}/specific_report?vital_type=${vitalTypeId}&period=${currentPeriod}`;
-        
-        // Apri l'URL in una nuova finestra/tab
+
+        // Open the URL in a new window/tab
         window.open(reportUrl, '_blank');
     });
 }
 
 /**
- * Aggiorna tutti i link dei report con il periodo corrente
+ * Update all report links with the current period
  */
 function updateAllReportLinks() {
-    // Aggiorna il link del report completo
+    // Update complete report link
     const completeReportLink = document.querySelector('a[href*="select_all=true"]');
     if (completeReportLink) {
         const patientId = getPatientIdFromUrl();
@@ -838,8 +830,8 @@ function updateAllReportLinks() {
             completeReportLink.href = `/patients/${patientId}/specific_report?select_all=true&period=${currentPeriod}`;
         }
     }
-    
-    // Aggiorna tutti i link dei report specifici per parametro
+
+    // Update all links for parameter-specific reports
     const vitalReportLinks = document.querySelectorAll('.vital-report-link');
     if (vitalReportLinks && vitalReportLinks.length > 0) {
         vitalReportLinks.forEach(link => {
@@ -855,9 +847,9 @@ function updateAllReportLinks() {
 }
 
 /**
- * Trova le informazioni per un tipo di parametro vitale
- * @param {string} vitalType ID del tipo di parametro vitale
- * @returns {Object} Informazioni sul tipo di parametro vitale
+ * Find information for a vital parameter type
+ * @param {string} vitalType ID of the vital parameter type
+ * @returns {Object} Information about the vital parameter type
  */
 function findVitalTypeInfo(vitalType) {
     if (currentPlatform && SUPPORTED_DATA_TYPES[currentPlatform]) {
@@ -866,31 +858,31 @@ function findVitalTypeInfo(vitalType) {
     return null;
 }
 
-// Inizializza i grafici quando il documento è caricato
-document.addEventListener('DOMContentLoaded', function() {
-    // Inizializza le variabili globali
-    console.log('Inizializzazione delle variabili globali...');
-    
-    // Inizializza i grafici
-    console.log('Avvio initVitalsCharts...');
+// Initialize charts when document is loaded
+document.addEventListener('DOMContentLoaded', function () {
+    // Initialize global variables
+    console.log(translateText('Initializing global variables...'));
+
+    // Initialize charts
+    console.log(translateText('Starting initVitalsCharts...'));
     initVitalsCharts();
-    console.log('Stato dopo initVitalsCharts:', {
+    console.log(translateText('Status after initVitalsCharts:'), {
         currentPeriod,
         currentPlatform,
         currentVitalType
     });
-    
-    // Inizializza il modulo delle osservazioni dopo i grafici
+
+    // Initialize observations module after charts
     if (typeof initObservations === 'function') {
-        console.log('Avvio initObservations...');
+        console.log(translateText('Starting initObservations...'));
         initObservations();
-        console.log('Stato dopo initObservations:', {
+        console.log(translateText('Status after initObservations:'), {
             currentPeriod,
             currentPlatform,
             currentVitalType
         });
     }
-    
-    // Inizializza il pulsante per il report specifico
+
+    // Initialize specific report button
     setupSpecificReportButton();
 });

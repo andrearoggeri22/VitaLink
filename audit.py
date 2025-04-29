@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 import logging
 from flask import request, current_app, jsonify, Blueprint, render_template
 from flask_login import current_user, login_required
+from flask_babel import _
 
 from models import AuditLog, ActionType, EntityType, Doctor, Patient, Note, DoctorPatient, HealthPlatformLink, HealthPlatform, VitalObservation
 from app import db
@@ -178,7 +179,7 @@ def get_audit_logs():
                 request=request,
                 current_user=current_user,
                 now=datetime.now(),
-                message=f"Errore durante il filtraggio per azione: {str(e)}"
+                message=_("Error during action filtering: %(error)s") % {"error": str(e)}
             )
     
     if entity_type:
@@ -213,7 +214,7 @@ def get_audit_logs():
                     now=datetime.now()
                 )
         except Exception as e:
-            # In caso di errore, restituisci un insieme vuoto
+            # In case of error, return an empty set
             return render_template(
                 'audit_logs.html',
                 logs=[],
@@ -222,7 +223,7 @@ def get_audit_logs():
                 request=request,
                 current_user=current_user,
                 now=datetime.now(),
-                message=f"Errore durante il filtraggio per entità: {str(e)}"
+                message=_("Error during entity filtering: %(error)s") % {"error": str(e)}
             )
     
     # Get results ordered by timestamp (most recent first)

@@ -1,7 +1,7 @@
 // vitals.js - JavaScript for vital signs functionality
 
 document.addEventListener('DOMContentLoaded', function () {
-    // Initialize vital signs form
+    // Initialize the vital signs form
     initVitalsForm();
 
     // Initialize charts for vital signs visualization
@@ -12,18 +12,18 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 /**
- * Initialize vital signs form functionality
+ * Initialize the functionality of the vital signs form
  */
 function initVitalsForm() {
     const vitalsForm = document.getElementById('vitalsForm');
 
     if (vitalsForm) {
-        // Update units based on selected vital sign type
+        // Update units based on the selected vital sign type
         const typeSelect = document.getElementById('vitalType');
         const unitInput = document.getElementById('vitalUnit');
         if (typeSelect && unitInput) {
             const units = {
-                // Parametri vitali principali
+                // Main vital parameters
                 'heart_rate': 'bpm',
                 'oxygen_saturation': '%',
                 'breathing_rate': 'resp/min',
@@ -31,23 +31,23 @@ function initVitalsForm() {
                 'temperature_core': '°C',
                 'temperature_skin': '°C',
 
-                // Parametri di attività fisica
-                'steps': 'steps',
+                // Physical activity parameters
+                'steps': translateText('steps'),
                 'calories': 'kcal',
                 'distance': 'km',
-                'active_minutes': 'min',
-                'sleep_duration': 'hours',
-                'floors_climbed': 'floors',
+                'active_minutes': translateText('min'),
+                'sleep_duration': translateText('hours'),
+                'floors_climbed': translateText('floors'),
                 'elevation': 'm',
 
-                // Parametri di metabolismo e attività dettagliata
+                // Metabolism and detailed activity parameters
                 'activity_calories': 'kcal',
                 'calories_bmr': 'kcal',
-                'minutes_sedentary': 'min',
-                'minutes_lightly_active': 'min',
-                'minutes_fairly_active': 'min',
+                'minutes_sedentary': translateText('min'),
+                'minutes_lightly_active': translateText('min'),
+                'minutes_fairly_active': translateText('min'),
 
-                // Nutrizione e idratazione
+                // Nutrition and hydration
                 'calories_in': 'kcal',
                 'water': 'ml'
             };
@@ -58,7 +58,7 @@ function initVitalsForm() {
                 unitInput.value = units[typeSelect.value] || '';
             }
 
-            // Update unit when type changes
+            // Update unit on type change
             typeSelect.addEventListener('change', function () {
                 unitInput.value = units[this.value] || '';
             });
@@ -79,19 +79,20 @@ function initVitalsForm() {
 /**
  * Initialize charts for vital signs visualization
  */
-function initVitalsCharts() {    // Controlla se siamo nella pagina dei parametri vitali
+function initVitalsCharts() {
+    // Check if we are on the vital parameters page
     const patientIdMatch = window.location.pathname.match(/\/patients\/(\d+)\/vitals/);
     if (!patientIdMatch) return;
 
     const patientId = patientIdMatch[1];
 
-    // Estrai i parametri di filtro dall'URL
+    // Extract filter parameters from URL
     const urlParams = new URLSearchParams(window.location.search);
     const startDate = urlParams.get('start_date');
     const endDate = urlParams.get('end_date');
     const vitalType = urlParams.get('type');
 
-    // Costruisci l'URL dell'API con i parametri di filtro
+    // Build API URL with filter parameters
     let apiUrl = `/api/patients/${patientId}/vitals`;
     const apiParams = [];
 
@@ -103,14 +104,15 @@ function initVitalsCharts() {    // Controlla se siamo nella pagina dei parametr
         apiUrl += `?${apiParams.join('&')}`;
     }
 
-    // Ottieni i dati tramite API
+    // Get data via API
     fetch(apiUrl)
         .then(response => {
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                throw new Error(translateText('Network response was not ok'));
             }
             return response.json();
-        }).then(vitalsData => {
+        })
+        .then(vitalsData => {
             // Create charts for each vital sign type
             for (const [type, values] of Object.entries(vitalsData)) {
                 if (!values || values.length === 0) continue;
@@ -159,7 +161,7 @@ function initVitalsCharts() {    // Controlla se siamo nella pagina dei parametr
                                 },
                                 title: {
                                     display: true,
-                                    text: 'Date'
+                                    text: translateText('Data')
                                 }
                             },
                             y: {
@@ -194,7 +196,7 @@ function initVitalsCharts() {    // Controlla se siamo nella pagina dei parametr
             }
         })
         .catch(error => {
-            console.error('Error fetching vital signs data:', error);
+            console.error(translateText('Error fetching vital signs data:'), error);
         });
 }
 
@@ -204,7 +206,8 @@ function initVitalsCharts() {    // Controlla se siamo nella pagina dei parametr
  * @param {HTMLCanvasElement} canvas - The canvas element where the chart would be displayed
  * @param {string} message - The message to display
  */
-function displayNoDataMessage(canvas, message) {    // Remove any existing chart
+function displayNoDataMessage(canvas, message) {
+    // Remove any existing chart
     if (Chart.getChart(canvas)) {
         Chart.getChart(canvas).destroy();
     }
@@ -221,18 +224,18 @@ function displayNoDataMessage(canvas, message) {    // Remove any existing chart
     messageElement.style.color = '#666';
     messageElement.style.fontStyle = 'italic';
 
-    // Nascondi il canvas e aggiungi il messaggio
+    // Hide the canvas and add the message
     canvas.style.display = 'none';
     container.appendChild(messageElement);
 }
 
 /**
- * Initialize filter functionality for vital signs
+ * Initialize the filter functionality for vital signs
  */
 function initVitalsFilter() {
     const filterForm = document.getElementById('vitalsFilterForm');
     if (filterForm) {
-        // Set max date for date inputs to today
+        // Set the maximum date for date inputs to today
         const startDateInput = document.getElementById('startDate');
         const endDateInput = document.getElementById('endDate');
 

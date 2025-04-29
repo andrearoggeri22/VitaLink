@@ -28,7 +28,7 @@ class RegistrationForm(FlaskForm):
         DataRequired(),
         Length(min=8, message=_("Password must be at least 8 characters long"))
     ])
-    # Rimuoviamo il validator EqualTo poiché verifichiamo manualmente nel controller
+    # We remove the EqualTo validator since we verify manually in the controller
     confirm_password = PasswordField(_('Confirm Password'), validators=[
         DataRequired()
     ])
@@ -41,7 +41,7 @@ def register():
     form = RegistrationForm()
     
     if request.method == 'POST':
-        # Verifica la corrispondenza delle password manualmente prima della validazione del form
+        # Verify password match manually before form validation
         if form.password.data != form.confirm_password.data:
             logger.info("Password mismatch during registration")
             flash(_('Passwords do not match'), 'danger')

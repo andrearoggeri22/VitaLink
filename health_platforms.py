@@ -146,7 +146,7 @@ def get_fitbit_authorization_url(link_uuid):
         'scope': FITBIT_CONFIG['scope'],
         'redirect_uri': FITBIT_CONFIG['redirect_uri'],
         'state': link_uuid,
-        'expires_in': 31536000  # 365 days (1 year) - massimo consentito da Fitbit
+        'expires_in': 31536000  # 365 days (1 year) - maximum allowed by Fitbit
     }
     
     auth_url = f"{FITBIT_CONFIG['authorize_url']}?{urlencode(params)}"
@@ -251,7 +251,7 @@ def save_fitbit_tokens(patient, token_response):
         # Extract token data
         access_token = token_response.get('access_token')
         refresh_token = token_response.get('refresh_token')
-        # Default to 1 year if not provided - il massimo possibile per Fitbit
+        # Default to 1 year if not provided - the maximum possible for Fitbit
         expires_in = token_response.get('expires_in', 31536000)
         
         # Calculate expiry date
@@ -310,64 +310,64 @@ def ensure_fresh_token(patient):
 
 def check_rate_limit():
     """
-    Verifica se abbiamo raggiunto il rate limit dell'API Fitbit
+    Check if we have reached the Fitbit API rate limit
     
     Returns:
-        bool: True se possiamo fare richieste, False altrimenti
+        bool: True if we can make requests, False otherwise
     """
     global api_rate_limit
     
     now = datetime.utcnow()
     
-    # Se c'è un retry_after impostato e non è ancora passato, blocca le richieste
+    # If there's a retry_after set and it hasn't passed yet, block requests
     if api_rate_limit['retry_after'] and now < api_rate_limit['retry_after']:
         wait_seconds = (api_rate_limit['retry_after'] - now).total_seconds()
-        api_logger.warning(f"Rate limit attivo, attendere {wait_seconds:.1f} secondi.")
+        api_logger.warning(f"Rate limit active, wait {wait_seconds:.1f} seconds.")
         return False
     
-    # Se è passata un'ora dall'ultimo reset, azzera il contatore
+    # If an hour has passed since the last reset, reset the counter
     if (now - api_rate_limit['last_reset']).total_seconds() >= 3600:
         api_rate_limit['last_reset'] = now
         api_rate_limit['calls'] = 0
-        api_logger.info("Contatore rate limit azzerato dopo 1 ora.")
+        api_logger.info("Rate limit counter reset after 1 hour.")
     
-    # Verifica se abbiamo superato il limite orario
+    # Check if we've exceeded the hourly limit
     if api_rate_limit['calls'] >= api_rate_limit['hourly_limit']:
         api_rate_limit['retry_after'] = api_rate_limit['last_reset'] + timedelta(hours=1)
-        api_logger.warning(f"Rate limit raggiunto ({api_rate_limit['calls']} chiamate). "
-                           f"Riprova dopo {api_rate_limit['retry_after'].strftime('%H:%M:%S')}")
+        api_logger.warning(f"Rate limit reached ({api_rate_limit['calls']} calls). "
+                           f"Try again after {api_rate_limit['retry_after'].strftime('%H:%M:%S')}")
         return False
     
     return True
 
 def increment_api_call_counter(response=None):
     """
-    Incrementa il contatore delle chiamate API e gestisce eventuali rate limit
+    Increment the API call counter and handle any rate limits
     
     Args:
-        response: Risposta dell'API per controllare il rate limit
+        response: API response to check for rate limit
     """
     global api_rate_limit
     
     api_rate_limit['calls'] += 1
     
-    # Se la risposta contiene headers relativi al rate limit, aggiorniamo i nostri limiti
+    # If the response contains rate limit headers, update our limits
     if response and response.status_code == 429:
-        # Otteni il valore di Retry-After se presente
+        # Get the Retry-After value if present
         retry_after = response.headers.get('Retry-After')
         if retry_after:
             try:
                 seconds = int(retry_after)
                 api_rate_limit['retry_after'] = datetime.utcnow() + timedelta(seconds=seconds)
-                api_logger.warning(f"Rate limit raggiunto. Retry-After: {seconds} secondi.")
+                api_logger.warning(f"Rate limit reached. Retry-After: {seconds} seconds.")
             except ValueError:
-                # Se non è un intero, assume che sia una data RFC1123
+                # If it's not an integer, assume it's an RFC1123 date
                 api_rate_limit['retry_after'] = datetime.utcnow() + timedelta(hours=1)
-                api_logger.warning("Rate limit raggiunto. Attesa di 1 ora.")
+                api_logger.warning("Rate limit reached. Wait for 1 hour.")
         else:
-            # Se non c'è Retry-After, attendi 1 ora per sicurezza
+            # If there's no Retry-After, wait 1 hour for safety
             api_rate_limit['retry_after'] = datetime.utcnow() + timedelta(hours=1)
-            api_logger.warning("Rate limit raggiunto. Attesa di 1 ora.")
+            api_logger.warning("Rate limit reached. Wait for 1 hour.")
 
 def get_fitbit_data(patient, data_type, start_date=None, end_date=None):
     """
@@ -382,69 +382,69 @@ def get_fitbit_data(patient, data_type, start_date=None, end_date=None):
     Returns:
         dict: Data from Fitbit API or None if error
     """
-    # Verifica se abbiamo raggiunto il rate limit
+    # Check if we have reached the rate limit
     if not check_rate_limit():
-        api_logger.warning(f"Rate limit attivo, richiesta bloccata: {data_type} per il paziente {patient.id}")
+        api_logger.warning(f"Rate limit active, request blocked: {data_type} for patient {patient.id}")
         return None
     
     if data_type not in FITBIT_ENDPOINTS:
-        api_logger.error(f"Tipo di dati Fitbit non supportato: {data_type}")
+        api_logger.error(f"Unsupported Fitbit data type: {data_type}")
         return None
     
     access_token = ensure_fresh_token(patient)
     if not access_token:
-        api_logger.error(f"Token di accesso non disponibile per il paziente {patient.id}")
+        api_logger.error(f"Access token not available for patient {patient.id}")
         return None
     
     endpoint_config = FITBIT_ENDPOINTS[data_type]
     
-    # Genera il log request ID univoco per tracciare questa specifica richiesta
+    # Generate a unique log request ID to track this specific request
     request_id = str(uuid.uuid4())[:8]
     
-    # Costruisci l'endpoint appropriato in base alle date e al tipo di dati
+    # Build the appropriate endpoint based on dates and data type
     if start_date and end_date:
-        # Calcola la differenza di giorni tra le date per verificare se è all'interno dei limiti di Fitbit
+        # Calculate the difference in days between the dates to check if it's within Fitbit's limits
         try:
             start_dt = datetime.strptime(start_date, '%Y-%m-%d')
             end_dt = datetime.strptime(end_date, '%Y-%m-%d')
             days_diff = (end_dt - start_dt).days + 1
             
-            # Verifica se l'intervallo supera il numero massimo di giorni per questo tipo di dati
+            # Check if the range exceeds the maximum number of days for this data type
             max_range = endpoint_config.get('max_range_days', 31)
             
             if days_diff > max_range:
-                api_logger.warning(f"[{request_id}] Intervallo di {days_diff} giorni supera il limite di {max_range} per {data_type}. "
-                                 f"Limitazione a {max_range} giorni a partire da {end_date}.")
-                # Limitiamo l'intervallo al massimo consentito, partendo dalla data di fine
+                api_logger.warning(f"[{request_id}] Range of {days_diff} days exceeds the limit of {max_range} for {data_type}. "
+                                 f"Limiting to {max_range} days from {end_date}.")
+                # Limit the range to the maximum allowed, starting from the end date
                 start_date = (end_dt - timedelta(days=max_range-1)).strftime('%Y-%m-%d')
-                api_logger.info(f"[{request_id}] Intervallo modificato: {start_date} - {end_date}")
+                api_logger.info(f"[{request_id}] Modified range: {start_date} - {end_date}")
         except ValueError as e:
-            api_logger.error(f"[{request_id}] Errore nel formato delle date: {str(e)}")
+            api_logger.error(f"[{request_id}] Error in date format: {str(e)}")
             return None
         
-        # Utilizzo dell'endpoint di range specifico per questo tipo di dati
+        # Use the specific range endpoint for this data type
         if 'range_endpoint' in endpoint_config:
             endpoint = endpoint_config['range_endpoint'].format(start=start_date, end=end_date)
-            api_logger.info(f"[{request_id}] Utilizzo endpoint range per {data_type}: {endpoint}")
+            api_logger.info(f"[{request_id}] Using range endpoint for {data_type}: {endpoint}")
         else:
-            # Fallback al formato generico se non è specificato un range_endpoint
+            # Fallback to the generic format if no range_endpoint is specified
             base = endpoint_config.get('base_endpoint', '')
             endpoint = f"{base}/{start_date}/{end_date}.json"
-            api_logger.info(f"[{request_id}] Utilizzo endpoint generico per {data_type}: {endpoint}")
+            api_logger.info(f"[{request_id}] Using generic endpoint for {data_type}: {endpoint}")
     else:
-        # Se non vengono fornite date, usiamo l'endpoint predefinito
+        # If no dates are provided, use the default endpoint
         endpoint = endpoint_config['endpoint']
-        api_logger.info(f"[{request_id}] Utilizzo endpoint predefinito per {data_type}: {endpoint}")
+        api_logger.info(f"[{request_id}] Using default endpoint for {data_type}: {endpoint}")
     
     headers = {
         'Authorization': f'Bearer {access_token}',
-        'Accept-Language': 'it_IT'  # Richiedi i dati in formato italiano
+        'Accept-Language': 'it_IT'  # Request data in Italian format
     }
     
-    api_logger.debug(f"[{request_id}] Chiamata API Fitbit: {endpoint}")
+    api_logger.debug(f"[{request_id}] Fitbit API call: {endpoint}")
     
     try:
-        # Effettua la chiamata API
+        # Make the API call
         response = requests.get(
             f"{FITBIT_CONFIG['api_base_url']}{endpoint}",
             headers=headers
@@ -485,10 +485,10 @@ def process_fitbit_data(data, data_type):
     Returns:
         list: Processed data in format [{'timestamp': ISO8601, 'value': 123, 'unit': 'xyz'}, ...]
     """
-    request_id = str(uuid.uuid4())[:8]  # ID per tracciamento nel log
+    request_id = str(uuid.uuid4())[:8]  # ID for log tracking
     
     if not data or data_type not in FITBIT_ENDPOINTS:
-        api_logger.warning(f"[{request_id}] Nessun dato per l'elaborazione o tipo di dati non supportato: {data_type}")
+        api_logger.warning(f"[{request_id}] No data for processing or unsupported data type: {data_type}")
         return []
     
     endpoint_config = FITBIT_ENDPOINTS[data_type]
@@ -498,11 +498,11 @@ def process_fitbit_data(data, data_type):
     unit = endpoint_config.get('unit', '')
     transform = endpoint_config.get('value_transform', lambda x: x)  # Default identity function
     
-    api_logger.info(f"[{request_id}] Elaborazione dati {data_type}, risposta con chiave {response_key}")
+    api_logger.info(f"[{request_id}] Processing data {data_type}, response with key {response_key}")
     
-    # Gestione speciale per la frequenza cardiaca
+    # Special handling for heart rate
     if data_type == 'heart_rate' and 'activities-heart' in data:
-        # Elaborazione speciale per le risposte della frequenza cardiaca
+        # Special processing for heart rate responses
         heart_results = []
         
         for heart_data in data['activities-heart']:
@@ -511,26 +511,26 @@ def process_fitbit_data(data, data_type):
                 heart_value = None
                 value_type = None
                 
-                # Prima verifichiamo se c'è il valore di frequenza cardiaca a riposo
+                # First check if there's a resting heart rate value
                 if 'restingHeartRate' in heart_data['value']:
                     heart_value = heart_data['value']['restingHeartRate']
                     value_type = 'resting'
-                    api_logger.info(f"[{request_id}] Trovato valore di frequenza cardiaca a riposo: {heart_value} per {timestamp}")
-                # Se non c'è, calcoliamo una media dalle zone di frequenza cardiaca
+                    api_logger.info(f"[{request_id}] Found resting heart rate value: {heart_value} for {timestamp}")
+                # If not, calculate an average from heart rate zones
                 elif 'heartRateZones' in heart_data['value'] and heart_data['value']['heartRateZones']:
                     zones = heart_data['value']['heartRateZones']
                     zone_values = []
                     
                     for zone in zones:
                         if 'min' in zone and 'max' in zone:
-                            # Calcola la media di ogni zona
+                            # Calculate the average of each zone
                             zone_avg = (float(zone['min']) + float(zone['max'])) / 2
                             zone_values.append(zone_avg)
                     
                     if zone_values:
                         heart_value = sum(zone_values) / len(zone_values)
                         value_type = 'zone_avg'
-                        api_logger.info(f"[{request_id}] Calcolato valore medio dalle zone: {heart_value} per {timestamp}")
+                        api_logger.info(f"[{request_id}] Calculated average value from zones: {heart_value} for {timestamp}")
                 
                 if heart_value is not None:
                     heart_results.append({
@@ -542,23 +542,23 @@ def process_fitbit_data(data, data_type):
                     })
         
         if heart_results:
-            api_logger.info(f"[{request_id}] Elaborati {len(heart_results)} valori di frequenza cardiaca")
+            api_logger.info(f"[{request_id}] Processed {len(heart_results)} heart rate values")
             return heart_results
     
-    # Elaborazione standard
-    # Estrai i dati dalla risposta in base alla chiave di risposta
+    # Standard processing
+    # Extract data from response based on response key
     if response_key in data:
         current_data = data[response_key]
     else:
-        api_logger.error(f"[{request_id}] Chiave di risposta {response_key} non trovata nei dati")
+        api_logger.error(f"[{request_id}] Response key {response_key} not found in data")
         return []
     
-    # Gestione di diverse strutture di dati
+    # Handling of different data structures
     results = []
     
-    # Funzione di supporto per estrarre valori nidificati
+    # Helper function to extract nested values
     def extract_nested_value(obj, path):
-        """Estrai un valore nidificato da un oggetto in base a un percorso."""
+        """Extract a nested value from an object based on a path."""
         if not path or not isinstance(obj, dict):
             return None
         
@@ -571,12 +571,12 @@ def process_fitbit_data(data, data_type):
         
         return extract_nested_value(obj[key], path[1:])
     
-    # Gestione dei valori nidificati (es: value.restingHeartRate, value.avg)
+    # Handling of nested values (e.g., value.restingHeartRate, value.avg)
     if '.' in value_key:
         value_path = value_key.split('.')
         
         if isinstance(current_data, list):
-            # Elabora dati in formato lista
+            # Process data in list format
             for item in current_data:
                 if timestamp_key in item:
                     try:
@@ -585,7 +585,7 @@ def process_fitbit_data(data, data_type):
                             value = float(nested_value)
                             timestamp = item[timestamp_key]
                             
-                            # Applica trasformazioni
+                            # Apply transformations
                             value = transform(value)
                             
                             results.append({
@@ -595,10 +595,10 @@ def process_fitbit_data(data, data_type):
                                 'unit': unit
                             })
                     except (ValueError, TypeError) as e:
-                        api_logger.error(f"[{request_id}] Errore durante l'elaborazione del valore: {str(e)}")
+                        api_logger.error(f"[{request_id}] Error during value processing: {str(e)}")
         
         elif isinstance(current_data, dict):
-            # Elabora dati in formato dizionario
+            # Process data in dict format
             if timestamp_key in current_data:
                 try:
                     nested_value = extract_nested_value(current_data, value_path)
@@ -606,7 +606,7 @@ def process_fitbit_data(data, data_type):
                         value = float(nested_value)
                         timestamp = current_data[timestamp_key]
                         
-                        # Applica trasformazioni
+                        # Apply transformations
                         value = transform(value)
                         
                         results.append({
@@ -616,18 +616,18 @@ def process_fitbit_data(data, data_type):
                             'unit': unit
                         })
                 except (ValueError, TypeError) as e:
-                    api_logger.error(f"[{request_id}] Errore durante l'elaborazione del valore: {str(e)}")
+                    api_logger.error(f"[{request_id}] Error during value processing: {str(e)}")
     else:
-        # Gestione standard dei dati (chiave valore semplice)
+        # Standard key-value processing
         if isinstance(current_data, list):
-            # Elabora formato lista
+            # Process list format
             for item in current_data:
                 if value_key in item and timestamp_key in item:
                     try:
                         value = float(item[value_key])
                         timestamp = item[timestamp_key]
                         
-                        # Applica trasformazioni
+                        # Apply transformations
                         value = transform(value)
                         
                         results.append({
@@ -637,16 +637,16 @@ def process_fitbit_data(data, data_type):
                             'unit': unit
                         })
                     except (ValueError, TypeError) as e:
-                        api_logger.error(f"[{request_id}] Errore nell'elaborazione del valore: {str(e)}")
+                        api_logger.error(f"[{request_id}] Error in value processing: {str(e)}")
         
         elif isinstance(current_data, dict):
-            # Elabora formato dizionario singolo
+            # Process single dict format
             if value_key in current_data and timestamp_key in current_data:
                 try:
                     value = float(current_data[value_key])
                     timestamp = current_data[timestamp_key]
                     
-                    # Applica trasformazioni
+                    # Apply transformations
                     value = transform(value)
                     
                     results.append({
@@ -656,9 +656,9 @@ def process_fitbit_data(data, data_type):
                         'unit': unit
                     })
                 except (ValueError, TypeError) as e:
-                    api_logger.error(f"[{request_id}] Errore nell'elaborazione del valore: {str(e)}")
+                    api_logger.error(f"[{request_id}] Error in value processing: {str(e)}")
     
-    api_logger.info(f"[{request_id}] Elaborati {len(results)} risultati per {data_type}")
+    api_logger.info(f"[{request_id}] Processed {len(results)} results for {data_type}")
     return results
 
 def get_vitals_data(patient, data_type, start_date=None, end_date=None, cache_duration=300):
@@ -676,26 +676,26 @@ def get_vitals_data(patient, data_type, start_date=None, end_date=None, cache_du
     Returns:
         list: Processed data in format [{'timestamp': ISO8601, 'value': 123, 'unit': 'xyz'}, ...]
     """
-    # Genera un ID univoco per questa richiesta
+    # Generate a unique ID for this request
     request_id = str(uuid.uuid4())[:8]
     
-    # Normalizza il tipo di dato (converti in minuscolo se è una stringa)
+    # Normalize the data type (convert to lowercase if it's a string)
     if isinstance(data_type, str):
         normalized_data_type = data_type.lower()
     else:
         normalized_data_type = data_type
     
-    # Imposta date predefinite se non fornite
+    # Set default dates if not provided
     if not end_date:
         end_date = datetime.now().strftime('%Y-%m-%d')
-        api_logger.debug(f"[{request_id}] Data fine non fornita, usando oggi: {end_date}")
+        api_logger.debug(f"[{request_id}] End date not provided, using today: {end_date}")
     
     if not start_date:
-        # Default: 7 giorni prima della data di fine
+        # Default: 7 days before end date
         end_dt = datetime.strptime(end_date, '%Y-%m-%d')
         start_dt = end_dt - timedelta(days=7)
         start_date = start_dt.strftime('%Y-%m-%d')
-        api_logger.debug(f"[{request_id}] Data inizio non fornita, usando 7 giorni prima: {start_date}")
+        api_logger.debug(f"[{request_id}] Start date not provided, using 7 days before: {start_date}")
     
     # Check if we have cached data for this request
     cache_key = f"{patient.id}_{normalized_data_type}_{start_date}_{end_date}"
@@ -705,46 +705,46 @@ def get_vitals_data(patient, data_type, start_date=None, end_date=None, cache_du
         cache_time = cache_entry.get('cache_time')
         if cache_time:
             cache_age = (datetime.utcnow() - cache_time).total_seconds()
-            # Se la cache è ancora valida, usiamo i dati memorizzati
+            # If the cache is still valid, use the stored data
             if cache_age < cache_duration:
-                api_logger.info(f"[{request_id}] Usando dati dalla cache per {normalized_data_type}, età: {cache_age:.1f}s")
+                api_logger.info(f"[{request_id}] Using data from cache for {normalized_data_type}, age: {cache_age:.1f}s")
                 return cache_entry.get('data', [])
             else:
-                api_logger.info(f"[{request_id}] Cache scaduta per {normalized_data_type}, età: {cache_age:.1f}s")
+                api_logger.info(f"[{request_id}] Cache expired for {normalized_data_type}, age: {cache_age:.1f}s")
     
     # No valid cache, need to get data from the platform
     data = []
     
     # Check which platform the patient is connected to
     if not patient.connected_platform:
-        api_logger.warning(f"[{request_id}] Paziente {patient.id} non collegato a nessuna piattaforma")
+        api_logger.warning(f"[{request_id}] Patient {patient.id} not connected to any platform")
         return []
     
-    start_time = time.time()  # Per misurare il tempo di esecuzione
+    start_time = time.time()  # To measure execution time
     try:
         if patient.connected_platform == HealthPlatform.FITBIT:
-            api_logger.info(f"[{request_id}] Richiesta dati Fitbit: {normalized_data_type} dal {start_date} al {end_date}")
+            api_logger.info(f"[{request_id}] Requesting Fitbit data: {normalized_data_type} from {start_date} to {end_date}")
             data = get_processed_fitbit_data(patient, normalized_data_type, start_date, end_date)
         elif patient.connected_platform == HealthPlatform.GOOGLE_HEALTH_CONNECT:
             # Placeholder for Google Fit implementation
-            api_logger.warning(f"[{request_id}] Integrazione Google Fit non ancora implementata")
+            api_logger.warning(f"[{request_id}] Google Fit integration not yet implemented")
             data = []
         elif patient.connected_platform == HealthPlatform.APPLE_HEALTH:
             # Placeholder for Apple Health implementation
-            api_logger.warning(f"[{request_id}] Integrazione Apple Health non ancora implementata")
+            api_logger.warning(f"[{request_id}] Apple Health integration not yet implemented")
             data = []
         else:
-            api_logger.warning(f"[{request_id}] Piattaforma non supportata: {patient.connected_platform}")
+            api_logger.warning(f"[{request_id}] Unsupported platform: {patient.connected_platform}")
             data = []
         
-        # Calcola statistiche sui dati
+        # Calculate statistics on the data
         stats = {
             "count": len(data),
             "execution_time": round(time.time() - start_time, 3)
         }
         
         if data and len(data) > 0:
-            # Calcola min, max, avg solo se abbiamo dati
+            # Calculate min, max, avg only if we have data
             try:
                 values = [item.get('value') for item in data if item.get('value') is not None]
                 if values:
@@ -752,10 +752,10 @@ def get_vitals_data(patient, data_type, start_date=None, end_date=None, cache_du
                     stats["max"] = max(values)
                     stats["avg"] = sum(values) / len(values)
                     
-                    # Ottieni l'unità di misura dal primo elemento
+                    # Get the unit of measure from the first element
                     stats["unit"] = data[0].get('unit', '')
             except Exception as stats_error:
-                api_logger.error(f"[{request_id}] Errore nel calcolo delle statistiche: {str(stats_error)}")
+                api_logger.error(f"[{request_id}] Error calculating statistics: {str(stats_error)}")
         
         # Cache the data with statistics
         vitals_cache[cache_key] = {
@@ -765,10 +765,10 @@ def get_vitals_data(patient, data_type, start_date=None, end_date=None, cache_du
             'source': patient.connected_platform.value
         }
         
-        api_logger.info(f"[{request_id}] Recuperati {len(data)} punti dati per {normalized_data_type} in {stats['execution_time']}s")
+        api_logger.info(f"[{request_id}] Retrieved {len(data)} data points for {normalized_data_type} in {stats['execution_time']}s")
         return data
     except Exception as e:
-        api_logger.error(f"[{request_id}] Errore nel recupero dati per paziente {patient.id}, tipo {normalized_data_type}: {str(e)}")
+        api_logger.error(f"[{request_id}] Error retrieving data for patient {patient.id}, type {normalized_data_type}: {str(e)}")
         return []
 
 def get_processed_fitbit_data(patient, data_type, start_date=None, end_date=None):
@@ -784,24 +784,25 @@ def get_processed_fitbit_data(patient, data_type, start_date=None, end_date=None
     Returns:
         list: Processed data in format [{'timestamp': ISO8601, 'value': 123, 'unit': 'xyz'}, ...]
     """
-    # Se le date non sono specificate, usa valori predefiniti
+    # If dates are not specified, use default values
     if not end_date:
         end_date = datetime.now().strftime('%Y-%m-%d')
     
     if not start_date:
-        # Default: 7 giorni prima della data di fine
+        # Default: 7 days before end date
         end_dt = datetime.strptime(end_date, '%Y-%m-%d')
         start_dt = end_dt - timedelta(days=7)
         start_date = start_dt.strftime('%Y-%m-%d')
     
-    # Genera un ID univoco per questa richiesta di dati (per tracciamento nel log)
+    # Generate a unique ID for this data request (for log tracking)
     request_id = str(uuid.uuid4())[:8]
-    api_logger.info(f"[{request_id}] Richiesta dati: {data_type} per paziente {patient.id} dal {start_date} al {end_date}")
+    api_logger.info(f"[{request_id}] Data request: {data_type} for patient {patient.id} from {start_date} to {end_date}")
     
     # Convert data_type to lowercase if it's coming from JavaScript/frontend
     # JavaScript uses uppercase like 'HEART_RATE' while Python backend expects lowercase like 'heart_rate'
     normalized_data_type = data_type.lower() if isinstance(data_type, str) else data_type
-      # Detailed mapping for all supported data types
+    
+    # Detailed mapping for all supported data types
     mapping = {
     'heart_rate': 'heart_rate',
     'steps': 'steps',
@@ -826,63 +827,64 @@ def get_processed_fitbit_data(patient, data_type, start_date=None, end_date=None
     }
 
     
-    # Determina il tipo di dato API corretto
+    # Determine the correct API data type
     api_data_type = mapping.get(normalized_data_type, normalized_data_type)
-    api_logger.debug(f"[{request_id}] Tipo dati normalizzato: {normalized_data_type} -> {api_data_type}")
+    api_logger.debug(f"[{request_id}] Normalized data type: {normalized_data_type} -> {api_data_type}")
     
-    # Verifica se il tipo di dati è supportato da Fitbit
+    # Check if the data type is supported by Fitbit
     if api_data_type not in FITBIT_ENDPOINTS:
-        api_logger.error(f"[{request_id}] Tipo di dati non supportato da Fitbit: {api_data_type}")
+        api_logger.error(f"[{request_id}] Data type not supported by Fitbit: {api_data_type}")
         return []
     
-    # Strategie multiple di recupero dati per maggiore resilienza
+    # Multiple data retrieval strategies for greater resilience
     results = []
     error_count = 0
     
-    # Primo tentativo: dati di range con periodo completo
-    api_logger.info(f"[{request_id}] Tentativo 1: Richiesta dati range per {api_data_type}")
+    # First attempt: range data with full period
+    api_logger.info(f"[{request_id}] Attempt 1: Requesting range data for {api_data_type}")
     
     try:
         raw_data = get_fitbit_data(patient, api_data_type, start_date, end_date)
         if raw_data:
-            # Processa i dati di range normali
+            # Process normal range data
             range_results = process_fitbit_data(raw_data, api_data_type)
             if range_results:
                 results = range_results
-                api_logger.info(f"[{request_id}] Recuperati {len(range_results)} punti dati range")
+                api_logger.info(f"[{request_id}] Retrieved {len(range_results)} range data points")
             else:
-                api_logger.warning(f"[{request_id}] Nessun dato range disponibile per il periodo")
+                api_logger.warning(f"[{request_id}] No range data available for the period")
         else:
-            api_logger.warning(f"[{request_id}] Nessun dato ricevuto per {api_data_type}")
+            api_logger.warning(f"[{request_id}] No data received for {api_data_type}")
             error_count += 1
     except Exception as e:
-        api_logger.error(f"[{request_id}] Errore nel recupero o processamento dati range: {str(e)}")
+        api_logger.error(f"[{request_id}] Error retrieving or processing range data: {str(e)}")
         error_count += 1
+        
     if results:
         try:
-            # Alcuni timestamp potrebbero non avere il formato previsto, quindi gestiamo le eccezioni
+            # Some timestamps may not have the expected format, so handle exceptions
             results.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
         except Exception as sort_error:
-            api_logger.warning(f"[{request_id}] Impossibile ordinare i risultati: {str(sort_error)}")
+            api_logger.warning(f"[{request_id}] Unable to sort results: {str(sort_error)}")
     
-    # Applica eventuali trasformazioni addizionali (ad esempio, unità di misura)
+    # Apply any additional transformations (e.g., unit of measure)
     try:
         endpoint_config = FITBIT_ENDPOINTS[api_data_type]
         transform_function = endpoint_config.get('value_transform', lambda x: x)
         unit = endpoint_config.get('unit', '')
         
         for item in results:
-            # Assicurati che ogni elemento abbia l'unità corretta
+            # Make sure each item has the correct unit
             if 'unit' not in item:
                 item['unit'] = unit
             
-            # Aggiungi il campo recorded_at se non esiste già
+            # Add the recorded_at field if it doesn't already exist
             if 'recorded_at' not in item and 'timestamp' in item:
                 item['recorded_at'] = item['timestamp']
     except Exception as transform_error:
-        api_logger.error(f"[{request_id}] Errore nella trasformazione finale dei dati: {str(transform_error)}")
+        api_logger.error(f"[{request_id}] Error in final data transformation: {str(transform_error)}")
     
-    api_logger.info(f"[{request_id}] Elaborazione completata, restituiti {len(results)} punti dati per {api_data_type}")
+    api_logger.info(f"[{request_id}] Processing completed, returning {len(results)} data points for {api_data_type}")
     return results
 
 # -------- Blueprint routes --------

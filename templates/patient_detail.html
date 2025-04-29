@@ -188,7 +188,6 @@
             </div>
         </div>
     </div>
-    <!-- Health Platform Modal creato dinamicamente da JavaScript -->
     <!-- Delete Note Confirmation Modal -->
     <div class="modal fade"
          id="deleteNoteModal"
@@ -228,7 +227,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const confirmDeleteNoteBtn = document.getElementById('confirmDeleteNote');
     let noteIdToDelete = null;
 
-    // Evento click sui pulsanti di eliminazione
+    // Click event on delete buttons
     document.querySelectorAll('.delete-note-btn').forEach(button => {
         button.addEventListener('click', function() {
             noteIdToDelete = this.getAttribute('data-note-id');
@@ -236,11 +235,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Azione di conferma dell'eliminazione
+    // Confirmation action for deletion
     confirmDeleteNoteBtn.addEventListener('click', function() {
         if (!noteIdToDelete) return;
         
-        // Effettua la richiesta DELETE all'endpoint
+        // Make DELETE request to endpoint
         fetch(`/notes/${noteIdToDelete}`, {
             method: 'DELETE',
             headers: {
@@ -255,7 +254,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             return response.json();
         })
-        .then(data => {            // Hide modal
+        .then(data => {            
+            // Hide modal
             deleteNoteModal.hide();
             
             // Remove note from page
@@ -263,7 +263,8 @@ document.addEventListener('DOMContentLoaded', function() {
             if (noteElement) {
                 noteElement.remove();
             }
-              // Show success message
+              
+            // Show success message
             showAlert('success', translateText('Note deleted successfully'));
             
             // Check if there are no more notes and show appropriate message
@@ -281,13 +282,15 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         })
         .catch(error => {
-            console.error('Errore:', error);
+            console.error('Error:', error);
             showAlert('danger', translateText('An error occurred while deleting the note.'));
         })
         .finally(() => {
             noteIdToDelete = null;
         });
-    });    // Function to show alerts
+    });
+    
+    // Function to show alerts
     function showAlert(type, message) {
         const alertDiv = document.createElement('div');
         alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
@@ -296,7 +299,8 @@ document.addEventListener('DOMContentLoaded', function() {
             ${message}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         `;
-          // Insert the alert in the same position as Flask flash messages (at the beginning of the main container)
+          
+        // Insert the alert in the same position as Flask flash messages (at the beginning of the main container)
         const mainContainer = document.querySelector('main.container');
         // Check if an alert already exists, if so insert before it,
         // otherwise insert before the first element in the main container
@@ -307,7 +311,7 @@ document.addEventListener('DOMContentLoaded', function() {
             mainContainer.insertBefore(alertDiv, mainContainer.firstChild);
         }
         
-        // Nascondi automaticamente dopo 5 secondi
+        // Hide automatically after 5 seconds
         setTimeout(() => {
             const bsAlert = new bootstrap.Alert(alertDiv);
             bsAlert.close();

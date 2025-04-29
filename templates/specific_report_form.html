@@ -114,7 +114,8 @@
                 <form action="{{ url_for('views.create_specific_patient_report', patient_id=patient.id) }}"
                       method="post"
                       id="specificReportForm">
-                    <!-- Summary section -->                    <div class="mb-4">
+                    <!-- Summary section -->
+                    <div class="mb-4">
                         <label for="summary" class="form-label">
                             <i class="fas fa-pen-fancy me-1"></i>
                             {{ _("Summary (Optional)") }}
@@ -266,7 +267,8 @@
                                                     </label>
                                                 </div>
                                             </div>
-                                            <div class="card-body charts-selection d-none">                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <div class="card-body charts-selection d-none">
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
                                                     <div class="form-text mb-0">{{ _("Select periods:") }}</div>
                                                     <div class="btn-group btn-group-sm">
                                                         <button type="button"
@@ -318,7 +320,8 @@
                                                                data-vital-type="{{ vital_type.value }}">
                                                         <label class="form-check-label" for="chart3m{{ loop.index }}">{{ _("3 Months") }}</label>
                                                     </div>
-                                                </div>                                                <div class="invalid-feedback d-none period-error">{{ _("Select at least one period") }}</div>
+                                                </div>
+                                                <div class="invalid-feedback d-none period-error">{{ _("Select at least one period") }}</div>
                                             </div>
                                         </div>
                                     </div>
