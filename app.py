@@ -75,14 +75,14 @@ def format_datetime(value, format='%Y-%m-%d %H:%M:%S'):
     if value is None:
         return ""
 
-    # Definisci il timezone UTC+2
+    # Define the UTC+2 timezone
     utc_plus_2 = timezone(timedelta(hours=2))
 
-    # Se il valore non ha timezone, assumiamo che sia UTC
+    # If the value has no timezone, assume it's UTC
     if value.tzinfo is None:
         value = value.replace(tzinfo=timezone.utc)
 
-    # Converti in UTC+2
+    # Convert to UTC+2
     value = value.astimezone(utc_plus_2)
 
     return value.strftime(format)

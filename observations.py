@@ -172,7 +172,7 @@ def update_web_observation(observation_id):
             observation.vital_type = VitalSignType(data['vital_type'])
         except ValueError:
             return jsonify({
-                "error": _("Tipo di parametro vitale non valido. Deve essere uno tra: %(types)s") % {
+                "error": _("Invalid vital sign type. Must be one of: %(types)s") % {
                     "types": ", ".join(t.value for t in VitalSignType)
                 }
             }), 400
@@ -186,18 +186,18 @@ def update_web_observation(observation_id):
         try:
             observation.start_date = datetime.fromisoformat(data['start_date'].replace('Z', '+00:00'))
         except ValueError:
-            return jsonify({"error": _("Formato data inizio non valido. Usa il formato ISO (YYYY-MM-DD)")}), 400
+            return jsonify({"error": _("Invalid start date format. Use ISO format (YYYY-MM-DD)")}), 400
     
     # Aggiorna la data di fine se fornita
     if 'end_date' in data:
         try:
             observation.end_date = datetime.fromisoformat(data['end_date'].replace('Z', '+00:00'))
         except ValueError:
-            return jsonify({"error": _("Formato data fine non valido. Usa il formato ISO (YYYY-MM-DD)")}), 400
+            return jsonify({"error": _("Invalid end date format. Use ISO format (YYYY-MM-DD)")}), 400
     
     # Verifica che la data di inizio sia precedente alla data di fine
     if observation.start_date >= observation.end_date:
-        return jsonify({"error": _("La data di inizio deve essere precedente alla data di fine")}), 400
+        return jsonify({"error": _("Start date must be before end date")}), 400
     
     # Salva le modifiche
     try:
@@ -216,7 +216,7 @@ def update_web_observation(observation_id):
         try:
             log_observation_update(current_user.id, observation, old_data)
         except Exception as e:
-            logger.error(f"Errore durante la registrazione dell'audit per l'aggiornamento dell'osservazione: {str(e)}")
+            logger.error(f"Error during audit logging for observation update: {str(e)}")
         
         logger.info(f"Osservazione {observation_id} aggiornata dal medico {current_user.id}")
         

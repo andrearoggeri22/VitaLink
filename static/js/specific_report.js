@@ -1,48 +1,48 @@
 /**
  * Specific Report Form JavaScript
- * Gestisce le interazioni UI per il form di generazione dei report specifici per pazienti.
+ * Handles UI interactions for patient-specific report generation form.
  */
 document.addEventListener('DOMContentLoaded', function () {
-    // Controlla se ci sono parametri nell'URL che indicano un tipo vitale specifico
+    // Check if there are URL parameters indicating a specific vital type
     const urlParams = new URLSearchParams(window.location.search);
     const vitalTypeParam = urlParams.get('vital_type');
     const periodParam = urlParams.get('period');
     const selectAllParam = urlParams.get('select_all');
 
-    // Se è presente il parametro select_all, seleziona tutti i dati
+    // If select_all parameter is present, select all data
     if (selectAllParam === 'true') {
-        console.log('Selezione automatica di tutti i dati attivata');
+        console.log('Automatic selection of all data activated');
 
-        // Seleziona tutte le note
+        // Select all notes
         document.querySelectorAll('.note-checkbox').forEach(checkbox => {
             checkbox.checked = true;
             checkbox.closest('.form-check').classList.add('selected-item');
         });
 
-        // Seleziona tutte le osservazioni
+        // Select all observations
         document.querySelectorAll('.observation-checkbox').forEach(checkbox => {
             checkbox.checked = true;
             checkbox.closest('.form-check').classList.add('selected-item');
         });
 
-        // Seleziona tutti i tipi vitali e periodi
+        // Select all vital types and periods
         document.querySelectorAll('.vital-type-checkbox').forEach(checkbox => {
             checkbox.checked = true;
 
-            // Evidenzia la card del tipo vitale
+            // Highlight vital type card
             const card = checkbox.closest('.vital-type-card');
             card.classList.add('selected');
 
-            // Mostra le opzioni per i periodi
+            // Show options for periods
             const chartsSelection = card.querySelector('.charts-selection');
             if (chartsSelection) {
                 chartsSelection.classList.remove('d-none');
             }
 
-            // Seleziona tutti i periodi per questo tipo vitale
+            // Select all periods for this vital type
             const vitalType = checkbox.value;
             document.querySelectorAll(`.period-checkbox[data-vital-type="${vitalType}"]`).forEach(periodCheckbox => {
-                // Se è specificato un periodo, seleziona solo quello, altrimenti seleziona tutti
+                // If a period is specified, select only that one, otherwise select all
                 if (periodParam) {
                     let periodValue;
                     switch (periodParam) {
@@ -59,14 +59,14 @@ document.addEventListener('DOMContentLoaded', function () {
                             periodValue = '3m';
                             break;
                         default:
-                            periodValue = '7d'; // Default a 7 giorni
+                            periodValue = '7d'; // Default to 7 days
                     }
 
                     if (periodCheckbox.value === periodValue) {
                         periodCheckbox.checked = true;
                     }
                 } else {
-                    // Se non è specificato un periodo, seleziona tutti
+                    // If no period is specified, select all
                     periodCheckbox.checked = true;
                 }
             });
@@ -77,21 +77,21 @@ document.addEventListener('DOMContentLoaded', function () {
     const vitalTypeCheckboxes = document.querySelectorAll('.vital-type-checkbox');
     if (vitalTypeCheckboxes) {
         vitalTypeCheckboxes.forEach(checkbox => {
-            // Controllo se questo tipo vitale corrisponde a quello nell'URL
-            // Solo se non è presente select_all=true
+            // Check if this vital type matches the one in the URL
+            // Only if select_all=true is not present
             if (!selectAllParam && vitalTypeParam && checkbox.value.toUpperCase() === vitalTypeParam.toUpperCase()) {
                 checkbox.checked = true;
-                // Evidenzia la card del tipo vitale
+                // Highlight vital type card
                 const card = checkbox.closest('.vital-type-card');
                 card.classList.add('selected');
 
-                // Mostra le opzioni per i periodi
+                // Show options for periods
                 const chartsSelection = card.querySelector('.charts-selection');
                 if (chartsSelection) {
                     chartsSelection.classList.remove('d-none');
                 }
 
-                // Se è specificato anche un parametro di periodo, seleziona quello
+                // If a period parameter is also specified, select that one
                 if (periodParam) {
                     let periodValue;
                     switch (periodParam) {
@@ -108,10 +108,10 @@ document.addEventListener('DOMContentLoaded', function () {
                             periodValue = '3m';
                             break;
                         default:
-                            periodValue = '7d'; // Default a 7 giorni
+                            periodValue = '7d'; // Default to 7 days
                     }
 
-                    // Cerca e seleziona il checkbox del periodo corrispondente
+                    // Find and select the corresponding period checkbox
                     const periodCheckboxes = card.querySelectorAll(`.period-checkbox`);
                     periodCheckboxes.forEach(periodCheckbox => {
                         if (periodCheckbox.value === periodValue) {
@@ -120,13 +120,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     });
                 }
 
-                // Scorri automaticamente a questa sezione
+                // Auto-scroll to this section
                 setTimeout(() => {
                     card.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }, 500);
             }
 
-            // Aggiungi event listener per mostrare/nascondere le opzioni dei periodi
+            // Add event listener to show/hide period options
             checkbox.addEventListener('change', function () {
                 const card = this.closest('.vital-type-card');
                 const chartsSelection = card.querySelector('.charts-selection');
@@ -137,7 +137,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else {
                     chartsSelection.classList.add('d-none');
                     card.classList.remove('selected');
-                    // Deseleziona tutti i periodi quando si deseleziona il tipo vitale
+                    // Deselect all periods when the vital type is unchecked
                     card.querySelectorAll('.period-checkbox').forEach(periodCheckbox => {
                         periodCheckbox.checked = false;
                     });
@@ -301,7 +301,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Prevent form submission if validation fails
             if (!isValid) {
-                event.preventDefault();                const message = translateText('Please select at least one time period for each selected vital type');
+                event.preventDefault(); 
+                const message = translateText('Please select at least one time period for each selected vital type');
 
                 // Create a toast notification instead of alert
                 const toastHtml = `

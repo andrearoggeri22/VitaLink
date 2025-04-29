@@ -289,7 +289,7 @@ def add_observation(doctor):
     required_fields = ['patient_id', 'vital_type', 'content', 'start_date', 'end_date']
     for field in required_fields:
         if field not in data:
-            return jsonify({"error": _("Missing required field: {field}") % {"field": field}}), 400
+            return jsonify({"error": _("Missing required field: %(field)s") % {"field": field}}), 400
     
     # Find the patient
     patient_id = data['patient_id']

@@ -80,7 +80,7 @@ def create_vital_chart(vitals_data, period_name, vital_type):
     'temperature_core': colors.orange,
     'temperature_skin': colors.orange,
     'steps': colors.teal,
-    'calories': colors.orange,  # <-- AGGIUNTO
+    'calories': colors.orange,  # <-- ADDED
     'sleep_duration': colors.navy,
     'distance': colors.green,
     'active_minutes': colors.purple,

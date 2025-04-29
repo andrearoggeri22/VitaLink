@@ -615,7 +615,7 @@ def create_specific_patient_report(patient_id):
     
     logger.info(f"Loading report form with parameters: vital_type={vital_type_param}, period={period_param}, select_all={select_all_param}")
     return render_template(
-        'specific_report_form.html',  # Utilizziamo il template aggiornato
+        'specific_report_form.html',  # We use the updated template
         patient=patient,
         notes=notes,
         vital_types=list(VitalSignType),

@@ -14,7 +14,7 @@ from app import db
 class VitalSignType(Enum):
     # Types of vital signs supported in the system
 
-    # Parametri vitali principali
+    # Main vital parameters
     HEART_RATE = "heart_rate"
     OXYGEN_SATURATION = "oxygen_saturation"
     BREATHING_RATE = "breathing_rate"
@@ -22,7 +22,7 @@ class VitalSignType(Enum):
     TEMPERATURE_CORE = "temperature_core"
     TEMPERATURE_SKIN = "temperature_skin"
     
-    # Parametri di attività fisica
+    # Physical activity parameters
     STEPS = "steps"
     CALORIES = "calories"
     DISTANCE = "distance"
@@ -31,14 +31,14 @@ class VitalSignType(Enum):
     FLOORS_CLIMBED = "floors_climbed"
     ELEVATION = "elevation"
     
-    # Metabolismo e attività dettagliata
+    # Metabolism and detailed activity
     ACTIVITY_CALORIES = "activity_calories"
     CALORIES_BMR = "calories_bmr"
     MINUTES_SEDENTARY = "minutes_sedentary"
     MINUTES_LIGHTLY_ACTIVE = "minutes_lightly_active"
     MINUTES_FAIRLY_ACTIVE = "minutes_fairly_active"
     
-    # Nutrizione e idratazione
+    # Nutrition and hydration
     CALORIES_IN = "calories_in"
     WATER = "water"
 
