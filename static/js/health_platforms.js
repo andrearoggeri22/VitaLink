@@ -63,7 +63,7 @@ function initHealthPlatforms() {
                         // Se connesso, mostra il popup di conferma disconnessione
                         disconnectHealthPlatform(patientId, platform);
                     } else {
-                        // Se non connesso, mostra il popup per la connessione
+                // Se non connesso, mostra il popup per la connessione
                         createHealthPlatformModal(patientId);
                     }
                 });
@@ -277,10 +277,10 @@ function createConfirmDialog(title, message, confirmCallback) {
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            ${translateText('Annulla')}
+                            ${translateText('Cancel')}
                         </button>
                         <button type="button" class="btn btn-danger" id="confirmBtn">
-                            <i class="fas fa-unlink me-1"></i> ${translateText('Disconnetti')}
+                            <i class="fas fa-unlink me-1"></i> ${translateText('Disconnect')}
                         </button>
                     </div>
                 </div>
@@ -321,8 +321,8 @@ function disconnectHealthPlatform(patientId, platform) {
     
     // Show confirmation dialog
     createConfirmDialog(
-        translateText('Disconnetti piattaforma'),
-        translateText('Sei sicuro di voler disconnettere questa piattaforma? I dati non saranno più disponibili.'),
+        translateText('Disconnect Platform'),
+        translateText('Are you sure you want to disconnect this platform? The data will no longer be available.'),
         function() {
             // Execute disconnection after confirmation
             executeDisconnection(patientId, platform);
@@ -362,11 +362,10 @@ function executeDisconnection(patientId, platform) {
     .then(data => {
         console.log('Disconnect response:', data);
         
-        if (data.success) {
-            // Mostra notifica di successo
+        if (data.success) {            // Show success notification
             showNotification(translateText('Successfully disconnected from health platform'), 'success');
             
-            // Ricarica la pagina dopo un breve ritardo
+            // Reload page after a short delay
             setTimeout(() => {
                 window.location.reload();
             }, 1000);
@@ -414,9 +413,8 @@ function executeDisconnection(patientId, platform) {
  * @param {string} message The message to display
  * @param {string} type The type of notification (success, danger, etc.)
  */
-function showNotification(message, type) {
-    // Invece di creare un container personalizzato, utilizziamo lo stesso metodo di showAlert
-    // Crea l'elemento alert
+function showNotification(message, type) {    // Instead of creating a custom container, we use the same method as showAlert
+    // Create the alert element
     const alertDiv = document.createElement('div');
     alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
     alertDiv.setAttribute('role', 'alert');
@@ -561,30 +559,28 @@ function createHealthPlatformLink(patientId, platform) {
         }
           if (data.success) {
             // Show success message
-            if (connectionStatusElem) {                // Rimuovi le classi esistenti e aggiungi la classe di successo
+            if (connectionStatusElem) {                // Remove existing classes and add success class
                 connectionStatusElem.classList.remove('alert-info', 'alert-danger', 'd-none');
                 connectionStatusElem.classList.add('alert-success');
-                
-                // Crea un div separato per il messaggio di successo (senza il link)
+                  // Create a separate div for the success message (without the link)
                 connectionStatusElem.innerHTML = `
                     <i class="fas fa-check-circle me-2"></i>
                     ${translateText('Link created successfully!')}
                 `;
-                
-                // Crea un nuovo elemento fuori dall'alert per contenere il link
-                // Questo elemento non sarà affetto da eventuali comportamenti automatici dell'alert
+                  // Create a new element outside the alert to contain the link
+                // This element won't be affected by any automatic alert behavior
                 const linkContainer = document.createElement('div');
                 linkContainer.id = 'healthPlatformLinkContainer';
                 linkContainer.className = 'mt-3';
                 linkContainer.innerHTML = `
-                    <p class="mb-1">${translateText('Link per la connessione (valido per 24 ore):')}</p>
+                    <p class="mb-1">${translateText('Connection link (valid for 24 hours):')}</p>
                     <div class="input-group mb-3">
                         <input type="text" class="form-control" id="linkCopyInput" value="${data.connect_url}" readonly>
                         <button class="btn btn-outline-primary" type="button" id="copyLinkBtn">
-                            <i class="fas fa-copy"></i> ${translateText('Copia')}
+                            <i class="fas fa-copy"></i> ${translateText('Copy')}
                         </button>
                     </div>
-                    <small class="text-muted">${translateText('Fornisci questo link al paziente per connettere il suo servizio di raccolta dati.')}</small>
+                    <small class="text-muted">${translateText('Provide this link to the patient to connect their data collection service.')}</small>
                 `;
                 
                 // Inserisci il nuovo contenitore dopo l'elemento connectionStatusElem
@@ -598,14 +594,14 @@ function createHealthPlatformLink(patientId, platform) {
                     copyBtn.addEventListener('click', () => {
                         linkInput.select();
                         document.execCommand('copy');
-                        copyBtn.innerHTML = `<i class="fas fa-check"></i> ${translateText('Copiato')}`;
+                        copyBtn.innerHTML = `<i class="fas fa-check"></i> ${translateText('Copied')}`;
                         setTimeout(() => {
-                            copyBtn.innerHTML = `<i class="fas fa-copy"></i> ${translateText('Copia')}`;
+                            copyBtn.innerHTML = `<i class="fas fa-copy"></i> ${translateText('Copy')}`;
                         }, 2000);
                     });
                 }
                 
-                // Modifica il footer del modale per renderlo chiaro che l'utente deve chiudere manualmente
+                // Modify the modal footer to make it clear the user needs to close manually
                 const modalFooter = document.querySelector('#healthPlatformModal .modal-footer');
                 if (modalFooter) {
                     modalFooter.innerHTML = `

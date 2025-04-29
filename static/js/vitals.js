@@ -204,16 +204,15 @@ function initVitalsCharts() {    // Controlla se siamo nella pagina dei parametr
  * @param {HTMLCanvasElement} canvas - The canvas element where the chart would be displayed
  * @param {string} message - The message to display
  */
-function displayNoDataMessage(canvas, message) {
-    // Rimuovi qualsiasi grafico esistente
+function displayNoDataMessage(canvas, message) {    // Remove any existing chart
     if (Chart.getChart(canvas)) {
         Chart.getChart(canvas).destroy();
     }
 
-    // Ottieni il container del canvas
+    // Get the canvas container
     const container = canvas.parentElement;
 
-    // Crea un elemento di messaggio
+    // Create a message element
     const messageElement = document.createElement('div');
     messageElement.className = 'no-data-message';
     messageElement.textContent = message;

@@ -271,15 +271,15 @@ def delete_web_observation(observation_id):
             temp_obs = TempObservation(observation_copy)
             log_observation_delete(current_user.id, temp_obs)
         except Exception as e:
-            logger.error(f"Errore durante la registrazione dell'audit per l'eliminazione dell'osservazione: {str(e)}")
+            logger.error(f"Error during audit logging for observation deletion: {str(e)}")
         
         logger.info(f"Osservazione {observation_id} eliminata dal medico {current_user.id}")
         
-        return jsonify({
-            "message": _("Osservazione eliminata con successo")
+        jsonify({
+            "message": _("Observation deleted successfully")
         }), 200
         
     except SQLAlchemyError as e:
         db.session.rollback()
-        logger.error(f"Errore durante l'eliminazione dell'osservazione: {str(e)}")
-        return jsonify({"error": _("Si è verificato un errore durante l'eliminazione dell'osservazione")}), 500
+        logger.error(f"Error while deleting the observation: {str(e)}")
+        return jsonify({"error": _("An error occurred while deleting the observation")}), 500

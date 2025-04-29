@@ -1,270 +1,359 @@
 {% extends "base.html" %}
-
 {% block title %}
     {% if mode == 'new' %}
-        {{ _('Add New Patient') }}
+        {{ _("Add New Patient") }}
     {% elif mode == 'edit' %}
-        {{ _('Edit Patient') }}
+        {{ _("Edit Patient") }}
     {% else %}
-        {{ _('Patients') }}
+        {{ _("Patients") }}
     {% endif %}
-    - {{ _('VitaLink') }}
+    - {{ _("VitaLink") }}
 {% endblock %}
-
 {% block content %}
-{% if mode == 'new' %}
-    <!-- New Patient Form -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1><i class="fas fa-user-plus me-2"></i> {{ _('Add New Patient') }}</h1>
-        <a href="{{ url_for('views.patients') }}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-1"></i> {{ _('Back to Patients') }}
-        </a>
-    </div>
-    
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <form id="patientForm" method="post" action="{{ url_for('views.new_patient') }}" class="needs-validation">
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="first_name" class="form-label">{{ _('Name') }} <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="first_name" name="first_name" required>
-                        <div class="invalid-feedback">{{ _('Name is mandatory') }}</div>
-                    </div>
-                    
-                    <div class="col-md-6 mb-3">
-                        <label for="last_name" class="form-label">{{ _('Surname') }} <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="last_name" name="last_name" required>
-                        <div class="invalid-feedback">{{ _('Surname is mandatory') }}</div>
-                    </div>
-                </div>
-                
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="date_of_birth" class="form-label">{{ _('Date of birth') }} <span class="text-danger">*</span></label>
-                        <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" required>
-                        <div class="invalid-feedback">{{ _('Date of birth is mandatory') }}</div>
-                    </div>
-                    
-                    <div class="col-md-6 mb-3">
-                        <label for="gender" class="form-label">{{ _('Gender') }} <span class="text-danger">*</span></label>
-                        <select class="form-select" id="gender" name="gender" required>
-                            <option disabled selected value style="display:none"></option>
-                            <option value="Male">{{ _('Male') }}</option>
-                            <option value="Female">{{ _('Female') }}</option>
-                            <option value="Other">{{ _('Other') }}</option>
-                            <option value="Prefer not to say">{{ _('Prefer not to say') }}</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="contact_number" class="form-label">{{ _('Contact Number') }} <span class="text-danger">*</span></label>
-                        <input type="number" class="form-control" id="contact_number" name="contact_number" required>
-                    </div>
-                </div>
-                
-                <div class="mb-3">
-                    <label for="address" class="form-label">{{ _('Address') }}</label>
-                    <textarea class="form-control" id="address" name="address" rows="3"></textarea>
-                </div>
-                
-                <div class="d-flex justify-content-end mt-4">
-                    <a href="{{ url_for('views.patients') }}" class="btn btn-outline-secondary me-2">{{ _('Cancel') }}</a>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save me-1"></i> {{ _('Save Patient') }}
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-{% elif mode == 'edit' %}
-    <!-- Edit Patient Form -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1><i class="fas fa-user-edit me-2"></i> {{ _('Edit Patient') }}</h1>
-        <a href="{{ url_for('views.patient_detail', patient_id=patient.id) }}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-1"></i> {{ _('Back to Patient') }}
-        </a>
-    </div>
-    
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <form id="patientForm" method="post" action="{{ url_for('views.edit_patient', patient_id=patient.id) }}" class="needs-validation">
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="first_name" class="form-label">{{ _('Name') }} <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="first_name" name="first_name" value="{{ patient.first_name }}" required>
-                        <div class="invalid-feedback">{{ _('Name is mandatory') }}</div>
-                    </div>
-                    
-                    <div class="col-md-6 mb-3">
-                        <label for="last_name" class="form-label">{{ _('Surname') }} <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="last_name" name="last_name" value="{{ patient.last_name }}" required>
-                        <div class="invalid-feedback">{{ _('Surname is mandatory') }}</div>
-                    </div>
-                </div>
-                
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="date_of_birth" class="form-label">{{ _('Date of birth') }} <span class="text-danger">*</span></label>
-                        <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" value="{{ patient.date_of_birth.strftime('%Y-%m-%d') }}" required>
-                        <div class="invalid-feedback">{{ _('Date of birth is mandatory') }}</div>
-                    </div>
-                    
-                    <div class="col-md-6 mb-3">
-                        <label for="gender" class="form-label">{{ _('Gender') }} <span class="text-danger">*</span></label>
-                        <select class="form-select" id="gender" name="gender" required>
-                            <option value="Male" {% if patient.gender == 'Male' %}selected{% endif %}>{{ _('Male') }}</option>
-                            <option value="Female" {% if patient.gender == 'Female' %}selected{% endif %}>{{ _('Female') }}</option>
-                            <option value="Other" {% if patient.gender == 'Other' %}selected{% endif %}>{{ _('Other') }}</option>
-                            <option value="Prefer not to say" {% if patient.gender == 'Prefer not to say' %}selected{% endif %}>{{ _('Prefer not to say') }}</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="contact_number" class="form-label">{{ _('Phone Number') }} <span class="text-danger">*</span></label>
-                        <input type="number" class="form-control" id="contact_number" name="contact_number" value="{{ patient.contact_number }}" required>
-                    </div>
-                </div>
-                
-                <div class="mb-3">
-                    <label for="address" class="form-label">{{ _('Address') }}</label>
-                    <textarea class="form-control" id="address" name="address" rows="3">{{ patient.address }}</textarea>
-                </div>
-                
-                <div class="d-flex justify-content-end mt-4">
-                    <a href="{{ url_for('views.patient_detail', patient_id=patient.id) }}" class="btn btn-outline-secondary me-2">{{ _('Cancel') }}</a>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save me-1"></i> {{ _('Update Patient') }}
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-{% else %}    <!-- Patient List -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1><i class="fas fa-users me-2"></i> {{ _('Patients') }}</h1>
-        <div class="d-flex flex-column align-items-end">
-            <a href="{{ url_for('views.dashboard') }}" class="btn btn-outline-secondary mb-4 w-100">
-                <i class="fas fa-arrow-left me-1"></i> {{ _('Back to Dashboard') }}
+    {% if mode == 'new' %}
+        <!-- New Patient Form -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>
+                <i class="fas fa-user-plus me-2"></i> {{ _("Add New Patient") }}
+            </h1>
+            <a href="{{ url_for("views.patients") }}"
+               class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i> {{ _("Back to Patients") }}
             </a>
-            <a href="{{ url_for('views.new_patient') }}" class="btn btn-primary mb-2 w-100">
-                <i class="fas fa-user-plus me-1"></i> {{ _('Add new Patient') }}
+        </div>
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <form id="patientForm"
+                      method="post"
+                      action="{{ url_for("views.new_patient") }}"
+                      class="needs-validation">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="first_name" class="form-label">
+                                {{ _("Name") }} <span class="text-danger">*</span>
+                            </label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="first_name"
+                                   name="first_name"
+                                   required>
+                            <div class="invalid-feedback">{{ _("Name is mandatory") }}</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="last_name" class="form-label">
+                                {{ _("Surname") }} <span class="text-danger">*</span>
+                            </label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="last_name"
+                                   name="last_name"
+                                   required>
+                            <div class="invalid-feedback">{{ _("Surname is mandatory") }}</div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="date_of_birth" class="form-label">
+                                {{ _("Date of birth") }} <span class="text-danger">*</span>
+                            </label>
+                            <input type="date"
+                                   class="form-control"
+                                   id="date_of_birth"
+                                   name="date_of_birth"
+                                   required>
+                            <div class="invalid-feedback">{{ _("Date of birth is mandatory") }}</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="gender" class="form-label">
+                                {{ _("Gender") }} <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" id="gender" name="gender" required>
+                                <option disabled selected value style="display:none"></option>
+                                <option value="Male">{{ _("Male") }}</option>
+                                <option value="Female">{{ _("Female") }}</option>
+                                <option value="Other">{{ _("Other") }}</option>
+                                <option value="Prefer not to say">{{ _("Prefer not to say") }}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="contact_number" class="form-label">
+                                {{ _("Contact Number") }} <span class="text-danger">*</span>
+                            </label>
+                            <input type="number"
+                                   class="form-control"
+                                   id="contact_number"
+                                   name="contact_number"
+                                   required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="address" class="form-label">{{ _("Address") }}</label>
+                        <textarea class="form-control" id="address" name="address" rows="3"></textarea>
+                    </div>
+                    <div class="d-flex justify-content-end mt-4">
+                        <a href="{{ url_for("views.patients") }}"
+                           class="btn btn-outline-secondary me-2">{{ _("Cancel") }}</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i> {{ _("Save Patient") }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    {% elif mode == 'edit' %}
+        <!-- Edit Patient Form -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>
+                <i class="fas fa-user-edit me-2"></i> {{ _("Edit Patient") }}
+            </h1>
+            <a href="{{ url_for('views.patient_detail', patient_id=patient.id) }}"
+               class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i> {{ _("Back to Patient") }}
             </a>
-            <button id="importPatientBtn" class="btn btn-info w-100">
-                <i class="fas fa-file-import me-1"></i> {{ _('Import Patient by UUID') }}
-            </button>
         </div>
-    </div>
-    
-    <!-- Import Patient Modal -->
-    <div class="modal fade" id="importPatientModal" tabindex="-1" aria-labelledby="importPatientModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="importPatientModalLabel">{{ _('Import Patient by UUID') }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="importPatientForm" action ="initImportPatient">
-                        <div class="mb-3">
-                            <label for="patientUUID" class="form-label">{{ _('Patient UUID') }} <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="patientUUID" placeholder="{{ _('Enter patient UUID...') }}" required>
-                            <div class="form-text">{{ _('Enter the UUID of the patient you want to import. The patient will be linked to your account.') }}</div>
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <form id="patientForm"
+                      method="post"
+                      action="{{ url_for('views.edit_patient', patient_id=patient.id) }}"
+                      class="needs-validation">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="first_name" class="form-label">
+                                {{ _("Name") }} <span class="text-danger">*</span>
+                            </label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="first_name"
+                                   name="first_name"
+                                   value="{{ patient.first_name }}"
+                                   required>
+                            <div class="invalid-feedback">{{ _("Name is mandatory") }}</div>
                         </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('Cancel') }}</button>
-                            <button type="submit" id="importPatientSubmit" class="btn btn-primary">
-                                <i class="fas fa-file-import me-1"></i> {{ _('Import Patient') }}
-                            </button>
+                        <div class="col-md-6 mb-3">
+                            <label for="last_name" class="form-label">
+                                {{ _("Surname") }} <span class="text-danger">*</span>
+                            </label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="last_name"
+                                   name="last_name"
+                                   value="{{ patient.last_name }}"
+                                   required>
+                            <div class="invalid-feedback">{{ _("Surname is mandatory") }}</div>
                         </div>
-                    </form>
-                    <div id="importPatientError" class="alert alert-danger mt-3" style="display: none;"></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="date_of_birth" class="form-label">
+                                {{ _("Date of birth") }} <span class="text-danger">*</span>
+                            </label>
+                            <input type="date"
+                                   class="form-control"
+                                   id="date_of_birth"
+                                   name="date_of_birth"
+                                   value="{{ patient.date_of_birth.strftime("%Y-%m-%d") }}"
+                                   required>
+                            <div class="invalid-feedback">{{ _("Date of birth is mandatory") }}</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="gender" class="form-label">
+                                {{ _("Gender") }} <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" id="gender" name="gender" required>
+                                <option value="Male" {% if patient.gender == 'Male' %}selected{% endif %}>{{ _("Male") }}</option>
+                                <option value="Female" {% if patient.gender == 'Female' %}selected{% endif %}>{{ _("Female") }}</option>
+                                <option value="Other" {% if patient.gender == 'Other' %}selected{% endif %}>{{ _("Other") }}</option>
+                                <option value="Prefer not to say"
+                                        {% if patient.gender == 'Prefer not to say' %}selected{% endif %}>
+                                    {{ _("Prefer not to say") }}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="contact_number" class="form-label">
+                                {{ _("Phone Number") }} <span class="text-danger">*</span>
+                            </label>
+                            <input type="number"
+                                   class="form-control"
+                                   id="contact_number"
+                                   name="contact_number"
+                                   value="{{ patient.contact_number }}"
+                                   required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="address" class="form-label">{{ _("Address") }}</label>
+                        <textarea class="form-control" id="address" name="address" rows="3">{{ patient.address }}</textarea>
+                    </div>
+                    <div class="d-flex justify-content-end mt-4">
+                        <a href="{{ url_for('views.patient_detail', patient_id=patient.id) }}"
+                           class="btn btn-outline-secondary me-2">{{ _("Cancel") }}</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i> {{ _("Update Patient") }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    {% else %}
+        <!-- Patient List -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>
+                <i class="fas fa-users me-2"></i> {{ _("Patients") }}
+            </h1>
+            <div class="d-flex flex-column align-items-end">
+                <a href="{{ url_for("views.dashboard") }}"
+                   class="btn btn-outline-secondary mb-4 w-100">
+                    <i class="fas fa-arrow-left me-1"></i> {{ _("Back to Dashboard") }}
+                </a>
+                <a href="{{ url_for("views.new_patient") }}"
+                   class="btn btn-primary mb-2 w-100">
+                    <i class="fas fa-user-plus me-1"></i> {{ _("Add new Patient") }}
+                </a>
+                <button id="importPatientBtn" class="btn btn-info w-100">
+                    <i class="fas fa-file-import me-1"></i> {{ _("Import Patient by UUID") }}
+                </button>
+            </div>
+        </div>
+        <!-- Import Patient Modal -->
+        <div class="modal fade"
+             id="importPatientModal"
+             tabindex="-1"
+             aria-labelledby="importPatientModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="importPatientModalLabel">{{ _("Import Patient by UUID") }}</h5>
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="importPatientForm" action ="initImportPatient">
+                            <div class="mb-3">
+                                <label for="patientUUID" class="form-label">
+                                    {{ _("Patient UUID") }} <span class="text-danger">*</span>
+                                </label>
+                                <input type="text"
+                                       class="form-control"
+                                       id="patientUUID"
+                                       placeholder="{{ _("Enter patient UUID...") }}"
+                                       required>
+                                <div class="form-text">
+                                    {{ _("Enter the UUID of the patient you want to import. The patient will be linked to your account.") }}
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _("Cancel") }}</button>
+                                <button type="submit" id="importPatientSubmit" class="btn btn-primary">
+                                    <i class="fas fa-file-import me-1"></i> {{ _("Import Patient") }}
+                                </button>
+                            </div>
+                        </form>
+                        <div id="importPatientError"
+                             class="alert alert-danger mt-3"
+                             style="display: none"></div>
+                    </div>
                 </div>
-                
             </div>
         </div>
-    </div>
-    
-    <div class="card shadow-sm mb-4">
-        <div class="card-body">
-            <div class="input-group mb-3">
-                <span class="input-group-text"><i class="fas fa-search"></i></span>
-                <input type="text" class="form-control" id="patientSearch" placeholder="{{ _('Search by name or ID...') }}">
-            </div>
-            
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>{{ _('Name') }}</th>
-                            <th>{{ _('ID') }}</th>
-                            <th>{{ _('Date of Birth') }}</th>
-                            <th>{{ _('Added') }}</th>
-                            <th>{{ _('Actions') }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% if patients %}
-                            {% for patient in patients %}
-                            <tr class="patient-row" data-name="{{ patient.first_name }} {{ patient.last_name }}" data-id="{{ patient.uuid }}">
-                                <td>{{ patient.first_name }} {{ patient.last_name }}</td>
-                                <td><span class="badge bg-secondary">{{ patient.uuid }}</span></td>
-                                <td>{{ patient.date_of_birth.strftime('%Y-%m-%d') }}</td>
-                                <td>{{ patient.created_at|format_datetime('%Y-%m-%d') }}</td>
-                                <td>
-                                    <div class="btn-group" role="group">
-                                        <a href="{{ url_for('views.patient_detail', patient_id=patient.id) }}" 
-                                           class="btn btn-sm btn-outline-info" title="{{ _('View Patient') }}">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        <a href="{{ url_for('views.patient_vitals', patient_id=patient.id) }}" 
-                                           class="btn btn-sm btn-outline-primary" title="{{ _('View Vitals') }}">
-                                            <i class="fas fa-heartbeat"></i>
-                                        </a>
-                                        <a href="{{ url_for('views.edit_patient', patient_id=patient.id) }}" 
-                                           class="btn btn-sm btn-outline-warning" title="{{ _('Edit Patient') }}">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <button type="button" class="btn btn-sm btn-outline-danger delete-patient" 
-                                                data-id="{{ patient.id }}" data-name="{{ patient.first_name }} {{ patient.last_name }}"
-                                                title="{{ _('Delete Patient') }}">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                        <form id="deleteForm{{ patient.id }}" action="{{ url_for('views.delete_patient', patient_id=patient.id) }}" method="post" class="d-none">
-                                        </form>
-                                    </div>
-                                </td>
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <div class="input-group mb-3">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input type="text"
+                           class="form-control"
+                           id="patientSearch"
+                           placeholder="{{ _("Search by name or ID...") }}">
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>{{ _("Name") }}</th>
+                                <th>{{ _("ID") }}</th>
+                                <th>{{ _("Date of Birth") }}</th>
+                                <th>{{ _("Added") }}</th>
+                                <th>{{ _("Actions") }}</th>
                             </tr>
-                            {% endfor %}
-                        {% else %}
-                            <tr id="noResults">
-                                <td colspan="5" class="text-center py-4">
-                                    <p class="text-muted mb-0">{{ _('No patient found') }}</p>
-                                    <a href="{{ url_for('views.new_patient') }}" class="btn btn-primary mt-3">
-                                        <i class="fas fa-user-plus me-1"></i> {{ _('Add New Patient') }}
-                                    </a>
-                                </td>
-                            </tr>
-                        {% endif %}
-                    </tbody>
-                </table>
-            </div>
-            
-            <div id="noResults" style="display: none;" class="text-center py-4">
-                <p class="text-muted mb-0">{{ _('No patients match your search') }}</p>
+                        </thead>
+                        <tbody>
+                            {% if patients %}
+                                {% for patient in patients %}
+                                    <tr class="patient-row"
+                                        data-name="{{ patient.first_name }} {{ patient.last_name }}"
+                                        data-id="{{ patient.uuid }}">
+                                        <td>{{ patient.first_name }} {{ patient.last_name }}</td>
+                                        <td>
+                                            <span class="badge bg-secondary">{{ patient.uuid }}</span>
+                                        </td>
+                                        <td>{{ patient.date_of_birth.strftime("%Y-%m-%d") }}</td>
+                                        <td>{{ patient.created_at|format_datetime("%Y-%m-%d") }}</td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a href="{{ url_for('views.patient_detail', patient_id=patient.id) }}"
+                                                   class="btn btn-sm btn-outline-info"
+                                                   title="{{ _("View Patient") }}">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{{ url_for('views.patient_vitals', patient_id=patient.id) }}"
+                                                   class="btn btn-sm btn-outline-primary"
+                                                   title="{{ _("View Vitals") }}">
+                                                    <i class="fas fa-heartbeat"></i>
+                                                </a>
+                                                <a href="{{ url_for('views.edit_patient', patient_id=patient.id) }}"
+                                                   class="btn btn-sm btn-outline-warning"
+                                                   title="{{ _("Edit Patient") }}">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <button type="button"
+                                                        class="btn btn-sm btn-outline-danger delete-patient"
+                                                        data-id="{{ patient.id }}"
+                                                        data-name="{{ patient.first_name }} {{ patient.last_name }}"
+                                                        title="{{ _("Delete Patient") }}">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                                <form id="deleteForm{{ patient.id }}"
+                                                      action="{{ url_for('views.delete_patient', patient_id=patient.id) }}"
+                                                      method="post"
+                                                      class="d-none">
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr id="noResults">
+                                    <td colspan="5" class="text-center py-4">
+                                        <p class="text-muted mb-0">{{ _("No patient found") }}</p>
+                                        <a href="{{ url_for("views.new_patient") }}"
+                                           class="btn btn-primary mt-3">
+                                            <i class="fas fa-user-plus me-1"></i> {{ _("Add New Patient") }}
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+                <div id="noResults" style="display: none;" class="text-center py-4">
+                    <p class="text-muted mb-0">{{ _("No patients match your search") }}</p>
+                </div>
             </div>
         </div>
-    </div>
-{% endif %}
+    {% endif %}
 {% endblock %}
-
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/patients.js') }}">
+    <script src="{{ url_for('static', filename='js/patients.js') }}">
     const today = new Date();
     const isoToday = today.toISOString().split('T')[0];
     date_of_birth.max = isoToday;
-</script>
+    </script>
 {% endblock %}

@@ -72,13 +72,13 @@ function initObservations() {
 function loadObservations() {
     // Verifica che la variabile currentVitalType sia disponibile (definita in vitals_charts.js)
     if (typeof currentVitalType === 'undefined') {
-        console.error('La variabile currentVitalType non è disponibile');
+        console.error('The currentVitalType variable is not available');
         // Non blocchiamo l'esecuzione, poiché il caricamento dovrebbe funzionare lo stesso
     }
     
     const patientId = getPatientIdFromUrl();
     if (!patientId) {
-        console.error('Impossibile determinare l\'ID del paziente');
+        console.error('Unable to determine patient ID');
         updateObservationsUI([]);
         return;
     }
@@ -95,7 +95,7 @@ function loadObservations() {
     fetch(apiUrl)
         .then(response => {
             if (!response.ok) {
-                throw new Error('Errore nel caricamento delle osservazioni');
+                throw new Error(translateText('Error loading observations'));
             }
             return response.json();
         })
@@ -105,7 +105,7 @@ function loadObservations() {
             updateObservationsUI(data);
         })
         .catch(error => {
-            console.error('Errore nel caricamento delle osservazioni:', error);
+            console.error(translateText('Error loading observations') + ':', error);
             updateObservationsUI([]);
         });
 }
@@ -146,8 +146,7 @@ function updateObservationsUI(observations) {
                 console.log(`Mostrando solo osservazioni per il tipo: ${vitalTypeId}`);
             }
         }
-    } catch (error) {
-        console.error('Errore nel filtraggio delle osservazioni:', error);
+    } catch (error) {                console.error('Error filtering observations:', error);
         // In caso di errore, mostra tutte le osservazioni
         filteredObservations = observations;
     }
@@ -239,7 +238,7 @@ function updateObservationsUI(observations) {
             } catch (error) {
                 // In caso di errore, mostriamo il pulsante per mantenere la funzionalità
                 isCurrentDoctorObservation = true;
-                console.error('Errore nel controllo del proprietario dell\'osservazione:', error);
+                console.error('Error checking observation owner:', error);
             }
               // HTML con nome del dottore e pulsante di eliminazione solo se è il proprietario
             item.innerHTML = `
@@ -251,7 +250,7 @@ function updateObservationsUI(observations) {
                                 <i class="fas fa-calendar-alt me-1"></i> ${dateStr}
                             </span>
                             <span>
-                                <i class="fas fa-user-md me-1"></i> ${obs.doctor_name || 'Unknown Doctor'}
+                                <i class="fas fa-user-md me-1"></i> ${obs.doctor_name || translateText('Unknown Doctor')}
                             </span>
                         </div>
                     </div>
@@ -294,7 +293,7 @@ function openObservationModal(observation = null) {
     
     if (observation) {
         // Se è un'osservazione esistente, mostra la conferma di eliminazione
-        modalTitle.textContent = translateText('Elimina osservazione');
+        modalTitle.textContent = translateText('Delete observation');
         
         // Impostazione per eliminazione
         formAction.value = 'delete';
@@ -314,7 +313,7 @@ function openObservationModal(observation = null) {
             deleteContent.innerHTML = `
                 <div>
                     <i class="fas fa-exclamation-triangle me-2"></i>
-                    <strong>${translateText('Attenzione')}</strong>: ${translateText('Sei sicuro di voler eliminare questa osservazione?')}
+                    <strong>${translateText('Warning')}</strong>: ${translateText('Are you sure you want to delete this observation?')}
                 </div>
             `;
         }
@@ -325,7 +324,7 @@ function openObservationModal(observation = null) {
         }
     } else {
         // Se è una nuova osservazione
-        modalTitle.textContent = translateText('Aggiungi osservazione');
+        modalTitle.textContent = translateText('Add observation');
         
         // Impostazione per aggiunta
         formAction.value = 'add';
@@ -378,7 +377,7 @@ function openObservationModal(observation = null) {
                 }
             }
         } catch (error) {
-            console.error('Errore nella selezione del tipo vitale:', error);
+            console.error(translateText('Error selecting vital type') + ':', error);
             // In caso di errore, non impostiamo alcun valore predefinito
         }
     }
@@ -412,7 +411,7 @@ function populateVitalTypeOptions() {
             });
         }
     } catch (error) {
-        console.error('Errore nel popolamento delle opzioni:', error);
+        console.error(translateText('Error populating options') + ':', error);
     }
 }
 
@@ -449,9 +448,7 @@ function submitAddObservation(form) {
         const startDateInput = document.getElementById('observationStartDate');
         
         // Imposta la validità personalizzata sul campo della data di fine
-        startDateInput.setCustomValidity(document.documentElement.lang === "it"
-            ? "La data di inizio deve essere precedente alla data di fine"
-            : "Start date must be before end date");
+    startDateInput.setCustomValidity(translateText("Start date must be before end date"));
             
         // Forza la visualizzazione del messaggio di errore
         startDateInput.reportValidity();
@@ -493,7 +490,7 @@ function submitAddObservation(form) {
     })
     .then(response => {
         if (!response.ok) {
-            throw new Error('Errore nel salvataggio dell\'osservazione');
+            throw new Error(translateText('Error saving observation. Please try again later.'));
         }
         return response.json();
     })
@@ -504,16 +501,13 @@ function submitAddObservation(form) {
         observationModal.hide();
         
         // Mostra messaggio di successo
-        showAlert('Osservazione aggiunta con successo', 'success');
+        showAlert(translateText('Observation added successfully'), 'success');
         
         // Ricarica le osservazioni
         loadObservations();
     })    .catch(error => {
-        console.error('Errore nel salvataggio dell\'osservazione:', error);
-        // Mostra l'errore di API come messaggio personalizzato visibile nella parte superiore del form
-        const errorMessage = error.message || (document.documentElement.lang === "it"
-            ? "Errore nel salvataggio dell'osservazione. Riprova più tardi."
-            : "Error saving observation. Please try again later.");
+        console.error('Error saving observation:', error);
+        // Mostra l'errore di API come messaggio personalizzato visibile nella parte superiore del form        const errorMessage = error.message || translateText("Error saving observation. Please try again later.");
             
         // Mostra l'errore nella parte alta del form
         if (errorDiv) {
@@ -551,7 +545,7 @@ function deleteObservation() {
     })
     .then(response => {
         if (!response.ok) {
-            throw new Error('Errore nell\'eliminazione dell\'osservazione');
+            throw new Error(translateText('Error deleting observation. Please try again later.'));
         }
         return response.json();
     })
@@ -562,21 +556,18 @@ function deleteObservation() {
         observationModal.hide();
         
         // Mostra messaggio di successo
-        showAlert('Osservazione eliminata con successo', 'success');
+        showAlert(translateText('Observation deleted successfully'), 'success');
         
         // Ricarica le osservazioni
         loadObservations();
     })    .catch(error => {
-        console.error('Errore nell\'eliminazione dell\'osservazione:', error);
+        console.error('Error deleting observation:', error);
         
-        if (errorDiv) {
-            errorDiv.textContent = error.message || (document.documentElement.lang === "it"
-                ? "Errore nell'eliminazione dell'osservazione. Riprova più tardi."
-                : "Error deleting observation. Please try again later.");
+        if (errorDiv) {            errorDiv.textContent = error.message || translateText("Error deleting observation. Please try again later.");
             errorDiv.style.display = 'block';
             errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
         } else {
-            showAlert('Errore nell\'eliminazione dell\'osservazione. Riprova più tardi.', 'danger');
+            showAlert(translateText('Error deleting observation. Please try again later.'), 'danger');
         }
     });
 }
