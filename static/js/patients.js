@@ -90,10 +90,9 @@ function initDeleteConfirmation() {
             
             const patientId = this.getAttribute('data-id');
             const patientName = this.getAttribute('data-name');
-            
-            confirmAction(
-                document.documentElement.lang === "it" ? "Elimina paziente" : 'Delete Patient',
-                document.documentElement.lang === "it" ? "Sei sicuro di voler eliminare il paziente? L'azione non può essere cancellata." : 'Are you sure you want to delete the patient? This action cannot be undone.',
+              confirmAction(
+                translateText('Delete Patient'),
+                translateText('Are you sure you want to delete the patient? This action cannot be undone.'),
                 function() {
                     // Submit the delete form
                     const form = document.getElementById(`deleteForm${patientId}`);
@@ -119,7 +118,7 @@ function openAddNoteModal(patientId, patientName) {
         const patientIdField = document.getElementById('notePatientId');
         const form = document.getElementById('addNoteForm');
         
-        modalTitle.textContent = document.documentElement.lang === "it" ? "Aggiungi nota" : 'Add note';
+        modalTitle.textContent = translateText('Add note');
         
         if (patientIdField) {
             patientIdField.value = patientId;
@@ -165,9 +164,8 @@ function initImportPatient() {
                 }
                 
                 // Disable the submit button and show loading state
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>' + 
-                                      (document.documentElement.lang === "it" ? "Importazione..." : "Importing...");
+                submitBtn.disabled = true;                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>' + 
+                                      translateText("Importing...");
                 
                 // Make the request to import the patient
                 console.log("Sending import request", uuidInput.value.trim());
@@ -197,17 +195,13 @@ function initImportPatient() {
                     console.error('Error importing patient:', error);
                     
                     // Show error message
-                    if (errorDiv) {
-                        errorDiv.textContent = error.message || (document.documentElement.lang === "it"
-                            ? "Si è verificato un errore durante l'importazione del paziente. Riprova più tardi."
-                            : "An error occurred while importing the patient. Please try again later.");
+                    if (errorDiv) {                        errorDiv.textContent = error.message || translateText("An error occurred while importing the patient. Please try again later.");
                         errorDiv.style.display = 'block';
                     }
                     
                     // Reset button state
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<i class="fas fa-file-import me-1"></i>' + 
-                                         (document.documentElement.lang === "it" ? "Importa Paziente" : "Import Patient");
+                    submitBtn.disabled = false;                    submitBtn.innerHTML = '<i class="fas fa-file-import me-1"></i>' + 
+                                         translateText("Import Patient");
                 });
             });
         }

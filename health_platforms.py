@@ -28,22 +28,22 @@ health_bp = Blueprint('health', __name__, url_prefix='/health')
 logger = logging.getLogger(__name__)
 
 # Define cache for vitals data to avoid unnecessary API calls
-# Struttura: {
+# Structure: {
 #   'cache_key': {
-#     'data': [...],                 # Dati effettivi
-#     'cache_time': datetime,        # Quando i dati sono stati memorizzati
-#     'request_params': {...},       # Parametri usati nella richiesta (per debug)
-#     'api_calls': 0                 # Conteggio chiamate all'API per questa cache key
+#     'data': [...],                 # Actual data
+#     'cache_time': datetime,        # When data was cached
+#     'request_params': {...},       # Request parameters (for debugging)
+#     'api_calls': 0                 # API call count for this cache key
 #   }  
 # }
 vitals_cache = {}
 
-# Cache per la gestione dei rate limit
-# Struttura: {
-#  'last_reset': datetime,           # Ultima volta che il contatore è stato azzerato
-#  'calls': 0,                       # Contatore delle chiamate
-#  'hourly_limit': 150,              # Limite di chiamate orarie (rate limit Fitbit)
-#  'retry_after': None               # Da quale ora possiamo riprendere le chiamate
+# Cache for rate limit management
+# Structure: {
+#  'last_reset': datetime,           # Last time the counter was reset
+#  'calls': 0,                       # Call counter
+#  'hourly_limit': 150,              # Hourly call limit (Fitbit rate limit)
+#  'retry_after': None               # Time when we can resume calls
 # }
 api_rate_limit = {
     'last_reset': datetime.utcnow(),
@@ -52,14 +52,14 @@ api_rate_limit = {
     'retry_after': None
 }
 
-# Configurazione delle opzioni di logging
+# Logging configuration
 logger = logging.getLogger(__name__)
 
-# Aggiungi un handler specifico per le API Fitbit
+# Add a specific handler for Fitbit API
 api_logger = logging.getLogger('fitbit_api')
 api_logger.setLevel(logging.DEBUG)
 
-# Crea un file handler per il logging dettagliato
+# Create a file handler for detailed logging
 try:
     api_file_handler = logging.FileHandler('fitbit_api.log')
     api_file_handler.setLevel(logging.DEBUG)
@@ -67,7 +67,7 @@ try:
     api_file_handler.setFormatter(formatter)
     api_logger.addHandler(api_file_handler)
 except Exception as e:
-    logger.error(f"Impossibile creare il file di log per le API Fitbit: {str(e)}")
+    logger.error(f"Unable to create log file for Fitbit API: {str(e)}")
 
 # -------- Link generation for health platform connection --------
 
@@ -449,30 +449,29 @@ def get_fitbit_data(patient, data_type, start_date=None, end_date=None):
             f"{FITBIT_CONFIG['api_base_url']}{endpoint}",
             headers=headers
         )
-        
-        # Incrementa il contatore delle chiamate API
+          # Increment API call counter
         increment_api_call_counter(response)
         
         if response.status_code == 200:
             data = response.json()
-            api_logger.info(f"[{request_id}] Dati ricevuti con successo per {data_type}")
+            api_logger.info(f"[{request_id}] Data successfully received for {data_type}")
             
-            # Log dettagliato per debug (solo in modalità debug)
+            # Detailed log for debugging (only in debug mode)
             if api_logger.isEnabledFor(logging.DEBUG):
                 truncated_data = str(data)[:1000] + "..." if len(str(data)) > 1000 else str(data)
-                api_logger.debug(f"[{request_id}] Risposta: {truncated_data}")
+                api_logger.debug(f"[{request_id}] Response: {truncated_data}")
             
             return data
         elif response.status_code == 429:
-            # Rate limit raggiunto
+            # Rate limit reached
             retry_after = response.headers.get('Retry-After', '3600')
-            api_logger.warning(f"[{request_id}] Rate limit raggiunto. Retry-After: {retry_after}")
+            api_logger.warning(f"[{request_id}] Rate limit reached. Retry-After: {retry_after}")
             return None
         else:
-            api_logger.error(f"[{request_id}] Errore recupero dati: {response.status_code} - {response.text}")
+            api_logger.error(f"[{request_id}] Error retrieving data: {response.status_code} - {response.text}")
             return None
     except Exception as e:
-        api_logger.error(f"[{request_id}] Eccezione durante il recupero dati: {str(e)}")
+        api_logger.error(f"[{request_id}] Exception during data retrieval: {str(e)}")
         return None
 
 def process_fitbit_data(data, data_type):
@@ -802,8 +801,7 @@ def get_processed_fitbit_data(patient, data_type, start_date=None, end_date=None
     # Convert data_type to lowercase if it's coming from JavaScript/frontend
     # JavaScript uses uppercase like 'HEART_RATE' while Python backend expects lowercase like 'heart_rate'
     normalized_data_type = data_type.lower() if isinstance(data_type, str) else data_type
-    
-    # Mapping dettagliato per tutti i tipi di dati supportati
+      # Detailed mapping for all supported data types
     mapping = {
     'heart_rate': 'heart_rate',
     'steps': 'steps',

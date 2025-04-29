@@ -1,20 +1,10 @@
 // main.js - Common JavaScript functions for the application
 
 // Function to delete a note with confirmation
-function deleteNote(noteId, patientId) {
-    const lang = document.documentElement.lang || 'en';
-    let confirmMessage = 'Are you sure you want to delete this note? This action cannot be undone.';
-    let confirmTitle = 'Confirm Deletion';
-    let confirmButton = 'Delete';
-    let cancelButton = 'Cancel';
-    
-    // Messages per language
-    if (lang === 'it') {
-        confirmMessage = 'Sei sicuro di voler eliminare questa nota? Questa azione non può essere annullata.';
-        confirmTitle = 'Conferma Eliminazione';
-        confirmButton = 'Elimina';
-        cancelButton = 'Annulla';
-    }
+function deleteNote(noteId, patientId) {    let confirmMessage = translateText('Are you sure you want to delete this note? This action cannot be undone.');
+    let confirmTitle = translateText('Confirm Deletion');
+    let confirmButton = translateText('Delete');
+    let cancelButton = translateText('Cancel');
     
     showConfirmationModal(confirmTitle, confirmMessage, confirmButton, cancelButton, function() {
         // Send DELETE request to delete the note
@@ -83,15 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add confirmation to delete buttons
     const deleteButtons = document.querySelectorAll('.delete-confirm');
     deleteButtons.forEach(function(button) {
-        button.addEventListener('click', function(event) {
-            // Get language from html lang attribute
-            const lang = document.documentElement.lang || 'en';
-            let confirmMessage = 'Are you sure you want to delete this item? This action cannot be undone.';
-            
-            // Messages per language
-            if (lang === 'it') {
-                confirmMessage = 'Sei sicuro di voler eliminare questo elemento? Questa azione non può essere annullata.';
-            }
+        button.addEventListener('click', function(event) {            let confirmMessage = translateText('Are you sure you want to delete this item? This action cannot be undone.');
             
             if (!confirm(confirmMessage)) {
                 event.preventDefault();
@@ -306,9 +288,8 @@ function confirmAction(title, message, onConfirm) {
                             </div>
                         
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">${document.documentElement.lang === "it" ? "Annulla" : 'Cancel'}</button>
-                        <button type="button" class="btn btn-danger" id="confirmButton">${document.documentElement.lang === "it" ? "Conferma" : 'Confirm'}</button>
+                    <div class="modal-footer">                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">${translateText('Cancel')}</button>
+                        <button type="button" class="btn btn-danger" id="confirmButton">${translateText('Confirm')}</button>
                     </div>
                 </div>
             </div>

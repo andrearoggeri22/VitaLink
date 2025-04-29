@@ -1,294 +1,349 @@
 {% extends "base.html" %}
-
-{% block title %}{{ _('Audit Logs') }} - {{ _('VitaLink') }}{% endblock %}
-
+{% block title %}{{ _("Audit Logs") }} - {{ _("VitaLink") }}{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1>{{ _('Audit Logs') }}</h1>
-    <div>
-        <a href="{{ url_for('views.dashboard') }}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-1"></i> {{ _('Back to Dashboard') }}
-        </a>
-    </div>
-</div>
-
-<!-- Filter Form -->
-<div class="card shadow-sm mb-4">
-    <div class="card-header">
-        <h5 class="mb-0"><i class="fas fa-filter me-2"></i> {{ _('Filter Logs') }}</h5>
-    </div>
-    <div class="card-body">
-        <form id="filterForm" method="get" action="{{ url_for('audit.get_audit_logs') }}">
-            <div class="row g-3">
-                <div class="col-md-6 col-lg-3">
-                    <div class="mb-3">
-                        <label for="start_date" class="form-label">{{ _('Start Date') }}</label>
-                        <input type="date" class="form-control" id="start_date" name="start_date" 
-                              value="{{ request.args.get('start_date', '') }}">
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="mb-3">
-                        <label for="end_date" class="form-label">{{ _('End Date') }}</label>
-                        <input type="date" class="form-control" id="end_date" name="end_date"
-                              value="{{ request.args.get('end_date', '') }}">
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="mb-3">
-                        <label for="action_type" class="form-label">{{ _('Action Type') }}</label>
-                        <select class="form-select" id="action_type" name="action_type">
-                            <option value="">{{ _('All Actions') }}</option>
-                            <option value="CREATE" {% if request.args.get('action_type') == 'CREATE' %}selected{% endif %}>{{ _('Create') }}</option>
-                            <option value="UPDATE" {% if request.args.get('action_type') == 'UPDATE' %}selected{% endif %}>{{ _('Update') }}</option>
-                            <option value="DELETE" {% if request.args.get('action_type') == 'DELETE' %}selected{% endif %}>{{ _('Delete') }}</option>
-                            <option value="VIEW" {% if request.args.get('action_type') == 'VIEW' %}selected{% endif %}>{{ _('View') }}</option>
-                            <option value="EXPORT" {% if request.args.get('action_type') == 'EXPORT' %}selected{% endif %}>{{ _('Export') }}</option>
-                            <option value="GENERATE_LINK" {% if request.args.get('action_type') == 'GENERATE_LINK' %}selected{% endif %}>{{ _('Generate Link') }}</option>
-                            <option value="CONNECT" {% if request.args.get('action_type') == 'CONNECT' %}selected{% endif %}>{{ _('Connect') }}</option>
-                            <option value="DISCONNECT" {% if request.args.get('action_type') == 'DISCONNECT' %}selected{% endif %}>{{ _('Disconnect') }}</option>
-                            <option value="SYNC" {% if request.args.get('action_type') == 'SYNC' %}selected{% endif %}>{{ _('Sync') }}</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="mb-3">
-                        <label for="entity_type" class="form-label">{{ _('Entity Type') }}</label>
-                        <select class="form-select" id="entity_type" name="entity_type">
-                            <option value="">{{ _('All Entities') }}</option>
-                            <option value="PATIENT" {% if request.args.get('entity_type') == 'PATIENT' %}selected{% endif %}>{{ _('Patient') }}</option>
-                            <option value="NOTE" {% if request.args.get('entity_type') == 'NOTE' %}selected{% endif %}>{{ _('Note') }}</option>
-                            <option value="REPORT" {% if request.args.get('entity_type') == 'REPORT' %}selected{% endif %}>{{ _('Report') }}</option>
-                            <option value="HEALTH_PLATFORM" {% if request.args.get('entity_type') == 'HEALTH_PLATFORM' %}selected{% endif %}>{{ _('Health Platform') }}</option>
-                            <option value="HEALTH_LINK" {% if request.args.get('entity_type') == 'HEALTH_LINK' %}selected{% endif %}>{{ _('Health Link') }}</option>
-                            <option value="OBSERVATION" {% if request.args.get('entity_type') == 'OBSERVATION' %}selected{% endif %}>{{ _('Observation') }}</option>
-                        </select>
-                    </div>
-                </div>
-                {% if current_user.is_admin %}
-                <div class="col-md-6 col-lg-3">
-                    <div class="mb-3">
-                        <label for="doctor_id" class="form-label">{{ _('Doctor') }}</label>
-                        <select class="form-select" id="doctor_id" name="doctor_id">
-                            <option value="">{{ _('All Doctors') }}</option>
-                            {% for doctor in doctors %}
-                            <option value="{{ doctor.id }}" {% if request.args.get('doctor_id')|int == doctor.id %}selected{% endif %}>
-                                {{ doctor.first_name }} {{ doctor.last_name }}
-                            </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                </div>
-                {% endif %}
-                <div class="col-md-6 col-lg-3">
-                    <div class="mb-3">
-                        <label for="patient_id" class="form-label">{{ _('Patient') }}</label>
-                        <select class="form-select" id="patient_id" name="patient_id">
-                            <option value="">{{ _('All Patients') }}</option>
-                            {% for patient in patients %}
-                            <option value="{{ patient.id }}" {% if request.args.get('patient_id')|int == patient.id %}selected{% endif %}>
-                                {{ patient.first_name }} {{ patient.last_name }}
-                            </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="d-flex justify-content-end mt-3">
-                <a href="{{ url_for('audit.get_audit_logs') }}" class="btn btn-outline-secondary me-2">
-                    {{ _('Clear Filters') }}
-                </a>
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-search me-1"></i> {{ _('Apply Filters') }}
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Audit Logs Table -->
-<div class="card shadow-sm">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h5 class="mb-0"><i class="fas fa-history me-2"></i> {{ _('Audit History') }}</h5>
-        <span class="badge bg-primary">{{ logs|length }} {{ _('Records') }}</span>
-    </div>
-    <div class="card-body p-0">
-        {% if message %}
-        <div class="alert alert-info m-3" role="alert">
-            {{ message }}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>{{ _("Audit Logs") }}</h1>
+        <div>
+            <a href="{{ url_for("views.dashboard") }}"
+               class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i> {{ _("Back to Dashboard") }}
+            </a>
         </div>
-        {% endif %}
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead>
-                    <tr>
-                        <th>{{ _('Date & Time') }}</th>
-                        <th>{{ _('User') }}</th>
-                        <th>{{ _('Action') }}</th>
-                        <th>{{ _('Entity') }}</th>
-                        <th>{{ _('Patient') }}</th>
-                        <th>{{ _('IP Address') }}</th>
-                        <th>{{ _('Details') }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% if logs %}
-                        {% for log in logs %}
+    </div>
+    <!-- Filter Form -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-filter me-2"></i> {{ _("Filter Logs") }}
+            </h5>
+        </div>
+        <div class="card-body">
+            <form id="filterForm"
+                  method="get"
+                  action="{{ url_for("audit.get_audit_logs") }}">
+                <div class="row g-3">
+                    <div class="col-md-6 col-lg-3">
+                        <div class="mb-3">
+                            <label for="start_date" class="form-label">{{ _("Start Date") }}</label>
+                            <input type="date"
+                                   class="form-control"
+                                   id="start_date"
+                                   name="start_date"
+                                   value="{{ request.args.get('start_date', '') }}">
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="mb-3">
+                            <label for="end_date" class="form-label">{{ _("End Date") }}</label>
+                            <input type="date"
+                                   class="form-control"
+                                   id="end_date"
+                                   name="end_date"
+                                   value="{{ request.args.get('end_date', '') }}">
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="mb-3">
+                            <label for="action_type" class="form-label">{{ _("Action Type") }}</label>
+                            <select class="form-select" id="action_type" name="action_type">
+                                <option value="">{{ _("All Actions") }}</option>
+                                <option value="CREATE"
+                                        {% if request.args.get('action_type') == 'CREATE' %}selected{% endif %}>
+                                    {{ _("Create") }}
+                                </option>
+                                <option value="UPDATE"
+                                        {% if request.args.get('action_type') == 'UPDATE' %}selected{% endif %}>
+                                    {{ _("Update") }}
+                                </option>
+                                <option value="DELETE"
+                                        {% if request.args.get('action_type') == 'DELETE' %}selected{% endif %}>
+                                    {{ _("Delete") }}
+                                </option>
+                                <option value="VIEW"
+                                        {% if request.args.get('action_type') == 'VIEW' %}selected{% endif %}>
+                                    {{ _("View") }}
+                                </option>
+                                <option value="EXPORT"
+                                        {% if request.args.get('action_type') == 'EXPORT' %}selected{% endif %}>
+                                    {{ _("Export") }}
+                                </option>
+                                <option value="GENERATE_LINK"
+                                        {% if request.args.get('action_type') == 'GENERATE_LINK' %}selected{% endif %}>
+                                    {{ _("Generate Link") }}
+                                </option>
+                                <option value="CONNECT"
+                                        {% if request.args.get('action_type') == 'CONNECT' %}selected{% endif %}>
+                                    {{ _("Connect") }}
+                                </option>
+                                <option value="DISCONNECT"
+                                        {% if request.args.get('action_type') == 'DISCONNECT' %}selected{% endif %}>
+                                    {{ _("Disconnect") }}
+                                </option>
+                                <option value="SYNC"
+                                        {% if request.args.get('action_type') == 'SYNC' %}selected{% endif %}>
+                                    {{ _("Sync") }}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="mb-3">
+                            <label for="entity_type" class="form-label">{{ _("Entity Type") }}</label>
+                            <select class="form-select" id="entity_type" name="entity_type">
+                                <option value="">{{ _("All Entities") }}</option>
+                                <option value="PATIENT"
+                                        {% if request.args.get('entity_type') == 'PATIENT' %}selected{% endif %}>
+                                    {{ _("Patient") }}
+                                </option>
+                                <option value="NOTE"
+                                        {% if request.args.get('entity_type') == 'NOTE' %}selected{% endif %}>
+                                    {{ _("Note") }}
+                                </option>
+                                <option value="REPORT"
+                                        {% if request.args.get('entity_type') == 'REPORT' %}selected{% endif %}>
+                                    {{ _("Report") }}
+                                </option>
+                                <option value="HEALTH_PLATFORM"
+                                        {% if request.args.get('entity_type') == 'HEALTH_PLATFORM' %}selected{% endif %}>
+                                    {{ _("Health Platform") }}
+                                </option>
+                                <option value="HEALTH_LINK"
+                                        {% if request.args.get('entity_type') == 'HEALTH_LINK' %}selected{% endif %}>
+                                    {{ _("Health Link") }}
+                                </option>
+                                <option value="OBSERVATION"
+                                        {% if request.args.get('entity_type') == 'OBSERVATION' %}selected{% endif %}>
+                                    {{ _("Observation") }}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    {% if current_user.is_admin %}
+                        <div class="col-md-6 col-lg-3">
+                            <div class="mb-3">
+                                <label for="doctor_id" class="form-label">{{ _("Doctor") }}</label>
+                                <select class="form-select" id="doctor_id" name="doctor_id">
+                                    <option value="">{{ _("All Doctors") }}</option>
+                                    {% for doctor in doctors %}
+                                        <option value="{{ doctor.id }}"
+                                                {% if request.args.get('doctor_id')|int == doctor.id %}selected{% endif %}>
+                                            {{ doctor.first_name }} {{ doctor.last_name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    {% endif %}
+                    <div class="col-md-6 col-lg-3">
+                        <div class="mb-3">
+                            <label for="patient_id" class="form-label">{{ _("Patient") }}</label>
+                            <select class="form-select" id="patient_id" name="patient_id">
+                                <option value="">{{ _("All Patients") }}</option>
+                                {% for patient in patients %}
+                                    <option value="{{ patient.id }}"
+                                            {% if request.args.get('patient_id')|int == patient.id %}selected{% endif %}>
+                                        {{ patient.first_name }} {{ patient.last_name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end mt-3">
+                    <a href="{{ url_for("audit.get_audit_logs") }}"
+                       class="btn btn-outline-secondary me-2">{{ _("Clear Filters") }}</a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search me-1"></i> {{ _("Apply Filters") }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- Audit Logs Table -->
+    <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="fas fa-history me-2"></i> {{ _("Audit History") }}
+            </h5>
+            <span class="badge bg-primary">{{ logs|length }} {{ _("Records") }}</span>
+        </div>
+        <div class="card-body p-0">
+            {% if message %}<div class="alert alert-info m-3" role="alert">{{ message }}</div>{% endif %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
                         <tr>
-                            <td>{{ log.timestamp }}</td>
-                            <td>{{ log.doctor_name }}</td>
-                            <td>
-                                <span class="badge 
-                                    {% if log.action_type == 'create' %}bg-success
-                                    {% elif log.action_type == 'update' %}bg-info
-                                    {% elif log.action_type == 'delete' %}bg-danger
-                                    {% elif log.action_type == 'view' %}bg-secondary
-                                    {% elif log.action_type == 'export' %}bg-primary
-                                    {% elif log.action_type == 'generate_link' %}bg-warning text-dark
-                                    {% elif log.action_type == 'connect' %}bg-success
-                                    {% elif log.action_type == 'disconnect' %}bg-danger
-                                    {% elif log.action_type == 'sync' %}bg-info
-                                    {% else %}bg-secondary{% endif %}">
-                                    {{ log.action_type|replace('_', ' ')|title }}
-                                </span>
-                            </td>
-                            <td>
-                                <span class="badge bg-info text-dark">
-                                    {{ log.entity_type|replace('_', ' ')|title }}
-                                </span>
-                            </td>
-                            <td>
-                                {% if log.patient_name %}
-                                <a href="{{ url_for('views.patient_detail', patient_id=log.patient_id) }}">
-                                    {{ log.patient_name }}
-                                </a>
-                                {% else %}
-                                <span class="text-muted">N/A</span>
-                                {% endif %}
-                            </td>
-                            <td><small>{{ log.ip_address }}</small></td>
-                            <td>
-                                <button type="button" class="btn btn-sm btn-outline-info" 
-                                        data-bs-toggle="modal" data-bs-target="#detailsModal{{ log.id }}">
-                                    {{ _('View Details') }}
-                                </button>
-                                
-                                <!-- Details Modal -->
-                                <div class="modal fade" id="detailsModal{{ log.id }}" tabindex="-1" aria-hidden="true">
-                                    <div class="modal-dialog modal-lg">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">{{ _('Audit Log Details') }}</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <dl class="row">
-                                                    <dt class="col-sm-3">{{ _('Timestamp') }}</dt>
-                                                    <dd class="col-sm-9">{{ log.timestamp }}</dd>
-                                                    
-                                                    <dt class="col-sm-3">{{ _('Doctor') }}</dt>
-                                                    <dd class="col-sm-9">{{ log.doctor_name }}</dd>
-                                                    
-                                                    <dt class="col-sm-3">{{ _('Action') }}</dt>
-                                                    <dd class="col-sm-9">{{ log.action_type|title }}</dd>
-                                                    
-                                                    <dt class="col-sm-3">{{ _('Entity Type') }}</dt>
-                                                    <dd class="col-sm-9">{{ log.entity_type|replace('_', ' ')|title }}</dd>
-                                                    
-                                                    <dt class="col-sm-3">{{ _('Entity ID') }}</dt>
-                                                    <dd class="col-sm-9">{{ log.entity_id }}</dd>
-                                                    
-                                                    {% if log.patient_name %}
-                                                    <dt class="col-sm-3">{{ _('Patient') }}</dt>
-                                                    <dd class="col-sm-9">{{ log.patient_name }}</dd>
-                                                    {% endif %}
-                                                    
-                                                    <dt class="col-sm-3">{{ _('IP Address') }}</dt>
-                                                    <dd class="col-sm-9">{{ log.ip_address }}</dd>
-                                                    
-                                                    {% if log.details %}
-                                                    <dt class="col-sm-3">{{ _('Details') }}</dt>
-                                                    <dd class="col-sm-9">
-                                                        <pre class="pre-scrollable"><code>{{ log.details|tojson(indent=2) }}</code></pre>
-                                                    </dd>
-                                                    {% endif %}
-                                                </dl>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('Close') }}</button>
+                            <th>{{ _("Date & Time") }}</th>
+                            <th>{{ _("User") }}</th>
+                            <th>{{ _("Action") }}</th>
+                            <th>{{ _("Entity") }}</th>
+                            <th>{{ _("Patient") }}</th>
+                            <th>{{ _("IP Address") }}</th>
+                            <th>{{ _("Details") }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if logs %}
+                            {% for log in logs %}
+                                <tr>
+                                    <td>{{ log.timestamp }}</td>
+                                    <td>{{ log.doctor_name }}</td>
+                                    <td>
+                                        <span class="badge {% if log.action_type == 'create' %}bg-success {% elif log.action_type == 'update' %}bg-info {% elif log.action_type == 'delete' %}bg-danger {% elif log.action_type == 'view' %}bg-secondary {% elif log.action_type == 'export' %}bg-primary {% elif log.action_type == 'generate_link' %}bg-warning text-dark {% elif log.action_type == 'connect' %}bg-success {% elif log.action_type == 'disconnect' %}bg-danger {% elif log.action_type == 'sync' %}bg-info {% else %}bg-secondary{% endif %}">
+                                            {{ log.action_type|replace('_', ' ') |title }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info text-dark">{{ log.entity_type|replace('_', ' ') |title }}</span>
+                                    </td>
+                                    <td>
+                                        {% if log.patient_name %}
+                                            <a href="{{ url_for('views.patient_detail', patient_id=log.patient_id) }}">{{ log.patient_name }}</a>
+                                        {% else %}
+                                            <span class="text-muted">N/A</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <small>{{ log.ip_address }}</small>
+                                    </td>
+                                    <td>
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-info"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#detailsModal{{ log.id }}">
+                                            {{ _("View Details") }}
+                                        </button>
+                                        <!-- Details Modal -->
+                                        <div class="modal fade"
+                                             id="detailsModal{{ log.id }}"
+                                             tabindex="-1"
+                                             aria-hidden="true">
+                                            <div class="modal-dialog modal-lg">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">{{ _("Audit Log Details") }}</h5>
+                                                        <button type="button"
+                                                                class="btn-close"
+                                                                data-bs-dismiss="modal"
+                                                                aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <dl class="row">
+                                                            <dt class="col-sm-3">{{ _("Timestamp") }}</dt>
+                                                            <dd class="col-sm-9">
+                                                                {{ log.timestamp }}
+                                                            </dd>
+                                                            <dt class="col-sm-3">{{ _("Doctor") }}</dt>
+                                                            <dd class="col-sm-9">
+                                                                {{ log.doctor_name }}
+                                                            </dd>
+                                                            <dt class="col-sm-3">{{ _("Action") }}</dt>
+                                                            <dd class="col-sm-9">
+                                                                {{ log.action_type|title }}
+                                                            </dd>
+                                                            <dt class="col-sm-3">{{ _("Entity Type") }}</dt>
+                                                            <dd class="col-sm-9">
+                                                                {{ log.entity_type|replace('_', ' ') |title }}
+                                                            </dd>
+                                                            <dt class="col-sm-3">{{ _("Entity ID") }}</dt>
+                                                            <dd class="col-sm-9">
+                                                                {{ log.entity_id }}
+                                                            </dd>
+                                                            {% if log.patient_name %}
+                                                                <dt class="col-sm-3">{{ _("Patient") }}</dt>
+                                                                <dd class="col-sm-9">
+                                                                    {{ log.patient_name }}
+                                                                </dd>
+                                                            {% endif %}
+                                                            <dt class="col-sm-3">{{ _("IP Address") }}</dt>
+                                                            <dd class="col-sm-9">
+                                                                {{ log.ip_address }}
+                                                            </dd>
+                                                            {% if log.details %}
+                                                                <dt class="col-sm-3">{{ _("Details") }}</dt>
+                                                                <dd class="col-sm-9">
+                                                                    <pre class="pre-scrollable"><code>{{ log.details|tojson(indent=2) }}</code></pre>
+                                                                </dd>
+                                                            {% endif %}
+                                                        </dl>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _("Close") }}</button>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    {% else %}
-                        <tr>
-                            <td colspan="7" class="text-center py-4">
-                                <p class="text-muted mb-0">{{ _('No audit logs found matching your criteria') }}</p>
-                            </td>
-                        </tr>
-                    {% endif %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<!-- Audit Statistics -->
-<div class="row mt-4">
-    <div class="col-md-6 mb-4">
-        <div class="card shadow-sm h-100">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i> {{ _('Actions by Type') }}</h5>
-            </div>
-            <div class="card-body">
-                <canvas id="actionTypeChart"></canvas>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="7" class="text-center py-4">
+                                    <p class="text-muted mb-0">{{ _("No audit logs found matching your criteria") }}</p>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
-    <div class="col-md-6 mb-4">
-        <div class="card shadow-sm h-100">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i> {{ _('Entities by Type') }}</h5>
+    <!-- Audit Statistics -->
+    <div class="row mt-4">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i> {{ _("Actions by Type") }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="actionTypeChart"></canvas>
+                </div>
             </div>
-            <div class="card-body">
-                <canvas id="entityTypeChart"></canvas>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-pie me-2"></i> {{ _("Entities by Type") }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="entityTypeChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
-</div>
-
-<div class="row">
-    <div class="col-md-12 mb-4">
-        <div class="card shadow-sm">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i> {{ _('Activity Timeline') }}</h5>
-            </div>
-            <div class="card-body">
-                <canvas id="timelineChart"></canvas>
+    <div class="row">
+        <div class="col-md-12 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-line me-2"></i> {{ _("Activity Timeline") }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="timelineChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
-</div>
 {% endblock %}
-
 {% block scripts %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
-<script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <script>
     const today = new Date();
     const isoToday = today.toISOString().split('T')[0];
     start_date.max = isoToday;
     end_date.max = isoToday;
-</script>
-<script>
-    // Verifica validità delle date quando il form viene inviato
+    </script>    <script>
+    // Check date validity when the form is submitted
     document.getElementById('filterForm').addEventListener('submit', function(event) {
         const startDate = document.getElementById('start_date').value;
         const endDate = document.getElementById('end_date').value;
         
-        // Verifica che entrambe le date siano inserite e che la data di inizio sia precedente alla data di fine
+        // Verify that both dates are entered and that the start date is before the end date
         if (startDate && endDate && (new Date(startDate) > new Date(endDate))) {
             // Impedisci l'invio del form
             event.preventDefault();
@@ -296,10 +351,8 @@
             // Ottieni i riferimenti ai campi data
             const startDateInput = document.getElementById('start_date');
             
-            // Imposta la validità personalizzata sul campo della data di fine
-            startDateInput.setCustomValidity(document.documentElement.lang === "it"
-                ? "La data di inizio deve essere precedente alla data di fine"
-                : "Start date must be before end date");
+            // Imposta la validità personalizzata sul campo della data di fine            
+            startDateInput.setCustomValidity(translateText("Start date must be before end date"));
                 
             // Forza la visualizzazione del messaggio di errore
             startDateInput.reportValidity();
@@ -441,5 +494,5 @@ function createTimelineChart(timeline) {
         }
     });
 }
-</script>
+    </script>
 {% endblock %}

@@ -104,8 +104,7 @@ function initVitalsCharts() {
  */
 function checkPlatformConnection() {
     const patientId = getPatientIdFromUrl();
-    if (!patientId) {
-        console.error('Impossibile determinare l\'ID del paziente');
+    if (!patientId) {        console.error('Unable to determine patient ID');
         updateUIForNoConnection();
         return;
     }
@@ -127,8 +126,7 @@ function checkPlatformConnection() {
                 updateUIForNoConnection();
             }
         })
-        .catch(error => {
-            console.error('Errore nel controllo della connessione:', error);
+        .catch(error => {            console.error(translateText('Error checking connection') + ':', error);
             updateUIForNoConnection();
         });
 }
@@ -140,19 +138,17 @@ function updateUIForNoConnection() {
     // Mostra il messaggio di nessun dato
     const noDataMessage = document.getElementById('noDataMessage');
     if (noDataMessage) {
-        noDataMessage.classList.remove('d-none');
-        noDataMessage.innerHTML = `
+        noDataMessage.classList.remove('d-none');        noDataMessage.innerHTML = `
             <div class="alert alert-info">
                 <i class="fas fa-info-circle me-2"></i>
-                ${translateText('Collegati ad una piattaforma di salute per visualizzare i dati dei parametri vitali.')}
+                ${translateText('Connect to a health platform to view vital signs data.')}
             </div>
         `;
     }
-    
-    // Aggiorna il messaggio nella tabella
+      // Aggiorna il messaggio nella tabella
     const vitalsTableMessage = document.getElementById('vitalsTableMessage');
     if (vitalsTableMessage) {
-        vitalsTableMessage.textContent = translateText('Nessun dato disponibile. Collega una piattaforma di salute.');
+        vitalsTableMessage.textContent = translateText('No data available. Connect a health platform.');
     }
     
     // Nascondi il contenitore dei pulsanti del periodo
@@ -187,7 +183,7 @@ function updateUIForConnectedPlatform(platform) {
         }
         
     } catch (error) {
-        console.error('Errore nel mostrare i pulsanti del periodo:', error);
+        console.error(translateText('Error showing period buttons') + ':', error);
     }
     
     // Abilita i pulsanti del periodo
@@ -207,12 +203,11 @@ function updateUIForConnectedPlatform(platform) {
  * Carica i tipi di dati disponibili per la piattaforma specificata
  * @param {string} platform Nome della piattaforma
  */
-function loadAvailableDataTypes(platform) {
-    platform = platform.toUpperCase();
+function loadAvailableDataTypes(platform) {    platform = platform.toUpperCase();
     
     // Controlla se la piattaforma è supportata
     if (!SUPPORTED_DATA_TYPES[platform]) {
-        console.error(`Piattaforma non supportata: ${platform}`);
+        console.error(translateText(`Unsupported platform:`) + ` ${platform}`);
         return;
     }
     
@@ -416,7 +411,7 @@ function showChartLoading(typeId) {
                 <div class="spinner-border text-primary mb-2" role="status">
                     <span class="visually-hidden">Caricamento...</span>
                 </div>
-                <p class="mb-0">${translateText('Caricamento dati...')}</p>
+                <p class="mb-0">${translateText('Loading data...')}</p>
             </div>
         `;
         
@@ -458,10 +453,9 @@ function showChartError(typeId) {
         
         errorOverlay.innerHTML = `
             <div class="text-center">
-                <i class="fas fa-exclamation-circle text-danger fa-3x mb-3"></i>
-                <p class="mb-0">${translateText('Errore nel caricamento dei dati. Riprova più tardi.')}</p>
+                <i class="fas fa-exclamation-circle text-danger fa-3x mb-3"></i>                <p class="mb-0">${translateText('Error loading data. Try again later.')}</p>
                 <button class="btn btn-outline-primary mt-3 retry-btn">
-                    <i class="fas fa-sync me-1"></i> ${translateText('Riprova')}
+                    <i class="fas fa-sync me-1"></i> ${translateText('Retry')}
                 </button>
             </div>
         `;
@@ -700,7 +694,7 @@ function updateDataTable(typeId, data) {
         if (noDataRow) {
             const message = document.getElementById('vitalsTableMessage');
             if (message) {
-                message.textContent = translateText(`Nessun dato disponibile per ${typeInfo.name.toLowerCase()}`);
+                message.textContent = translateText(`No data available for`) + ` ${typeInfo.name.toLowerCase()}`;
             }
             noDataRow.style.display = 'table-row';
         }
@@ -800,11 +794,7 @@ function formatTimestamp(timestamp) {
  * @param {string} text Testo da tradurre
  * @returns {string} Testo tradotto
  */
-function translateText(text) {
-    // Per ora restituisce il testo originale
-    // In futuro potrà essere sostituita con la vera funzione di traduzione
-    return text;
-}
+// translateText function is now imported from translations.js
 
 /**
  * Gestisce il clic sul pulsante per generare un report specifico
@@ -818,7 +808,7 @@ function setupSpecificReportButton() {
         
         // Verifica che ci sia un tipo vitale attualmente selezionato
         if (!currentVitalType) {
-            alert(translateText('Seleziona prima un tipo di parametro vitale.'));
+            alert(translateText('Please select a vital sign type first.'));
             return;
         }
         

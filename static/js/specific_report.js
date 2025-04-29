@@ -301,12 +301,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Prevent form submission if validation fails
             if (!isValid) {
-                event.preventDefault();
-                // Get language from html lang attribute
-                const lang = document.documentElement.lang || 'en';
-                const message = lang === 'it'
-                    ? 'Seleziona almeno un periodo di tempo per ogni tipo di parametro vitale selezionato'
-                    : 'Please select at least one time period for each selected vital type';
+                event.preventDefault();                const message = translateText('Please select at least one time period for each selected vital type');
 
                 // Create a toast notification instead of alert
                 const toastHtml = `
