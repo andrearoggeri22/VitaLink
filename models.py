@@ -13,14 +13,14 @@ from app import db
 
 class VitalSignType(Enum):
     # Types of vital signs supported in the system
+
     # Parametri vitali principali
     HEART_RATE = "heart_rate"
-    BLOOD_PRESSURE = "blood_pressure"
     OXYGEN_SATURATION = "oxygen_saturation"
-    TEMPERATURE = "temperature"
-    RESPIRATORY_RATE = "respiratory_rate"
-    GLUCOSE = "glucose"
+    BREATHING_RATE = "breathing_rate"
     WEIGHT = "weight"
+    TEMPERATURE_CORE = "temperature_core"
+    TEMPERATURE_SKIN = "temperature_skin"
     
     # Parametri di attività fisica
     STEPS = "steps"
@@ -41,9 +41,6 @@ class VitalSignType(Enum):
     # Nutrizione e idratazione
     CALORIES_IN = "calories_in"
     WATER = "water"
-    
-    # Parametri respiratori avanzati
-    BREATHING_RATE = "breathing_rate"
 
 class DoctorPatient(db.Model):
     # Association table for the many-to-many relationship between doctors and patients

@@ -1,12 +1,12 @@
 // vitals.js - JavaScript for vital signs functionality
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Initialize vital signs form
     initVitalsForm();
-    
+
     // Initialize charts for vital signs visualization
     initVitalsCharts();
-    
+
     // Initialize filter functionality
     initVitalsFilter();
 });
@@ -16,23 +16,21 @@ document.addEventListener('DOMContentLoaded', function() {
  */
 function initVitalsForm() {
     const vitalsForm = document.getElementById('vitalsForm');
-    
+
     if (vitalsForm) {
         // Update units based on selected vital sign type
         const typeSelect = document.getElementById('vitalType');
         const unitInput = document.getElementById('vitalUnit');
-        
         if (typeSelect && unitInput) {
             const units = {
                 // Parametri vitali principali
                 'heart_rate': 'bpm',
-                'blood_pressure': 'mmHg',
                 'oxygen_saturation': '%',
-                'temperature': '°C',
-                'respiratory_rate': 'breaths/min',
-                'glucose': 'mg/dL',
+                'breathing_rate': 'resp/min',
                 'weight': 'kg',
-                
+                'temperature_core': '°C',
+                'temperature_skin': '°C',
+
                 // Parametri di attività fisica
                 'steps': 'steps',
                 'calories': 'kcal',
@@ -41,40 +39,38 @@ function initVitalsForm() {
                 'sleep_duration': 'hours',
                 'floors_climbed': 'floors',
                 'elevation': 'm',
-                
+
                 // Parametri di metabolismo e attività dettagliata
                 'activity_calories': 'kcal',
                 'calories_bmr': 'kcal',
                 'minutes_sedentary': 'min',
                 'minutes_lightly_active': 'min',
                 'minutes_fairly_active': 'min',
-                
+
                 // Nutrizione e idratazione
                 'calories_in': 'kcal',
-                'water': 'ml',
-                
-                // Parametri respiratori avanzati
-                'breathing_rate': 'resp/min'
+                'water': 'ml'
             };
-            
+
+
             // Set initial unit
             if (typeSelect.value) {
                 unitInput.value = units[typeSelect.value] || '';
             }
-            
+
             // Update unit when type changes
-            typeSelect.addEventListener('change', function() {
+            typeSelect.addEventListener('change', function () {
                 unitInput.value = units[this.value] || '';
             });
         }
-        
+
         // Form validation
-        vitalsForm.addEventListener('submit', function(event) {
+        vitalsForm.addEventListener('submit', function (event) {
             if (!vitalsForm.checkValidity()) {
                 event.preventDefault();
                 event.stopPropagation();
             }
-            
+
             vitalsForm.classList.add('was-validated');
         });
     }
@@ -86,27 +82,27 @@ function initVitalsForm() {
 function initVitalsCharts() {    // Controlla se siamo nella pagina dei parametri vitali
     const patientIdMatch = window.location.pathname.match(/\/patients\/(\d+)\/vitals/);
     if (!patientIdMatch) return;
-    
+
     const patientId = patientIdMatch[1];
-    
+
     // Estrai i parametri di filtro dall'URL
     const urlParams = new URLSearchParams(window.location.search);
     const startDate = urlParams.get('start_date');
     const endDate = urlParams.get('end_date');
     const vitalType = urlParams.get('type');
-    
+
     // Costruisci l'URL dell'API con i parametri di filtro
     let apiUrl = `/api/patients/${patientId}/vitals`;
     const apiParams = [];
-    
+
     if (startDate) apiParams.push(`start_date=${startDate}`);
     if (endDate) apiParams.push(`end_date=${endDate}`);
     if (vitalType) apiParams.push(`type=${vitalType}`);
-    
+
     if (apiParams.length > 0) {
         apiUrl += `?${apiParams.join('&')}`;
     }
-    
+
     // Ottieni i dati tramite API
     fetch(apiUrl)
         .then(response => {
@@ -114,25 +110,25 @@ function initVitalsCharts() {    // Controlla se siamo nella pagina dei parametr
                 throw new Error('Network response was not ok');
             }
             return response.json();
-        })        .then(vitalsData => {
+        }).then(vitalsData => {
             // Create charts for each vital sign type
             for (const [type, values] of Object.entries(vitalsData)) {
                 if (!values || values.length === 0) continue;
-                
+
                 const canvasId = `chart-${type}`;
-                
+
                 // Check if canvas element exists
                 const canvas = document.getElementById(canvasId);
                 if (!canvas) continue;
-                
+
                 // Prepare data for the chart
                 const labels = values.map(v => new Date(v.recorded_at || v.timestamp));
                 const data = values.map(v => v.value);
                 const unit = values[0].unit || '';
-                
+
                 // Format type name for display
                 const typeDisplay = type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                
+
                 // Create the chart
                 new Chart(canvas, {
                     type: 'line',
@@ -181,10 +177,10 @@ function initVitalsCharts() {    // Controlla se siamo nella pagina dei parametr
                             },
                             tooltip: {
                                 callbacks: {
-                                    title: function(tooltipItems) {
+                                    title: function (tooltipItems) {
                                         if (tooltipItems && tooltipItems[0]) {
-                                            const value = tooltipItems[0].parsed ? 
-                                                tooltipItems[0].parsed.x : 
+                                            const value = tooltipItems[0].parsed ?
+                                                tooltipItems[0].parsed.x :
                                                 (tooltipItems[0].raw ? tooltipItems[0].raw : tooltipItems[0].label);
                                             return formatDate(value);
                                         }
@@ -213,10 +209,10 @@ function displayNoDataMessage(canvas, message) {
     if (Chart.getChart(canvas)) {
         Chart.getChart(canvas).destroy();
     }
-    
+
     // Ottieni il container del canvas
     const container = canvas.parentElement;
-    
+
     // Crea un elemento di messaggio
     const messageElement = document.createElement('div');
     messageElement.className = 'no-data-message';
@@ -225,7 +221,7 @@ function displayNoDataMessage(canvas, message) {
     messageElement.style.padding = '20px';
     messageElement.style.color = '#666';
     messageElement.style.fontStyle = 'italic';
-    
+
     // Nascondi il canvas e aggiungi il messaggio
     canvas.style.display = 'none';
     container.appendChild(messageElement);
@@ -240,22 +236,22 @@ function initVitalsFilter() {
         // Set max date for date inputs to today
         const startDateInput = document.getElementById('startDate');
         const endDateInput = document.getElementById('endDate');
-        
+
         if (startDateInput && endDateInput) {
             const today = new Date().toISOString().split('T')[0];
-            
+
             startDateInput.setAttribute('max', today);
             endDateInput.setAttribute('max', today);
-            
+
             // Ensure start date is not after end date
-            startDateInput.addEventListener('change', function() {
+            startDateInput.addEventListener('change', function () {
                 if (endDateInput.value && this.value > endDateInput.value) {
                     endDateInput.value = this.value;
                 }
             });
-            
+
             // Ensure end date is not before start date
-            endDateInput.addEventListener('change', function() {
+            endDateInput.addEventListener('change', function () {
                 if (startDateInput.value && this.value < startDateInput.value) {
                     startDateInput.value = this.value;
                 }
@@ -289,6 +285,6 @@ function getRandomColor() {
         '#009688', // Teal
         '#FF5722'  // Deep orange
     ];
-    
+
     return colors[Math.floor(Math.random() * colors.length)];
 }

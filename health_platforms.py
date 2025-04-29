@@ -369,7 +369,7 @@ def increment_api_call_counter(response=None):
             api_rate_limit['retry_after'] = datetime.utcnow() + timedelta(hours=1)
             api_logger.warning("Rate limit raggiunto. Attesa di 1 ora.")
 
-def get_fitbit_data(patient, data_type, start_date=None, end_date=None, use_intraday=False):
+def get_fitbit_data(patient, data_type, start_date=None, end_date=None):
     """
     Get data from Fitbit API for the specified data type
     
@@ -378,7 +378,6 @@ def get_fitbit_data(patient, data_type, start_date=None, end_date=None, use_intr
         data_type (str): Type of data to retrieve (heart_rate, steps, etc.)
         start_date (str, optional): Start date in YYYY-MM-DD format
         end_date (str, optional): End date in YYYY-MM-DD format
-        use_intraday (bool, optional): Se True, tenta di recuperare i dati intraday
         
     Returns:
         dict: Data from Fitbit API or None if error
@@ -423,22 +422,15 @@ def get_fitbit_data(patient, data_type, start_date=None, end_date=None, use_intr
             api_logger.error(f"[{request_id}] Errore nel formato delle date: {str(e)}")
             return None
         
-        # Per i dati intraday, abbiamo bisogno di richiedere un giorno alla volta
-        if use_intraday and 'intraday_endpoint' in endpoint_config:
-            # Per i dati intraday, dobbiamo richiedere un giorno alla volta
-            # Se le date sono diverse, usiamo solo l'ultima data
-            endpoint = endpoint_config['intraday_endpoint'].format(date=end_date)
-            api_logger.info(f"[{request_id}] Utilizzo endpoint intraday per {data_type}: {endpoint}")
+        # Utilizzo dell'endpoint di range specifico per questo tipo di dati
+        if 'range_endpoint' in endpoint_config:
+            endpoint = endpoint_config['range_endpoint'].format(start=start_date, end=end_date)
+            api_logger.info(f"[{request_id}] Utilizzo endpoint range per {data_type}: {endpoint}")
         else:
-            # Utilizzo dell'endpoint di range specifico per questo tipo di dati
-            if 'range_endpoint' in endpoint_config:
-                endpoint = endpoint_config['range_endpoint'].format(start=start_date, end=end_date)
-                api_logger.info(f"[{request_id}] Utilizzo endpoint range per {data_type}: {endpoint}")
-            else:
-                # Fallback al formato generico se non è specificato un range_endpoint
-                base = endpoint_config.get('base_endpoint', '')
-                endpoint = f"{base}/{start_date}/{end_date}.json"
-                api_logger.info(f"[{request_id}] Utilizzo endpoint generico per {data_type}: {endpoint}")
+            # Fallback al formato generico se non è specificato un range_endpoint
+            base = endpoint_config.get('base_endpoint', '')
+            endpoint = f"{base}/{start_date}/{end_date}.json"
+            api_logger.info(f"[{request_id}] Utilizzo endpoint generico per {data_type}: {endpoint}")
     else:
         # Se non vengono fornite date, usiamo l'endpoint predefinito
         endpoint = endpoint_config['endpoint']
@@ -511,62 +503,81 @@ def process_fitbit_data(data, data_type):
     
     # Gestione speciale per la frequenza cardiaca
     if data_type == 'heart_rate' and 'activities-heart' in data:
-        # Log di debug per la risposta completa
-        if api_logger.isEnabledFor(logging.DEBUG):
-            truncated_response = str(data)[:1000] + "..." if len(str(data)) > 1000 else str(data)
-            api_logger.debug(f"[{request_id}] Risposta frequenza cardiaca: {truncated_response}")
+        # Elaborazione speciale per le risposte della frequenza cardiaca
+        heart_results = []
         
-        # Elabora i dati intraday di frequenza cardiaca
-        if 'activities-heart-intraday' in data and 'dataset' in data['activities-heart-intraday']:
-            return process_fitbit_intraday_data(data, data_type)
+        for heart_data in data['activities-heart']:
+            if 'dateTime' in heart_data and 'value' in heart_data and isinstance(heart_data['value'], dict):
+                timestamp = heart_data['dateTime']
+                heart_value = None
+                value_type = None
+                
+                # Prima verifichiamo se c'è il valore di frequenza cardiaca a riposo
+                if 'restingHeartRate' in heart_data['value']:
+                    heart_value = heart_data['value']['restingHeartRate']
+                    value_type = 'resting'
+                    api_logger.info(f"[{request_id}] Trovato valore di frequenza cardiaca a riposo: {heart_value} per {timestamp}")
+                # Se non c'è, calcoliamo una media dalle zone di frequenza cardiaca
+                elif 'heartRateZones' in heart_data['value'] and heart_data['value']['heartRateZones']:
+                    zones = heart_data['value']['heartRateZones']
+                    zone_values = []
+                    
+                    for zone in zones:
+                        if 'min' in zone and 'max' in zone:
+                            # Calcola la media di ogni zona
+                            zone_avg = (float(zone['min']) + float(zone['max'])) / 2
+                            zone_values.append(zone_avg)
+                    
+                    if zone_values:
+                        heart_value = sum(zone_values) / len(zone_values)
+                        value_type = 'zone_avg'
+                        api_logger.info(f"[{request_id}] Calcolato valore medio dalle zone: {heart_value} per {timestamp}")
+                
+                if heart_value is not None:
+                    heart_results.append({
+                        'timestamp': timestamp,
+                        'recorded_at': timestamp,
+                        'value': float(heart_value),
+                        'unit': unit,
+                        'type': value_type
+                    })
+        
+        if heart_results:
+            api_logger.info(f"[{request_id}] Elaborati {len(heart_results)} valori di frequenza cardiaca")
+            return heart_results
     
-    # Estrai il percorso della chiave di risposta
-    if '.' in response_key:
-        data_path = response_key.split('.')
-        current_data = data
-        
-        for key in data_path:
-            if key in current_data:
-                current_data = current_data[key]
-            else:
-                api_logger.error(f"[{request_id}] Chiave {key} non trovata nella risposta Fitbit per {data_type}")
-                return []
+    # Elaborazione standard
+    # Estrai i dati dalla risposta in base alla chiave di risposta
+    if response_key in data:
+        current_data = data[response_key]
     else:
-        # Chiave di risposta semplice
-        if response_key in data:
-            current_data = data[response_key]
-        else:
-            # Prova alcune alternative comuni in base al tipo di dati
-            if data_type.startswith('activities-') and f"activities-{data_type}" in data:
-                current_data = data[f"activities-{data_type}"]
-            else:
-                api_logger.error(f"[{request_id}] Chiave di risposta {response_key} non trovata nei dati")
-                # Log dell'intera risposta (troncata) per debug
-                if api_logger.isEnabledFor(logging.DEBUG):
-                    api_logger.debug(f"[{request_id}] Chiavi disponibili: {list(data.keys())}")
-                    truncated_data = str(data)[:1000] + "..." if len(str(data)) > 1000 else str(data)
-                    api_logger.debug(f"[{request_id}] Dati completi: {truncated_data}")
-                return []
+        api_logger.error(f"[{request_id}] Chiave di risposta {response_key} non trovata nei dati")
+        return []
     
     # Gestione di diverse strutture di dati
     results = []
     
-    # Gestione di dati complessi nestati
-    # Ad esempio, il formato SpO2 o HRV ha un valore che è un oggetto con campi min/max/avg
-    if '.' in value_key:
-        api_logger.debug(f"[{request_id}] Gestione chiave di valore annidata: {value_key}")
-        value_path = value_key.split('.')
-        
-        # Funzione ricorsiva per estrarre valori nestati
-        def extract_nested_value(obj, path):
-            if not path or not obj:
-                return obj
-            if path[0] in obj:
-                return extract_nested_value(obj[path[0]], path[1:])
+    # Funzione di supporto per estrarre valori nidificati
+    def extract_nested_value(obj, path):
+        """Estrai un valore nidificato da un oggetto in base a un percorso."""
+        if not path or not isinstance(obj, dict):
             return None
         
+        key = path[0]
+        if key not in obj:
+            return None
+        
+        if len(path) == 1:
+            return obj[key]
+        
+        return extract_nested_value(obj[key], path[1:])
+    
+    # Gestione dei valori nidificati (es: value.restingHeartRate, value.avg)
+    if '.' in value_key:
+        value_path = value_key.split('.')
+        
         if isinstance(current_data, list):
-            # Gestisci dati giornalieri in formato lista
+            # Elabora dati in formato lista
             for item in current_data:
                 if timestamp_key in item:
                     try:
@@ -586,8 +597,9 @@ def process_fitbit_data(data, data_type):
                             })
                     except (ValueError, TypeError) as e:
                         api_logger.error(f"[{request_id}] Errore durante l'elaborazione del valore: {str(e)}")
+        
         elif isinstance(current_data, dict):
-            # Gestisci oggetto singolo con valore nestato
+            # Elabora dati in formato dizionario
             if timestamp_key in current_data:
                 try:
                     nested_value = extract_nested_value(current_data, value_path)
@@ -607,20 +619,14 @@ def process_fitbit_data(data, data_type):
                 except (ValueError, TypeError) as e:
                     api_logger.error(f"[{request_id}] Errore durante l'elaborazione del valore: {str(e)}")
     else:
-        # Gestione standard dei dati
+        # Gestione standard dei dati (chiave valore semplice)
         if isinstance(current_data, list):
-            # Gestisci formato dati lista (la maggior parte degli endpoint Fitbit)
+            # Elabora formato lista
             for item in current_data:
                 if value_key in item and timestamp_key in item:
                     try:
                         value = float(item[value_key])
                         timestamp = item[timestamp_key]
-                        
-                        # Per dati intraday, aggiungi la data
-                        if 'timestamp_format' in endpoint_config and len(timestamp) <= 8:  # formato HH:MM:SS
-                            # Assume la data odierna per i dati intraday
-                            today = datetime.today().strftime('%Y-%m-%d')
-                            timestamp = f"{today} {timestamp}"
                         
                         # Applica trasformazioni
                         value = transform(value)
@@ -633,9 +639,9 @@ def process_fitbit_data(data, data_type):
                         })
                     except (ValueError, TypeError) as e:
                         api_logger.error(f"[{request_id}] Errore nell'elaborazione del valore: {str(e)}")
-                        continue
+        
         elif isinstance(current_data, dict):
-            # Gestisci formato oggetto singolo (sonno, peso, ecc.)
+            # Elabora formato dizionario singolo
             if value_key in current_data and timestamp_key in current_data:
                 try:
                     value = float(current_data[value_key])
@@ -656,105 +662,7 @@ def process_fitbit_data(data, data_type):
     api_logger.info(f"[{request_id}] Elaborati {len(results)} risultati per {data_type}")
     return results
 
-def process_fitbit_intraday_data(data, data_type):
-    """
-    Processa specificamente i dati intraday di Fitbit
-    
-    Args:
-        data (dict): Dati grezzi dall'API Fitbit
-        data_type (str): Tipo di dati da processare
-        
-    Returns:
-        list: Dati processati in formato standardizzato
-    """
-    request_id = str(uuid.uuid4())[:8]  # ID per tracciamento nel log
-    
-    if not data or data_type not in FITBIT_ENDPOINTS:
-        api_logger.warning(f"[{request_id}] Nessun dato intraday da processare")
-        return []
-    
-    endpoint_config = FITBIT_ENDPOINTS[data_type]
-    intraday_key = endpoint_config.get('intraday_response_key', 'activities-heart-intraday')
-    dataset_key = endpoint_config.get('dataset_key', 'dataset')
-    value_key = endpoint_config.get('value_key', 'value')
-    timestamp_key = endpoint_config.get('intraday_timestamp_key', 'time')
-    unit = endpoint_config.get('unit', '')
-    transform = endpoint_config.get('value_transform', lambda x: x)
-    
-    # Log della struttura dei dati ricevuti
-    response_structure = {}
-    for key, value in data.items():
-        if isinstance(value, list):
-            response_structure[key] = f"{len(value)} items"
-        elif isinstance(value, dict):
-            response_structure[key] = f"{len(value)} keys"
-        else:
-            truncated = str(value)[:30] + "..." if len(str(value)) > 30 else str(value)
-            response_structure[key] = truncated
-    
-    api_logger.debug(f"[{request_id}] Struttura dati intraday: {response_structure}")
-    
-    results = []
-    
-    # Estrai la data di riferimento dalle risposte
-    if 'activities-heart' in data and data['activities-heart'] and isinstance(data['activities-heart'], list):
-        date_info = data['activities-heart'][0].get('dateTime', datetime.now().strftime('%Y-%m-%d'))
-    else:
-        date_info = datetime.now().strftime('%Y-%m-%d')
-    
-    # Estrai dati di frequenza cardiaca a riposo se presenti (valore giornaliero importante)
-    if data_type == 'heart_rate' and 'activities-heart' in data and data['activities-heart']:
-        for heart_data in data['activities-heart']:
-            if isinstance(heart_data, dict) and 'value' in heart_data and isinstance(heart_data['value'], dict) and 'restingHeartRate' in heart_data['value']:
-                try:
-                    resting_hr = heart_data['value']['restingHeartRate']
-                    date_str = heart_data.get('dateTime', date_info)
-                    api_logger.info(f"[{request_id}] Trovato valore di frequenza cardiaca a riposo: {resting_hr} per {date_str}")
-                    
-                    # Aggiungiamo questo valore importante ai risultati
-                    results.append({
-                        'timestamp': f"{date_str} 12:00:00",
-                        'recorded_at': f"{date_str} 12:00:00",
-                        'value': float(resting_hr),
-                        'unit': unit,
-                        'type': 'resting',
-                        'note': 'Frequenza cardiaca a riposo'
-                    })
-                except (ValueError, TypeError) as e:
-                    api_logger.error(f"[{request_id}] Errore nell'elaborazione della frequenza cardiaca a riposo: {str(e)}")
-    
-    # Estrai i dati intraday (serie temporali per minuto)
-    if intraday_key in data and dataset_key in data[intraday_key]:
-        dataset = data[intraday_key][dataset_key]
-        api_logger.info(f"[{request_id}] Elaborazione di {len(dataset)} letture intraday per {data_type} in data {date_info}")
-        
-        for item in dataset:
-            if value_key in item and timestamp_key in item:
-                try:
-                    value = float(item[value_key])
-                    time_str = item[timestamp_key]
-                    
-                    # Combina data e ora per un timestamp completo
-                    timestamp = f"{date_info} {time_str}"
-                    
-                    # Applica eventuali trasformazioni
-                    value = transform(value)
-                    
-                    # Creiamo un formato compatibile con il frontend
-                    results.append({
-                        'timestamp': timestamp,
-                        'recorded_at': timestamp,  # Aggiungiamo questo campo per compatibilità
-                        'value': value,
-                        'unit': unit,
-                        'type': 'intraday'
-                    })
-                except (ValueError, TypeError) as e:
-                    api_logger.error(f"[{request_id}] Errore nell'elaborazione di un valore intraday: {str(e)}")
-    
-    api_logger.info(f"[{request_id}] Processati {len(results)} risultati intraday per {data_type}")
-    return results
-
-def get_vitals_data(patient, data_type, start_date=None, end_date=None, use_intraday=True, cache_duration=300):
+def get_vitals_data(patient, data_type, start_date=None, end_date=None, cache_duration=300):
     """
     Get vital sign data for a patient from their connected health platform
     This is the main function used by reports and charts to get vital sign data
@@ -764,7 +672,6 @@ def get_vitals_data(patient, data_type, start_date=None, end_date=None, use_intr
         data_type (str): Type of data to retrieve (heart_rate, steps, etc.)
         start_date (str, optional): Start date in YYYY-MM-DD format
         end_date (str, optional): End date in YYYY-MM-DD format
-        use_intraday (bool, optional): Whether to use intraday data when available
         cache_duration (int, optional): Duration in seconds to keep data in cache
         
     Returns:
@@ -792,7 +699,7 @@ def get_vitals_data(patient, data_type, start_date=None, end_date=None, use_intr
         api_logger.debug(f"[{request_id}] Data inizio non fornita, usando 7 giorni prima: {start_date}")
     
     # Check if we have cached data for this request
-    cache_key = f"{patient.id}_{normalized_data_type}_{start_date}_{end_date}_{use_intraday}"
+    cache_key = f"{patient.id}_{normalized_data_type}_{start_date}_{end_date}"
     if cache_key in vitals_cache:
         # Check if the cache is still valid
         cache_entry = vitals_cache[cache_key]
@@ -815,11 +722,10 @@ def get_vitals_data(patient, data_type, start_date=None, end_date=None, use_intr
         return []
     
     start_time = time.time()  # Per misurare il tempo di esecuzione
-    
     try:
         if patient.connected_platform == HealthPlatform.FITBIT:
             api_logger.info(f"[{request_id}] Richiesta dati Fitbit: {normalized_data_type} dal {start_date} al {end_date}")
-            data = get_processed_fitbit_data(patient, normalized_data_type, start_date, end_date, use_intraday)
+            data = get_processed_fitbit_data(patient, normalized_data_type, start_date, end_date)
         elif patient.connected_platform == HealthPlatform.GOOGLE_HEALTH_CONNECT:
             # Placeholder for Google Fit implementation
             api_logger.warning(f"[{request_id}] Integrazione Google Fit non ancora implementata")
@@ -866,7 +772,7 @@ def get_vitals_data(patient, data_type, start_date=None, end_date=None, use_intr
         api_logger.error(f"[{request_id}] Errore nel recupero dati per paziente {patient.id}, tipo {normalized_data_type}: {str(e)}")
         return []
 
-def get_processed_fitbit_data(patient, data_type, start_date=None, end_date=None, use_intraday=True):
+def get_processed_fitbit_data(patient, data_type, start_date=None, end_date=None):
     """
     Get and process data from Fitbit API for the specified data type
     
@@ -875,7 +781,6 @@ def get_processed_fitbit_data(patient, data_type, start_date=None, end_date=None
         data_type (str): Type of data to retrieve (heart_rate, steps, etc.)
         start_date (str, optional): Start date in YYYY-MM-DD format
         end_date (str, optional): End date in YYYY-MM-DD format
-        use_intraday (bool, optional): Whether to use intraday data when available
         
     Returns:
         list: Processed data in format [{'timestamp': ISO8601, 'value': 123, 'unit': 'xyz'}, ...]
@@ -900,176 +805,61 @@ def get_processed_fitbit_data(patient, data_type, start_date=None, end_date=None
     
     # Mapping dettagliato per tutti i tipi di dati supportati
     mapping = {
-        # Parametri vitali principali
-        'heart_rate': 'heart_rate',
-        'blood_pressure': 'blood_pressure',
-        'oxygen_saturation': 'oxygen_saturation',
-        'temperature': 'temperature',
-        'respiratory_rate': 'breathing_rate',
-        'glucose': 'glucose',
-        'weight': 'weight',
-        
-        # Parametri di attività fisica
-        'steps': 'steps',
-        'step': 'steps',
-        'steps_count': 'steps',
-        'distance': 'distance',
-        'distance_km': 'distance',
-        'calories': 'calories',
-        'calorie': 'calories',
-        'energy': 'calories',
-        'active_minutes': 'active_minutes',
-        'active_time': 'active_minutes',
-        'activity': 'active_minutes',
-        'sleep_duration': 'sleep_duration',
-        'sleep': 'sleep_duration',
-        'sleep_time': 'sleep_duration',
-        'floors_climbed': 'floors_climbed',
-        'floors': 'floors_climbed',
-        'elevation': 'elevation',
-        
-        # Parametri di metabolismo e attività dettagliata
-        'activity_calories': 'activity_calories',
-        'calories_bmr': 'calories_bmr',
-        'minutes_sedentary': 'minutes_sedentary',
-        'minutes_lightly_active': 'minutes_lightly_active',
-        'minutes_fairly_active': 'minutes_fairly_active',
-        
-        # Nutrizione e idratazione
-        'calories_in': 'calories_in',
-        'water': 'water',
-        
-        # Altri parametri
-        'breathing_rate': 'breathing_rate',
-        'spo2': 'oxygen_saturation',
-        'cardio_fitness': 'cardio_fitness'
+    'heart_rate': 'heart_rate',
+    'steps': 'steps',
+    'calories': 'calories',
+    'distance': 'distance',
+    'active_minutes': 'active_minutes',
+    'sleep_duration': 'sleep_duration',
+    'floors_climbed': 'floors_climbed',
+    'elevation': 'elevation',
+    'weight': 'weight',
+    'activity_calories': 'activity_calories',
+    'calories_bmr': 'calories_bmr',
+    'minutes_sedentary': 'minutes_sedentary',
+    'minutes_lightly_active': 'minutes_lightly_active',
+    'minutes_fairly_active': 'minutes_fairly_active',
+    'calories_in': 'calories_in',
+    'water': 'water',
+    'breathing_rate': 'breathing_rate',
+    'oxygen_saturation': 'oxygen_saturation',
+    'temperature_core': 'temperature_core',
+    'temperature_skin': 'temperature_skin'
     }
+
     
     # Determina il tipo di dato API corretto
     api_data_type = mapping.get(normalized_data_type, normalized_data_type)
-    api_logger.debug(f"[{request_id}] Tipo dati normalizzato: {normalized_data_type} → {api_data_type}")
+    api_logger.debug(f"[{request_id}] Tipo dati normalizzato: {normalized_data_type} -> {api_data_type}")
     
     # Verifica se il tipo di dati è supportato da Fitbit
     if api_data_type not in FITBIT_ENDPOINTS:
         api_logger.error(f"[{request_id}] Tipo di dati non supportato da Fitbit: {api_data_type}")
         return []
     
-    # Determina se è necessario utilizzare dati intraday
-    supports_intraday = api_data_type in ['heart_rate', 'steps', 'calories', 'distance', 'floors_climbed', 'elevation']
-    should_use_intraday = use_intraday and supports_intraday
-    
-    # Calcola il periodo di tempo per determinare se usare intraday
-    try:
-        if start_date and end_date:
-            start_dt = datetime.strptime(start_date, '%Y-%m-%d')
-            end_dt = datetime.strptime(end_date, '%Y-%m-%d')
-            days_diff = (end_dt - start_dt).days + 1
-            
-            # Per periodi brevi (1-2 giorni) è preferibile usare dati intraday
-            # Per periodi più lunghi, usa i dati giornalieri aggregati
-            if days_diff > 3:
-                should_use_intraday = False
-                api_logger.debug(f"[{request_id}] Periodo troppo lungo ({days_diff} giorni) per intraday, uso dati giornalieri")
-        
-        # Se la richiesta è per oggi o ieri, preferisci sempre dati intraday per certi tipi di dati
-        now = datetime.now().date()
-        end_dt_date = datetime.strptime(end_date, '%Y-%m-%d').date()
-        days_from_today = (now - end_dt_date).days
-        
-        if days_from_today <= 1 and supports_intraday:
-            should_use_intraday = True
-            api_logger.debug(f"[{request_id}] Richiesta per oggi/ieri, uso dati intraday: {should_use_intraday}")
-    
-    except Exception as e:
-        api_logger.error(f"[{request_id}] Errore nel calcolo del periodo: {str(e)}")
-    
     # Strategie multiple di recupero dati per maggiore resilienza
     results = []
     error_count = 0
     
-    # Primo tentativo: dati intraday se supportati e richiesti
-    if should_use_intraday:
-        api_logger.info(f"[{request_id}] Tentativo 1: Richiesta dati intraday per {api_data_type}")
-        
-        # Per i dati intraday su più giorni, avremmo bisogno di fare più richieste
-        # Per semplicità, iniziamo con solo la data più recente e aggiungeremo altri giorni se necessario
-        try:
-            # Gestisce la richiesta solo per la data finale se è recente
-            raw_data = get_fitbit_data(patient, api_data_type, end_date, end_date, use_intraday=True)
-            if raw_data:
-                intraday_results = process_fitbit_intraday_data(raw_data, api_data_type)
-                if intraday_results:
-                    results.extend(intraday_results)
-                    api_logger.info(f"[{request_id}] Recuperati {len(intraday_results)} dati intraday per {end_date}")
-                else:
-                    api_logger.warning(f"[{request_id}] Nessun dato intraday disponibile per {end_date}")
-        except Exception as e:
-            api_logger.error(f"[{request_id}] Errore nel recupero dati intraday: {str(e)}")
+    # Primo tentativo: dati di range con periodo completo
+    api_logger.info(f"[{request_id}] Tentativo 1: Richiesta dati range per {api_data_type}")
+    
+    try:
+        raw_data = get_fitbit_data(patient, api_data_type, start_date, end_date)
+        if raw_data:
+            # Processa i dati di range normali
+            range_results = process_fitbit_data(raw_data, api_data_type)
+            if range_results:
+                results = range_results
+                api_logger.info(f"[{request_id}] Recuperati {len(range_results)} punti dati range")
+            else:
+                api_logger.warning(f"[{request_id}] Nessun dato range disponibile per il periodo")
+        else:
+            api_logger.warning(f"[{request_id}] Nessun dato ricevuto per {api_data_type}")
             error_count += 1
-    
-    # Secondo tentativo: dati di range con periodo completo
-    if (not results or not should_use_intraday) and error_count < 3:
-        api_logger.info(f"[{request_id}] Tentativo 2: Richiesta dati range per {api_data_type}")
-        
-        try:
-            raw_data = get_fitbit_data(patient, api_data_type, start_date, end_date, use_intraday=False)
-            if raw_data:
-                # Processa i dati di range normali
-                range_results = process_fitbit_data(raw_data, api_data_type)
-                if range_results:
-                    if not results:  # Se non avevamo già dati intraday
-                        results = range_results
-                    else:
-                        # Combina con dati intraday, conservando solo quelli per date diverse
-                        # Prima estrai le date dai risultati intraday
-                        intraday_dates = {item.get('timestamp', '').split(' ')[0] for item in results if ' ' in item.get('timestamp', '')}
-                        
-                        # Aggiungi solo i risultati del range per date non presenti nei dati intraday
-                        for range_item in range_results:
-                            item_date = range_item.get('timestamp', '').split(' ')[0] if ' ' in range_item.get('timestamp', '') else range_item.get('timestamp', '')
-                            if item_date not in intraday_dates:
-                                results.append(range_item)
-                    
-                    api_logger.info(f"[{request_id}] Recuperati {len(range_results)} punti dati range")
-                else:
-                    api_logger.warning(f"[{request_id}] Nessun dato range disponibile per il periodo")
-        except Exception as e:
-            api_logger.error(f"[{request_id}] Errore nel recupero o processamento dati range: {str(e)}")
-            error_count += 1
-    
-    # Terzo tentativo: endpoint alternativo o dati meno granulari
-    if not results and error_count < 3:
-        api_logger.info(f"[{request_id}] Tentativo 3: Ricerca endpoint alternativi per {api_data_type}")
-        
-        # Mappatura tra tipi di dati che potrebbero avere alternative
-        # Ad esempio, se non abbiamo dati di attività cardio specifica, proviamo con la frequenza cardiaca
-        alternatives = {
-            'cardio_fitness': ['heart_rate'],
-            'active_minutes': ['minutes_fairly_active', 'minutes_lightly_active'],
-            'calories': ['activity_calories', 'calories_bmr'],
-            'oxygen_saturation': ['breathing_rate'],
-            'breathing_rate': ['oxygen_saturation']
-        }
-        
-        if api_data_type in alternatives:
-            for alt_type in alternatives[api_data_type]:
-                api_logger.info(f"[{request_id}] Tentativo con endpoint alternativo: {alt_type}")
-                try:
-                    alt_raw_data = get_fitbit_data(patient, alt_type, start_date, end_date, use_intraday=False)
-                    if alt_raw_data:
-                        alt_results = process_fitbit_data(alt_raw_data, alt_type)
-                        if alt_results:
-                            # Aggiungi un'annotazione per indicare che questi sono dati alternativi
-                            for item in alt_results:
-                                item['alternative_source'] = alt_type
-                            
-                            results = alt_results
-                            api_logger.info(f"[{request_id}] Recuperati {len(alt_results)} punti dati alternativi da {alt_type}")
-                            break  # Interrompi al primo risultato valido
-                except Exception as e:
-                    api_logger.error(f"[{request_id}] Errore nel tentativo con endpoint alternativo {alt_type}: {str(e)}")
-    
-    # Ordina i risultati per timestamp
+    except Exception as e:
+        api_logger.error(f"[{request_id}] Errore nel recupero o processamento dati range: {str(e)}")
+        error_count += 1
     if results:
         try:
             # Alcuni timestamp potrebbero non avere il formato previsto, quindi gestiamo le eccezioni
@@ -1095,97 +885,6 @@ def get_processed_fitbit_data(patient, data_type, start_date=None, end_date=None
         api_logger.error(f"[{request_id}] Errore nella trasformazione finale dei dati: {str(transform_error)}")
     
     api_logger.info(f"[{request_id}] Elaborazione completata, restituiti {len(results)} punti dati per {api_data_type}")
-    return results
-
-def process_fitbit_intraday_data(data, data_type):
-    """
-    Processa specificamente i dati intraday di Fitbit
-    
-    Args:
-        data (dict): Dati grezzi dall'API Fitbit
-        data_type (str): Tipo di dati da processare
-        
-    Returns:
-        list: Dati processati in formato standardizzato
-    """
-    if not data or data_type not in FITBIT_ENDPOINTS:
-        return []
-    
-    endpoint_config = FITBIT_ENDPOINTS[data_type]
-    intraday_key = endpoint_config.get('intraday_response_key')
-    dataset_key = endpoint_config.get('dataset_key', 'dataset')
-    value_key = endpoint_config.get('value_key', 'value')
-    timestamp_key = endpoint_config.get('intraday_timestamp_key', 'time')
-    unit = endpoint_config.get('unit', '')
-    transform = endpoint_config.get('value_transform', lambda x: x)
-    
-    # Logga quantità di dati ricevuti per debug
-    response_summary = {}
-    for key, value in data.items():
-        if isinstance(value, list):
-            response_summary[key] = f"{len(value)} items"
-        elif isinstance(value, dict):
-            response_summary[key] = f"{len(value)} keys"
-        else:
-            truncated = str(value)[:30] + "..." if len(str(value)) > 30 else str(value)
-            response_summary[key] = truncated
-    
-    api_logger.debug(f"Dati intraday ricevuti: {response_summary}")
-    
-    results = []
-    
-    # Estrai la data di riferimento dalle risposte
-    if 'activities-heart' in data and data['activities-heart'] and isinstance(data['activities-heart'], list):
-        date_info = data['activities-heart'][0].get('dateTime', datetime.now().strftime('%Y-%m-%d'))
-    else:
-        date_info = datetime.now().strftime('%Y-%m-%d')
-    
-    # Estrai dati di frequenza cardiaca a riposo se presenti (valore giornaliero importante)
-    if data_type == 'heart_rate' and 'activities-heart' in data and data['activities-heart']:
-        for heart_data in data['activities-heart']:
-            if 'value' in heart_data and isinstance(heart_data['value'], dict) and 'restingHeartRate' in heart_data['value']:
-                resting_hr = heart_data['value']['restingHeartRate']
-                date_str = heart_data.get('dateTime', date_info)
-                api_logger.info(f"Trovato valore di frequenza cardiaca a riposo: {resting_hr} per {date_str}")
-                
-                # Aggiungiamo questo valore importante ai risultati
-                results.append({
-                    'timestamp': f"{date_str} 12:00:00",
-                    'recorded_at': f"{date_str} 12:00:00",
-                    'value': float(resting_hr),
-                    'unit': unit,
-                    'type': 'resting',
-                    'note': 'Frequenza cardiaca a riposo'
-                })
-    
-    # Estrai i dati intraday (serie temporali per minuto)
-    if intraday_key in data and dataset_key in data[intraday_key]:
-        dataset = data[intraday_key][dataset_key]
-        api_logger.info(f"Elaborazione di {len(dataset)} letture intraday per {data_type} in data {date_info}")
-        
-        for item in dataset:
-            if value_key in item and timestamp_key in item:
-                try:
-                    value = float(item[value_key])
-                    time_str = item[timestamp_key]
-                    
-                    # Combina data e ora per un timestamp completo
-                    timestamp = f"{date_info} {time_str}"
-                    
-                    # Applica eventuali trasformazioni
-                    value = transform(value)
-                    
-                    # Creiamo un formato compatibile con il frontend
-                    results.append({
-                        'timestamp': timestamp,
-                        'recorded_at': timestamp,  # Aggiungiamo questo campo per compatibilità
-                        'value': value,
-                        'unit': unit,
-                        'type': 'intraday'
-                    })
-                except (ValueError, TypeError) as e:
-                    api_logger.error(f"Errore nell'elaborazione di un valore intraday: {str(e)}")
-    
     return results
 
 # -------- Blueprint routes --------

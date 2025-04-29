@@ -71,18 +71,30 @@ def create_vital_chart(vitals_data, period_name, vital_type):
     
     # Create drawing and chart
     drawing = Drawing(500, 220)
-    
-    # Define chart colors based on vital type
+      # Define chart colors based on vital type
     chart_colors = {
-        'heart_rate': colors.red,
-        'blood_pressure': colors.darkred,
-        'temperature': colors.orange,
-        'respiratory_rate': colors.purple,
-        'oxygen_saturation': colors.blue,
-        'weight': colors.green,
-        'steps': colors.teal,
-        'sleep_duration': colors.navy,
-    }
+    'heart_rate': colors.red,
+    'oxygen_saturation': colors.blue,
+    'breathing_rate': colors.cyan,
+    'weight': colors.green,
+    'temperature_core': colors.orange,
+    'temperature_skin': colors.orange,
+    'steps': colors.teal,
+    'calories': colors.orange,  # <-- AGGIUNTO
+    'sleep_duration': colors.navy,
+    'distance': colors.green,
+    'active_minutes': colors.purple,
+    'floors_climbed': colors.saddlebrown,
+    'elevation': colors.brown,
+    'activity_calories': colors.orange,
+    'calories_bmr': colors.orange,
+    'minutes_sedentary': colors.gray,
+    'minutes_lightly_active': colors.lightgreen,
+    'minutes_fairly_active': colors.yellow,
+    'calories_in': colors.red,
+    'water': colors.blue
+}
+
     
     chart_color = chart_colors.get(vital_type, colors.blueviolet)
     
@@ -358,15 +370,28 @@ def generate_specific_report(patient, doctor, selected_notes, selected_vital_typ
         
         # Define colors for each vital type
         vital_colors = {
-            'heart_rate': colors.red,
-            'blood_pressure': colors.darkred,
-            'temperature': colors.orange,
-            'respiratory_rate': colors.purple,
-            'oxygen_saturation': colors.blue,
-            'weight': colors.green,
-            'steps': colors.teal,
-            'sleep_duration': colors.navy
+        'heart_rate': colors.red,
+        'steps': colors.teal,
+        'calories': colors.orange,
+        'distance': colors.green,
+        'active_minutes': colors.purple,
+        'sleep_duration': colors.navy,
+        'floors_climbed': colors.saddlebrown,
+        'elevation': colors.brown,
+        'weight': colors.green,
+        'activity_calories': colors.orange,
+        'calories_bmr': colors.orange,
+        'minutes_sedentary': colors.gray,
+        'minutes_lightly_active': colors.lightgreen,
+        'minutes_fairly_active': colors.yellow,
+        'calories_in': colors.red,
+        'water': colors.blue,
+        'breathing_rate': colors.cyan,
+        'oxygen_saturation': colors.blue,
+        'temperature_core': colors.orange,
+        'temperature_skin': colors.orange
         }
+
         
         for vital_type in selected_vital_types:
             vital_type_value = vital_type.value

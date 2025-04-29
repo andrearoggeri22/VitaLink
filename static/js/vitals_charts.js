@@ -18,6 +18,8 @@ const SUPPORTED_DATA_TYPES = {
         { id: 'OXYGEN_SATURATION', name: 'Ossigenazione', unit: '%', color: '#3F51B5', chartType: 'line' },
         { id: 'WEIGHT', name: 'Peso', unit: 'kg', color: '#607D8B', chartType: 'line' },
         { id: 'BREATHING_RATE', name: 'Freq. respiratoria', unit: 'resp/min', color: '#00BCD4', chartType: 'line' },
+        { id: 'TEMPERATURE_CORE', name: 'Temperatura core', unit: '°C', color: '#FF9800', chartType: 'line' },
+        { id: 'TEMPERATURE_SKIN', name: 'Temperatura cutanea', unit: '°C', color: '#FF9800', chartType: 'line' },
         
         // Parametri di attività fisica
         { id: 'STEPS', name: 'Passi', unit: 'passi', color: '#2196F3', chartType: 'bar' },
@@ -40,6 +42,7 @@ const SUPPORTED_DATA_TYPES = {
         { id: 'WATER', name: 'Consumo acqua', unit: 'ml', color: '#03A9F4', chartType: 'bar' }
     ]
 };
+
 
 let currentPeriod = 7; // Default: 7 giorni
 let activeCharts = {}; // Memorizza i riferimenti ai grafici attivi
