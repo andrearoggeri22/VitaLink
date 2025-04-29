@@ -97,16 +97,16 @@ def inject_globals():
 
 with app.app_context():
     # Import models to ensure they're registered with SQLAlchemy
-    from models import Doctor, Patient, DoctorPatient, Note, AuditLog, HealthPlatformLink, VitalObservation
+    from .models import (Doctor, Patient, DoctorPatient, Note, AuditLog, HealthPlatformLink, VitalObservation)
     
     # Import and register blueprints
-    from auth import auth_bp
-    from views import views_bp
-    from api import api_bp
-    from audit import audit_bp
-    from language import language_bp
-    from health_platforms import health_bp
-    from observations import observations_bp
+    from .auth import auth_bp
+    from .views import views_bp
+    from .api import api_bp
+    from .audit import audit_bp
+    from .language import language_bp
+    from .health_platforms import health_bp
+    from .observations import observations_bp
     
     app.register_blueprint(auth_bp)
     app.register_blueprint(views_bp)
@@ -122,7 +122,7 @@ with app.app_context():
     logger.info("Application initialized successfully")
 
 # Initialize login manager
-from models import Doctor
+from .models import Doctor
 
 @login_manager.user_loader
 def load_user(user_id):

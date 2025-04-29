@@ -17,10 +17,10 @@ from flask_login import login_required, current_user
 from flask_babel import gettext as _
 from sqlalchemy.exc import SQLAlchemyError
 
-from app import app, db
-from models import Patient, HealthPlatform, HealthPlatformLink, VitalSignType, ActionType, EntityType
-from audit import log_action, log_health_link_creation, log_platform_connection, log_platform_disconnection, log_data_sync
-from health_platforms_config import FITBIT_CONFIG, FITBIT_ENDPOINTS
+from .app import app, db
+from .models import (Patient, HealthPlatform, HealthPlatformLink, VitalSignType, ActionType, EntityType)
+from .audit import (log_action, log_health_link_creation, log_platform_connection, log_platform_disconnection, log_data_sync)
+from .health_platforms_config import (FITBIT_CONFIG, FITBIT_ENDPOINTS)
 
 # Create the blueprint
 health_bp = Blueprint('health', __name__, url_prefix='/health')

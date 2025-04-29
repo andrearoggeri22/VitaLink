@@ -4,9 +4,9 @@ from flask import request, current_app, jsonify, Blueprint, render_template
 from flask_login import current_user, login_required
 from flask_babel import _
 
-from models import AuditLog, ActionType, EntityType, Doctor, Patient, Note, DoctorPatient, HealthPlatformLink, HealthPlatform, VitalObservation
-from app import db
-from auth import doctor_required
+from .models import (AuditLog, ActionType, EntityType, Doctor, Patient, Note, DoctorPatient, HealthPlatformLink, HealthPlatform, VitalObservation)
+from .app import db
+from .auth import doctor_required
 
 # Initialize logger
 logger = logging.getLogger(__name__)

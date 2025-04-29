@@ -85,6 +85,7 @@ docker-compose.override.yml
 postgres-data/
 
 # Virtual folders e node_modules
+.venv/
 venv/
 ENV/
 env/
@@ -106,3 +107,8 @@ public/
 *.swo
 
 migrations/
+instance/
+
+*.env
+*.env.prod
+*.env.dev
