@@ -6,7 +6,7 @@ from zoneinfo import ZoneInfo
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from app import db
+from .app import db
 
 # Models for the VitaLink application
 # Defines the main data entities and their relationships
@@ -316,7 +316,7 @@ class VitalObservation(db.Model):
         # Returns:
         #   dict: Dictionary representation of the object
         # Carica il dottore per ottenere i dettagli
-        from app import db
+        from .app import db
         from sqlalchemy.orm import joinedload
         doctor = db.session.query(Doctor).get(self.doctor_id)
         

@@ -10,11 +10,11 @@ from flask_babel import gettext as _
 import copy
 import json
 
-from app import db
-from models import Patient, Doctor, VitalSignType, Note, DoctorPatient, ActionType, EntityType, VitalObservation
-from utils import parse_date, to_serializable_dict, validate_uuid
-from reports import create_vital_chart
-from audit import (
+from .app import db
+from .models import (Patient, Doctor, VitalSignType, Note, DoctorPatient, ActionType, EntityType, VitalObservation)
+from .utils import (parse_date, to_serializable_dict, validate_uuid)
+from .reports import create_vital_chart
+from .audit import (
     log_patient_creation, log_patient_update, log_patient_delete,
     log_vital_creation, log_note_creation, log_report_generation, log_patient_view,
     log_action, log_patient_import
@@ -39,7 +39,7 @@ def dashboard():
     recent_patients = current_user.patients.order_by(Patient.created_at.desc()).limit(5).all()
     
     # Get recent audit logs
-    from models import AuditLog
+    from .models import AuditLog
     recent_audits = AuditLog.query.filter_by(doctor_id=current_user.id).order_by(
         AuditLog.timestamp.desc()
     ).limit(10).all()
@@ -350,7 +350,7 @@ def api_patient_vitals(patient_id):
         return jsonify({'error': _('No health platform connection'), 'vital_type': vital_type}), 404
     
     # Import health platform functionality
-    from health_platforms import get_processed_fitbit_data
+    from .health_platforms import get_processed_fitbit_data
     
     # Get data from Fitbit
     try:
@@ -434,7 +434,7 @@ def delete_note(note_id):
     # Delete the note
     try:
         # Log the note deletion
-        from audit import log_note_delete
+        from .audit import log_note_delete
         log_note_delete(current_user.id, note)
         
         # Store note details for response
@@ -554,7 +554,7 @@ def create_specific_patient_report(patient_id):
             logger.debug(f"Generating specific report with language: {current_language}")
             
             # Generate the PDF report
-            from reports import generate_specific_report
+            from .reports import generate_specific_report
             pdf_buffer = generate_specific_report(
                 patient, 
                 current_user, 

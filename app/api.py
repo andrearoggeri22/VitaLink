@@ -4,11 +4,11 @@ from datetime import datetime
 from flask import Blueprint, request, jsonify
 from sqlalchemy.exc import SQLAlchemyError
 from flask_babel import gettext as _
-from app import db
-from models import Patient, VitalSignType, Note, VitalObservation, DoctorPatient
-from auth import api_doctor_required as doctor_required
-from utils import validate_uuid
-from audit import log_patient_import
+from .app import db 
+from .models import (Patient, VitalSignType, Note, VitalObservation, DoctorPatient)
+from .auth import api_doctor_required as doctor_required
+from .utils import validate_uuid
+from .audit import log_patient_import
 
 api_bp = Blueprint('api', __name__)
 logger = logging.getLogger(__name__)
@@ -72,7 +72,7 @@ def get_vitals(doctor, patient_uuid):
     end_date = request.args.get('end_date')
     
     # Import health platform functionality
-    from health_platforms import get_processed_fitbit_data
+    from .health_platforms import get_processed_fitbit_data
     
     try:
         # Get data from Fitbit
@@ -158,7 +158,7 @@ def add_note(doctor, patient_uuid):
         db.session.commit()
         
         # Log the note creation
-        from audit import log_note_creation
+        from .audit import log_note_creation
         log_note_creation(doctor.id, note)
         
         logger.info(f"Note added for patient {patient_uuid} via API")
@@ -200,7 +200,7 @@ def delete_note(doctor, note_id):
     # Delete the note
     try:
         # Log the note deletion
-        from audit import log_note_delete
+        from .audit import log_note_delete
         log_note_delete(doctor.id, note)
         
         # Store note details for response

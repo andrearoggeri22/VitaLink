@@ -16,8 +16,8 @@ from reportlab.graphics.shapes import Drawing
 from reportlab.graphics.charts.linecharts import HorizontalLineChart
 from reportlab.graphics.charts.legends import Legend
 
-from models import VitalSignType, VitalObservation
-import health_platforms
+from .models import (VitalSignType, VitalObservation)
+from . import health_platforms
 
 # Setup logger
 logger = logging.getLogger(__name__)
@@ -366,7 +366,7 @@ def generate_specific_report(patient, doctor, selected_notes, selected_vital_typ
         content.append(Paragraph(_('Vital Signs'), styles['Heading2Modern']))
         content.append(Spacer(1, 8))
         
-        from health_platforms import get_vitals_data
+        from .health_platforms import get_vitals_data
         
         # Define colors for each vital type
         vital_colors = {

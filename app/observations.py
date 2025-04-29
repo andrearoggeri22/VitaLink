@@ -4,9 +4,9 @@ from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
 from sqlalchemy.exc import SQLAlchemyError
 from flask_babel import gettext as _
-from app import db
-from models import Patient, VitalObservation, VitalSignType
-from audit import log_observation_creation, log_observation_update, log_observation_delete
+from .app import db
+from .models import (Patient, VitalObservation, VitalSignType)
+from .audit import (log_observation_creation, log_observation_update, log_observation_delete)
 
 observations_bp = Blueprint('observations', __name__)
 logger = logging.getLogger(__name__)

@@ -11,9 +11,9 @@ from wtforms.validators import DataRequired, Email, EqualTo, Length
 from flask_babel import lazy_gettext as _
 from flask_babel import Babel
 
-from app import db
-from models import Doctor
-from utils import validate_email, is_valid_password
+from .app import db
+from .models import Doctor
+from .utils import (validate_email, is_valid_password)
 
 auth_bp = Blueprint('auth', __name__)
 logger = logging.getLogger(__name__)
