@@ -1,0 +1,1705 @@
+# Italian translations for PROJECT.
+# Copyright (C) 2025 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2025-04-30 01:30+0200\n"
+"PO-Revision-Date: 2025-04-29 09:44+0200\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: it\n"
+"Language-Team: it <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: app/api.py:31 app/api.py:53 app/api.py:101 app/api.py:126 app/api.py:473
+#: app/views.py:84
+msgid "Invalid UUID format"
+msgstr "Formato UUID non valido"
+
+#: app/api.py:37 app/api.py:59 app/api.py:107 app/api.py:132 app/api.py:190
+#: app/api.py:233 app/api.py:299 app/api.py:479 app/views.py:90
+#: app/views.py:424
+msgid "Patient not found"
+msgstr "Paziente non trovato"
+
+#: app/api.py:41 app/api.py:63 app/api.py:111 app/api.py:136 app/api.py:194
+#: app/api.py:237 app/api.py:303 app/views.py:428
+msgid "You are not authorized to access this patient"
+msgstr "Non sei autorizzato ad accedere a questo paziente"
+
+#: app/api.py:67
+msgid "Patient does not have a health platform connection"
+msgstr "Il paziente non è connesso alla piattaforma sanitaria"
+
+#: app/api.py:93 app/views.py:371
+msgid "Failed to retrieve health platform data"
+msgstr "Impossibile recuperare i dati dalla piattaforma sanitaria"
+
+#: app/api.py:140 app/api.py:284 app/api.py:375 app/auth.py:126
+msgid "Missing JSON in request"
+msgstr "JSON mancante nella richiesta"
+
+#: app/api.py:145 app/views.py:387
+msgid "Note content cannot be empty"
+msgstr "Il contenuto della nota non può essere vuoto"
+
+#: app/api.py:167 app/views.py:403
+msgid "Note added successfully"
+msgstr "Nota aggiunta con successo"
+
+#: app/api.py:174 app/views.py:409
+msgid "An error occurred while adding the note"
+msgstr "Si è verificato un errore durante l'aggiunta della nota"
+
+#: app/api.py:184
+msgid "Note not found"
+msgstr "Nota non trovata"
+
+#: app/api.py:198 app/views.py:432
+msgid "You can only delete notes you have created"
+msgstr "Puoi eliminare solo le note che hai creato"
+
+#: app/api.py:216 app/views.py:449
+msgid "Note deleted successfully"
+msgstr "Nota eliminata con successo"
+
+#: app/api.py:223 app/views.py:456
+msgid "An error occurred while deleting the note"
+msgstr "Si è verificato un errore durante l'eliminazione della nota"
+
+#: app/api.py:253 app/api.py:322 app/api.py:399
+msgid "Invalid start_date format. Use ISO format (YYYY-MM-DD)"
+msgstr "Formato data_inizio non valido. Usa il formato ISO (YYYY-MM-DD)"
+
+#: app/api.py:260 app/api.py:327 app/api.py:406
+msgid "Invalid end_date format. Use ISO format (YYYY-MM-DD)"
+msgstr "Formato data_fine non valido. Usa il formato ISO (YYYY-MM-DD)"
+
+#: app/api.py:268 app/api.py:313 app/api.py:385 app/observations.py:175
+#, python-format
+msgid "Invalid vital sign type. Must be one of: %(types)s"
+msgstr "Tipo di parametro vitale non valido. Deve essere uno tra: %(types)s"
+
+#: app/api.py:292
+#, python-format
+msgid "Missing required field: %(field)s"
+msgstr "Campo obbligatorio mancante: %(field)s"
+
+#: app/api.py:331 app/api.py:410 app/observations.py:200
+msgid "Start date must be before end date"
+msgstr "La data di inizio deve essere precedente alla data di fine"
+
+#: app/api.py:350
+msgid "Observation added successfully"
+msgstr "Osservazione aggiunta con successo"
+
+#: app/api.py:357
+msgid "An error occurred while adding the observation"
+msgstr "Si è verificato un errore durante l'aggiunta dell'osservazione"
+
+#: app/api.py:367 app/api.py:437
+msgid "Observation not found"
+msgstr "Osservazione non trovata"
+
+#: app/api.py:371
+msgid "You are not authorized to modify this observation"
+msgstr "Non sei autorizzato a modificare questa osservazione"
+
+#: app/api.py:420
+msgid "Observation updated successfully"
+msgstr "Osservazione aggiornata con successo"
+
+#: app/api.py:427
+msgid "An error occurred while updating the observation"
+msgstr "Si è verificato un errore durante l'aggiornamento dell'osservazione"
+
+#: app/api.py:441
+msgid "You are not authorized to delete this observation"
+msgstr "Non sei autorizzato a eliminare questa osservazione"
+
+#: app/api.py:451 app/observations.py:279
+msgid "Observation deleted successfully"
+msgstr "Osservazione eliminata con successo"
+
+#: app/api.py:457 app/observations.py:285
+msgid "An error occurred while deleting the observation"
+msgstr "Si è verificato un errore durante l'eliminazione dell'osservazione"
+
+#: app/api.py:467 app/views.py:78
+msgid "Patient UUID is required"
+msgstr "UUID del paziente obbligatorio"
+
+#: app/api.py:483 app/views.py:94
+msgid "Patient is already associated with your account"
+msgstr "Il paziente è già associato al tuo account"
+
+#: app/api.py:495 app/views.py:106
+msgid "Patient imported successfully"
+msgstr "Paziente importato con successo"
+
+#: app/api.py:501 app/views.py:112
+msgid "A database error occurred while importing the patient"
+msgstr "Si è verificato un errore di database durante l'importazione del paziente"
+
+#: app/api.py:505 app/views.py:116
+msgid "An error occurred while importing the patient"
+msgstr "Si è verificato un errore durante l'importazione del paziente"
+
+#: app/audit.py:182
+#, python-format
+msgid "Error during action filtering: %(error)s"
+msgstr "Errore durante il filtraggio delle azioni: %(error)s"
+
+#: app/audit.py:226
+#, python-format
+msgid "Error during entity filtering: %(error)s"
+msgstr "Errore durante il filtraggio delle entità: %(error)s"
+
+#: app/auth.py:23 app/reports.py:319
+msgid "Email"
+msgstr "Email"
+
+#: app/auth.py:24 app/templates/profile.html:17 app/templates/register.html:23
+msgid "First Name"
+msgstr "Nome"
+
+#: app/auth.py:25 app/templates/profile.html:26 app/templates/register.html:33
+msgid "Last Name"
+msgstr "Cognome"
+
+#: app/auth.py:26 app/reports.py:318 app/templates/profile.html:45
+msgid "Specialty"
+msgstr "Specializzazione"
+
+#: app/auth.py:27 app/templates/login.html:27 app/templates/register.html:48
+msgid "Password"
+msgstr "Password"
+
+#: app/auth.py:29
+msgid "Password must be at least 8 characters long"
+msgstr "La password deve contenere almeno 8 caratteri"
+
+#: app/auth.py:32 app/templates/register.html:59
+msgid "Confirm Password"
+msgstr "Conferma Password"
+
+#: app/auth.py:47
+msgid "Passwords do not match"
+msgstr "Le password non corrispondono"
+
+#: app/auth.py:56
+msgid "An account with this Email already exists"
+msgstr "Un account con questa email esiste già"
+
+#: app/auth.py:76
+msgid "Registration completed. Now you can access"
+msgstr "Registrazione completata. Ora puoi accedere"
+
+#: app/auth.py:82
+msgid "An error occurred. Please try again"
+msgstr "Errore. Per favore riprova"
+
+#: app/auth.py:96
+msgid "Please provide both email and password"
+msgstr "Inserire sia l'email che la password"
+
+#: app/auth.py:100
+msgid "Invalid email format"
+msgstr "Formato email non valido"
+
+#: app/auth.py:110 app/auth.py:137
+msgid "Invalid email or password"
+msgstr "Email o password non validi"
+
+#: app/auth.py:119
+msgid "You have been disconnected"
+msgstr "Sei stato disconnesso"
+
+#: app/auth.py:132
+msgid "Missing email or password"
+msgstr "Email o password mancanti"
+
+#: app/auth.py:146
+msgid "Login successful"
+msgstr "Login effettuato con successo"
+
+#: app/auth.py:173
+msgid "Doctor not found"
+msgstr "Medico non trovato"
+
+#: app/auth.py:187
+msgid "Authentication required"
+msgstr "Autenticazione richiesta"
+
+#: app/health_platforms.py:912
+msgid "You are not authorized to manage this patient"
+msgstr "Non sei autorizzato a gestire questo paziente"
+
+#: app/health_platforms.py:921
+msgid "Invalid platform name"
+msgstr "Nome piattaforma non valido"
+
+#: app/health_platforms.py:939
+msgid "Error generating platform link"
+msgstr "Errore durante la generazione del link alla piattaforma"
+
+#: app/health_platforms.py:945 app/health_platforms.py:1356
+msgid "An error occurred"
+msgstr "Si è verificato un errore"
+
+#: app/health_platforms.py:963 app/health_platforms.py:1020
+msgid "Invalid or expired link"
+msgstr "Link non valido o scaduto"
+
+#: app/health_platforms.py:966 app/health_platforms.py:1023
+msgid "The link you are trying to use is invalid or has expired"
+msgstr "Il link che stai cercando di utilizzare non è valido o è scaduto"
+
+#: app/health_platforms.py:970 app/health_platforms.py:1081
+msgid "This link has expired"
+msgstr "Questo link è scaduto"
+
+#: app/health_platforms.py:973
+msgid "The link you are trying to use has expired"
+msgstr "Il link che stai cercando di utilizzare è scaduto"
+
+#: app/health_platforms.py:978 app/health_platforms.py:1089
+msgid "This link has already been used"
+msgstr "Questo link è già stato utilizzato"
+
+#: app/health_platforms.py:981
+msgid "The link you are trying to use has already been used"
+msgstr "Il link che stai cercando di utilizzare è già stato usato"
+
+#: app/health_platforms.py:1010
+msgid "Invalid session"
+msgstr "Sessione non valida"
+
+#: app/health_platforms.py:1013
+msgid "Your session is invalid or has expired"
+msgstr "La tua sessione non è valida o è scaduta"
+
+#: app/health_platforms.py:1030 app/health_platforms.py:1131
+#: app/health_platforms.py:1349
+msgid "Unsupported platform"
+msgstr "Piattaforma non supportata"
+
+#: app/health_platforms.py:1033
+msgid "The platform you selected is not supported"
+msgstr "La piattaforma selezionata non è supportata"
+
+#: app/health_platforms.py:1047
+#, python-format
+msgid "Authentication failed: %(error)s"
+msgstr "Autenticazione fallita: %(error)s"
+
+#: app/health_platforms.py:1050
+msgid "The health platform authentication failed"
+msgstr "L'autenticazione alla piattaforma sanitaria è fallita"
+
+#: app/health_platforms.py:1056
+msgid "No authorization code received"
+msgstr "Nessun codice di autorizzazione ricevuto"
+
+#: app/health_platforms.py:1059
+msgid "No authorization code was received from the health platform"
+msgstr ""
+"Nessun codice di autorizzazione è stato ricevuto dalla piattaforma "
+"sanitaria"
+
+#: app/health_platforms.py:1064
+msgid "Invalid state parameter"
+msgstr "Parametro di stato non valido"
+
+#: app/health_platforms.py:1067
+msgid "The state parameter is missing from the callback"
+msgstr "Il parametro di stato è mancante dal callback"
+
+#: app/health_platforms.py:1074
+msgid "Invalid link"
+msgstr "Link non valido"
+
+#: app/health_platforms.py:1077
+msgid "The link is invalid"
+msgstr "Il link non è valido"
+
+#: app/health_platforms.py:1084
+msgid "The link has expired"
+msgstr "Il link è scaduto"
+
+#: app/health_platforms.py:1092
+msgid "The link has already been used"
+msgstr "Il link è già stato utilizzato"
+
+#: app/health_platforms.py:1103
+msgid "Failed to exchange authorization code for token"
+msgstr "Impossibile scambiare il codice di autorizzazione per un token"
+
+#: app/health_platforms.py:1106
+msgid "Failed to exchange the authorization code for a token"
+msgstr "Impossibile scambiare il codice di autorizzazione per un token"
+
+#: app/health_platforms.py:1119
+msgid "Successfully connected to Fitbit"
+msgstr "Connessione a Fitbit riuscita"
+
+#: app/health_platforms.py:1122
+msgid "Your Fitbit account has been successfully connected"
+msgstr "Il tuo account Fitbit è stato connesso con successo"
+
+#: app/health_platforms.py:1125
+msgid "Failed to save token data"
+msgstr " Errore durante il salvataggio dei dati del token"
+
+#: app/health_platforms.py:1128
+msgid "Failed to save the token data"
+msgstr "Errore durante il salvataggio dei dati del token"
+
+#: app/health_platforms.py:1134
+msgid "The platform is not supported"
+msgstr "La piattaforma non è supportata"
+
+#: app/health_platforms.py:1156 app/health_platforms.py:1316
+msgid "You are not authorized to view this patient's data"
+msgstr "Non sei autorizzato a visualizzare i dati di questo paziente"
+
+#: app/health_platforms.py:1205
+msgid "Token has expired or been revoked"
+msgstr "Il token è scaduto o è stato revocato"
+
+#: app/health_platforms.py:1210
+msgid "Incomplete token data"
+msgstr "Dati del token incompleti"
+
+#: app/health_platforms.py:1215
+msgid "Not connected to any health platform"
+msgstr "Non connesso a nessuna piattaforma sanitaria"
+
+#: app/health_platforms.py:1221
+msgid "Error checking connection status"
+msgstr "Errore durante la verifica dello stato della connessione"
+
+#: app/health_platforms.py:1244
+msgid "You are not authorized to manage this patient's connections"
+msgstr "Non sei autorizzato a gestire le connessioni di questo paziente"
+
+#: app/health_platforms.py:1253
+msgid "Invalid platform specified"
+msgstr "Piattaforma specificata non valida"
+
+#: app/health_platforms.py:1260
+msgid "Patient is not connected to the specified platform"
+msgstr "Il paziente non è connesso alla piattaforma specificata"
+
+#: app/health_platforms.py:1278
+msgid "Successfully disconnected from health platform"
+msgstr "Disconnessione dalla piattaforma sanitaria avvenuta con successo"
+
+#: app/health_platforms.py:1284
+msgid "Error disconnecting from health platform"
+msgstr "Errore durante la disconnessione dalla piattaforma sanitaria"
+
+#: app/health_platforms.py:1323
+msgid "Patient is not connected to any health platform"
+msgstr "Il paziente non è connesso a nessuna piattaforma sanitaria"
+
+#: app/observations.py:23 app/observations.py:90
+msgid "Non sei autorizzato ad accedere a questo paziente"
+msgstr "Non sei autorizzato ad accedere a questo paziente"
+
+#: app/observations.py:39 app/observations.py:109
+msgid "Formato data inizio non valido. Usa il formato ISO (YYYY-MM-DD)"
+msgstr "Formato data inizio non valido. Usa il formato ISO (YYYY-MM-DD)"
+
+#: app/observations.py:46 app/observations.py:114
+msgid "Formato data fine non valido. Usa il formato ISO (YYYY-MM-DD)"
+msgstr "Formato data fine non valido. Usa il formato ISO (YYYY-MM-DD)"
+
+#: app/observations.py:54 app/observations.py:100
+#, python-format
+msgid "Tipo di parametro vitale non valido. Deve essere uno tra: %(types)s"
+msgstr "Tipo di parametro vitale non valido. Deve essere uno tra: %(types)s"
+
+#: app/observations.py:70 app/observations.py:165
+msgid "Dati JSON mancanti nella richiesta"
+msgstr "Dati JSON mancanti nella richiesta"
+
+#: app/observations.py:79
+#, python-format
+msgid "Campo obbligatorio mancante: %(field)s"
+msgstr "Campo obbligatorio mancante: %(field)s"
+
+#: app/observations.py:86
+msgid "Paziente non trovato"
+msgstr "Paziente non trovato"
+
+#: app/observations.py:118
+msgid "La data di inizio deve essere precedente alla data di fine"
+msgstr "La data di inizio deve essere precedente alla data di fine"
+
+#: app/observations.py:143
+msgid "Osservazione aggiunta con successo"
+msgstr "Osservazione aggiunta con successo"
+
+#: app/observations.py:150
+msgid "Si è verificato un errore durante l'aggiunta dell'osservazione"
+msgstr "Si è verificato un errore durante l'aggiunta dell'osservazione"
+
+#: app/observations.py:161
+msgid "Non sei autorizzato a modificare questa osservazione"
+msgstr "Non sei autorizzato a modificare questa osservazione"
+
+#: app/observations.py:189
+msgid "Invalid start date format. Use ISO format (YYYY-MM-DD)"
+msgstr "Formato data iniziale non valido. Usa il formato ISO (YYYY-MM-DD)"
+
+#: app/observations.py:196
+msgid "Invalid end date format. Use ISO format (YYYY-MM-DD)"
+msgstr "Formato data finale non valido. Usa il formato ISO (YYYY-MM-DD)"
+
+#: app/observations.py:224
+msgid "Osservazione aggiornata con successo"
+msgstr "Osservazione aggiornata con successo"
+
+#: app/observations.py:231
+msgid "Si è verificato un errore durante l'aggiornamento dell'osservazione"
+msgstr "Si è verificato un errore durante l'aggiornamento dell'osservazione"
+
+#: app/observations.py:242
+msgid "Non sei autorizzato a eliminare questa osservazione"
+msgstr "Non sei autorizzato a eliminare questa osservazione"
+
+#: app/reports.py:271
+msgid "Specific Report"
+msgstr "Report Specifico"
+
+#: app/reports.py:275
+msgid "Generated on"
+msgstr "Generato il"
+
+#: app/reports.py:296 app/templates/patient_detail.html:31
+msgid "Patient Information"
+msgstr "Informazioni Paziente"
+
+#: app/reports.py:300 app/reports.py:317 app/templates/dashboard.html:114
+#: app/templates/patients.html:33 app/templates/patients.html:125
+#: app/templates/patients.html:280
+msgid "Name"
+msgstr "Nome"
+
+#: app/reports.py:301 app/templates/patients.html:282
+msgid "Date of Birth"
+msgstr "Data di Nascita"
+
+#: app/reports.py:302 app/templates/patients.html:68
+#: app/templates/patients.html:163
+msgid "Gender"
+msgstr "Sesso"
+
+#: app/reports.py:302
+msgid "Not specified"
+msgstr "Non specificato"
+
+#: app/reports.py:303
+msgid "Contact"
+msgstr "Contatto"
+
+#: app/reports.py:303
+msgid "Not provided"
+msgstr "Non fornito"
+
+#: app/reports.py:313
+msgid "Attending Physician"
+msgstr "Medico Curante"
+
+#: app/reports.py:318
+msgid "General Practice"
+msgstr "Medicina Generale"
+
+#: app/reports.py:330
+msgid "Summary"
+msgstr "Riepilogo"
+
+#: app/reports.py:337
+msgid "Clinical Notes"
+msgstr "Note Cliniche"
+
+#: app/reports.py:366 app/templates/vitals.html:3 app/templates/vitals.html:15
+#: app/templates/vitals.html:421
+msgid "Vital Signs"
+msgstr "Parametri Vitali"
+
+#: app/reports.py:419 app/templates/specific_report_form.html:294
+#: app/templates/vitals.html:454
+msgid "1 Day"
+msgstr "1 Giorno"
+
+#: app/reports.py:421 app/templates/specific_report_form.html:303
+#: app/templates/vitals.html:462
+msgid "7 Days"
+msgstr "7 Giorni"
+
+#: app/reports.py:423 app/templates/specific_report_form.html:312
+#: app/templates/vitals.html:470
+msgid "1 Month"
+msgstr "1 Mese"
+
+#: app/reports.py:425 app/templates/specific_report_form.html:321
+#: app/templates/vitals.html:478
+msgid "3 Months"
+msgstr "3 Mesi"
+
+#: app/reports.py:427
+msgid "days"
+msgstr "giorni"
+
+#: app/reports.py:455 app/reports.py:460 app/reports.py:463
+msgid "No vital data available for this period."
+msgstr "Nessun parametro vitale disponibile per questo periodo"
+
+#: app/reports.py:471 app/templates/specific_report_form.html:183
+msgid "Observations"
+msgstr "Osservazioni"
+
+#: app/reports.py:523
+msgid "Page"
+msgstr "Pagina"
+
+#: app/utils.py:23
+msgid "The password must be at least 8 characters long"
+msgstr "La password deve contenere almeno 8 caratteri"
+
+#: app/utils.py:26
+msgid "The password must contain at least one uppercase letter"
+msgstr "La password deve contenere almeno una lettera maiuscola"
+
+#: app/utils.py:29
+msgid "The password must contain at least one lowercase letter"
+msgstr "La password deve contenere almeno una lettera minuscola"
+
+#: app/utils.py:32
+msgid "The password must contain at least one digit"
+msgstr "La password deve contenere almeno una cifra"
+
+#: app/utils.py:35
+msgid "The password must contain at least one special character"
+msgstr "La password deve contenere almeno un carattere speciale"
+
+#: app/utils.py:37
+msgid "The password is strong"
+msgstr "La password è forte"
+
+#: app/utils.py:52
+msgid "Invalid date format. Please use YYYY-MM-DD"
+msgstr "Formato data non valido. Utilizzare YYYY-MM-DD"
+
+#: app/views.py:131 app/views.py:220
+msgid "Name, surname and date of birth are mandatory fields"
+msgstr "Nome, cognome e data di nascita sono campi obbligatori"
+
+#: app/views.py:160
+#, python-format
+msgid "Patient %(first_name)s %(last_name)s successfully created with ID %(uuid)s"
+msgstr "Paziente %(first_name)s %(last_name)s creato con successo con ID %(uuid)s"
+
+#: app/views.py:170 app/views.py:250
+msgid "Invalid date format. Use YYYY-MM-DD"
+msgstr "Formato data non valido. Utilizzare YYYY-MM-DD"
+
+#: app/views.py:174
+msgid "An error occurred while creating the patient"
+msgstr "Si è verificato un errore durante la creazione del paziente"
+
+#: app/views.py:186
+msgid "You are not authorized to view this patient."
+msgstr "Non sei autorizzato a visualizzare questo paziente"
+
+#: app/views.py:207
+msgid "You are not authorized to modify this patient."
+msgstr "Non sei autorizzato a modificare questo paziente"
+
+#: app/views.py:244
+msgid "Patient information updated successfully"
+msgstr "Paziente aggiornato con successo"
+
+#: app/views.py:254
+msgid "An error occurred while updating the patient"
+msgstr "Si è verificato un errore durante l'aggiornamento del paziente"
+
+#: app/views.py:265
+msgid "You are not authorized to delete this patient."
+msgstr "Non sei autorizzato ad eliminare questo paziente"
+
+#: app/views.py:302
+msgid "Patient successfully removed"
+msgstr "Paziente rimosso con successo"
+
+#: app/views.py:308
+msgid "An error occurred while removing the patient"
+msgstr "Si è verificato un errore durante la rimozione del paziente"
+
+#: app/views.py:319
+msgid "You are not authorized to view this patient"
+msgstr "Non sei autorizzato a visualizzare questo paziente"
+
+#: app/views.py:342
+msgid "Not authorized"
+msgstr "Non autorizzato"
+
+#: app/views.py:350
+msgid "No health platform connection"
+msgstr "Nessuna connessione alla piattaforma sanitaria"
+
+#: app/views.py:381
+msgid "You are not allowed to add notes for this patient"
+msgstr "Non sei autorizzato ad aggiungere note per questo paziente"
+
+#: app/views.py:477
+msgid "Profile updated successfully"
+msgstr "Profilo aggiornato con successo"
+
+#: app/views.py:482
+msgid "The current password is incorrect"
+msgstr "La password attuale non è corretta"
+
+#: app/views.py:484
+msgid "New passwords do not match"
+msgstr "Le nuove password non corrispondono"
+
+#: app/views.py:490
+msgid "Password updated successfully"
+msgstr "Password aggiornata con successo"
+
+#: app/views.py:502
+msgid "You are not authorized to generate reports for this patient"
+msgstr "Non sei autorizzato a generare report per questo paziente"
+
+#: app/views.py:598
+#, python-format
+msgid "Error generating specific report: %(error)s"
+msgstr "Errore durante la generazione del report specifico: %(error)s"
+
+#: app/templates/audit_logs.html:2 app/templates/audit_logs.html:5
+#: app/templates/base.html:60 app/templates/dashboard.html:60
+msgid "Audit Logs"
+msgstr "Log di Audit"
+
+#: app/templates/audit_logs.html:2 app/templates/base-no-session.html:7
+#: app/templates/base-no-session.html:31 app/templates/base.html:7
+#: app/templates/base.html:31 app/templates/patient_detail.html:2
+#: app/templates/patients.html:10 app/templates/profile.html:2
+#: app/templates/register.html:2
+msgid "VitaLink"
+msgstr "VitaLink"
+
+#: app/templates/audit_logs.html:9 app/templates/patients.html:212
+msgid "Back to Dashboard"
+msgstr "Ritorna a Dashboard"
+
+#: app/templates/audit_logs.html:17
+msgid "Filter Logs"
+msgstr "Filtra Log"
+
+#: app/templates/audit_logs.html:27 app/templates/vitals.html:319
+msgid "Start Date"
+msgstr "Data Inizio"
+
+#: app/templates/audit_logs.html:37 app/templates/vitals.html:329
+msgid "End Date"
+msgstr "Data Fine"
+
+#: app/templates/audit_logs.html:47
+msgid "Action Type"
+msgstr "Tipo Azione"
+
+#: app/templates/audit_logs.html:49
+msgid "All Actions"
+msgstr "Tutte le Azioni"
+
+#: app/templates/audit_logs.html:52
+msgid "Create"
+msgstr "Crea"
+
+#: app/templates/audit_logs.html:56
+msgid "Update"
+msgstr "Aggiorna"
+
+#: app/templates/audit_logs.html:60 app/templates/vitals.html:357
+msgid "Delete"
+msgstr "Elimina"
+
+#: app/templates/audit_logs.html:64
+msgid "View"
+msgstr "Visualizza"
+
+#: app/templates/audit_logs.html:68
+msgid "Export"
+msgstr "Esporta"
+
+#: app/templates/audit_logs.html:72
+msgid "Generate Link"
+msgstr "Genera Link"
+
+#: app/templates/audit_logs.html:76
+msgid "Connect"
+msgstr "Connetti"
+
+#: app/templates/audit_logs.html:80
+msgid "Disconnect"
+msgstr "Disconnetti"
+
+#: app/templates/audit_logs.html:84
+msgid "Sync"
+msgstr "Sincronizza"
+
+#: app/templates/audit_logs.html:91 app/templates/audit_logs.html:244
+msgid "Entity Type"
+msgstr "Tipo Entità"
+
+#: app/templates/audit_logs.html:93
+msgid "All Entities"
+msgstr "Tutte le Entità"
+
+#: app/templates/audit_logs.html:96 app/templates/audit_logs.html:139
+#: app/templates/audit_logs.html:180 app/templates/audit_logs.html:253
+#: app/templates/dashboard.html:167
+msgid "Patient"
+msgstr "Paziente"
+
+#: app/templates/audit_logs.html:100
+msgid "Note"
+msgstr "Nota"
+
+#: app/templates/audit_logs.html:104
+msgid "Report"
+msgstr "Report"
+
+#: app/templates/audit_logs.html:108 app/templates/vitals.html:32
+msgid "Health Platform"
+msgstr "Piattaforma Sanitaria"
+
+#: app/templates/audit_logs.html:112
+msgid "Health Link"
+msgstr "Health Link"
+
+#: app/templates/audit_logs.html:116 app/templates/vitals.html:308
+msgid "Observation"
+msgstr "Osservazione"
+
+#: app/templates/audit_logs.html:124 app/templates/audit_logs.html:236
+msgid "Doctor"
+msgstr "Dottore"
+
+#: app/templates/audit_logs.html:126
+msgid "All Doctors"
+msgstr "Tutti i Dottori"
+
+#: app/templates/audit_logs.html:141
+msgid "All Patients"
+msgstr "Tutti i Pazienti"
+
+#: app/templates/audit_logs.html:154
+msgid "Clear Filters"
+msgstr "Rimuovi Filtri"
+
+#: app/templates/audit_logs.html:156
+msgid "Apply Filters"
+msgstr "Applica Filtri"
+
+#: app/templates/audit_logs.html:166
+msgid "Audit History"
+msgstr "Cronologia Audit"
+
+#: app/templates/audit_logs.html:168
+msgid "Records"
+msgstr "Records"
+
+#: app/templates/audit_logs.html:176 app/templates/vitals.html:259
+msgid "Date & Time"
+msgstr "Data & Ora"
+
+#: app/templates/audit_logs.html:177
+msgid "User"
+msgstr "Utente"
+
+#: app/templates/audit_logs.html:178 app/templates/audit_logs.html:240
+#: app/templates/dashboard.html:165
+msgid "Action"
+msgstr "Azione"
+
+#: app/templates/audit_logs.html:179 app/templates/dashboard.html:166
+msgid "Entity"
+msgstr "Entità"
+
+#: app/templates/audit_logs.html:181 app/templates/audit_logs.html:258
+msgid "IP Address"
+msgstr "Indirizzo IP"
+
+#: app/templates/audit_logs.html:182 app/templates/audit_logs.html:263
+msgid "Details"
+msgstr "Dettagli"
+
+#: app/templates/audit_logs.html:214
+msgid "View Details"
+msgstr "Visualizza Dettagli"
+
+#: app/templates/audit_logs.html:224
+msgid "Audit Log Details"
+msgstr "Dettagli del Registro di Audit"
+
+#: app/templates/audit_logs.html:232
+msgid "Timestamp"
+msgstr "Timestamp"
+
+#: app/templates/audit_logs.html:248
+msgid "Entity ID"
+msgstr "ID Entità"
+
+#: app/templates/audit_logs.html:271
+msgid "Close"
+msgstr "Chiudi"
+
+#: app/templates/audit_logs.html:282
+msgid "No audit logs found matching your criteria"
+msgstr "Nessun registro di Audit trovato che corrisponda ai tuoi criteri"
+
+#: app/templates/audit_logs.html:297
+msgid "Actions by Type"
+msgstr "Azioni per Tipo"
+
+#: app/templates/audit_logs.html:309
+msgid "Entities by Type"
+msgstr "Entità per Tipo"
+
+#: app/templates/audit_logs.html:323
+msgid "Activity Timeline"
+msgstr "Azioni nel Tempo"
+
+#: app/templates/audit_logs.html:409 app/templates/audit_logs.html:477
+msgid "Number of Actions"
+msgstr "Numero di Azioni"
+
+#: app/templates/base-no-session.html:55 app/templates/base.html:78
+msgid "Language"
+msgstr "Lingua"
+
+#: app/templates/base-no-session.html:95 app/templates/base.html:146
+msgid "VitaLink. All rights reserved."
+msgstr "VitaLink. Tutti i diritti riservati"
+
+#: app/templates/base.html:48 app/templates/dashboard.html:2
+#: app/templates/dashboard.html:5
+msgid "Dashboard"
+msgstr "Dashboard"
+
+#: app/templates/base.html:54 app/templates/dashboard.html:13
+#: app/templates/patients.html:8 app/templates/patients.html:207
+msgid "Patients"
+msgstr "Pazienti"
+
+#: app/templates/base.html:106 app/templates/profile.html:2
+msgid "Profile"
+msgstr "Profilo"
+
+#: app/templates/base.html:114
+msgid "Logout"
+msgstr "Logout"
+
+#: app/templates/dashboard.html:2 app/templates/health_connect.html:2
+#: app/templates/health_connect_result.html:2 app/templates/login.html:2
+#: app/templates/vitals.html:3
+msgid "Healthcare Monitoring Platform"
+msgstr "Piattaforma di Monitoraggio Sanitario"
+
+#: app/templates/dashboard.html:15
+msgid "Total patients under your care"
+msgstr "Numero di pazienti sotto la tua cura"
+
+#: app/templates/dashboard.html:25
+msgid "View all patients"
+msgstr "Visualizza tutti i pazienti"
+
+#: app/templates/dashboard.html:35
+msgid "Quick Actions"
+msgstr "Azioni Rapide"
+
+#: app/templates/dashboard.html:36
+msgid "Manage your patients and vital signs"
+msgstr "Gestisci i tuoi pazienti e i parametri vitali"
+
+#: app/templates/dashboard.html:46
+msgid "New Patient"
+msgstr "Nuovo Paziente"
+
+#: app/templates/dashboard.html:50
+msgid "Search Patients"
+msgstr "Cerca Pazienti"
+
+#: app/templates/dashboard.html:61
+msgid "Monitor changes and actions in the system"
+msgstr "Monitora le modifiche e le azioni nel sistema"
+
+#: app/templates/dashboard.html:71
+msgid "View activity logs"
+msgstr "Visualizza i log delle attività"
+
+#: app/templates/dashboard.html:81
+msgid "System Status"
+msgstr "Stato del sistema"
+
+#: app/templates/dashboard.html:82 app/templates/vitals.html:96
+msgid "Active"
+msgstr "Attivo"
+
+#: app/templates/dashboard.html:83
+msgid "All systems operational"
+msgstr "Tutti i Sistemi Operativi"
+
+#: app/templates/dashboard.html:92 app/templates/patient_detail.html:62
+msgid "Last updated"
+msgstr "Ultimo aggiornamento"
+
+#: app/templates/dashboard.html:104
+msgid "Recent Patients"
+msgstr "Pazienti Recenti"
+
+#: app/templates/dashboard.html:107 app/templates/dashboard.html:158
+msgid "View All"
+msgstr "Visualizza Tutto"
+
+#: app/templates/dashboard.html:115 app/templates/patients.html:281
+msgid "ID"
+msgstr "ID"
+
+#: app/templates/dashboard.html:116 app/templates/patients.html:283
+msgid "Added"
+msgstr "Aggiunto"
+
+#: app/templates/dashboard.html:117 app/templates/patients.html:284
+msgid "Actions"
+msgstr "Azioni"
+
+#: app/templates/dashboard.html:140
+msgid "No patients added yet"
+msgstr "Nessun paziente aggiunto finora"
+
+#: app/templates/dashboard.html:155
+msgid "Recent Activities"
+msgstr "Attività Recenti"
+
+#: app/templates/dashboard.html:168
+msgid "Time"
+msgstr "Ora"
+
+#: app/templates/dashboard.html:197
+msgid "No activities recorded yet"
+msgstr "Nessuna attività registrata finora"
+
+#: app/templates/health_connect.html:2 app/templates/health_connect.html:5
+msgid "Connect Health Platform"
+msgstr "Connetti Piattaforma Sanitaria"
+
+#: app/templates/health_connect.html:12
+msgid "Health Connection Request"
+msgstr "Richiesta di Connessione alla Piattaforma Sanitaria"
+
+#: app/templates/health_connect.html:17
+msgid "Hello"
+msgstr "Ciao"
+
+#: app/templates/health_connect.html:18
+msgid ""
+"Your doctor has requested to connect to your health data to monitor your "
+"health status."
+msgstr ""
+"Il tuo medico ha richiesto di connettersi ai tuoi dati sanitari per "
+"monitorare il tuo stato di salute"
+
+#: app/templates/health_connect.html:22
+msgid "This link is valid for 24 hours and can only be used once."
+msgstr "Questo link è valido per 24 ore e può essere utilizzato solo una volta"
+
+#: app/templates/health_connect.html:24
+msgid "Expires at:"
+msgstr "Scade il:"
+
+#: app/templates/health_connect.html:37
+msgid "Connect your Fitbit account to share your health and activity data."
+msgstr ""
+"Connetti il tuo account Fitbit per condividere i tuoi dati sanitari e di "
+"attività"
+
+#: app/templates/health_connect.html:43
+msgid "Connect Fitbit"
+msgstr "Connetti Fitbit"
+
+#: app/templates/health_connect.html:60
+msgid ""
+"Connect your Google Health Connect account to share your health and "
+"activity data."
+msgstr ""
+"Connetti il tuo account Google Health Connect per condividere i tuoi dati"
+" sanitari e di attività"
+
+#: app/templates/health_connect.html:67
+msgid "Connect Google Health Connect"
+msgstr "Connetti Google Health Connect"
+
+#: app/templates/health_connect.html:83
+msgid "Connect your Apple Health account to share your health and activity data."
+msgstr ""
+"Connetti il tuo account Apple Health per condividere i tuoi dati sanitari"
+" e di attività"
+
+#: app/templates/health_connect.html:89
+msgid "Connect Apple Health"
+msgstr "Connetti Apple Health"
+
+#: app/templates/health_connect.html:98
+msgid "Privacy Information"
+msgstr "Informativa sulla Privacy"
+
+#: app/templates/health_connect.html:101
+msgid ""
+"Your health data will only be visible to your healthcare provider. You "
+"can revoke access at any time by disconnecting your account from your "
+"health platform settings."
+msgstr ""
+"I tuoi dati sanitari saranno visibili solo al tuo fornitore di assistenza"
+" sanitaria. Puoi revocare l'accesso in qualsiasi momento disconnettendo "
+"il tuo account dalle impostazioni della piattaforma connessa"
+
+#: app/templates/health_connect_result.html:2
+msgid "Health Platform Connection"
+msgstr "Connessione alla Piattaforma Sanitaria"
+
+#: app/templates/health_connect_result.html:7
+#: app/templates/health_connect_result.html:19
+msgid "Connection Successful"
+msgstr "Connessione Riuscita"
+
+#: app/templates/health_connect_result.html:9
+#: app/templates/health_connect_result.html:21
+msgid "Connection Failed"
+msgstr "Connessione Fallita"
+
+#: app/templates/health_connect_result.html:30
+msgid "Your health platform was successfully connected!"
+msgstr "La tua piattaforma sanitaria è stata connessa con successo!"
+
+#: app/templates/health_connect_result.html:32
+msgid "You can now close this window."
+msgstr "Adesso puoi chiudere questa finestra"
+
+#: app/templates/health_connect_result.html:37
+msgid "There was an error connecting your health platform"
+msgstr "C'è stato un errore durante la connessione alla piattaforma sanitaria"
+
+#: app/templates/health_connect_result.html:39
+msgid "Please try again or contact your healthcare provider."
+msgstr "Riprova o contatta il tuo fornitore di assistenza sanitaria"
+
+#: app/templates/health_connect_result.html:42
+msgid "Go Back"
+msgstr "Torna Indietro"
+
+#: app/templates/login.html:2 app/templates/login.html:40
+msgid "Login"
+msgstr "Accedi"
+
+#: app/templates/login.html:10
+msgid "Healthcare Monitor"
+msgstr "Monitor Sanitario"
+
+#: app/templates/login.html:14 app/templates/register.html:15
+msgid "Email address"
+msgstr "Indirizzo Email"
+
+#: app/templates/login.html:47
+msgid "New doctor? Register here"
+msgstr "Nuovo medico? Registrati Qui"
+
+#: app/templates/login.html:51
+msgid "This is a secure platform for healthcare professionals only."
+msgstr "Questa è una piattaforma sicura solo per professionisti sanitari"
+
+#: app/templates/login.html:53
+msgid "Unauthorized access is strictly prohibited."
+msgstr "L'accesso non autorizzato è severamente proibito"
+
+#: app/templates/patient_detail.html:10
+msgid "DOB"
+msgstr "DDN"
+
+#: app/templates/patient_detail.html:11
+msgid "Age"
+msgstr "Età"
+
+#: app/templates/patient_detail.html:16 app/templates/patients.html:21
+msgid "Back to Patients"
+msgstr "Ritorna a Pazienti"
+
+#: app/templates/patient_detail.html:36
+msgid "Contact Information"
+msgstr "Numero di Telefono"
+
+#: app/templates/patient_detail.html:42
+msgid "No contact number"
+msgstr "Nessun numero di telefono"
+
+#: app/templates/patient_detail.html:48 app/templates/patients.html:92
+#: app/templates/patients.html:190
+msgid "Address"
+msgstr "Indirizzo"
+
+#: app/templates/patient_detail.html:53
+msgid "No address provided"
+msgstr "Nessun indirizzo fornito"
+
+#: app/templates/patient_detail.html:58
+msgid "Registration Information"
+msgstr "Informazioni di Registrazione"
+
+#: app/templates/patient_detail.html:60
+msgid "Added on"
+msgstr "Aggiunto il"
+
+#: app/templates/patient_detail.html:73
+msgid "Patient Actions"
+msgstr "Azioni Paziente"
+
+#: app/templates/patient_detail.html:82
+msgid "View Vital Signs"
+msgstr "Visualizza Parametri Vitali"
+
+#: app/templates/patient_detail.html:86
+msgid "Edit Patient Information"
+msgstr "Modifica Informazioni Paziente"
+
+#: app/templates/patient_detail.html:92
+msgid "Delete Patient Record"
+msgstr "Elimina Record Paziente"
+
+#: app/templates/patient_detail.html:105
+#: app/templates/specific_report_form.html:139 app/templates/vitals.html:399
+msgid "Medical Notes"
+msgstr "Note mediche"
+
+#: app/templates/patient_detail.html:110 app/templates/patient_detail.html:157
+msgid "Add Note"
+msgstr "Aggiungi Nota"
+
+#: app/templates/patient_detail.html:127 app/templates/patient_detail.html:213
+msgid "Delete Note"
+msgstr "Elimina Nota"
+
+#: app/templates/patient_detail.html:138 app/templates/patient_detail.html:276
+msgid "No notes have been added yet"
+msgstr "Nessuna nota è stata aggiunta finora"
+
+#: app/templates/patient_detail.html:142 app/templates/patient_detail.html:278
+msgid "Add First Note"
+msgstr "Aggiungi Prima Nota"
+
+#: app/templates/patient_detail.html:173
+msgid "Note Content"
+msgstr "Contenuto Nota"
+
+#: app/templates/patient_detail.html:177
+msgid ""
+"Enter your medical observations, treatment plans, or other relevant "
+"information."
+msgstr ""
+"Inserisci le tue osservazioni mediche, piani di trattamento o altre "
+"informazioni pertinenti"
+
+#: app/templates/patient_detail.html:184 app/templates/patient_detail.html:212
+#: app/templates/patients.html:97 app/templates/patients.html:195
+#: app/templates/patients.html:254 app/templates/vitals.html:351
+#: app/templates/vitals.html:356 app/templates/vitals.html:511
+msgid "Cancel"
+msgstr "Annulla"
+
+#: app/templates/patient_detail.html:185
+msgid "Save Note"
+msgstr "Salva Nota"
+
+#: app/templates/patient_detail.html:199
+msgid "Confirm Deletion"
+msgstr "Conferma Eliminazione"
+
+#: app/templates/patient_detail.html:208
+msgid "Are you sure you want to delete this note?"
+msgstr "Sei sicuro di voler eliminare questa nota?"
+
+#: app/templates/patients.html:4 app/templates/patients.html:17
+#: app/templates/patients.html:338
+msgid "Add New Patient"
+msgstr "Aggiungi Nuovo Paziente"
+
+#: app/templates/patients.html:6 app/templates/patients.html:109
+#: app/templates/patients.html:313
+msgid "Edit Patient"
+msgstr "Modifica Paziente"
+
+#: app/templates/patients.html:40 app/templates/patients.html:133
+msgid "Name is mandatory"
+msgstr "Il nome è obbligatorio"
+
+#: app/templates/patients.html:44 app/templates/patients.html:137
+msgid "Surname"
+msgstr "Cognome"
+
+#: app/templates/patients.html:51 app/templates/patients.html:145
+msgid "Surname is mandatory"
+msgstr "Il cognome è obbligatorio"
+
+#: app/templates/patients.html:57 app/templates/patients.html:151
+msgid "Date of birth"
+msgstr "Data di Nascita"
+
+#: app/templates/patients.html:64 app/templates/patients.html:159
+msgid "Date of birth is mandatory"
+msgstr "La data di nascita è obbligatoria"
+
+#: app/templates/patients.html:72 app/templates/patients.html:166
+msgid "Male"
+msgstr "Maschio"
+
+#: app/templates/patients.html:73 app/templates/patients.html:167
+msgid "Female"
+msgstr "Femmina"
+
+#: app/templates/patients.html:74 app/templates/patients.html:168
+msgid "Other"
+msgstr "Altro"
+
+#: app/templates/patients.html:75 app/templates/patients.html:171
+msgid "Prefer not to say"
+msgstr "Preferisco non rispondere"
+
+#: app/templates/patients.html:82
+msgid "Contact Number"
+msgstr "Numero di Telefono"
+
+#: app/templates/patients.html:99
+msgid "Save Patient"
+msgstr "Salva Paziente"
+
+#: app/templates/patients.html:113 app/templates/vitals.html:22
+msgid "Back to Patient"
+msgstr "Ritorna a Paziente"
+
+#: app/templates/patients.html:179
+msgid "Phone Number"
+msgstr "Numero di Telefono"
+
+#: app/templates/patients.html:197
+msgid "Update Patient"
+msgstr "Aggiorna Paziente"
+
+#: app/templates/patients.html:216
+msgid "Add new Patient"
+msgstr "Aggiungi nuovo Paziente"
+
+#: app/templates/patients.html:219 app/templates/patients.html:232
+msgid "Import Patient by UUID"
+msgstr "Importa Paziente tramite UUID"
+
+#: app/templates/patients.html:242
+msgid "Patient UUID"
+msgstr "UUID paziente"
+
+#: app/templates/patients.html:247
+msgid "Enter patient UUID..."
+msgstr "Inserisci UUID paziente..."
+
+#: app/templates/patients.html:250
+msgid ""
+"Enter the UUID of the patient you want to import. The patient will be "
+"linked to your account."
+msgstr ""
+"Inserisci l'UUID del paziente che desideri importare. Il paziente sarà "
+"collegato al tuo account"
+
+#: app/templates/patients.html:256
+msgid "Import Patient"
+msgstr "Importa Paziente"
+
+#: app/templates/patients.html:274
+msgid "Search by name or ID..."
+msgstr "Cerca per nome o ID..."
+
+#: app/templates/patients.html:303
+msgid "View Patient"
+msgstr "Visualizza Paziente"
+
+#: app/templates/patients.html:308
+msgid "View Vitals"
+msgstr "Visualizza Parametri Vitali"
+
+#: app/templates/patients.html:320
+msgid "Delete Patient"
+msgstr "Elimina Paziente"
+
+#: app/templates/patients.html:335
+msgid "No patient found"
+msgstr "Nessun paziente trovato"
+
+#: app/templates/patients.html:347
+msgid "No patients match your search"
+msgstr "Nessun paziente corrisponde alla tua ricerca"
+
+#: app/templates/profile.html:7
+msgid "Your Profile"
+msgstr "Il tuo Profilo"
+
+#: app/templates/profile.html:11
+msgid "Account Information"
+msgstr "Informazioni Account"
+
+#: app/templates/profile.html:36
+msgid "Email Address"
+msgstr "Indirizzo Email"
+
+#: app/templates/profile.html:42
+msgid "You cannot change your email address"
+msgstr "Non  puoi cambiare il tuo indirizzo email"
+
+#: app/templates/profile.html:54
+msgid "Update Profile"
+msgstr "Aggiorna Profilo"
+
+#: app/templates/profile.html:62 app/templates/profile.html:94
+msgid "Change Password"
+msgstr "Cambia Password"
+
+#: app/templates/profile.html:67
+msgid "Current Password"
+msgstr "Password Corrente"
+
+#: app/templates/profile.html:75
+msgid "New Password"
+msgstr "Nuova Password"
+
+#: app/templates/profile.html:82
+msgid "Password must be at least 8 characters"
+msgstr "La password deve contenere almeno 8 caratteri"
+
+#: app/templates/profile.html:85
+msgid "Confirm New Password"
+msgstr "Conferma Nuova Password"
+
+#: app/templates/register.html:2
+msgid "Register"
+msgstr "Registrati"
+
+#: app/templates/register.html:8
+msgid "Doctor Registration"
+msgstr "Registrazione Medico"
+
+#: app/templates/register.html:18
+msgid "We'll never share your email with anyone else."
+msgstr "Non condivideremo mai la tua email con nessun altro."
+
+#: app/templates/register.html:43
+msgid "Medical Specialty"
+msgstr "Specializzazione Medica"
+
+#: app/templates/register.html:69
+msgid "Create Account"
+msgstr "Crea Account"
+
+#: app/templates/register.html:75
+msgid "Already have an account?"
+msgstr "Hai già un account?"
+
+#: app/templates/register.html:75
+msgid "Login here"
+msgstr "Accedi Qui"
+
+#: app/templates/specific_report_form.html:2
+#: app/templates/specific_report_form.html:97
+msgid "Generate Patient Report"
+msgstr "Genera Report Paziente"
+
+#: app/templates/specific_report_form.html:109
+msgid "Create Custom Report"
+msgstr "Crea Report Personalizzato"
+
+#: app/templates/specific_report_form.html:121 app/templates/vitals.html:388
+msgid "Summary (Optional)"
+msgstr "Riepilogo (Facoltativo)"
+
+#: app/templates/specific_report_form.html:127
+msgid ""
+"Add an optional summary for this report. It will appear in the report but"
+" will not be saved in the database."
+msgstr ""
+"Aggiungi un riepilogo facoltativo per questo report. Apparirà nel report "
+"ma non sarà salvato nel database"
+
+#: app/templates/specific_report_form.html:128
+msgid "This summary will only be included in this report and will not be saved."
+msgstr "Questo riepilogo sarà incluso solo in questo report e non sarà salvato"
+
+#: app/templates/specific_report_form.html:131
+msgid "REPORT CONTENTS"
+msgstr "CONTENUTO DEL REPORT"
+
+#: app/templates/specific_report_form.html:142
+#: app/templates/specific_report_form.html:188
+#: app/templates/specific_report_form.html:246 app/templates/vitals.html:405
+#: app/templates/vitals.html:427
+msgid "Select All"
+msgstr "Seleziona Tutti"
+
+#: app/templates/specific_report_form.html:143
+#: app/templates/specific_report_form.html:191
+#: app/templates/specific_report_form.html:249
+msgid "Deselect"
+msgstr "Deseleziona"
+
+#: app/templates/specific_report_form.html:171
+msgid "No notes available"
+msgstr "Nessuna nota disponibile"
+
+#: app/templates/specific_report_form.html:226
+msgid "No observations available"
+msgstr "Nessuna osservazione disponibile"
+
+#: app/templates/specific_report_form.html:235
+msgid "CHARTS AND VITAL PARAMETERS"
+msgstr "GRAFICI E PARAMETRI VITALI"
+
+#: app/templates/specific_report_form.html:241
+msgid "Vital Parameters"
+msgstr "Parametri Vitali"
+
+#: app/templates/specific_report_form.html:272
+msgid "Select periods:"
+msgstr ""
+
+#: app/templates/specific_report_form.html:277
+msgid "All"
+msgstr "Tutti"
+
+#: app/templates/specific_report_form.html:282
+msgid "None"
+msgstr "Nessuno"
+
+#: app/templates/specific_report_form.html:324
+msgid "Select at least one period"
+msgstr "Seleziona almeno un periodo"
+
+#: app/templates/specific_report_form.html:334
+msgid "Generate PDF Report"
+msgstr "Genera Report PDF"
+
+#: app/templates/vitals.html:35
+msgid "Health Sync"
+msgstr "Health Sync"
+
+#: app/templates/vitals.html:42 app/templates/vitals.html:232
+#: app/templates/vitals.html:414 app/templates/vitals.html:499
+msgid "Loading..."
+msgstr "Caricamento..."
+
+#: app/templates/vitals.html:44
+msgid "Checking connection status..."
+msgstr "Verifica stato connessione..."
+
+#: app/templates/vitals.html:51
+msgid "Connected to Health Platform"
+msgstr "Connesso alla Piattaforma sanitaria"
+
+#: app/templates/vitals.html:52
+msgid "This patient has an active connection to their health platform."
+msgstr "Questo paziente ha una connessione attiva alla sua piattaforma sanitaria."
+
+#: app/templates/vitals.html:60
+msgid "Connected Platform"
+msgstr "Piattaforma Connessa"
+
+#: app/templates/vitals.html:71
+msgid "Connection Date"
+msgstr "Data di Connessione"
+
+#: app/templates/vitals.html:82
+msgid "Token Expiration"
+msgstr "Scadenza Token"
+
+#: app/templates/vitals.html:93
+msgid "Status"
+msgstr "Stato"
+
+#: app/templates/vitals.html:109
+msgid "No Active Connection"
+msgstr "Nessuna Connessione Attiva"
+
+#: app/templates/vitals.html:110
+msgid "This patient does not have an active connection to a health platform."
+msgstr ""
+"Questo paziente non ha una connessione attiva a una piattaforma "
+"sanitaria"
+
+#: app/templates/vitals.html:116
+msgid ""
+"Click the Health Sync button above to connect to a health platform and "
+"automatically collect vital signs data."
+msgstr ""
+"Clicca il pulsante Health Sync sopra per connetterti a una piattaforma "
+"sanitaria e raccogliere automaticamente i dati sui parametri vitali"
+
+#: app/templates/vitals.html:127
+msgid "Reports"
+msgstr "Reports"
+
+#: app/templates/vitals.html:137
+msgid "Complete Report (Auto-select all)"
+msgstr "Report Completo (Seleziona tutto)"
+
+#: app/templates/vitals.html:143
+msgid "Specific Parameter Reports"
+msgstr "Reports Parametri Specifici"
+
+#: app/templates/vitals.html:167
+msgid "Vital Signs Trends"
+msgstr "Andamento Parametri Vitali"
+
+#: app/templates/vitals.html:175
+msgid "Display Period"
+msgstr "Mostra Periodo"
+
+#: app/templates/vitals.html:183
+msgid "Day"
+msgstr "Giorno"
+
+#: app/templates/vitals.html:187
+msgid "Days"
+msgstr "Giorni"
+
+#: app/templates/vitals.html:191
+msgid "Month"
+msgstr "Mese"
+
+#: app/templates/vitals.html:195
+msgid "Months"
+msgstr "Mesi"
+
+#: app/templates/vitals.html:210
+msgid "Connect to a health platform to view data."
+msgstr "Connettiti a una piattaforma sanitaria per visualizzare i dati"
+
+#: app/templates/vitals.html:221
+msgid "Observations for Current Period"
+msgstr "Osservazioni per il Periodo Corrente"
+
+#: app/templates/vitals.html:224 app/templates/vitals.html:284
+msgid "Add Observation"
+msgstr "Aggiungi Osservazione"
+
+#: app/templates/vitals.html:234 app/templates/vitals.html:501
+msgid "Loading observations..."
+msgstr "Caricamento osservazioni..."
+
+#: app/templates/vitals.html:237
+msgid "No observations for the current period."
+msgstr "Nessuna osservazione per il periodo corrente"
+
+#: app/templates/vitals.html:249
+msgid "Vital Signs History"
+msgstr "Storico Parametri Vitali"
+
+#: app/templates/vitals.html:257
+msgid "Type"
+msgstr "Tipo"
+
+#: app/templates/vitals.html:258
+msgid "Value"
+msgstr "Valore"
+
+#: app/templates/vitals.html:260
+msgid "Source"
+msgstr "Sorgente"
+
+#: app/templates/vitals.html:267
+msgid "Loading data..."
+msgstr "Caricamento dati..."
+
+#: app/templates/vitals.html:300
+msgid "Vital Parameter"
+msgstr "Parametro Vitale"
+
+#: app/templates/vitals.html:343
+msgid "Are you sure you want to delete this observation?"
+msgstr "Sei sicuro di voler eliminare questa osservazione?"
+
+#: app/templates/vitals.html:352
+msgid "Save"
+msgstr "Salva"
+
+#: app/templates/vitals.html:375
+msgid "Generate Specific Report"
+msgstr "Genera Report Specifico"
+
+#: app/templates/vitals.html:385
+msgid "Create a customized report by selecting specific elements to include:"
+msgstr ""
+"Crea un report personalizzato selezionando gli elementi specifici da "
+"includere:"
+
+#: app/templates/vitals.html:393
+msgid "Add an optional summary for this report."
+msgstr "Aggiungi un riepilogo facoltativo per questo report"
+
+#: app/templates/vitals.html:395
+msgid ""
+"This summary will only be included in this report and will not be saved "
+"for future reference."
+msgstr ""
+"Questo riepilogo sarà incluso solo in questo report e non sarà salvato "
+"per riferimenti futuri"
+
+#: app/templates/vitals.html:401
+msgid "Select notes to include in the report:"
+msgstr "Seleziona le note da includere nel report:"
+
+#: app/templates/vitals.html:408 app/templates/vitals.html:430
+msgid "Deselect All"
+msgstr "Deseleziona Tutto"
+
+#: app/templates/vitals.html:416
+msgid "Loading notes..."
+msgstr "Caricamento note..."
+
+#: app/templates/vitals.html:423
+msgid "Select vital sign types to include:"
+msgstr "Seleziona i tipi di parametri vitali da includere:"
+
+#: app/templates/vitals.html:446
+msgid "Select time periods for charts:"
+msgstr "Seleziona il periodo temporale per i grafici:"
+
+#: app/templates/vitals.html:486
+msgid "1 Year"
+msgstr "1 Anno"
+
+#: app/templates/vitals.html:491
+msgid "Select observations:"
+msgstr "Seleziona osservazioni:"
+
+#: app/templates/vitals.html:512
+msgid "Generate Report"
+msgstr "Genera Report"
+
+#~ msgid "2025 Healthcare Monitoring Platform. All rights reserved."
+#~ msgstr "2025 Piattaforma di Monitoraggio Sanitario. Tutti i diritti riservati."
+

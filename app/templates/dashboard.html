@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+{% block title %}{{ _("Dashboard") }} - {{ _("Healthcare Monitoring Platform") }}{% endblock %}
+{% block content %}
+    <h1 class="mb-4">
+        <i class="fas fa-tachometer-alt me-2"></i> {{ _("Dashboard") }}
+    </h1>
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card bg-gradient-primary text-white shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">{{ _("Patients") }}</h6>
+                            <h2 class="my-2">{{ patient_count }}</h2>
+                            <p class="card-text mb-0">{{ _("Total patients under your care") }}</p>
+                        </div>
+                        <div>
+                            <i class="fas fa-users fa-3x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-0">
+                    <a href="{{ url_for("views.patients") }}"
+                       class="text-white text-decoration-none small">
+                        {{ _("View all patients") }} <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-gradient-success text-white shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">{{ _("Quick Actions") }}</h6>
+                            <p class="card-text mt-3 mb-2">{{ _("Manage your patients and vital signs") }}</p>
+                        </div>
+                        <div>
+                            <i class="fas fa-tasks fa-3x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-0 d-flex justify-content-between">
+                    <a href="{{ url_for("views.new_patient") }}"
+                       class="text-white text-decoration-none small">
+                        <i class="fas fa-plus-circle me-1"></i> {{ _("New Patient") }}
+                    </a>
+                    <a href="{{ url_for("views.patients") }}"
+                       class="text-white text-decoration-none small">
+                        <i class="fas fa-search me-1"></i> {{ _("Search Patients") }}
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-gradient-purple text-white shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">{{ _("Audit Logs") }}</h6>
+                            <p class="card-text mt-3 mb-2">{{ _("Monitor changes and actions in the system") }}</p>
+                        </div>
+                        <div>
+                            <i class="fas fa-history fa-3x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-0">
+                    <a href="{{ url_for("audit.get_audit_logs") }}"
+                       class="text-white text-decoration-none small">
+                        {{ _("View activity logs") }} <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-gradient-warning text-white shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">{{ _("System Status") }}</h6>
+                            <h2 class="my-2">{{ _("Active") }}</h2>
+                            <p class="card-text mb-0">{{ _("All systems operational") }}</p>
+                        </div>
+                        <div>
+                            <i class="fas fa-check-circle fa-3x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-0">
+                    <span class="text-white small">
+                        <i class="fas fa-clock me-1"></i> {{ _("Last updated") }}: {{ now.strftime("%Y-%m-%d %H:%M") }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Recent Patients -->
+    <div class="row mb-4">
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user-friends me-2"></i> {{ _("Recent Patients") }}
+                    </h5>
+                    <a href="{{ url_for("views.patients") }}"
+                       class="btn btn-sm btn-outline-primary">{{ _("View All") }}</a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>{{ _("Name") }}</th>
+                                    <th>{{ _("ID") }}</th>
+                                    <th>{{ _("Added") }}</th>
+                                    <th>{{ _("Actions") }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if recent_patients %}
+                                    {% for patient in recent_patients %}
+                                        <tr>
+                                            <td>{{ patient.first_name }} {{ patient.last_name }}</td>
+                                            <td>
+                                                <span class="badge bg-secondary">{{ patient.uuid }}</span>
+                                            </td>
+                                            <td>{{ patient.created_at|format_datetime("%Y-%m-%d") }}</td>
+                                            <td>
+                                                <a href="{{ url_for('views.patient_detail', patient_id=patient.id) }}"
+                                                   class="btn btn-sm btn-outline-info">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="4" class="text-center py-3">
+                                            <p class="text-muted mb-0">{{ _("No patients added yet") }}</p>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Recent Audit Logs -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history me-2"></i> {{ _("Recent Activities") }}
+                    </h5>
+                    <a href="{{ url_for("audit.view_logs") }}"
+                       class="btn btn-sm btn-outline-primary">{{ _("View All") }}</a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>{{ _("Action") }}</th>
+                                    <th>{{ _("Entity") }}</th>
+                                    <th>{{ _("Patient") }}</th>
+                                    <th>{{ _("Time") }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if recent_audits %}
+                                    {% for audit in recent_audits %}
+                                        <tr>
+                                            <td>
+                                                <span class="badge {% if audit.action_type.value in ['create', 'connect'] %} bg-success {% elif audit.action_type.value in ['update', 'sync'] %} bg-info {% elif audit.action_type.value in ['delete', 'disconnect'] %} bg-danger {% else %} bg-secondary {% endif %}">
+                                                    {{ audit.action_type.value|replace('_', ' ') |title }}
+                                                </span>
+                                            </td>
+                                            <td>{{ audit.entity_type.value|replace('_', ' ') |title }}</td>
+                                            <td>
+                                                {% if audit.patient %}
+                                                    <a href="{{ url_for('views.patient_detail', patient_id=audit.patient.id) }}"
+                                                       class="text-decoration-none">
+                                                        {{ audit.patient.first_name }} {{ audit.patient.last_name }}
+                                                    </a>
+                                                {% else %}
+                                                    -
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ audit.timestamp|format_datetime("%Y-%m-%d %H:%M") }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="4" class="text-center py-3">
+                                            <p class="text-muted mb-0">{{ _("No activities recorded yet") }}</p>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

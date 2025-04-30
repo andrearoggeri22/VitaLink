@@ -1,52 +1,32 @@
-version: '3.8'
-
 services:
   web:
-    build: .
-    restart: always
-    ports:
-      - "5000:5000"
-    depends_on:
-      - db
-    environment:
-      - DATABASE_URL=postgresql://vitalink:vitalink_password@db:5432/vitalink
-      - PGHOST=db
-      - PGPORT=5432
-      - PGUSER=vitalink
-      - PGPASSWORD=vitalink_password
-      - PGDATABASE=vitalink
-      - FLASK_APP=main.py
-      - FLASK_ENV=production
-      - PYTHONUNBUFFERED=1
-      # Other environment variables needed 
-      # (ClickSend, ecc. should be configured here in production)
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    ports: ["5000:5000"]
+    depends_on: [db]
+    env_file: .env  
     volumes:
       - ./uploads:/app/uploads
-    # Add an health check to ensure that the service is up and running
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
-    networks:
-      - vitalink-network
 
   db:
     image: postgres:15-alpine
-    restart: always
+    env_file: .env
     environment:
-      - POSTGRES_USER=vitalink
-      - POSTGRES_PASSWORD=vitalink_password
-      - POSTGRES_DB=vitalink
+      POSTGRES_USER:  ${PGUSER}
+      POSTGRES_PASSWORD: ${PGPASSWORD}
+      POSTGRES_DB: ${PGDATABASE}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    networks:
-      - vitalink-network
+    ports: ["5432:5432"]
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U vitalink"]
+      test: ["CMD-SHELL", "pg_isready -U ${PGUSER}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -54,7 +34,3 @@ services:
 
 volumes:
   postgres_data:
-
-networks:
-  vitalink-network:
-    driver: bridge
