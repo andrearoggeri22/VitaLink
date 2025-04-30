@@ -3,9 +3,7 @@ Health platforms integration module
 Provides functionality to connect to and retrieve data from various health platforms
 """
 
-import os
 import uuid
-import json
 import base64
 import logging
 import requests
@@ -15,11 +13,10 @@ from urllib.parse import urlencode
 from flask import url_for, session, Blueprint, redirect, request, render_template, flash, jsonify
 from flask_login import login_required, current_user
 from flask_babel import gettext as _
-from sqlalchemy.exc import SQLAlchemyError
 
-from .app import app, db
-from .models import (Patient, HealthPlatform, HealthPlatformLink, VitalSignType, ActionType, EntityType)
-from .audit import (log_action, log_health_link_creation, log_platform_connection, log_platform_disconnection, log_data_sync)
+from .app import db
+from .models import (Patient, HealthPlatform, HealthPlatformLink)
+from .audit import (log_health_link_creation, log_platform_connection, log_platform_disconnection, log_data_sync)
 from .health_platforms_config import (FITBIT_CONFIG, FITBIT_ENDPOINTS)
 
 # Create the blueprint

@@ -1,8 +1,7 @@
 import uuid
 import json
 from datetime import datetime, timedelta, timezone
-from enum import Enum, auto
-from zoneinfo import ZoneInfo
+from enum import Enum
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -317,7 +316,6 @@ class VitalObservation(db.Model):
         #   dict: Dictionary representation of the object
         # Carica il dottore per ottenere i dettagli
         from .app import db
-        from sqlalchemy.orm import joinedload
         doctor = db.session.query(Doctor).get(self.doctor_id)
         
         return {

@@ -1,5 +1,4 @@
-from flask import Blueprint, session, redirect, url_for, request, render_template, current_app
-from flask_babel import _
+from flask import Blueprint, session, redirect, url_for, request, current_app
 import logging
 
 logger = logging.getLogger(__name__)

@@ -97,7 +97,7 @@ def inject_globals():
 
 with app.app_context():
     # Import models to ensure they're registered with SQLAlchemy
-    from .models import (Doctor, Patient, DoctorPatient, Note, AuditLog, HealthPlatformLink, VitalObservation)
+    from .models import Doctor
     
     # Import and register blueprints
     from .auth import auth_bp

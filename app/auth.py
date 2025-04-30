@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 from functools import wraps
 
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash
@@ -7,9 +7,8 @@ from flask_login import login_user, logout_user, login_required, current_user
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, EmailField
-from wtforms.validators import DataRequired, Email, EqualTo, Length
+from wtforms.validators import DataRequired, Email, Length
 from flask_babel import lazy_gettext as _
-from flask_babel import Babel
 
 from .app import db
 from .models import Doctor
