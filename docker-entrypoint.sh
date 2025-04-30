@@ -27,5 +27,5 @@ python -m app.compile_translations
 echo "Verifying Gunicorn configuration..."
 echo "Parameters: $@"
 
-echo "Starting VitaLink application on 0.0.0.0:5000..."
+echo "Starting VitaLink application on 0.0.0.0:$PORT..."
 exec "$@"
