@@ -22,5 +22,4 @@ ENV PORT=5000
 EXPOSE 5000
 
 ENTRYPOINT ["/app/docker-entrypoint.sh"]
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "3", \
-     "--access-logfile", "-", "--error-logfile", "-", "--log-level", "debug", "app:app"]
+CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:$PORT --workers 3 --access-logfile - --error-logfile - --log-level debug app:app"]
