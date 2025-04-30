@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 
-COPY pyproject.toml /app/
+COPY ../pyproject.toml /app/
 COPY app/ /app/app/
 RUN pip install --no-cache-dir --upgrade pip \
  && pip install --no-cache-dir .
@@ -15,11 +15,11 @@ COPY . /app/
 
 RUN mkdir -p /app/uploads && chmod 777 /app/uploads
 
-RUN dos2unix /app/docker-entrypoint.sh \
- && chmod +x  /app/docker-entrypoint.sh
+RUN dos2unix /app/docker/docker-entrypoint.sh \
+ && chmod +x  /app/docker/docker-entrypoint.sh
 
 EXPOSE 5000
 
-ENTRYPOINT ["/app/docker-entrypoint.sh"]
+ENTRYPOINT ["/app/docker/docker-entrypoint.sh"]
 CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "3", \
      "--access-logfile", "-", "--error-logfile", "-", "--log-level", "debug", "app:app"]
