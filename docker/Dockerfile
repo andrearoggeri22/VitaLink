@@ -7,8 +7,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 
 # Copiamo tutto il contenuto del progetto
+COPY ../requirements.txt /app/requirements.txt
 COPY . /app/
 
+# Installa le dipendenze da requirements.txt
 RUN pip install --no-cache-dir --upgrade pip \
  && pip install --no-cache-dir -r requirements.txt
 
