@@ -275,7 +275,7 @@ def delete_web_observation(observation_id):
         
         logger.info(f"Osservazione {observation_id} eliminata dal medico {current_user.id}")
         
-        jsonify({
+        return jsonify({
             "message": _("Observation deleted successfully")
         }), 200
         
