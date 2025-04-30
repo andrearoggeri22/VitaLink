@@ -18,8 +18,7 @@ RUN mkdir -p /app/uploads && chmod 777 /app/uploads
 RUN dos2unix /app/docker-entrypoint.sh \
  && chmod +x /app/docker-entrypoint.sh
 
-ENV PORT=5000
-EXPOSE 5000
+EXPOSE $PORT
 
 ENTRYPOINT ["/app/docker-entrypoint.sh"]
-CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:$PORT --workers 3 --access-logfile - --error-logfile - --log-level debug app:app"]
+CMD ["sh", "-c", "gunicorn --bind $HOST:$PORT --workers 3 --access-logfile - --error-logfile - --log-level debug app:app"]
