@@ -1,6 +1,5 @@
 import re
 import uuid
-import json
 from datetime import datetime
 from flask_babel import gettext as _
 def validate_email(email):

@@ -1,23 +1,18 @@
 import logging
-import json
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify, send_file, session
-from app import app
 from flask_login import login_required, current_user
 from sqlalchemy.exc import SQLAlchemyError
 from flask_babel import gettext as _
-import copy
-import json
 
 from .app import db
-from .models import (Patient, Doctor, VitalSignType, Note, DoctorPatient, ActionType, EntityType, VitalObservation)
-from .utils import (parse_date, to_serializable_dict, validate_uuid)
-from .reports import create_vital_chart
+from .models import (Patient, VitalSignType, Note, DoctorPatient, ActionType, EntityType, VitalObservation)
+from .utils import (parse_date, validate_uuid)
 from .audit import (
     log_patient_creation, log_patient_update, log_patient_delete,
-    log_vital_creation, log_note_creation, log_report_generation, log_patient_view,
-    log_action, log_patient_import
+    log_note_creation, log_report_generation, log_patient_view, log_action,
+    log_patient_import
 )
 
 views_bp = Blueprint('views', __name__)

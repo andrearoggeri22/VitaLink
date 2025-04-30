@@ -1,23 +1,17 @@
-import os
 import logging
 from datetime import datetime, timedelta
 from io import BytesIO
-import tempfile
-import json
-from flask import session
 from flask_babel import gettext as _
 
-from reportlab.lib.pagesizes import letter, A4
+from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import inch, cm
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image, PageBreak
+from reportlab.lib.units import inch
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.graphics.shapes import Drawing
 from reportlab.graphics.charts.linecharts import HorizontalLineChart
 from reportlab.graphics.charts.legends import Legend
 
-from .models import (VitalSignType, VitalObservation)
-from . import health_platforms
 
 # Setup logger
 logger = logging.getLogger(__name__)
