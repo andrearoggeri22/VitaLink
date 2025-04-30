@@ -10,9 +10,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY . /app/
 
 RUN pip install --no-cache-dir --upgrade pip \
- && pip install --no-cache-dir .
-
-COPY . /app/
+ && pip install --no-cache-dir -r requirements.txt
 
 RUN mkdir -p /app/uploads && chmod 777 /app/uploads
 
