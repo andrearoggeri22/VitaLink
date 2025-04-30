@@ -10,7 +10,7 @@ COPY . /app/
 
 # Installiamo i requisiti da requirements.txt
 RUN pip install --no-cache-dir --upgrade pip \
- && pip install --no-cache-dir -r requirements.txt
+ && pip install --no-cache-dir .
 
 RUN mkdir -p /app/uploads && chmod 777 /app/uploads
 
@@ -18,6 +18,7 @@ RUN mkdir -p /app/uploads && chmod 777 /app/uploads
 RUN dos2unix /app/docker-entrypoint.sh \
  && chmod +x /app/docker-entrypoint.sh
 
+ENV PORT=5000
 EXPOSE 5000
 
 ENTRYPOINT ["/app/docker-entrypoint.sh"]
