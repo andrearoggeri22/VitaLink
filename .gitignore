@@ -112,3 +112,4 @@ instance/
 *.env
 *.env.prod
 *.env.dev
+*.env.cloud
