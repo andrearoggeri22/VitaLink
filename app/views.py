@@ -211,6 +211,7 @@ def new_patient():
         date_of_birth = request.form.get('date_of_birth')
         gender = request.form.get('gender')
         contact_number = request.form.get('contact_number')
+        email = request.form.get('email')
         address = request.form.get('address')
         
         # Validate required fields
@@ -229,6 +230,7 @@ def new_patient():
                 date_of_birth=dob,
                 gender=gender,
                 contact_number=contact_number,
+                email=email,
                 address=address
             )
             
@@ -321,6 +323,7 @@ def edit_patient(patient_id):
         date_of_birth (str): Updated date of birth in YYYY-MM-DD format
         gender (str): Updated gender
         contact_number (str): Updated contact number
+        email (str): Updated email address
         address (str): Updated address
         
     Returns:
@@ -345,6 +348,7 @@ def edit_patient(patient_id):
         date_of_birth = request.form.get('date_of_birth')
         gender = request.form.get('gender')
         contact_number = request.form.get('contact_number')
+        email = request.form.get('email')
         address = request.form.get('address')
         
         # Validate required fields
@@ -365,6 +369,7 @@ def edit_patient(patient_id):
             patient.date_of_birth = dob
             patient.gender = gender
             patient.contact_number = contact_number
+            patient.email = email
             patient.address = address
             patient.updated_at = datetime.utcnow()
             

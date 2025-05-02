@@ -284,6 +284,7 @@ class Patient(db.Model):
         date_of_birth (date): Patient's date of birth
         gender (str): Patient's gender
         contact_number (str): Patient's contact phone number
+        email (str): Email address used for sending notifications, must be unique
         address (str): Patient's physical address
         created_at (datetime): When the patient record was created
         updated_at (datetime): When the patient record was last updated
@@ -301,7 +302,8 @@ class Patient(db.Model):
     last_name = db.Column(db.String(100), nullable=False)
     date_of_birth = db.Column(db.Date, nullable=False)
     gender = db.Column(db.String(20))
-    contact_number = db.Column(db.String(20))
+    contact_number = db.Column(db.String(20), nullable=False)
+    email = db.Column(db.String(120))
     address = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -336,6 +338,7 @@ class Patient(db.Model):
             'date_of_birth': self.date_of_birth.isoformat() if self.date_of_birth else None,
             'gender': self.gender,
             'contact_number': self.contact_number,
+            'email': self.email,
             'address': self.address,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None

@@ -345,7 +345,8 @@ def generate_specific_report(patient, doctor, selected_notes, selected_vital_typ
         [f"{_('Name')}:", f"{patient.first_name} {patient.last_name}"],
         [f"{_('Date of Birth')}:", patient.date_of_birth.strftime('%d/%m/%Y')],
         [f"{_('Gender')}:", patient.gender or _('Not specified')],
-        [f"{_('Contact')}:", patient.contact_number or _('Not provided')]
+        [f"{_('Contact')}:", patient.contact_number]
+        [f"{_('Email')}:", patient.email or _('Not provided')]
     ]
     
     patient_table = Table(patient_data, colWidths=[1.5*inch, 4*inch])

@@ -81,11 +81,21 @@
                             <label for="contact_number" class="form-label">
                                 {{ _("Contact Number") }} <span class="text-danger">*</span>
                             </label>
-                            <input type="number"
+                            <input type="tel"
                                    class="form-control"
                                    id="contact_number"
                                    name="contact_number"
-                                   required>
+                                   required
+                                   max>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label">
+                                {{ _("Email") }} 
+                            </label>
+                            <input type="email"
+                                   class="form-control"
+                                   id="email"
+                                   name="email">
                         </div>
                     </div>
                     <div class="mb-3">
@@ -178,12 +188,21 @@
                             <label for="contact_number" class="form-label">
                                 {{ _("Phone Number") }} <span class="text-danger">*</span>
                             </label>
-                            <input type="number"
+                            <input type="tel"
                                    class="form-control"
                                    id="contact_number"
                                    name="contact_number"
                                    value="{{ patient.contact_number }}"
                                    required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label">
+                                {{ _("Email") }} 
+                            </label>
+                            <input type="email"
+                                   class="form-control"
+                                   id="email"
+                                   name="email">
                         </div>
                     </div>
                     <div class="mb-3">

@@ -35,13 +35,16 @@
                     <div class="mb-3">
                         <h6 class="text-muted mb-1">{{ _("Contact Information") }}</h6>
                         <p>
-                            {% if patient.contact_number %}
-                                <i class="fas fa-phone me-2"></i> {{ patient.contact_number }}
+                            <i class="fas fa-phone me-2"></i> {{ patient.contact_number }}
+                            <br>
+                            {% if patient.email %}
+                                <i class="fas fa-envelope me-2"></i> {{ patient.email }}
                                 <br>
                             {% else %}
-                                <i class="fas fa-phone me-2"></i> <span class="text-muted">{{ _("No contact number") }}</span>
+                                <i class="fas fa-envelope me-2"></i> <span class="text-muted">{{ _("No email provided") }}</span>
                                 <br>
                             {% endif %}
+                            
                         </p>
                     </div>
                     <div class="mb-3">
