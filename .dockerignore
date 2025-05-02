@@ -47,3 +47,5 @@ uploads/*
 # Other files
 *.log
 .DS_Store
+
+UML/
