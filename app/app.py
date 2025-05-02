@@ -209,6 +209,15 @@ def inject_globals():
     }
 
 with app.app_context():
+    # Compile translation files (.po to .mo)
+    try:
+        from .compile_translations import main as compile_translations
+        logger.info("Compiling translation files (.po to .mo)...")
+        compile_translations()
+        logger.info("Translation compilation completed")
+    except Exception as e:
+        logger.error(f"Error during translation compilation: {e}")
+    
     # Import models to ensure they're registered with SQLAlchemy
     from .models import Doctor
     

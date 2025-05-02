@@ -61,7 +61,27 @@ def main() -> None:
     Returns:
         None
     """
-    po_files = BASE_DIR.glob("*/*/LC_MESSAGES/*.po")  # es. it/LC_MESSAGES/messages.po
+    # first pattern: lingua/LC_MESSAGES/*.po (standard Flask)
+    pattern1 = "*/LC_MESSAGES/*.po"
+    po_files_1 = list(BASE_DIR.glob(pattern1))
+    
+    # second pattern: */*/LC_MESSAGES/*.po (deep search)
+    pattern2 = "*/*/LC_MESSAGES/*.po"
+    po_files_2 = list(BASE_DIR.glob(pattern2))
+    
+    # Combina i risultati
+    po_files = po_files_1 + [p for p in po_files_2 if p not in po_files_1]
+    
+    if not po_files:
+        print(f"No file .po found in {BASE_DIR}")
+        print(f"Search patterns: {pattern1} o {pattern2}")
+        print("Available directories:")
+        for item in BASE_DIR.iterdir():
+            if item.is_dir():
+                print(f"  - {item}")
+                for subitem in item.iterdir():
+                    print(f"    - {subitem}")
+    
     results = [compile_po_to_mo(po) for po in po_files]
     print(
         f"\nCompiled {sum(results)} / {len(results)} catalog(s)"

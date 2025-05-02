@@ -47,9 +47,6 @@ except Exception as e:
     print("The application will attempt to initialize on startup")
 PY
 
-echo "Compiling translations..."
-python -m app.compile_translations
-
 echo "Verifying Gunicorn configuration..."
 echo "Parameters: $@"
 
