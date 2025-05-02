@@ -1,0 +1,88 @@
+@startuml VitaLink - Communication Diagram
+
+' Stile e configurazione
+skinparam object {
+    BackgroundColor #f0f0f0
+    BorderColor #555555
+}
+skinparam arrow {
+    Color #666666
+}
+
+title VitaLink - Communication Diagram: Gestione di un Paziente
+
+' Oggetti
+object "Medico" as Doctor
+object "Flask App" as App
+object "AuthController" as Auth
+object "PatientController" as PatientCtrl
+object "ObservationController" as ObsCtrl
+object "VitalsController" as VitalsCtrl
+object "HealthPlatformService" as HealthService
+object "AuditService" as AuditService
+object "PatientModel" as PatientModel
+object "VitalObservationModel" as ObsModel
+object "NoteModel" as NoteModel
+object "DatabaseSession" as DB
+object "FitbitAPI" as FitbitAPI
+
+' Relazioni con messaggi numerati
+Doctor -right-> App : "1: Accede all'applicazione"
+App -right-> Auth : "2: Verifica credenziali"
+Auth -right-> DB : "3: Query utente"
+DB -left-> Auth : "4: Dati utente"
+Auth -left-> App : "5: Sessione autenticata"
+App -left-> Doctor : "6: Dashboard visualizzata"
+
+' Creazione paziente
+Doctor -right-> App : "7: Richiede creazione nuovo paziente"
+App -right-> PatientCtrl : "8: Elabora form nuovo paziente"
+PatientCtrl -down-> PatientModel : "9: Crea nuovo paziente"
+PatientModel -right-> DB : "10: INSERT paziente"
+DB -left-> PatientModel : "11: ID paziente"
+PatientCtrl -right-> AuditService : "12: Registra creazione"
+AuditService -down-> DB : "13: INSERT audit log"
+PatientCtrl -up-> App : "14: Redirect a dettaglio paziente"
+App -left-> Doctor : "15: Visualizza dettaglio paziente"
+
+' Collegamento Fitbit
+Doctor -right-> App : "16: Richiede collegamento Fitbit"
+App -right-> HealthService : "17: Genera link di collegamento"
+HealthService -down-> DB : "18: INSERT link Fitbit"
+DB -up-> HealthService : "19: UUID link"
+HealthService -left-> App : "20: URL di autorizzazione"
+App -left-> Doctor : "21: URL di collegamento mostrato"
+
+' Sincronizzazione dati Fitbit
+Doctor -right-> App : "22: Richiede visualizzazione parametri"
+App -right-> VitalsCtrl : "23: Richiede parametri vitali"
+VitalsCtrl -right-> HealthService : "24: Richiede dati Fitbit"
+HealthService -right-> FitbitAPI : "25: Richiesta API"
+FitbitAPI -left-> HealthService : "26: Dati parametri vitali"
+HealthService -left-> VitalsCtrl : "27: Dati elaborati"
+VitalsCtrl -left-> App : "28: Dati formattati"
+App -left-> Doctor : "29: Visualizza grafici"
+
+' Creazione osservazione
+Doctor -right-> App : "30: Inserisce osservazione"
+App -right-> ObsCtrl : "31: Elabora form osservazione"
+ObsCtrl -down-> ObsModel : "32: Crea osservazione"
+ObsModel -right-> DB : "33: INSERT osservazione"
+DB -left-> ObsModel : "34: ID osservazione"
+ObsCtrl -right-> AuditService : "35: Registra osservazione"
+AuditService -down-> DB : "36: INSERT audit log"
+ObsCtrl -up-> App : "37: Conferma creazione"
+App -left-> Doctor : "38: Visualizza osservazione creata"
+
+' Aggiunta note
+Doctor -right-> App : "39: Aggiunge nota clinica"
+App -down-> PatientCtrl : "40: Elabora nuova nota"
+PatientCtrl -right-> NoteModel : "41: Crea nota"
+NoteModel -down-> DB : "42: INSERT nota"
+DB -up-> NoteModel : "43: ID nota"
+PatientCtrl -up-> AuditService : "44: Registra creazione nota"
+AuditService -down-> DB : "45: INSERT audit log"
+PatientCtrl -left-> App : "46: Conferma creazione"
+App -left-> Doctor : "47: Visualizza nota creata"
+
+@enduml

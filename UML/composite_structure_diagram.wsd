@@ -1,0 +1,108 @@
+@startuml VitaLink - Composite Structure Diagram
+
+' Stile e configurazione
+skinparam class {
+    BackgroundColor #f0f0f0
+    BorderColor #555555
+}
+skinparam package {
+    BackgroundColor #eeeeee
+    BorderColor #555555
+}
+
+title VitaLink - Composite Structure Diagram
+
+' Classe principale dell'applicazione
+class "VitaLink Application" as App {
+    ' Componenti interne dell'applicazione
+    
+    ' Flask App e configurazioni
+    component "Flask Application Core" as FlaskApp {
+        port " " as AppPort
+    }
+    
+    ' Database
+    component "Database Layer" as DB {
+        port " " as DBPort
+    }
+    
+    ' Autenticazione
+    component "Authentication System" as Auth {
+        port "web_login" as WebAuthPort
+        port "api_login" as ApiAuthPort
+    }
+    
+    ' Blueprint dei pazienti
+    component "Patient Management" as Patient {
+        port "view" as PatientViewPort
+        port "api" as PatientApiPort
+    }
+    
+    ' Sistema di osservazioni
+    component "Observation System" as Observation {
+        port "view" as ObsViewPort
+        port "api" as ObsApiPort
+    }
+    
+    ' Integrazione piattaforme sanitarie
+    component "Health Platform Integration" as Health {
+        port "oauth" as OAuthPort
+        port "data_sync" as SyncPort
+    }
+    
+    ' Sistema di audit
+    component "Audit System" as Audit {
+        port "log" as LogPort
+        port "view" as AuditViewPort
+    }
+    
+    ' Sistemi di report
+    component "Reporting System" as Report {
+        port "generate" as ReportGenPort
+        port "export" as ReportExportPort
+    }
+    
+    ' Supporto multilingua
+    component "Localization" as Lang {
+        port "switch_lang" as LangPort
+    }
+    
+    ' Connessioni interne
+    FlaskApp -down-> Auth : "routes requests"
+    FlaskApp -down-> Patient : "routes requests" 
+    FlaskApp -down-> Observation : "routes requests"
+    FlaskApp -down-> Health : "routes requests"
+    FlaskApp -down-> Audit : "routes requests"
+    FlaskApp -down-> Report : "routes requests"
+    FlaskApp -down-> Lang : "uses"
+    
+    DB -up-> FlaskApp : "provides data model"
+    DB -up-> Auth : "stores credentials"
+    DB -up-> Patient : "stores patient data"
+    DB -up-> Observation : "stores observations"
+    DB -up-> Health : "stores platform links"
+    DB -up-> Audit : "stores logs"
+    
+    Auth -right-> Audit : "logs actions"
+    Patient -right-> Audit : "logs changes"
+    Health -right-> Audit : "logs sync"
+    Report -right-> Audit : "logs generation"
+    
+    Health -left-> Patient : "enriches data"
+    Observation -left-> Patient : "refers to"
+    Report -left-> Patient : "reports on"
+}
+
+' Interfacce esterne
+interface "Web Browser" as Browser
+interface "API Client" as APIClient
+interface "Health Platform APIs" as ExtAPI
+interface "Database Storage" as Storage
+
+' Collegamenti esterni
+Browser -- App.AppPort : "HTTP/HTTPS"
+APIClient -- App.AppPort : "REST API"
+App.SyncPort -- ExtAPI : "OAuth 2.0, REST"
+App.DBPort -- Storage : "SQL"
+
+@enduml

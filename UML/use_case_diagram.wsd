@@ -1,0 +1,134 @@
+@startuml VitaLink - Use Case Diagram
+
+' Stile e configurazione
+skinparam actor {
+    BackgroundColor #f0f0f0
+    BorderColor #555555
+}
+skinparam usecase {
+    BackgroundColor #f0f0f0
+    BorderColor #555555
+}
+skinparam package {
+    BackgroundColor #eeeeee
+    BorderColor #555555
+}
+skinparam arrow {
+    Color #666666
+}
+
+title VitaLink - Use Case Diagram
+
+' Attori
+actor "Medico" as Doctor
+actor "Paziente" as Patient
+actor "Sistema Fitbit" as Fitbit
+actor "Amministratore\ndi Sistema" as Admin
+
+' Pacchetti di casi d'uso principale
+package "Gestione Account" {
+    usecase "Registrazione account" as UC_Register
+    usecase "Accesso al sistema" as UC_Login
+    usecase "Recupero password" as UC_RecoverPassword
+    usecase "Logout dal sistema" as UC_Logout
+    usecase "Modifica profilo" as UC_EditProfile
+}
+
+package "Gestione Pazienti" {
+    usecase "Visualizzare lista pazienti" as UC_ViewPatients
+    usecase "Aggiungere nuovo paziente" as UC_AddPatient
+    usecase "Modificare paziente" as UC_EditPatient
+    usecase "Eliminare paziente" as UC_DeletePatient
+    usecase "Importare paziente\nesistente" as UC_ImportPatient
+    usecase "Visualizzare dettagli paziente" as UC_ViewPatientDetails
+}
+
+package "Gestione Note Cliniche" {
+    usecase "Aggiungere nota clinica" as UC_AddNote
+    usecase "Visualizzare note cliniche" as UC_ViewNotes
+    usecase "Eliminare nota clinica" as UC_DeleteNote
+}
+
+package "Monitoraggio Parametri Vitali" {
+    usecase "Collegare dispositivo\nFitbit" as UC_ConnectFitbit
+    usecase "Visualizzare parametri\nvitali" as UC_ViewVitals
+    usecase "Sincronizzare dati\nda Fitbit" as UC_SyncFitbit
+    usecase "Disconnettere dispositivo\nFitbit" as UC_DisconnectFitbit
+}
+
+package "Gestione Osservazioni" {
+    usecase "Aggiungere osservazione\nsu parametri vitali" as UC_AddObservation
+    usecase "Visualizzare osservazioni" as UC_ViewObservations
+    usecase "Modificare osservazione" as UC_EditObservation
+    usecase "Eliminare osservazione" as UC_DeleteObservation
+}
+
+package "Reportistica" {
+    usecase "Generare report\npaziente" as UC_GenerateReport
+    usecase "Esportare report\nin PDF" as UC_ExportReport
+    usecase "Visualizzare log\ndi audit" as UC_ViewAuditLogs
+    usecase "Visualizzare statistiche\ndi utilizzo" as UC_ViewStatistics
+}
+
+package "Localizzazione" {
+    usecase "Cambiare lingua" as UC_ChangeLanguage
+}
+
+' Relazioni per il Medico
+Doctor --> UC_Register
+Doctor --> UC_Login
+Doctor --> UC_RecoverPassword
+Doctor --> UC_Logout
+Doctor --> UC_EditProfile
+
+Doctor --> UC_ViewPatients
+Doctor --> UC_AddPatient
+Doctor --> UC_EditPatient
+Doctor --> UC_DeletePatient
+Doctor --> UC_ImportPatient
+Doctor --> UC_ViewPatientDetails
+
+Doctor --> UC_AddNote
+Doctor --> UC_ViewNotes
+Doctor --> UC_DeleteNote
+
+Doctor --> UC_ConnectFitbit
+Doctor --> UC_ViewVitals
+Doctor --> UC_SyncFitbit
+Doctor --> UC_DisconnectFitbit
+
+Doctor --> UC_AddObservation
+Doctor --> UC_ViewObservations
+Doctor --> UC_EditObservation
+Doctor --> UC_DeleteObservation
+
+Doctor --> UC_GenerateReport
+Doctor --> UC_ExportReport
+Doctor --> UC_ViewAuditLogs
+Doctor --> UC_ViewStatistics
+
+Doctor --> UC_ChangeLanguage
+
+' Relazioni per il Paziente
+' Nota: al momento il paziente non ha un'interfaccia diretta nel sistema
+' quindi non ci sono casi d'uso associati a loro
+
+' Relazioni per Fitbit
+Fitbit --> UC_SyncFitbit
+
+' Relazioni per l'Admin
+Admin --> UC_ViewAuditLogs
+Admin --> UC_ViewStatistics
+
+' Relazioni di estensione e inclusione
+UC_Login ..> UC_RecoverPassword : <<extends>>
+UC_ViewPatientDetails ..> UC_ViewVitals : <<include>>
+UC_ViewPatientDetails ..> UC_ViewNotes : <<include>>
+UC_ViewPatientDetails ..> UC_ViewObservations : <<include>>
+
+UC_ConnectFitbit ..> UC_SyncFitbit : <<include>>
+UC_GenerateReport ..> UC_ViewVitals : <<include>>
+UC_GenerateReport ..> UC_ViewObservations : <<include>>
+UC_ExportReport ..> UC_GenerateReport : <<include>>
+
+@enduml

@@ -1,0 +1,263 @@
+@startuml VitaLink - Class Diagram
+
+' Stile e configurazione
+skinparam classAttributeIconSize 0
+skinparam classFontStyle bold
+skinparam classBackgroundColor #f0f0f0
+skinparam classBorderColor #555555
+skinparam arrowColor #666666
+skinparam packageBackgroundColor #eeeeee
+
+title VitaLink - Class Diagram
+
+' Enumerazioni
+enum VitalSignType {
+    HEART_RATE = "heart_rate"
+    OXYGEN_SATURATION = "oxygen_saturation"
+    BREATHING_RATE = "breathing_rate"
+    WEIGHT = "weight"
+    TEMPERATURE_CORE = "temperature_core"
+    TEMPERATURE_SKIN = "temperature_skin"
+    STEPS = "steps"
+    CALORIES = "calories"
+    DISTANCE = "distance"
+    ACTIVE_MINUTES = "active_minutes"
+    SLEEP_DURATION = "sleep_duration"
+    FLOORS_CLIMBED = "floors_climbed"
+    ELEVATION = "elevation"
+    ACTIVITY_CALORIES = "activity_calories"
+    CALORIES_BMR = "calories_bmr"
+    MINUTES_SEDENTARY = "minutes_sedentary"
+    MINUTES_LIGHTLY_ACTIVE = "minutes_lightly_active"
+    MINUTES_FAIRLY_ACTIVE = "minutes_fairly_active"
+    CALORIES_IN = "calories_in"
+    WATER = "water"
+}
+
+enum HealthPlatform {
+    FITBIT = "fitbit"
+    GOOGLE_HEALTH_CONNECT = "google_health_connect"
+    APPLE_HEALTH = "apple_health"
+}
+
+enum ActionType {
+    CREATE = "CREATE"
+    UPDATE = "UPDATE"
+    DELETE = "DELETE"
+    VIEW = "VIEW"
+    EXPORT = "EXPORT"
+    GENERATE_LINK = "GENERATE_LINK"
+    CONNECT = "CONNECT"
+    DISCONNECT = "DISCONNECT"
+    SYNC = "SYNC"
+    IMPORT = "IMPORT"
+}
+
+enum EntityType {
+    PATIENT = "patient"
+    VITAL_SIGN = "vital_sign"
+    NOTE = "note"
+    REPORT = "report"
+    HEALTH_PLATFORM = "health_platform"
+    HEALTH_LINK = "health_link"
+    OBSERVATION = "observation"
+}
+
+' Classi principali
+class UserMixin {
+}
+
+class Doctor extends UserMixin {
+    +id: Integer
+    +email: String
+    +password_hash: String
+    +first_name: String
+    +last_name: String
+    +specialty: String
+    +created_at: DateTime
+    +updated_at: DateTime
+    --
+    +set_password(password): void
+    +check_password(password): boolean
+    +to_dict(): dict
+    +get_patients(): list[Patient]
+    +add_patient(patient: Patient): void
+    +remove_patient(patient: Patient): void
+}
+
+class Patient {
+    +id: Integer
+    +uuid: String
+    +first_name: String
+    +last_name: String
+    +date_of_birth: Date
+    +gender: String
+    +contact_number: String
+    +address: String
+    +created_at: DateTime
+    +updated_at: DateTime
+    +connected_platform: HealthPlatform
+    +platform_access_token: String
+    +platform_refresh_token: String
+    +platform_token_expires_at: DateTime
+    --
+    +to_dict(): dict
+    +get_vital_observations(vital_type: VitalSignType, start_date: DateTime, end_date: DateTime): list[VitalObservation]
+    +get_notes(): list[Note]
+}
+
+class Note {
+    +id: Integer
+    +patient_id: Integer
+    +doctor_id: Integer
+    +content: Text
+    +created_at: DateTime
+    +updated_at: DateTime
+    --
+    +to_dict(): dict
+}
+
+class VitalObservation {
+    +id: Integer
+    +patient_id: Integer
+    +doctor_id: Integer
+    +vital_type: VitalSignType
+    +content: Text
+    +start_date: DateTime
+    +end_date: DateTime
+    +created_at: DateTime
+    +updated_at: DateTime
+    --
+    +to_dict(): dict
+}
+
+class AuditLog {
+    +id: Integer
+    +doctor_id: Integer
+    +timestamp: DateTime
+    +action_type: ActionType
+    +entity_type: EntityType
+    +entity_id: Integer
+    +details: Text
+    +patient_id: Integer
+    +ip_address: String
+    --
+    +__init__(doctor_id: Integer, action_type: ActionType, entity_type: EntityType, entity_id: Integer, details: dict, patient_id: Integer, ip_address: String): void
+    +get_details(): dict
+    +to_dict(): dict
+}
+
+class DoctorPatient {
+    +doctor_id: Integer
+    +patient_id: Integer
+    +assigned_date: DateTime
+}
+
+class HealthPlatformLink {
+    +id: Integer
+    +uuid: String
+    +patient_id: Integer
+    +doctor_id: Integer
+    +created_at: DateTime
+    +expires_at: DateTime
+    +used: Boolean
+    +platform: HealthPlatform
+    --
+    +is_expired(): boolean
+    +to_dict(): dict
+}
+
+' Relazioni
+Doctor "1" *-- "many" Note: creates >
+Doctor "1" *-- "many" VitalObservation: records >
+Doctor "many" o-- "many" Patient: manages >
+Doctor "1..*" -- "1" DoctorPatient : has association >
+Patient "1" -- "1..*" DoctorPatient : has association >
+Patient "1" *-- "many" Note: has >
+Patient "1" *-- "many" VitalObservation: has >
+Patient "1" *-- "many" HealthPlatformLink: has >
+Doctor "1" *-- "many" AuditLog: generates >
+AuditLog "0..*" -- "0..1" Patient: refers to >
+Doctor "1" *-- "many" HealthPlatformLink: creates >
+
+' Applicazione Flask
+package "Flask Application Components" {
+    class FlaskApp {
+        +config: Config
+        +db: SQLAlchemy
+        +migrate: Migrate
+        +jwt: JWTManager
+        +login: LoginManager
+        +babel: Babel
+    }
+
+    class Blueprint {
+        +name: String
+        +url_prefix: String
+    }
+    
+    class auth_bp extends Blueprint {
+        +register(): Route
+        +login(): Route
+        +logout(): Route
+        +api_login(): Route
+        +refresh_token(): Route
+    }
+    
+    class views_bp extends Blueprint {
+        +index(): Route
+        +dashboard(): Route
+        +patients(): Route
+        +patient_detail(): Route
+        +edit_patient(): Route
+        +delete_patient(): Route
+        +patient_vitals(): Route
+    }
+      class api_bp extends Blueprint {
+        +get_patients(): Route
+        +get_patient(): Route
+        +get_vitals(): Route
+        +get_notes(): Route
+        +add_note(): Route
+        +delete_note(): Route
+        +get_observations(): Route
+        +add_observation(): Route
+        +update_observation(): Route
+        +delete_observation(): Route
+        +import_patient(): Route
+    }
+    
+    class audit_bp extends Blueprint {
+        +view_logs(): Route
+        +get_audit_logs(): Route
+        +get_audit_stats(): Route
+    }
+    
+    class health_bp extends Blueprint {
+        +create_link(): Route
+        +connect(): Route
+        +start_auth(): Route
+        +oauth_callback(): Route
+    }
+    
+    class observations_bp extends Blueprint {
+        +get_web_observations(): Route
+        +add_web_observation(): Route
+        +update_web_observation(): Route
+        +delete_web_observation(): Route
+    }
+    
+    class language_bp extends Blueprint {
+        +change_language(): Route
+    }
+    
+    FlaskApp --* auth_bp: contains
+    FlaskApp --* views_bp: contains
+    FlaskApp --* api_bp: contains
+    FlaskApp --* audit_bp: contains
+    FlaskApp --* health_bp: contains
+    FlaskApp --* observations_bp: contains
+    FlaskApp --* language_bp: contains
+}
+
+@enduml

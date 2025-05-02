@@ -1,0 +1,166 @@
+@startuml VitaLink - Sequence Diagram
+
+' Stile e configurazione
+skinparam sequence {
+    ArrowColor #555555
+    ActorBorderColor #555555
+    LifeLineBorderColor #555555
+    LifeLineBackgroundColor #f0f0f0
+    
+    ParticipantBorderColor #555555
+    ParticipantBackgroundColor #f0f0f0
+    ParticipantFontSize 12
+    
+    ActorBackgroundColor #f0f0f0
+    ActorFontSize 12
+}
+
+title VitaLink - Sequence Diagram: Health Platform Integration
+
+actor "Medico" as Doctor
+participant "Frontend\nVitaLink" as Frontend
+participant "Backend\nVitaLink" as Backend
+participant "Database" as DB
+actor "Paziente" as Patient 
+participant "Piattaforma Salute\n(Fitbit/Google/Apple)" as HealthPlatform
+
+== Creazione Link di Integrazione ==
+
+Doctor -> Frontend : Richiede creazione link
+activate Frontend
+Frontend -> Backend : POST /api/health/create-link
+activate Backend
+Backend -> DB : Verifica medico e paziente
+activate DB
+DB --> Backend : Conferma dati
+deactivate DB
+Backend -> DB : Crea HealthPlatformLink
+activate DB
+DB --> Backend : Link creato con UUID
+deactivate DB
+Backend --> Frontend : Restituisce UUID del link
+deactivate Backend
+Frontend --> Doctor : Mostra link di integrazione
+deactivate Frontend
+
+' Flusso principale
+Doctor -> Frontend: Richiede sincronizzazione dati Fitbit\nper un paziente
+activate Frontend
+
+Frontend -> API: GET /api/patients/{patient_id}/vitals?type=heart_rate
+activate API
+
+API -> HealthService: get_vitals_data(patient, type, start_date, end_date)
+activate HealthService
+
+' Controllo cache
+HealthService -> HealthService: check_cache(patient, type, dates)
+alt Dati in cache e validi
+    HealthService --> API: Ritorna dati dalla cache
+else Dati non in cache o non validi
+
+    ' Controllo token
+    HealthService -> DB: Query token informazioni del paziente
+    activate DB
+    DB --> HealthService: Token e data di scadenza
+    deactivate DB
+    
+    HealthService -> HealthService: ensure_fresh_token(patient)
+    
+    alt Token invalido o scaduto
+        HealthService -> FitbitAPI: Richiede refresh token
+        activate FitbitAPI
+        FitbitAPI --> HealthService: Nuovi access token e refresh token
+        deactivate FitbitAPI
+        
+        HealthService -> DB: Salva nuovi token
+        activate DB
+        DB --> HealthService: Conferma salvataggio
+        deactivate DB
+    end
+    
+    ' Controllo rate limit
+    HealthService -> HealthService: check_rate_limit()
+    
+    alt Rate limit raggiunto
+        HealthService --> API: Errore di rate limit
+        API --> Frontend: 429 Too Many Requests
+        Frontend --> Doctor: Mostra errore di rate limit
+    else Rate limit OK
+    
+        ' Chiamata a Fitbit API
+        HealthService -> FitbitAPI: GET /1/user/-/activities/heart/date/.../...
+        activate FitbitAPI
+        
+        alt Chiamata API riuscita
+            FitbitAPI --> HealthService: Dati sulle frequenze cardiache
+            deactivate FitbitAPI
+            
+            ' Elaborazione dati
+            HealthService -> HealthService: process_fitbit_data(data, type)
+            
+            ' Aggiornamento cache
+            HealthService -> HealthService: update_cache(key, data)
+            
+            ' Logging
+            HealthService -> Audit: log_data_sync(doctor, patient, platform, type, summary)
+            activate Audit
+            Audit -> DB: Insert audit log
+            DB --> Audit: Conferma
+            Audit --> HealthService: OK
+            deactivate Audit
+            
+            ' Risposta
+            HealthService --> API: Dati elaborati
+            
+        else Errore API
+            FitbitAPI --> HealthService: Errore (401, 403, 429, 500)
+            deactivate FitbitAPI
+            
+            HealthService -> Audit: log_error(doctor, patient, platform, type, error)
+            activate Audit
+            Audit -> DB: Insert error log
+            DB --> Audit: Conferma
+            Audit --> HealthService: OK
+            deactivate Audit
+            
+            HealthService --> API: Errore con dettagli
+        end
+    
+    end
+
+end
+
+API --> Frontend: Risposta JSON con dati o errore
+deactivate API
+
+Frontend -> Frontend: Renderizza grafici\ncon i dati ricevuti
+Frontend --> Doctor: Mostra grafici dei parametri vitali
+deactivate Frontend
+
+' Interazione con i dati
+Doctor -> Frontend: Aggiunge osservazione sui dati
+activate Frontend
+
+Frontend -> API: POST /api/observations
+activate API
+
+API -> DB: Salva nuova osservazione
+activate DB
+DB --> API: Conferma salvataggio
+deactivate DB
+
+API -> Audit: log_observation_creation(doctor, observation)
+activate Audit
+Audit -> DB: Insert audit log
+DB --> Audit: Conferma
+Audit --> API: OK
+deactivate Audit
+
+API --> Frontend: Conferma creazione osservazione
+deactivate API
+
+Frontend --> Doctor: Mostra conferma di salvataggio
+deactivate Frontend
+
+@enduml

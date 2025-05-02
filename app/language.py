@@ -1,3 +1,17 @@
+"""
+Language Management Module.
+
+This module provides functionality for managing the application's internationalization (i18n)
+and localization (l10n) settings. It includes:
+
+1. Routes for changing the application language
+2. Session-based language persistence
+3. Utilities for language detection and handling
+
+The module works with Flask-Babel to provide a seamless multilingual experience,
+allowing users to switch between available languages (English, Italian, etc.).
+"""
+
 from flask import Blueprint, session, redirect, url_for, request, current_app
 import logging
 

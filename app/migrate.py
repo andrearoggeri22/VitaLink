@@ -1,3 +1,18 @@
+"""
+Database Migration Module.
+
+This module provides functionality for managing database schema migrations
+using Flask-Migrate and Alembic. It enables:
+
+1. Creating database migration scripts based on model changes
+2. Running migrations to update database schema
+3. Versioning of database schema changes
+4. Rolling back to previous schema versions when needed
+
+The module can be run as a standalone script to initiate migrations
+or imported to use the migration functionality elsewhere in the application.
+"""
+
 import os
 from pathlib import Path
 

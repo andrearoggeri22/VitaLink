@@ -1,0 +1,132 @@
+@startuml VitaLink - Interaction Overview Diagram
+
+' Stile e configurazione
+skinparam activityBackgroundColor #f0f0f0
+skinparam activityBorderColor #555555
+skinparam arrowColor #666666
+skinparam partitionBackgroundColor #f5f5f5
+skinparam partitionBorderColor #555555
+skinparam sequenceParticipantBackgroundColor #f0f0f0
+skinparam sequenceParticipantBorderColor #555555
+skinparam sequenceLifeLineBorderColor #555555
+skinparam sequenceArrowColor #666666
+
+title VitaLink - Interaction Overview Diagram: Processo di Monitoraggio Paziente
+
+' Inizio processo
+start
+
+' Partizione di autenticazione
+partition "Autenticazione" {
+    :Medico accede alla piattaforma;
+    
+    ' Sequenza di autenticazione incorporata
+    group Sequenza di autenticazione
+        actor "Medico" as Doctor
+        participant "AuthController" as Auth
+        participant "Database" as DB
+        
+        Doctor -> Auth: Invia credenziali
+        Auth -> DB: Verifica credenziali
+        DB --> Auth: Risultato verifica
+        Auth --> Doctor: Sessione autenticata
+    end
+}
+
+' Partizione di gestione pazienti
+partition "Selezione Paziente" {
+    :Medico seleziona un paziente;
+    
+    if (Paziente esiste?) then (sì)
+        :Sistema carica dettagli paziente;
+    else (no)
+        :Medico crea nuovo paziente;
+    endif
+}
+
+' Partizione di integrazione Fitbit - Decisione
+partition "Integrazione Fitbit" {
+    :Medico valuta integrazione Fitbit;
+    
+    if (Paziente già collegato a Fitbit?) then (sì)
+        :Sistema mostra stato collegamento;
+    else (no)
+        ' Opzione di collegamento
+        :Medico richiede collegamento Fitbit;
+        
+        ' Riferimento a un diagramma di sequenza
+        ref over Doctor, Auth, DB
+            Processo di Collegamento Fitbit
+        end ref
+        
+        ' Decisione dopo collegamento
+        if (Collegamento riuscito?) then (sì)
+            :Sistema conferma collegamento;
+        else (no)
+            :Sistema mostra errore;
+            :Medico può riprovare più tardi;
+        endif
+    endif
+}
+
+' Partizione di monitoraggio
+partition "Monitoraggio e Analisi" {
+    fork
+        :Medico richiede dati recenti;
+        
+        ' Attività di ottenimento dati
+        ' con dettagli di sd incorporati
+        group Ottenimento dati Fitbit
+            participant "API Controller" as API
+            participant "Health Service" as Health
+            participant "Fitbit API" as FitbitAPI
+            
+            API -> Health: Richiede dati
+            Health -> FitbitAPI: Chiamata API
+            FitbitAPI --> Health: Dati parametri
+            Health --> API: Dati elaborati
+        end
+    fork again
+        :Medico esamina storico;
+        
+        ' Scelta periodo
+        :Medico seleziona periodo\ndi interesse;
+    endfork
+    
+    :Sistema visualizza grafici\ncon i parametri vitali;
+    
+    :Medico analizza i dati;
+}
+
+' Partizione di azioni
+partition "Azioni Cliniche" {
+    fork
+        :Medico aggiunge osservazioni;
+        
+        ' Sequenza di aggiunta osservazione incorporata
+        group Aggiunta osservazione
+            actor "Medico" as Doc
+            participant "ObservationController" as ObsCtrl
+            participant "Database" as DbObs
+            
+            Doc -> ObsCtrl: Invia osservazione
+            ObsCtrl -> DbObs: Salva osservazione
+            DbObs --> ObsCtrl: Conferma
+            ObsCtrl --> Doc: Esito positivo
+        end
+    fork again
+        :Medico aggiunge note cliniche;
+    fork again
+        :Medico genera report;
+        
+        ' Riferimento a un diagramma di attività
+        ref
+            Processo di Generazione Report
+        end ref
+    endfork
+}
+
+' Fine del processo
+stop
+
+@enduml

@@ -1,3 +1,17 @@
+"""
+Flask Application Module.
+
+This module initializes and configures the Flask application and its extensions:
+- SQLAlchemy for database ORM
+- Flask-Migrate for database migrations
+- Flask-JWT-Extended for JSON web token authentication
+- Flask-Login for session-based authentication
+- Flask-Babel for internationalization
+
+It sets up logging, database connections, JWT authentication, user session management,
+localization, and registers all blueprints with the application.
+"""
+
 import os
 import logging
 import sys
@@ -31,6 +45,26 @@ db = SQLAlchemy(model_class=Base)
 
 # Function to configure database URI based on environment
 def get_database_uri():
+    """
+    Configure the database connection URI based on the runtime environment.
+    
+    This function determines whether the application is running in a cloud environment
+    or locally, and returns the appropriate database connection URI. 
+    
+    In cloud environments, it uses PostgreSQL with Unix socket connections.
+    In local environments, it defaults to SQLite or uses the DATABASE_URL environment variable.
+    
+    Returns:
+        str: Database connection URI for SQLAlchemy
+    
+    Environment variables used:
+        CLOUD_RUN_ENVIRONMENT: "true" if running in cloud environment
+        DB_USER: Database username (cloud environment only)
+        DB_PASS: Database password (cloud environment only)
+        DB_NAME: Database name (cloud environment only)
+        INSTANCE_UNIX_SOCKET: Unix socket path (cloud environment only)
+        DATABASE_URL: Database connection string (local environment only)
+    """
     is_cloud_environment = os.environ.get("CLOUD_RUN_ENVIRONMENT", "false").lower() == "true"
     logger.info(f"Running in cloud environment: {is_cloud_environment}")
     
@@ -86,6 +120,19 @@ app.config['LANGUAGES'] = {
 
 # Function to determine which language to use
 def get_locale():
+    """
+    Determine which language to use for the current request.
+    
+    This function implements a language selection strategy for Flask-Babel:
+    1. First checks if user has explicitly set a language preference in their session
+    2. If no session preference exists, detects language from browser's Accept-Language header
+    
+    The function is used as the locale_selector for Flask-Babel to dynamically
+    determine the appropriate language for each request.
+    
+    Returns:
+        str: Language code ('en', 'it', etc.) to use for the current request
+    """
     # First, check if user has explicitly set language in session
     logger.debug(f"get_locale called, session: {session}")
     if 'language' in session:
@@ -107,7 +154,24 @@ babel = Babel(app, locale_selector=get_locale)
 # Custom template filters
 @app.template_filter('format_datetime')
 def format_datetime(value, format='%Y-%m-%d %H:%M:%S'):
-    """Format a datetime to a readable string in UTC+2."""
+    """
+    Format a datetime object to a readable string in UTC+2 timezone.
+    
+    This template filter is used in Jinja templates to format datetime objects
+    consistently throughout the application. It handles timezone conversion
+    from UTC to UTC+2 (Central European Time) and applies the specified format.
+    
+    Args:
+        value (datetime): The datetime object to format
+        format (str, optional): Format string using Python's strftime format codes.
+                                Defaults to '%Y-%m-%d %H:%M:%S'.
+    
+    Returns:
+        str: Formatted datetime string in UTC+2 timezone, or empty string if value is None
+        
+    Example usage in template:
+        {{ patient.created_at|format_datetime('%d %b %Y') }}
+    """
     if value is None:
         return ""
 
@@ -126,7 +190,20 @@ def format_datetime(value, format='%Y-%m-%d %H:%M:%S'):
 # Inject common variables into templates
 @app.context_processor
 def inject_globals():
-    """Inject global variables into templates."""
+    """
+    Inject global variables into all templates.
+    
+    This context processor makes certain variables available to all templates
+    without having to explicitly pass them in each render_template call.
+    This ensures consistency and reduces repetitive code in route handlers.
+    
+    Variables injected:
+        now (datetime): Current datetime, useful for displaying current time
+                       or calculating relative time differences in templates
+    
+    Returns:
+        dict: Dictionary of variables to inject into template context
+    """
     return {
         'now': datetime.now()
     }
@@ -178,15 +255,50 @@ from .models import Doctor
 
 @login_manager.user_loader
 def load_user(user_id):
+    """
+    Load a user from the database for Flask-Login.
+    
+    This function is required by Flask-Login to load a user object from the database
+    based on the user ID stored in the session. It's called automatically by
+    Flask-Login when a page requires authentication.
+    
+    Args:
+        user_id (str): The ID of the user to load, as a string
+        
+    Returns:
+        Doctor: The Doctor object if found, or None if not found
+    """
     return Doctor.query.get(int(user_id))
 
 # Health check endpoint for Cloud Run
 @app.route('/healthz', methods=['GET'])
 def health_check():
-    """Health check endpoint for Cloud Run.
+    """
+    Health check endpoint for monitoring system health.
     
-    Returns a 200 OK status with basic service info if the application is healthy,
-    or a 500 status if there's a database connection issue.
+    This endpoint is used by Cloud Run, Kubernetes, or other orchestration systems
+    to determine if the application is healthy and ready to receive traffic.
+    It performs a basic check by testing database connectivity.
+    
+    Returns:
+        tuple: JSON response with health status and HTTP status code
+            - 200 OK with system information if healthy
+            - 500 Internal Server Error with error details if unhealthy
+            
+    Response format (healthy):
+        {
+            "status": "healthy",
+            "environment": "Cloud Run" or "Local",
+            "timestamp": "2023-05-01T12:34:56.789Z",
+            "version": "0.1.0"
+        }
+        
+    Response format (unhealthy):
+        {
+            "status": "unhealthy",
+            "error": "Error message",
+            "timestamp": "2023-05-01T12:34:56.789Z"
+        }
     """
     try:
         # Check database connection

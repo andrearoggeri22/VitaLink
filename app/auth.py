@@ -1,3 +1,17 @@
+"""
+Authentication Module.
+
+This module handles all authentication related functionality including:
+- User registration and login
+- JWT token creation and validation for API authentication
+- Session-based authentication for web interface
+- Password management and validation
+- Security-related decorators for route protection
+
+It provides both web routes (for form-based authentication) and API endpoints
+for programmatic authentication via JWT tokens.
+"""
+
 import logging
 from datetime import datetime
 from functools import wraps
@@ -15,10 +29,39 @@ from .models import Doctor
 from .utils import (validate_email, is_valid_password)
 
 auth_bp = Blueprint('auth', __name__)
+"""
+Authentication Blueprint.
+
+This blueprint handles all authentication-related routes including:
+- User registration and login/logout flows
+- API authentication via JWT tokens
+- Protected route decorators
+"""
+
 logger = logging.getLogger(__name__)
+"""
+Authentication module logger.
+
+Logger for authentication-related events such as login attempts,
+registrations, password changes, and authentication failures.
+"""
 
 # Registration form
 class RegistrationForm(FlaskForm):
+    """
+    Form for doctor registration.
+    
+    This form collects all necessary information to create a new doctor account,
+    including personal information, contact details, and secure password.
+    
+    Fields:
+        email: Doctor's email address, used for login
+        first_name: Doctor's first name
+        last_name: Doctor's last name
+        specialty: Doctor's medical specialty
+        password: Account password
+        confirm_password: Password confirmation to prevent typos
+    """
     email = EmailField(_('Email'), validators=[DataRequired(), Email()])
     first_name = StringField(_('First Name'), validators=[DataRequired(), Length(min=2, max=100)])
     last_name = StringField(_('Last Name'), validators=[DataRequired(), Length(min=2, max=100)])
@@ -34,6 +77,17 @@ class RegistrationForm(FlaskForm):
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
+    """
+    Doctor registration endpoint.
+    
+    Handles both GET requests (displaying the registration form) and
+    POST requests (processing form submission and creating new doctor account).
+    
+    Returns:
+        For GET: Rendered registration form template
+        For successful POST: Redirect to login page
+        For failed POST: Registration form with error messages
+    """
     if current_user.is_authenticated:
         return redirect(url_for('views.dashboard'))
     
@@ -84,6 +138,19 @@ def register():
     
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
+    """
+    Doctor login endpoint.
+    
+    Handles both GET requests (displaying the login form) and
+    POST requests (processing login attempts and establishing user session).
+    The function performs email and password validation, and creates
+    a Flask-Login session if authentication is successful.
+    
+    Returns:
+        For GET: Rendered login form template
+        For successful POST: Redirect to dashboard
+        For failed POST: Login form with error messages
+    """
     if current_user.is_authenticated:
         return redirect(url_for('views.dashboard'))
         
@@ -113,6 +180,16 @@ def login():
 @auth_bp.route('/logout')
 @login_required
 def logout():
+    """
+    Doctor logout endpoint.
+    
+    Terminates the user's authenticated session in the system.
+    This function requires an active login session (enforced by @login_required),
+    logs the logout event, and redirects the user back to the login page.
+    
+    Returns:
+        Response: Redirect to login page with success message
+    """
     logger.info(f"Doctor {current_user.id} logged out")
     logout_user()
     flash(_('You have been disconnected'), 'success')
@@ -121,6 +198,27 @@ def logout():
 # API endpoints for JWT authentication
 @auth_bp.route('/api/login', methods=['POST'])
 def api_login():
+    """
+    API endpoint for doctor authentication.
+    
+    Validates doctor credentials and issues JWT tokens for API access.
+    This endpoint expects a JSON payload with email and password fields.
+    If authentication is successful, it returns both access and refresh tokens
+    along with the doctor's information.
+    
+    Request Body:
+        email (str): Doctor's email address
+        password (str): Doctor's password
+    
+    Returns:
+        JSON: For successful authentication - tokens and doctor information
+              For failed authentication - error message with appropriate HTTP status
+    
+    Response Status Codes:
+        200: Success
+        400: Missing JSON payload or missing credentials
+        401: Invalid credentials
+    """
     if not request.is_json:
         return jsonify({"error": _("Missing JSON in request")}), 400
     
@@ -151,6 +249,24 @@ def api_login():
 @auth_bp.route('/api/refresh-token', methods=['POST'])
 @jwt_required(refresh=True)
 def refresh_token():
+    """
+    API endpoint for refreshing access tokens.
+    
+    This endpoint generates a new access token using a valid refresh token.
+    The refresh token must be included in the Authorization header as a Bearer token.
+    This mechanism enables extended API sessions without requiring frequent
+    re-authentication with username and password.
+    
+    The @jwt_required(refresh=True) decorator ensures that only refresh tokens
+    are accepted for this endpoint.
+    
+    Returns:
+        JSON: New access token on success
+    
+    Response Status Codes:
+        200: Success
+        401: Invalid or expired refresh token (handled by the JWT decorator)
+    """
     identity = get_jwt_identity()
     access_token = create_access_token(identity=identity)
     
@@ -162,6 +278,26 @@ def refresh_token():
 
 # Decorator for API authentication
 def api_doctor_required(f):
+    """
+    Decorator for API routes that require doctor authentication.
+    
+    This decorator extracts the doctor ID from the JWT token,
+    finds the corresponding doctor in the database, and passes
+    the doctor object to the route handler.
+    
+    Args:
+        f: The function to decorate
+    
+    Returns:
+        decorated: The decorated function that includes authentication check
+    
+    Example usage:
+        @api_bp.route('/endpoint')
+        @api_doctor_required
+        def protected_route(doctor):
+            # doctor object is automatically provided
+            return jsonify({"data": doctor.to_dict()})
+    """
     @wraps(f)
     @jwt_required()
     def decorated(*args, **kwargs):
@@ -177,6 +313,26 @@ def api_doctor_required(f):
 
 # Decorator for web routes that require doctor authentication
 def doctor_required(f):
+    """
+    Decorator for web routes that require doctor authentication.
+    
+    This decorator ensures that the current user is authenticated
+    and is a valid doctor in the system. It relies on Flask-Login
+    for session handling.
+    
+    Args:
+        f: The function to decorate
+    
+    Returns:
+        decorated: The decorated function that includes authentication check
+    
+    Example usage:
+        @views_bp.route('/dashboard')
+        @doctor_required
+        def dashboard():
+            # Only authenticated doctors can access this route
+            return render_template('dashboard.html')
+    """
     @wraps(f)
     @login_required
     def decorated(*args, **kwargs):

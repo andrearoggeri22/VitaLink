@@ -1,3 +1,15 @@
+"""
+Audit Logging Module.
+
+This module provides functionality for tracking and logging user actions in the system.
+It includes routes for viewing audit logs and utility functions for recording various
+types of actions (patient creation, updates, deletions, report generation, etc.).
+
+The audit system helps maintain a complete history of all changes made in the application,
+which is essential for healthcare applications that require high levels of data integrity
+and traceability.
+"""
+
 from datetime import datetime, timedelta
 import logging
 from flask import request, jsonify, Blueprint, render_template
@@ -10,18 +22,40 @@ from .auth import doctor_required
 
 # Initialize logger
 logger = logging.getLogger(__name__)
+"""
+Logger instance for the audit module.
+
+This logger is used throughout the audit module to record application-level
+logs related to audit operations, particularly focusing on error conditions
+during audit logging operations.
+"""
 
 audit_bp = Blueprint('audit', __name__)
+"""
+Flask Blueprint for audit-related routes.
+
+This Blueprint defines routes for viewing and accessing audit logs,
+providing functionality for tracking and monitoring user actions
+within the VitaLink application.
+"""
 
 @audit_bp.route('/audit-logs')
 @login_required
 @doctor_required
 def view_logs():
     """
-    View all audit logs for the current doctor
+    View all audit logs for the current doctor.
+    
+    This route handler renders a page displaying all audit logs associated with the currently
+    logged-in doctor, ordered by timestamp (most recent first). The audit logs provide
+    a comprehensive history of all actions performed by the doctor within the system.
+    
+    Decorators:
+        login_required: Ensures that only authenticated users can access this route
+        doctor_required: Ensures that only users with doctor role can access this route
     
     Returns:
-        Response: HTML page with all audit logs
+        Response: Rendered HTML page containing all audit logs for the current doctor
     """
     # Get all audit logs for the current doctor, ordered by timestamp (most recent first)
     logs = AuditLog.query.filter_by(doctor_id=current_user.id).order_by(
@@ -32,18 +66,30 @@ def view_logs():
 
 def log_action(doctor_id, action_type, entity_type, entity_id, details=None, patient_id=None):
     """
-    Create a new audit log entry.
+    Create a new audit log entry in the system.
+    
+    This is the core function of the audit system that records all actions performed
+    within the VitaLink application. It captures who performed an action (doctor),
+    what action was performed, which entity was affected, when it happened, and 
+    additional contextual information.
     
     Args:
         doctor_id (int): ID of the doctor who performed the action
-        action_type (ActionType): Type of action performed
-        entity_type (EntityType): Type of entity affected
-        entity_id (int): ID of the entity affected
-        details (dict, optional): Additional details about the action
+        action_type (ActionType): Type of action performed (CREATE, UPDATE, DELETE, VIEW, etc.)
+        entity_type (EntityType): Type of entity affected (PATIENT, NOTE, REPORT, etc.)
+        entity_id (int): ID of the entity affected by the action
+        details (dict, optional): Additional details about the action in dictionary format,
+                                 useful for storing contextual information
         patient_id (int, optional): ID of the patient related to the action (for easier querying)
+                                   and for organizing logs by patient
     
     Returns:
-        AuditLog: The created audit log entry or None if an error occurs
+        AuditLog: The created audit log entry object or None if an error occurs during creation
+    
+    Note:
+        - The function automatically captures the IP address of the request if available
+        - If entity_id is None, it will use a temporary default value (0)
+        - Any exceptions during log creation are caught to prevent disruption to the main application flow
     """
     try:
         # Check that entity_id is not None to avoid "not-null constraint" error
@@ -88,7 +134,34 @@ def log_action(doctor_id, action_type, entity_type, entity_id, details=None, pat
 def get_audit_logs():
     """
     Get audit logs filtered by various parameters.
-    Supports filtering by date range, doctor, patient, action type, and entity type.
+    
+    This endpoint retrieves audit logs based on provided filter criteria and returns
+    them either as HTML or JSON depending on the requested format. It provides a 
+    comprehensive search and filtering system for audit trails.
+    
+    Supports filtering by:
+        - Date range (start_date, end_date)
+        - Doctor (doctor_id)
+        - Patient (patient_id)
+        - Action type (create, update, delete, etc.)
+        - Entity type (patient, note, report, etc.)
+    
+    Args (from request.args):
+        start_date (str, optional): Start date for filtering logs (format: YYYY-MM-DD)
+        end_date (str, optional): End date for filtering logs (format: YYYY-MM-DD)
+        doctor_id (str, optional): ID of doctor whose actions should be included
+        patient_id (str, optional): ID of patient whose records were affected
+        action_type (str, optional): Type of action to filter by
+        entity_type (str, optional): Type of entity to filter by
+        format (str, optional): Response format, either 'html' (default) or 'json'
+    
+    Returns:
+        Response: Either a rendered HTML template with filtered logs or a JSON response
+                 containing the filtered logs, depending on the format parameter
+    
+    Decorators:
+        login_required: Ensures that only authenticated users can access this endpoint
+        doctor_required: Ensures that only users with doctor role can access this endpoint
     """
     # Get query parameters
     start_date = request.args.get('start_date')
@@ -272,11 +345,32 @@ def get_audit_logs():
 @doctor_required
 def get_audit_stats():
     """
-    Get statistics from audit logs, such as:
-    - Total number of actions by type
-    - Actions per doctor
-    - Most accessed patients
-    - Activity timeline
+    Get comprehensive statistics derived from audit logs.
+    
+    This endpoint analyzes audit log data and generates various statistical insights
+    that can be used for monitoring system usage, identifying patterns, and ensuring
+    compliance with usage policies.
+    
+    Statistics generated include:
+        - Total number of actions by type (create, update, delete, etc.)
+        - Actions by entity type (patient, note, report, etc.)
+        - Top doctors by activity level
+        - Most accessed patients
+        - Activity timeline showing actions per day
+    
+    Args (from request.args):
+        days (int, optional): Number of days to include in the statistics (default: 30)
+    
+    Returns:
+        Response: JSON response containing the various statistics categories
+        
+    Decorators:
+        login_required: Ensures that only authenticated users can access this endpoint
+        doctor_required: Ensures that only users with doctor role can access this endpoint
+    
+    Note:
+        The timeline is limited to a maximum of 30 days regardless of the days parameter
+        to ensure reasonable response size and performance.
     """
     # Time period filter
     days = request.args.get('days', default=30, type=int)
@@ -420,7 +514,23 @@ def get_audit_stats():
 # Convenience functions to use throughout the application
 
 def log_patient_creation(doctor_id, patient):
-    """Log patient creation."""
+    """
+    Log the creation of a new patient record.
+    
+    This convenience function creates an audit log entry when a doctor creates
+    a new patient record in the system.
+    
+    Args:
+        doctor_id (int): ID of the doctor who created the patient
+        patient (Patient): The Patient object that was created
+    
+    Returns:
+        AuditLog: The created audit log entry or None if an error occurs
+    
+    Note:
+        This function uses log_action internally, setting appropriate action_type
+        and entity_type values for patient creation events.
+    """
     return log_action(
         doctor_id=doctor_id,
         action_type=ActionType.CREATE,
@@ -431,7 +541,24 @@ def log_patient_creation(doctor_id, patient):
     )
 
 def log_patient_update(doctor_id, patient, old_data):
-    """Log patient update."""
+    """
+    Log the update of an existing patient record.
+    
+    This convenience function creates an audit log entry when a doctor updates
+    information in a patient record, storing both the previous and new states.
+    
+    Args:
+        doctor_id (int): ID of the doctor who updated the patient record
+        patient (Patient): The Patient object with updated information
+        old_data (dict): Dictionary containing the patient's data before the update
+    
+    Returns:
+        AuditLog: The created audit log entry or None if an error occurs
+        
+    Note:
+        The details field of the audit log contains both 'old' and 'new' states
+        for comparison and historical tracking purposes.
+    """
     return log_action(
         doctor_id=doctor_id,
         action_type=ActionType.UPDATE,
@@ -445,7 +572,24 @@ def log_patient_update(doctor_id, patient, old_data):
     )
 
 def log_patient_delete(doctor_id, patient):
-    """Log patient deletion."""
+    """
+    Log the deletion of a patient record.
+    
+    This convenience function creates an audit log entry when a doctor deletes
+    a patient record from the system, preserving the patient information for
+    audit purposes even after deletion.
+    
+    Args:
+        doctor_id (int): ID of the doctor who deleted the patient record
+        patient (Patient): The Patient object being deleted
+    
+    Returns:
+        AuditLog: The created audit log entry or None if an error occurs
+        
+    Note:
+        The complete patient data is stored in the details field to maintain
+        a record of the deleted information for compliance and audit purposes.
+    """
     return log_action(
         doctor_id=doctor_id,
         action_type=ActionType.DELETE,
@@ -456,7 +600,23 @@ def log_patient_delete(doctor_id, patient):
     )
 
 def log_vital_creation(doctor_id, vital):
-    """Log vital sign creation."""
+    """
+    Log the creation of a vital sign record.
+    
+    This convenience function creates an audit log entry when a doctor or system
+    adds a new vital sign measurement to a patient's record.
+    
+    Args:
+        doctor_id (int): ID of the doctor who created the vital sign record
+        vital (VitalSign): The VitalSign object that was created
+    
+    Returns:
+        AuditLog: The created audit log entry or None if an error occurs
+        
+    Note:
+        The patient_id is automatically extracted from the vital sign object
+        to enable filtering audit logs by patient.
+    """
     return log_action(
         doctor_id=doctor_id,
         action_type=ActionType.CREATE,
@@ -467,7 +627,24 @@ def log_vital_creation(doctor_id, vital):
     )
 
 def log_note_creation(doctor_id, note):
-    """Log note creation."""
+    """
+    Log the creation of a clinical note.
+    
+    This convenience function creates an audit log entry when a doctor adds
+    a new clinical note to a patient's medical record.
+    
+    Args:
+        doctor_id (int): ID of the doctor who created the note
+        note (Note): The Note object that was created
+    
+    Returns:
+        AuditLog: The created audit log entry or None if an error occurs
+        
+    Note:
+        Clinical notes are important medical record entries that may contain
+        observations, assessments, and treatment plans. Their creation is
+        tracked for medical and legal compliance purposes.
+    """
     return log_action(
         doctor_id=doctor_id,
         action_type=ActionType.CREATE,
@@ -478,7 +655,27 @@ def log_note_creation(doctor_id, note):
     )
 
 def log_report_generation(doctor_id, patient_id, report_type, params=None):
-    """Log report generation."""
+    """
+    Log the generation of a medical report.
+    
+    This convenience function creates an audit log entry when a doctor generates
+    a report from patient data, such as a vital signs summary, progress report,
+    or other clinical document.
+    
+    Args:
+        doctor_id (int): ID of the doctor who generated the report
+        patient_id (int): ID of the patient the report is about
+        report_type (str): Type or name of the report being generated
+        params (dict, optional): Parameters used for report generation such as
+                               date ranges, included data types, etc.
+    
+    Returns:
+        AuditLog: The created audit log entry or None if an error occurs
+        
+    Note:
+        Since reports don't have persistent IDs in the database, a placeholder
+        value of 0 is used for the entity_id.
+    """
     return log_action(
         doctor_id=doctor_id,
         action_type=ActionType.EXPORT,
@@ -492,7 +689,25 @@ def log_report_generation(doctor_id, patient_id, report_type, params=None):
     )
 
 def log_patient_view(doctor_id, patient_id):
-    """Log patient view."""
+    """
+    Log when a doctor views a patient's record.
+    
+    This convenience function creates an audit log entry when a doctor accesses
+    or views a patient's medical record. This is important for privacy compliance
+    and access tracking in healthcare systems.
+    
+    Args:
+        doctor_id (int): ID of the doctor who viewed the patient record
+        patient_id (int): ID of the patient whose record was viewed
+    
+    Returns:
+        AuditLog: The created audit log entry or None if an error occurs
+        
+    Note:
+        Patient record viewing is tracked separately from other operations as
+        it's a common compliance requirement in healthcare systems to monitor
+        who has accessed patient information.
+    """
     return log_action(
         doctor_id=doctor_id,
         action_type=ActionType.VIEW,
@@ -502,7 +717,24 @@ def log_patient_view(doctor_id, patient_id):
     )
 
 def log_health_link_creation(doctor_id, link):
-    """Log health platform link creation."""
+    """
+    Log the creation of a health platform connection link.
+    
+    This convenience function creates an audit log entry when a doctor generates
+    a link that allows a patient to connect their external health platform 
+    (like Fitbit, Apple Health, etc.) to the VitaLink system.
+    
+    Args:
+        doctor_id (int): ID of the doctor who generated the link
+        link (HealthPlatformLink): The HealthPlatformLink object that was created
+    
+    Returns:
+        AuditLog: The created audit log entry or None if an error occurs
+        
+    Note:
+        The details field includes information about the platform type and
+        link expiration date for tracking purposes.
+    """
     return log_action(
         doctor_id=doctor_id,
         action_type=ActionType.GENERATE_LINK,
@@ -516,7 +748,25 @@ def log_health_link_creation(doctor_id, link):
     )
 
 def log_platform_connection(doctor_id, patient, platform_name):
-    """Log health platform connection."""
+    """
+    Log when a patient connects an external health platform to VitaLink.
+    
+    This convenience function creates an audit log entry when a patient successfully
+    connects their external health platform account (like Fitbit, Google Fit, etc.)
+    to the VitaLink system, enabling data sharing.
+    
+    Args:
+        doctor_id (int): ID of the doctor who initiated or supervised the connection
+        patient (Patient): The Patient object whose account is being connected
+        platform_name (str): Name of the external health platform being connected
+    
+    Returns:
+        AuditLog: The created audit log entry or None if an error occurs
+        
+    Note:
+        Since platforms don't have distinct IDs in the system, a placeholder
+        value of 0 is used for the entity_id.
+    """
     return log_action(
         doctor_id=doctor_id,
         action_type=ActionType.CONNECT,
@@ -530,7 +780,24 @@ def log_platform_connection(doctor_id, patient, platform_name):
     )
 
 def log_platform_disconnection(doctor_id, patient, platform_name):
-    """Log health platform disconnection."""
+    """
+    Log when a patient disconnects an external health platform from VitaLink.
+    
+    This convenience function creates an audit log entry when a patient or doctor
+    disconnects an external health platform account from the VitaLink system,
+    stopping the data sharing between systems.
+    
+    Args:
+        doctor_id (int): ID of the doctor who initiated or supervised the disconnection
+        patient (Patient): The Patient object whose account is being disconnected
+        platform_name (str): Name of the external health platform being disconnected
+    
+    Returns:
+        AuditLog: The created audit log entry or None if an error occurs
+        
+    Note:
+        The disconnection timestamp is stored in the details field for future reference.
+    """
     return log_action(
         doctor_id=doctor_id,
         action_type=ActionType.DISCONNECT,
@@ -544,7 +811,28 @@ def log_platform_disconnection(doctor_id, patient, platform_name):
     )
 
 def log_data_sync(doctor_id, patient, platform_name, data_type, result_summary):
-    """Log health platform data synchronization."""
+    """
+    Log the synchronization of data from an external health platform.
+    
+    This convenience function creates an audit log entry when data is synchronized
+    from an external health platform (like Fitbit, Apple Health, etc.) into the 
+    VitaLink system. The log includes details about what was synchronized and the result.
+    
+    Args:
+        doctor_id (int): ID of the doctor who initiated the data synchronization
+        patient (Patient): The Patient object whose data is being synchronized
+        platform_name (str): Name of the external health platform being synchronized with
+        data_type (str): Type of data being synchronized (e.g., 'heart_rate', 'steps', etc.)
+        result_summary (dict): Summary of the synchronization results (e.g., number of records, success status)
+    
+    Returns:
+        AuditLog: The created audit log entry or None if an error occurs
+        
+    Note:
+        This function includes specific error handling to prevent sync failures
+        from disrupting the application flow, as data synchronization is an
+        auxiliary function to the core medical record system.
+    """
     try:
         # Utilizziamo ActionType("sync") per assicurarci di usare il valore minuscolo
         sync_action = ActionType.SYNC
@@ -566,7 +854,24 @@ def log_data_sync(doctor_id, patient, platform_name, data_type, result_summary):
         return None
     
 def log_observation_creation(doctor_id, observation):
-    """Log observation creation."""
+    """
+    Log the creation of a clinical observation.
+    
+    This convenience function creates an audit log entry when a doctor adds
+    a new clinical observation to a patient's record. Observations are structured
+    medical assessments related to specific vital signs or health metrics.
+    
+    Args:
+        doctor_id (int): ID of the doctor who created the observation
+        observation (Observation): The Observation object that was created
+    
+    Returns:
+        AuditLog: The created audit log entry or None if an error occurs
+        
+    Note:
+        The details field includes a truncated version of the observation content
+        if it's lengthy, as well as the vital sign type and relevant dates.
+    """
     return log_action(
         doctor_id=doctor_id,
         action_type=ActionType.CREATE,
@@ -582,7 +887,25 @@ def log_observation_creation(doctor_id, observation):
     )
     
 def log_observation_update(doctor_id, observation, old_data=None):
-    """Log observation update."""
+    """
+    Log the update of an existing clinical observation.
+    
+    This convenience function creates an audit log entry when a doctor modifies
+    an existing clinical observation in a patient's record. This tracks changes
+    made to clinical assessments over time.
+    
+    Args:
+        doctor_id (int): ID of the doctor who updated the observation
+        observation (Observation): The updated Observation object
+        old_data (dict, optional): The previous state of the observation before updates
+    
+    Returns:
+        AuditLog: The created audit log entry or None if an error occurs
+        
+    Note:
+        If old_data is provided, it is included in the details for comparison,
+        allowing for tracking of specific changes made to the observation.
+    """
     details = {
         'vital_type': observation.vital_type.value,
         'content': observation.content[:100] + ('...' if len(observation.content) > 100 else ''),
@@ -604,7 +927,25 @@ def log_observation_update(doctor_id, observation, old_data=None):
     )
     
 def log_observation_delete(doctor_id, observation):
-    """Log observation deletion."""
+    """
+    Log the deletion of a clinical observation.
+    
+    This convenience function creates an audit log entry when a doctor deletes
+    a clinical observation from a patient's record. This ensures that even deleted
+    observations leave an audit trail for compliance purposes.
+    
+    Args:
+        doctor_id (int): ID of the doctor who deleted the observation
+        observation (Observation): The Observation object being deleted
+    
+    Returns:
+        AuditLog: The created audit log entry or None if an error occurs
+        
+    Note:
+        Key information about the deleted observation is preserved in the
+        audit log details, including a truncated version of the content, 
+        the vital type, and the time period it covered.
+    """
     return log_action(
         doctor_id=doctor_id,
         action_type=ActionType.DELETE,
@@ -620,7 +961,25 @@ def log_observation_delete(doctor_id, observation):
     )
     
 def log_note_delete(doctor_id, note):
-    """Log note deletion."""
+    """
+    Log the deletion of a clinical note.
+    
+    This convenience function creates an audit log entry when a doctor deletes
+    a clinical note from a patient's record. This preserves a record of the
+    deletion action for compliance and audit purposes.
+    
+    Args:
+        doctor_id (int): ID of the doctor who deleted the note
+        note (Note): The Note object being deleted
+    
+    Returns:
+        AuditLog: The created audit log entry or None if an error occurs
+        
+    Note:
+        A truncated version of the note content is preserved in the audit log
+        details to maintain context about what was deleted, while the exact
+        deletion time is also recorded.
+    """
     return log_action(
         doctor_id=doctor_id,
         action_type=ActionType.DELETE,
@@ -634,7 +993,24 @@ def log_note_delete(doctor_id, note):
     )
 
 def log_patient_import(doctor_id, patient):
-    """Log patient import."""
+    """
+    Log the import of a patient record from an external source.
+    
+    This convenience function creates an audit log entry when a doctor imports
+    a patient record from another system or data source into VitaLink.
+    
+    Args:
+        doctor_id (int): ID of the doctor who performed the import
+        patient (Patient): The Patient object that was imported
+    
+    Returns:
+        AuditLog: The created audit log entry or None if an error occurs
+        
+    Note:
+        The details field captures key identifiers including the patient's UUID,
+        which is particularly important for tracking imported records that
+        originated from external systems.
+    """
     return log_action(
         doctor_id=doctor_id,
         action_type=ActionType.IMPORT,

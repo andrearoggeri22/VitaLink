@@ -1,0 +1,100 @@
+@startuml VitaLink - State Diagram
+
+' Stile e configurazione
+skinparam state {
+    BackgroundColor #f0f0f0
+    BorderColor #555555
+}
+skinparam arrow {
+    Color #666666
+}
+
+title VitaLink - State Diagram: Ciclo di Vita di un Collegamento Fitbit
+
+' Stato iniziale
+[*] --> LinkCreato : Medico genera link
+
+' Stati
+state LinkCreato {
+    state "Link UUID generato" as LinkGenerated
+    state "Non ancora utilizzato" as NotUsed
+    state "Token non presenti" as NoTokens
+    
+    LinkGenerated -[hidden]-> NotUsed
+    NotUsed -[hidden]-> NoTokens
+}
+
+state LinkInAttesa {
+    state "In attesa di autorizzazione" as WaitingAuth
+}
+
+state LinkAutorizzato {
+    state "Token salvati" as TokensSaved
+    state "Collegamento attivo" as ConnectionActive
+    
+    TokensSaved -[hidden]-> ConnectionActive
+}
+
+state LinkErrore {
+    state "Autorizzazione rifiutata" as AuthRejected
+}
+
+state LinkScaduto {
+    state "Superato tempo massimo" as TimedOut
+}
+
+state TokenScaduto {
+    state "Access token scaduto" as TokenExpired
+    state "Necessario refresh" as NeedsRefresh
+    
+    TokenExpired -[hidden]-> NeedsRefresh
+}
+
+state TokenRinfrescato {
+    state "Nuovi token salvati" as NewTokens
+}
+
+state CollegamentoDisconnesso {
+    state "Disconnesso manualmente" as ManualDisconnect
+}
+
+' Transizioni
+LinkCreato --> LinkInAttesa : Link inviato al paziente
+LinkInAttesa --> LinkAutorizzato : Paziente autorizza
+LinkInAttesa --> LinkErrore : Paziente rifiuta
+LinkInAttesa --> LinkScaduto : Scadenza timeout
+LinkErrore --> [*] : Link non più utilizzabile
+LinkScaduto --> [*] : Link non più utilizzabile
+
+LinkAutorizzato --> TokenScaduto : Access token scade
+TokenScaduto --> TokenRinfrescato : Refresh automatico riuscito
+TokenRinfrescato --> LinkAutorizzato : Collegamento ripristinato
+
+TokenScaduto --> CollegamentoDisconnesso : Refresh token scaduto/invalido
+LinkAutorizzato --> CollegamentoDisconnesso : Medico disconnette
+CollegamentoDisconnesso --> [*] : Collegamento terminato
+
+' Note
+note right of LinkCreato
+  Il link viene creato con un UUID univoco
+  e una data di scadenza (solitamente 24 ore)
+end note
+
+note right of LinkAutorizzato
+  Quando autorizzato, vengono salvati:
+  - Access token
+  - Refresh token
+  - Data di scadenza token
+end note
+
+note right of TokenScaduto
+  L'access token di Fitbit 
+  scade dopo 8 ore
+end note
+
+note right of TokenRinfrescato
+  Il refresh token di Fitbit 
+  è valido per 30 giorni
+end note
+
+@enduml

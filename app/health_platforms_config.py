@@ -1,6 +1,15 @@
 """
-Configuration file for health platform integrations
-Contains API keys, credentials, and other settings needed for integrating with external health platforms
+Health Platforms Configuration Module.
+
+This module contains configuration settings for integrations with external health platforms
+like Fitbit, Google Fit, Apple Health, etc. It defines:
+
+1. API endpoints, credentials and authentication settings
+2. Data mapping from external platforms to internal data models
+3. Configuration for data retrieval, processing, and visualization
+4. Rate limiting and caching parameters
+
+Environment variables are used for sensitive information like client IDs and secrets.
 """
 
 import os

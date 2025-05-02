@@ -1,3 +1,20 @@
+"""
+Views Module.
+
+This module provides the main web interface routes for the VitaLink application.
+It includes routes for:
+
+1. Dashboard and landing pages
+2. Patient management (creation, viewing, editing, deletion)
+3. Patient vital signs visualization
+4. Medical notes management
+5. Reports generation and export
+6. Audit log viewing
+
+All routes in this module use templates for rendering HTML responses and
+integrate with the Flask-Login system for authentication.
+"""
+
 import logging
 from datetime import datetime
 
@@ -20,6 +37,16 @@ logger = logging.getLogger(__name__)
 
 @views_bp.route('/')
 def index():
+    """
+    Landing page route.
+    
+    This route serves as the entry point to the application.
+    Authenticated users are redirected to the dashboard.
+    Unauthenticated users are redirected to the login page.
+    
+    Returns:
+        Response: Redirect to appropriate page based on authentication status
+    """
     if current_user.is_authenticated:
         return redirect(url_for('views.dashboard'))
     return redirect(url_for('auth.login'))
@@ -27,6 +54,15 @@ def index():
 @views_bp.route('/dashboard')
 @login_required
 def dashboard():
+    """
+    Doctor dashboard route.
+    
+    Displays an overview of the doctor's patients, recent activities, and
+    system statistics. This is the main landing page after authentication.
+    
+    Returns:
+        Response: Rendered dashboard template with context data
+    """
     # Get counts for dashboard
     patient_count = current_user.patients.count()
     
@@ -58,6 +94,23 @@ def dashboard():
 @views_bp.route('/patients')
 @login_required
 def patients():
+    """
+    Display list of all patients for the current doctor.
+    
+    This route retrieves and displays all patients associated with the 
+    authenticated doctor. It provides an overview of the doctor's patient list
+    and serves as the main patient management interface.
+    
+    The page includes functionality for:
+    - Viewing patient details
+    - Adding new patients
+    - Importing existing patients by UUID
+    - Searching and filtering patients
+    
+    Returns:
+        Response: Rendered template with list of all patients 
+                 associated with the current doctor
+    """
     # Get all patients for the current doctor
     all_patients = current_user.patients.all()
     return render_template('patients.html', patients=all_patients, now=datetime.now())
@@ -65,7 +118,26 @@ def patients():
 @views_bp.route('/patients/import', methods=['POST'])
 @login_required
 def import_patient():
-    """Import an existing patient by UUID."""
+    """
+    Import an existing patient into doctor's patient list by UUID.
+    
+    This endpoint allows doctors to associate themselves with existing patients
+    in the system by providing the patient's UUID. This is useful when multiple
+    doctors need to collaborate on patient care.
+    
+    Request Body JSON:
+        patient_uuid (str): UUID of the patient to import
+        
+    Returns:
+        JSON response with success message or error details
+        
+    Status Codes:
+        200: Patient imported successfully
+        400: Invalid request data or UUID format
+        404: Patient not found
+        409: Patient already associated with the doctor
+        500: Database or server error
+    """
     data = request.json
     
     # Validate request data
@@ -113,6 +185,26 @@ def import_patient():
 @views_bp.route('/patients/new', methods=['GET', 'POST'])
 @login_required
 def new_patient():
+    """
+    Create a new patient record.
+    
+    This route handles both displaying the new patient form (GET)
+    and processing the form submission (POST).
+    
+    For GET requests:
+        Displays the form to enter patient information
+        
+    For POST requests:
+        Validates and processes form data
+        Creates a new patient record
+        Associates the patient with the current doctor
+        Logs the patient creation in the audit trail
+    
+    Returns:
+        GET: Rendered form template
+        POST (success): Redirect to patient's detail page
+        POST (failure): Redirect back to form with error message
+    """
     if request.method == 'POST':
         first_name = request.form.get('first_name')
         last_name = request.form.get('last_name')
@@ -173,6 +265,24 @@ def new_patient():
 @views_bp.route('/patients/<int:patient_id>')
 @login_required
 def patient_detail(patient_id):
+    """
+    Display detailed information about a specific patient.
+    
+    This route shows comprehensive information about a patient,
+    including personal details and medical notes. It also logs
+    the view action in the audit trail for tracking purposes.
+    
+    Args:
+        patient_id (int): ID of the patient to display
+        
+    Returns:
+        Response: Rendered patient detail template or redirect
+                 if unauthorized
+    
+    Security:
+        Verifies that the current doctor is associated with the patient
+        before displaying any information
+    """
     # Get the patient
     patient = Patient.query.get_or_404(patient_id)
     
@@ -195,6 +305,33 @@ def patient_detail(patient_id):
 @views_bp.route('/patients/<int:patient_id>/edit', methods=['GET', 'POST'])
 @login_required
 def edit_patient(patient_id):
+    """
+    Edit an existing patient's information.
+    
+    This route handles both displaying the patient edit form (GET)
+    and processing form submissions to update patient data (POST).
+    Changes are logged in the audit trail for accountability.
+    
+    Args:
+        patient_id (int): ID of the patient to edit
+        
+    Request Form Data (POST):
+        first_name (str): Patient's updated first name
+        last_name (str): Patient's updated last name
+        date_of_birth (str): Updated date of birth in YYYY-MM-DD format
+        gender (str): Updated gender
+        contact_number (str): Updated contact number
+        address (str): Updated address
+        
+    Returns:
+        GET: Rendered form template with patient data
+        POST (success): Redirect to patient's detail page
+        POST (failure): Redirect back to form with error message
+        
+    Security:
+        Verifies that the current doctor is associated with the patient
+        before allowing any modifications
+    """
     patient = Patient.query.get_or_404(patient_id)
     
     # Check if the current doctor is associated with this patient
@@ -253,6 +390,29 @@ def edit_patient(patient_id):
 @views_bp.route('/patients/<int:patient_id>/delete', methods=['POST'])
 @login_required
 def delete_patient(patient_id):
+    """
+    Delete or disassociate a patient from the current doctor.
+    
+    This endpoint handles two scenarios:
+    1. If the patient is associated with other doctors, only the association
+       between the current doctor and patient is removed
+    2. If this is the last doctor associated with the patient, all patient data
+       (including notes) is completely removed from the system
+    
+    Args:
+        patient_id (int): ID of the patient to delete or disassociate
+        
+    Returns:
+        Response: Redirect to patients list with success or error message
+        
+    Security:
+        Verifies that the current doctor is associated with the patient
+        before allowing deletion or disassociation
+        
+    Notes:
+        This operation logs either a patient deletion or disassociation
+        in the audit trail for accountability
+    """
     patient = Patient.query.get_or_404(patient_id)
     
     # Check if the current doctor is associated with this patient
@@ -307,6 +467,28 @@ def delete_patient(patient_id):
 @views_bp.route('/patients/<int:patient_id>/vitals', methods=['GET'])
 @login_required
 def patient_vitals(patient_id):
+    """
+    Display vital signs data and observations for a patient.
+    
+    This route renders the vital signs visualization page for a specific patient.
+    It displays charts, observations, and provides options for filtering
+    and analyzing the patient's health data.
+    
+    Args:
+        patient_id (int): ID of the patient to display vital signs for
+        
+    Query Parameters:
+        period (int, optional): Time period in days for filtering data, 
+                               defaults to 7 if not specified
+        
+    Returns:
+        Response: Rendered vitals template with patient data and observations
+                 or redirect if unauthorized
+        
+    Security:
+        Verifies that the current doctor is associated with the patient
+        before displaying any information
+    """
     patient = Patient.query.get_or_404(patient_id)
     
     # Check if the current doctor is associated with this patient
@@ -329,7 +511,34 @@ def patient_vitals(patient_id):
 @views_bp.route('/api/patients/<int:patient_id>/vitals')
 @login_required
 def api_patient_vitals(patient_id):
-    """API endpoint to get health platform data in JSON format"""
+    """
+    API endpoint to retrieve patient vital sign data from health platforms.
+    
+    This endpoint fetches data from external health platforms (like Fitbit)
+    that are connected to the patient's account. It returns the data in JSON
+    format for use in charts, reports, and analysis.
+    
+    Args:
+        patient_id (int): ID of the patient to get vital signs for
+        
+    Query Parameters:
+        start_date (str, optional): ISO formatted start date to filter data
+        end_date (str, optional): ISO formatted end date to filter data
+        type (str): Type of vital sign to retrieve (heart_rate, steps, etc.)
+        
+    Returns:
+        JSON: Vital sign data organized by type or error message
+        
+    Status Codes:
+        200: Data retrieved successfully (even if empty)
+        403: Doctor not authorized to access this patient
+        404: Patient has no health platform connection
+        500: Error retrieving data from health platform
+        
+    Security:
+        Verifies that the current doctor is associated with the patient
+        Validates that the patient has a connected health platform
+    """
     patient = Patient.query.get_or_404(patient_id)
     
     # Check if the current doctor is associated with this patient
@@ -341,7 +550,7 @@ def api_patient_vitals(patient_id):
     vital_type = request.args.get('type')
     
     # Check if patient has health platform connection
-    if not patient.fitbit_access_token:
+    if not patient.platform_access_token:
         return jsonify({'error': _('No health platform connection'), 'vital_type': vital_type}), 404
     
     # Import health platform functionality
@@ -368,7 +577,26 @@ def api_patient_vitals(patient_id):
 @views_bp.route('/patients/<int:patient_id>/notes', methods=['POST'])
 @login_required
 def add_note(patient_id):
-    """Add a new note for a patient."""
+    """
+    Add a new medical note for a specific patient.
+    
+    This route handles the creation of a new medical note associated with a patient.
+    The note is created by the authenticated doctor and includes a timestamp.
+    The action is logged in the audit trail for accountability.
+    
+    Args:
+        patient_id (int): ID of the patient to add a note for
+        
+    Request Form Data:
+        content (str): The text content of the medical note
+        
+    Returns:
+        Response: Redirect to patient detail page with success or error message
+        
+    Security:
+        Verifies that the current doctor is associated with the patient
+        before allowing note creation
+    """
     patient = Patient.query.get_or_404(patient_id)
     
     # Check if the current doctor is associated with this patient
@@ -408,7 +636,28 @@ def add_note(patient_id):
 @views_bp.route('/notes/<int:note_id>', methods=['DELETE'])
 @login_required
 def delete_note(note_id):
-    """Delete a note."""
+    """
+    Delete a specific medical note.
+    
+    This API endpoint handles the deletion of medical notes. It implements several
+    security checks to ensure that only authorized doctors can delete notes:
+    1. The doctor must be associated with the patient
+    2. The doctor must be the original author of the note
+    
+    The deletion is logged in the audit trail for accountability.
+    
+    Args:
+        note_id (int): ID of the note to delete
+        
+    Returns:
+        JSON: Success message and deleted note data or error message
+        
+    Status Codes:
+        200: Note deleted successfully
+        403: Not authorized to delete this note
+        404: Note or patient not found
+        500: Database error occurred
+    """
     # Find the note
     note = Note.query.get_or_404(note_id)
     
@@ -453,6 +702,25 @@ def delete_note(note_id):
 @views_bp.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
+    """
+    Doctor profile management route.
+    
+    This route handles both displaying and updating the doctor's profile information:
+    - For GET requests: Displays the doctor's current profile information and a form to update it
+    - For POST requests: Processes form submissions to update the doctor's information
+    
+    The profile update functionality is divided into two parts:
+    1. Updating basic information (name, specialty)
+    2. Changing password (requires current password verification)
+    
+    Returns:
+        GET: Rendered profile template with doctor data
+        POST: Same template with success or error messages based on update result
+        
+    Security:
+        Uses login_required decorator to ensure only authenticated doctors can access
+        Verifies current password before allowing password changes
+    """
     if request.method == 'POST':
         first_name = request.form.get('first_name')
         last_name = request.form.get('last_name')
@@ -489,7 +757,43 @@ def profile():
 @views_bp.route('/patients/<int:patient_id>/specific_report', methods=['GET', 'POST'])
 @login_required
 def create_specific_patient_report(patient_id):
-    """Generate a specific report with selected notes, vital types, charts and observations."""
+    """
+    Generate a customized medical report for a specific patient.
+    
+    This route provides a powerful reporting system that allows doctors to create
+    comprehensive, tailored medical reports with selected:
+    - Medical notes
+    - Vital sign types
+    - Data visualization charts with different time periods
+    - Clinical observations
+    - Custom summary text
+    
+    The generated report is provided as a downloadable PDF file, and the report
+    generation action is logged in the audit trail.
+    
+    Args:
+        patient_id (int): ID of the patient to generate a report for
+        
+    Query Parameters (for GET):
+        vital_type (str, optional): Pre-select specific vital sign type
+        period (str, optional): Pre-select specific time period
+        select_all (bool, optional): Whether to pre-select all available options
+        
+    Request Form Data (for POST):
+        summary (str, optional): Doctor's summary text for the report
+        selected_notes (list): IDs of selected medical notes to include
+        selected_vital_types (list): Types of vital signs to include
+        charts_* (list): Time periods to include for each vital type's charts 
+        selected_observations (list): IDs of observations to include
+        
+    Returns:
+        GET: Rendered report configuration form
+        POST: Downloadable PDF report or redirect with error message
+        
+    Security:
+        Verifies that the current doctor is associated with the patient
+        before allowing report generation
+    """
     patient = Patient.query.get_or_404(patient_id)
     
     # Check if the current doctor is associated with this patient

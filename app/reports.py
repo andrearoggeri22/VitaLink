@@ -1,3 +1,18 @@
+"""
+Reports Generation Module.
+
+This module provides functionality for generating patient health reports in various
+formats (PDF, CSV, etc.). It includes:
+
+1. Functions to create graphical charts for vital signs visualization
+2. Data processing utilities to prepare and format health data for reporting
+3. PDF generation with ReportLab for comprehensive patient reports
+4. CSV export functionality for data analysis
+
+Reports can include multiple vital signs, observations, and trends over configurable
+time periods, providing healthcare professionals with valuable insights.
+"""
+
 import logging
 from datetime import datetime, timedelta
 from io import BytesIO
@@ -13,10 +28,27 @@ from reportlab.graphics.charts.linecharts import HorizontalLineChart
 from reportlab.graphics.charts.legends import Legend
 
 
-# Setup logger
+"""
+Reports module logger.
+
+Logger for tracking report generation events such as PDF creation,
+chart rendering, and any errors that might occur during the reporting process.
+"""
 logger = logging.getLogger(__name__)
 
-# Define days for each period string
+"""
+Mapping of period codes to their duration in days.
+
+This dictionary defines the number of days that each period identifier represents,
+used for calculating date ranges when generating reports and charts.
+
+Keys:
+    '1d': One day
+    '7d': One week (7 days)
+    '1m': One month (approximated as 30 days)
+    '3m': Three months (approximated as 90 days)
+    '1y': One year (approximated as 365 days)
+"""
 PERIOD_DAYS = {
     '1d': 1,
     '7d': 7,
@@ -27,15 +59,22 @@ PERIOD_DAYS = {
 
 def create_vital_chart(vitals_data, period_name, vital_type):
     """
-    Create a chart drawing for a specific vital sign and time period
+    Create a chart drawing for a specific vital sign and time period.
+    
+    This function generates a professionally styled line chart visualization for vital sign data
+    over a specified time period. It handles data sorting, formatting, and limiting the number
+    of data points to ensure readability. The function applies appropriate styling based on the
+    vital sign type including specific colors and formatting.
     
     Args:
-        vitals_data: List of data points
-        period_name: Name of the time period for the chart title
-        vital_type: Type of vital sign
+        vitals_data (list): List of dictionaries containing vital sign data points.
+            Each dictionary must have at least 'value' and 'timestamp' keys.
+        period_name (str): Name of the time period for the chart title (e.g. "Last 7 days").
+        vital_type (str): Type of vital sign from VitalSignType enum values (e.g. "heart_rate").
         
     Returns:
-        Drawing: ReportLab Drawing object containing the chart
+        Drawing: ReportLab Drawing object containing the styled chart ready to be
+                included in a PDF document.
     """
     # Sort data by timestamp
     sorted_data = sorted(vitals_data, key=lambda v: v.get('timestamp', ''))
@@ -152,20 +191,32 @@ def create_vital_chart(vitals_data, period_name, vital_type):
 
 def generate_specific_report(patient, doctor, selected_notes, selected_vital_types, selected_charts, selected_observations, summary=None, language=None):
     """
-    Generate a specific PDF report with only selected data
+    Generate a customized PDF report with only selected patient data.
+    
+    This function creates a professionally formatted PDF report containing only the
+    specifically selected vital signs, observations, and clinical notes for a patient.
+    The report includes patient and doctor information, optional summary text, selected
+    clinical notes, vital sign charts for selected time periods, and relevant medical
+    observations. The PDF is styled with a modern, clean design optimized for medical
+    professionals.
     
     Args:
-        patient: Patient object
-        doctor: Doctor object
-        selected_notes: List of selected Note objects
-        selected_vital_types: List of selected vital types
-        selected_charts: Dict mapping vital type to list of selected time periods
-        selected_observations: List of selected VitalObservation objects
-        summary: Optional summary text provided by the doctor (not saved to database)
-        language: Optional language code override (it/en)
+        patient (Patient): Patient object containing demographic and identification information.
+        doctor (Doctor): Doctor object representing the healthcare professional generating the report.
+        selected_notes (list): List of selected Note objects to include in the report.
+        selected_vital_types (list): List of VitalSignType enum values for which charts should be generated.
+        selected_charts (dict): Dictionary mapping vital type values to lists of time period codes
+                              (e.g. {'heart_rate': ['7d', '1m']}). Controls which charts are included.
+        selected_observations (list): List of VitalObservation objects to include in the report.
+        summary (str, optional): Optional summary text provided by the doctor. This text appears
+                               at the beginning of the report but is not saved to the database.
+        language (str, optional): Optional language code override ('it' or 'en').
+                                If not provided, uses the current Flask-Babel locale.
         
     Returns:
-        BytesIO: PDF file as a binary stream
+        BytesIO: PDF file as a binary stream ready to be served to the client or saved.
+                The PDF follows medical documentation best practices and includes
+                proper headers, footers, and organizational structure.
     """
     buffer = BytesIO()
     
@@ -505,6 +556,22 @@ def generate_specific_report(patient, doctor, selected_notes, selected_vital_typ
     
     # Footer with page numbers
     def add_page_number(canvas, doc):
+        """
+        Add page numbers and footer to each page of the PDF report.
+        
+        This function is called by ReportLab's document build process for each page
+        during PDF generation. It adds a thin grey line above the footer area,
+        page numbers in the format 'Page X / Y' in the bottom right corner,
+        and a timestamp with the application name in the bottom left corner.
+        
+        Args:
+            canvas (Canvas): ReportLab canvas object for drawing on the PDF page
+            doc (SimpleDocTemplate): The PDF document being built, containing page information
+                                    such as current page number and page size
+        
+        Returns:
+            None: The function modifies the canvas in-place
+        """
         canvas.saveState()
         canvas.setFont('Helvetica', 8)
         canvas.setFillColor(colors.grey)

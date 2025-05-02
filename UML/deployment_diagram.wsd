@@ -1,0 +1,126 @@
+@startuml VitaLink - Deployment Diagram
+
+' Stile e configurazione
+skinparam rectangle {
+    BackgroundColor #f0f0f0
+    BorderColor #555555
+}
+skinparam database {
+    BackgroundColor #e0e0e0
+    BorderColor #555555
+}
+skinparam node {
+    BackgroundColor #f8f8f8
+    BorderColor #555555
+}
+skinparam cloud {
+    BackgroundColor #f0f0ff
+    BorderColor #9999cc
+}
+skinparam arrow {
+    Color #666666
+}
+
+title VitaLink - Deployment Diagram
+
+' Dispositivi client
+node "Client Devices" as ClientDevices {
+    rectangle "Web Browser" as WebBrowser {
+        component "HTML/CSS/JS Frontend" as WebFrontend
+    }
+    
+    rectangle "Mobile App" as MobileApp {
+        component "Native Frontend" as MobileFrontend
+    }
+
+    rectangle "API Client" as APIClientDevice {
+        component "Third-party Application" as APIApp
+    }
+}
+
+' Ambiente di sviluppo locale
+node "Development Environment" as DevEnv {
+    rectangle "Developer Machine" as DevMachine {
+        component "VS Code" as VSCode
+        component "Python Interpreter" as PythonDev
+        component "Flask Dev Server" as FlaskDev
+        database "SQLite" as SqliteDev
+    }
+}
+
+' Ambiente di produzione
+node "Production Environment" as ProdEnv {
+    ' Server web
+    node "Web Server" as WebServer {
+        rectangle "NGINX" as Nginx {
+            component "SSL Termination" as SSL
+            component "Static Files" as StaticFiles
+            component "Proxy" as Proxy
+        }
+    }
+    
+    ' Server applicativo
+    node "Application Server" as AppServer {
+        rectangle "Docker Container" as DockerContainer {
+            component "uWSGI" as uWSGI
+            component "Flask Application" as FlaskApp {
+                component "VitaLink Core" as VitaLinkCore
+                component "Extensions" as FlaskExt
+                component "Blueprints" as Blueprints
+            }
+        }
+    }
+    
+    ' Database server
+    node "Database Server" as DBServer {
+        database "PostgreSQL" as PostgreSQL {
+            component "Patient Data" as PatientData
+            component "Clinical Data" as ClinicalData
+            component "Audit Logs" as AuditLogs
+        }
+    }
+}
+
+' Cloud services
+cloud "External Services" as ExternalServices {
+    rectangle "Fitbit API" as FitbitAPI
+    rectangle "Google Fit API" as GoogleFitAPI
+    rectangle "Apple Health API" as AppleHealthAPI
+    rectangle "S3-Compatible Storage" as S3Storage
+}
+
+' Development connections
+PythonDev -right-> FlaskDev : "executes"
+FlaskDev -down-> SqliteDev : "CRUD operations"
+FlaskDev -up-> VSCode : "debugging"
+
+' Client to server connections
+WebBrowser -down-> Nginx : "HTTPS (443)"
+MobileApp -down-> Nginx : "HTTPS (443)"
+APIClientDevice -down-> Nginx : "HTTPS (443)"
+
+' Server internal connections
+Nginx -down-> uWSGI : "uWSGI protocol"
+Proxy -down-> uWSGI : "forwards requests"
+uWSGI -down-> FlaskApp : "executes"
+FlaskApp -down-> PostgreSQL : "SQL (5432)"
+
+' External service connections
+VitaLinkCore -down-> FitbitAPI : "REST API (HTTPS)"
+VitaLinkCore -down-> GoogleFitAPI : "REST API (HTTPS)"
+VitaLinkCore -down-> AppleHealthAPI : "REST API (HTTPS)"
+VitaLinkCore -down-> S3Storage : "HTTPS"
+
+' Cache and message queue
+node "Auxiliary Services" as AuxServices {
+    database "Redis Cache" as Redis {
+        component "Session Store" as Sessions
+        component "Rate Limiting" as RateLimiting
+        component "Data Cache" as DataCache
+    }
+}
+
+' Auxiliary connections
+FlaskApp -left-> Redis : "Caching, Sessions"
+
+@enduml
