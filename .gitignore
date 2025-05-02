@@ -1,19 +1,9 @@
-# Replit specific files
-.replit
-.cache/
-replit.nix
-.config/
-.breakpoints
-.pythonlibs/
-.upm/
-.nix/
-.bash_history
-
 # Env and secrets files
 .env
 *.pem
 *.key
 *.crt
+*.env.cloud
 
 # Cache Python
 __pycache__/
@@ -94,8 +84,6 @@ jspm_packages/
 bower_components/
 
 # Compiled files and build
-*.mo
-*.pot
 .webassets-cache
 public/
 
@@ -108,8 +96,3 @@ public/
 
 migrations/
 instance/
-
-*.env
-*.env.prod
-*.env.dev
-*.env.cloud
