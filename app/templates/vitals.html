@@ -521,20 +521,45 @@
     <script src="{{ url_for('static', filename='js/vitals.js') }}"></script>
     <script src="{{ url_for('static', filename='js/health_platforms.js') }}"></script>
     <script src="{{ url_for('static', filename='js/vitals_charts.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/observations.js') }}"></script>
-    <script>
+    <script src="{{ url_for('static', filename='js/observations.js') }}"></script>    <script>
+    /**
+     * Initialize and set date constraints for observation date fields
+     * 
+     * Sets the maximum allowed date for observation start and end date fields to today's date
+     * to prevent users from selecting future dates for medical observations.
+     */
     const today = new Date();
     const isoToday = today.toISOString().split('T')[0];
     observationEndDate.max = isoToday;
     observationStartDate.max = isoToday;
-    </script>
-    <script>
-    // Base URL for the application
+    </script>    <script>
+    /**
+     * Specific Report Generation JavaScript
+     * 
+     * This script handles the functionality for generating specific patient reports,
+     * including loading notes and observations, managing UI selections, and form submissions.
+     */
+    
+    /**
+     * Base URL for API endpoints
+     * @type {string}
+     */
     const BASE_URL = "{{ url_for('views.index') }}";
-    // Patient ID for the current page
+    
+    /**
+     * Patient ID for the current page
+     * @type {number}
+     */
     const PATIENT_ID = {{ patient.id }};
     
-    // Handle specific report modal
+    /**
+     * Initialize the specific report generation modal
+     * 
+     * Sets up event handlers for the report generation button, loads relevant patient data,
+     * and configures selection controls for vital types, notes, and observations.
+     * 
+     * @listens click - Click event on generateSpecificReportBtn
+     */
     document.getElementById('generateSpecificReportBtn').addEventListener('click', function(e) {
         e.preventDefault();
         
@@ -594,8 +619,15 @@
         const specificReportModal = new bootstrap.Modal(document.getElementById('specificReportModal'));
         specificReportModal.show();
     });
-    
-    // Function to load notes for the specific report modal
+      /**
+     * Load patient notes for the specific report modal
+     * 
+     * Fetches all notes for the current patient via API and populates the notes
+     * selection area in the specific report modal with checkboxes for each note.
+     * Displays appropriate loading states and error messages.
+     * 
+     * @returns {void}
+     */
     function loadNotesForSpecificReport() {
         const notesContainer = document.querySelector('#notesSelectionContainer .notes-list');
         const loadingElement = document.getElementById('notesLoading');
@@ -645,8 +677,15 @@
                 notesContainer.innerHTML = `<p class="text-center text-danger py-2">${translateText('Error loading notes')}</p>`;
             });
     }
-    
-    // Function to load observations for the specific report modal
+      /**
+     * Load patient observations for the specific report modal
+     * 
+     * Fetches all observations for the current patient via API, groups them by vital type,
+     * and populates each vital type's observation list with checkboxes in the specific report modal.
+     * Handles empty states and error conditions appropriately.
+     * 
+     * @returns {void}
+     */
     function loadObservationsForSpecificReport() {
         fetch(`${BASE_URL}api/patients/${PATIENT_ID}/observations`)
             .then(response => response.json())

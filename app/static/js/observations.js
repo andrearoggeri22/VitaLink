@@ -9,13 +9,32 @@
  * - Displaying observations in the UI
  */
 
-// Global variables
+/**
+ * Global variables used throughout the observations management system.
+ */
+
+/**
+ * Array containing all loaded observations for the current patient.
+ * This cache is updated whenever observations are loaded, added, or deleted.
+ * @type {Array}
+ */
 let currentObservations = [];
+
+/**
+ * Reference to the Bootstrap modal instance for observation management.
+ * Used for adding new observations or confirming deletion of existing ones.
+ * @type {bootstrap.Modal|null}
+ */
 let observationModal = null;
+
 // We use the currentVitalType variable defined in vitals_charts.js
 
 /**
- * Initialize observations management
+ * Initialize observations management functionality.
+ * 
+ * Sets up event listeners for UI elements, initializes the observation modal,
+ * and handles interactions for adding, editing, and deleting observations.
+ * This function is called when the DOM is fully loaded, after charts are initialized.
  */
 function initObservations() {
     console.log(translateText('Initializing observations management'));
@@ -66,8 +85,14 @@ function initObservations() {
 }
 
 /**
- * Load all observations for the patient, without period filters
- * All observations will be shown regardless of the period
+ * Load all observations for the current patient.
+ * 
+ * Fetches all observations from the server API without applying period filters.
+ * Displays loading indicators during the fetch operation and updates the UI
+ * with the retrieved observations upon completion.
+ * 
+ * Note: This function loads ALL observations regardless of the selected time period,
+ * and filtering by vital type is handled in the updateObservationsUI function.
  */
 function loadObservations() {
     // Verify that currentVitalType variable is available (defined in vitals_charts.js)
@@ -111,8 +136,13 @@ function loadObservations() {
 }
 
 /**
- * Update the interface with loaded observations
- * @param {Array} observations Array of observations
+ * Update the interface with loaded observations.
+ * 
+ * Filters observations based on the currently selected vital parameter type,
+ * groups them by type, and creates UI elements to display them. Handles empty
+ * states and shows appropriate messages when no observations are available.
+ * 
+ * @param {Array} observations Array of observations to display
  */
 function updateObservationsUI(observations) {
     // Hide loading
@@ -280,8 +310,13 @@ function updateObservationsUI(observations) {
 }
 
 /**
- * Opens modal to add a new observation or delete an existing one
- * @param {Object} observation Existing observation only for potential deletion
+ * Opens modal to add a new observation or delete an existing one.
+ * 
+ * Configures the modal based on the context - either for creating a new observation
+ * or confirming deletion of an existing one. Sets up form fields, populates type options,
+ * and configures default dates based on the current period.
+ * 
+ * @param {Object|null} observation - Existing observation for deletion, or null for adding new
  */
 function openObservationModal(observation = null) {
     // UI elements
@@ -391,7 +426,11 @@ function openObservationModal(observation = null) {
 }
 
 /**
- * Populate options for available vital types
+ * Populate options for available vital types in the observation form.
+ * 
+ * Dynamically populates the vital type dropdown select with options based on 
+ * the currently selected health platform (from vitals_charts.js). Handles errors
+ * gracefully if platform information is not available.
  */
 function populateVitalTypeOptions() {
     const typeSelect = document.getElementById('observationType');
@@ -420,8 +459,13 @@ function populateVitalTypeOptions() {
 }
 
 /**
- * Submit the form to add a new observation
- * @param {HTMLFormElement} form - The form to submit
+ * Submit the form to add a new observation.
+ * 
+ * Validates the form data, including custom validation for date ranges,
+ * prepares the observation data object, and submits it to the server API.
+ * Handles success and error states, showing appropriate feedback to the user.
+ * 
+ * @param {HTMLFormElement} form - The form element containing observation data
  */
 function submitAddObservation(form) {
     if (!form) return;
@@ -527,7 +571,11 @@ function submitAddObservation(form) {
 }
 
 /**
- * Delete an observation
+ * Delete an observation from the system.
+ * 
+ * Retrieves the observation ID from the form, sends a DELETE request to the server API,
+ * and handles the server response. Updates the UI by removing the deleted observation
+ * element upon successful deletion, or shows an error message if deletion fails.
  */
 function deleteObservation() {
     // Get observation ID
@@ -581,9 +629,15 @@ function deleteObservation() {
 }
 
 /**
- * Shows an alert message in the interface
- * @param {string} message Message to display
- * @param {string} type Alert type (success, danger, warning, info)
+ * Shows an alert message in the interface.
+ * 
+ * Creates a Bootstrap alert component with the specified message and styling.
+ * The alert is inserted at the beginning of the main container or nearest container
+ * and includes a close button. Similar to the showToast function but uses alerts 
+ * instead of toasts for more prominent feedback.
+ * 
+ * @param {string} message - Message to display in the alert
+ * @param {string} type - Alert type that determines styling (success, danger, warning, info)
  */
 function showAlert(message, type = 'info') {
     // Create the alert element
@@ -634,18 +688,28 @@ function formatDateForInput(date) {
 }
 
 /**
- * Format a date for the API
- * @param {Date} date Date to format
- * @returns {string} Date formatted as ISO YYYY-MM-DD
+ * Format a date object for API requests.
+ * 
+ * Converts a JavaScript Date object to a string in the ISO YYYY-MM-DD format
+ * that the server API expects for date values. Currently uses formatDateForInput
+ * since both formats are the same.
+ * 
+ * @param {Date} date - Date object to format
+ * @returns {string} Date formatted as ISO YYYY-MM-DD string
  */
 function formatDateForAPI(date) {
     return formatDateForInput(date);
 }
 
 /**
- * Format a date for display
- * @param {Date} date Date to format
- * @returns {string} Date formatted as DD/MM/YYYY
+ * Format a date object for user-friendly display.
+ * 
+ * Converts a JavaScript Date object to a localized string in DD/MM/YYYY format,
+ * which is more human-readable for display in the UI. This format is used in
+ * observation lists and other UI elements.
+ * 
+ * @param {Date} date - Date object to format
+ * @returns {string} Formatted date string in DD/MM/YYYY format
  */
 function formatDateForDisplay(date) {
     const day = String(date.getDate()).padStart(2, '0');
@@ -654,7 +718,15 @@ function formatDateForDisplay(date) {
     return `${day}/${month}/${year}`;
 }
 
-// Initialize when document is loaded
+/**
+ * Initialize observations functionality when the document is fully loaded.
+ * 
+ * Note: This event handler doesn't directly call initObservations() because
+ * the initialization depends on charts being loaded first. The actual
+ * initialization is called from vitals_charts.js after chart initialization.
+ * 
+ * @listens DOMContentLoaded
+ */
 document.addEventListener('DOMContentLoaded', function() {
     // Initialization will be called after charts are loaded
     // See vitals_charts.js

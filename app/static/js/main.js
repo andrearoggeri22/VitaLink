@@ -1,6 +1,15 @@
 // main.js - Common JavaScript functions for the application
 
-// Function to delete a note with confirmation
+/**
+ * Deletes a patient note with confirmation.
+ * 
+ * Displays a confirmation dialog before deleting the note, then sends a DELETE request 
+ * to the server to remove the note. Updates the UI by removing the note element and
+ * displaying a notification upon success.
+ * 
+ * @param {number} noteId - The ID of the note to delete
+ * @param {number} patientId - The ID of the patient associated with the note
+ */
 function deleteNote(noteId, patientId) {
     let confirmMessage = translateText('Are you sure you want to delete this note? This action cannot be undone.');
     let confirmTitle = translateText('Confirm Deletion');
@@ -49,6 +58,15 @@ function deleteNote(noteId, patientId) {
     });
 }
 
+/**
+ * Initializes common UI components when the DOM is fully loaded.
+ * 
+ * Sets up Bootstrap components (tooltips, popovers), configures automatic dismissal
+ * of alert messages, adds confirmation dialogs to delete buttons, and initializes
+ * datetime inputs with the current date and time.
+ * 
+ * @listens DOMContentLoaded
+ */
 document.addEventListener('DOMContentLoaded', function () {
     // Initialize Bootstrap tooltips
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
@@ -100,10 +118,15 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 /**
- * Format a date for display
- * @param {string} dateString - ISO date string
- * @param {boolean} includeTime - Whether to include time in the formatted date
- * @returns {string} Formatted date string
+ * Formats a date string for display in the UI.
+ * 
+ * Converts an ISO date string to a localized date format based on the current
+ * application language (English or Italian). Can optionally include time information
+ * in the formatted output.
+ * 
+ * @param {string} dateString - ISO date string to format
+ * @param {boolean} includeTime - Whether to include time in the formatted date (default: true)
+ * @returns {string} Formatted date string suitable for display in the UI
  */
 function formatDate(dateString, includeTime = true) {
     if (!dateString) return '';
@@ -128,8 +151,13 @@ function formatDate(dateString, includeTime = true) {
 }
 
 /**
- * Generate a random color in HSL format with fixed saturation and lightness
- * @returns {string} HSL color string
+ * Generates a random color in HSL format.
+ * 
+ * Creates visually pleasing colors with random hue but fixed saturation and lightness
+ * values, suitable for charts, UI elements, and data visualizations that need 
+ * distinct but harmonious colors.
+ * 
+ * @returns {string} HSL color string in the format "hsl(hue, 70%, 50%)"
  */
 function getRandomColor() {
     const hue = Math.floor(Math.random() * 360);
@@ -137,9 +165,14 @@ function getRandomColor() {
 }
 
 /**
- * Show a toast notification
- * @param {string} message - Toast message
- * @param {string} type - Toast type (success, danger, warning, info)
+ * Displays a toast notification to provide feedback to the user.
+ * 
+ * Creates a Bootstrap toast element with appropriate styling based on the message type.
+ * The toast appears in the bottom-right corner of the screen and automatically dismisses
+ * after 5 seconds. Dynamically creates the toast container if it doesn't already exist.
+ * 
+ * @param {string} message - The message to display in the toast
+ * @param {string} type - Toast type that determines styling (success, danger, warning, info)
  */
 function showToast(message, type = 'info') {
     // Create toast container if it doesn't exist
@@ -190,12 +223,18 @@ function showToast(message, type = 'info') {
 }
 
 /**
- * Show a confirmation modal
- * @param {string} title - Modal title
- * @param {string} message - Modal message
- * @param {string} confirmButtonText - Text for the confirm button
- * @param {string} cancelButtonText - Text for the cancel button
- * @param {Function} onConfirm - Callback function on confirmation
+ * Displays a customizable confirmation modal dialog.
+ * 
+ * Creates a Bootstrap modal dialog that prompts the user to confirm an action.
+ * The dialog includes a title, message, and customizable button text for both
+ * the confirm and cancel buttons. When the user confirms, executes the provided
+ * callback function.
+ * 
+ * @param {string} title - The title to display in the modal header
+ * @param {string} message - The message to display in the modal body
+ * @param {string} confirmButtonText - Text to display on the confirm button
+ * @param {string} cancelButtonText - Text to display on the cancel button
+ * @param {Function} onConfirm - Callback function to execute when the user confirms
  */
 function showConfirmationModal(title, message, confirmButtonText, cancelButtonText, onConfirm) {
     // Check if a modal already exists
@@ -258,10 +297,16 @@ function showConfirmationModal(title, message, confirmButtonText, cancelButtonTe
 }
 
 /**
- * Create confirmation modal
- * @param {string} title - Modal title
- * @param {string} message - Modal message
- * @param {Function} onConfirm - Callback function on confirmation
+ * Creates a simpler confirmation modal dialog.
+ * 
+ * A streamlined version of showConfirmationModal with fewer parameters, using
+ * default text for buttons. Creates a Bootstrap modal with warning styling,
+ * including an exclamation icon. Used for simple confirmation scenarios where
+ * customized button text is not required.
+ * 
+ * @param {string} title - The title to display in the modal header
+ * @param {string} message - The message to display in the modal body
+ * @param {Function} onConfirm - Callback function to execute when the user confirms
  */
 function confirmAction(title, message, onConfirm) {
     // Check if a modal already exists

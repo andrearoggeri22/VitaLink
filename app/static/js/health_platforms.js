@@ -8,29 +8,94 @@
  * - Displaying data in charts and tables
  */
 
-// Cache for API data to avoid redundant calls
+/**
+ * Cache for API data to avoid redundant calls.
+ * Stores data retrieved from health platforms to reduce API requests and improve performance.
+ * @type {Object}
+ * @format { dataType: { data: Array, timestamp: Date } }
+ */
 const apiDataCache = {
     // Format: { dataType: { data: [...], timestamp: Date } }
 };
 
 // Constants
+/**
+ * Cache expiration time in milliseconds (5 minutes).
+ * Determines how long cached health platform data remains valid before a refresh is needed.
+ * @type {number}
+ */
 const CACHE_EXPIRY_MS = 5 * 60 * 1000; // 5 minutes
+
+/**
+ * Supported health data platforms.
+ * Defines the available health platforms that can be integrated with the application.
+ * @type {Object}
+ */
 const PLATFORMS = {
     FITBIT: 'fitbit',
     GOOGLE_HEALTH_CONNECT: 'google_health_connect',
     APPLE_HEALTH: 'apple_health'
 };
 
-// DOM elements references
+/**
+ * DOM element references for health platform integration.
+ * These references are initialized in the initHealthPlatforms function.
+ */
+
+/**
+ * Reference to the sync button element.
+ * This button toggles between connecting to a platform and disconnecting from it.
+ * @type {HTMLElement|null}
+ */
 let syncButton = null;
+
+/**
+ * Reference to the connect button element (deprecated).
+ * Previously used for connecting to health platforms, now replaced by syncButton.
+ * @type {HTMLElement|null}
+ * @deprecated
+ */
 let connectButton = null;
+
+/**
+ * Reference to the disconnect button element (deprecated).
+ * Previously used for disconnecting from health platforms, now replaced by syncButton.
+ * @type {HTMLElement|null}
+ * @deprecated
+ */
 let disconnectButton = null;
+
+/**
+ * Reference to the modal dialog for health platform selection.
+ * Contains UI for selecting and connecting to health platforms.
+ * @type {bootstrap.Modal|null}
+ */
 let syncModal = null;
+
+/**
+ * Collection of platform selection buttons in the modal.
+ * Each button represents a specific health platform that can be connected.
+ * @type {NodeList|null}
+ */
 let platformButtons = null;
+
+/**
+ * Element that displays connection status messages.
+ * Shows success/error messages during connection attempts.
+ * @type {HTMLElement|null}
+ */
 let connectionStatusElem = null;
 
 /**
- * Initialize the health platforms integration
+ * Initialize the health platforms integration.
+ * 
+ * This function sets up the health platform integration by:
+ * 1. Initializing DOM references for UI elements
+ * 2. Setting up event handlers for user interactions
+ * 3. Checking connection status
+ * 4. Loading health data for charts if available
+ * 
+ * It runs when the DOM is fully loaded.
  */
 function initHealthPlatforms() {
     // Initialize DOM references
@@ -40,23 +105,35 @@ function initHealthPlatforms() {
     disconnectButton = null;
 
     console.log('Initializing health platform...');
-    console.log('Sync button found:', !!syncButton);
-
-    // Find connection details section
+    console.log('Sync button found:', !!syncButton);    /**
+     * Find connection details section in the DOM.
+     * This section contains information about the current health platform connection.
+     * @type {HTMLElement|null}
+     */
     const connectionDetails = document.getElementById('connectionDetails');
     if (connectionDetails) {
         console.log('Connection details section found');
 
-        // Get patient ID from the URL
+        /**
+         * Get patient ID from the URL.
+         * The patient ID is extracted from the current URL path.
+         * @type {number|null}
+         */
         const patientId = getPatientIdFromUrl();
         console.log('Patient ID:', patientId);
 
         if (patientId) {
             // Add click event to the sync button (now handles both connect and disconnect)
             if (syncButton) {
-                console.log('Adding click event listener to sync button');
+                console.log('Adding click event listener to sync button');                /**
+                 * Event handler for sync button clicks.
+                 * Determines whether to show connection or disconnection UI based on current state.
+                 * @listens click
+                 */
                 syncButton.addEventListener('click', function () {
+                    /** @type {boolean} Whether a platform is currently connected */
                     const isConnected = this.getAttribute('data-connected') === 'true';
+                    /** @type {string|null} The currently connected platform */
                     const platform = this.getAttribute('data-platform');
 
                     if (isConnected && platform) {
@@ -72,24 +149,35 @@ function initHealthPlatforms() {
             // Check connection status
             checkConnectionStatus(patientId);
         }
-    }
-
+    }    /**
+     * Check if charts are present on the page and load data for them.
+     * If charts are found, it loads data for the currently active chart first,
+     * then sets up listeners for tab changes.
+     */
     // Check if we need to load data for charts
+    /** @type {NodeList} Collection of chart container elements */
     const chartContainers = document.querySelectorAll('.vitals-chart-container');
     if (chartContainers.length > 0) {
         // Attempt to load data for each chart
+        /** @type {NodeList} Collection of chart tab navigation links */
         const chartTabs = document.querySelectorAll('#vitalsChartTabs .nav-link');
         if (chartTabs.length > 0) {
             // Load data for the active tab first
+            /** @type {HTMLElement|null} Currently active chart tab */
             const activeTab = document.querySelector('#vitalsChartTabs .nav-link.active');
             if (activeTab) {
+                /** @type {string} Type of health data to display (heart_rate, steps, etc.) */
                 const dataType = activeTab.id.replace('tab-', '');
                 loadHealthPlatformData(dataType);
-            }
-
-            // Set up event listeners for tab clicks
+            }            // Set up event listeners for tab clicks
             chartTabs.forEach(tab => {
+                /**
+                 * Event handler for tab changes to load appropriate health data.
+                 * When user switches tabs, loads the relevant health data for the selected tab.
+                 * @listens shown.bs.tab
+                 */
                 tab.addEventListener('shown.bs.tab', function (event) {
+                    /** @type {string} Type of health data to display */
                     const dataType = event.target.id.replace('tab-', '');
                     loadHealthPlatformData(dataType);
                 });
@@ -99,9 +187,14 @@ function initHealthPlatforms() {
 }
 
 /**
- * Check the connection status for the patient
+ * Check the connection status for the patient.
+ * Makes an API call to determine if the patient has an active health platform 
+ * connection, then updates the UI accordingly.
+ * 
  * Updates button text based on connection status and populates connection details
- * @param {number} patientId The patient ID
+ * including platform name, connection date, and expiration date.
+ * 
+ * @param {number} patientId The patient ID to check connection status for
  */
 function checkConnectionStatus(patientId) {
     if (!patientId) {
@@ -197,8 +290,11 @@ function checkConnectionStatus(patientId) {
 }
 
 /**
- * Update button to show "Disconnect" text and styling
- * @param {string} platform Platform name
+ * Update button to show "Disconnect" text and styling.
+ * Changes the sync button appearance and attributes to indicate a connected state,
+ * including changing colors, icon, and storing the connected platform name.
+ * 
+ * @param {string} platform Platform name (e.g., 'fitbit', 'google_health_connect')
  */
 function updateButtonToDisconnect(platform) {
     if (syncButton) {
@@ -211,7 +307,9 @@ function updateButtonToDisconnect(platform) {
 }
 
 /**
- * Update button to show "Health Sync" text and styling
+ * Update button to show "Health Sync" text and styling.
+ * Changes the sync button appearance and attributes to indicate a disconnected state,
+ * including changing button color, icon, and removing the platform data attribute.
  */
 function updateButtonToConnect() {
     if (syncButton) {
@@ -224,8 +322,10 @@ function updateButtonToConnect() {
 }
 
 /**
- * Handle the click on the Sync button
- * This handles both connection and disconnection based on the current state
+ * Handle the click on the Sync button.
+ * This function determines the current connection state and either initiates
+ * a new platform connection or disconnects from the currently connected platform.
+ * The behavior changes based on the current connection state.
  */
 function handleSyncButtonClick() {
     // Get the patient ID from the URL
@@ -249,10 +349,14 @@ function handleSyncButtonClick() {
 }
 
 /**
- * Create a custom confirmation dialog
- * @param {string} title The dialog title
- * @param {string} message The confirmation message
- * @param {Function} confirmCallback Function to call if user confirms
+ * Create a custom confirmation dialog.
+ * Creates a Bootstrap modal dialog for confirming potentially destructive actions,
+ * such as disconnecting from health platforms. The dialog includes a title,
+ * message, and buttons for canceling or confirming the action.
+ * 
+ * @param {string} title The dialog title displayed in the header
+ * @param {string} message The confirmation message displayed in the body
+ * @param {Function} confirmCallback Function to call if user confirms the action
  */
 function createConfirmDialog(title, message, confirmCallback) {
     // Remove any existing confirmation dialogs
@@ -312,9 +416,13 @@ function createConfirmDialog(title, message, confirmCallback) {
 }
 
 /**
- * Disconnect from a health platform
- * @param {number} patientId The patient ID
- * @param {string} platform The platform name
+ * Disconnect from a health platform.
+ * Shows a confirmation dialog before disconnecting to ensure the user wants
+ * to proceed. If confirmed, it calls executeDisconnection to perform the actual
+ * disconnection from the health platform.
+ * 
+ * @param {number} patientId The patient ID associated with the connection
+ * @param {string} platform The platform name to disconnect from (e.g., 'fitbit')
  */
 function disconnectHealthPlatform(patientId, platform) {
     console.log('Disconnecting platform', platform, 'for patient', patientId);
@@ -331,9 +439,13 @@ function disconnectHealthPlatform(patientId, platform) {
 }
 
 /**
- * Execute the disconnection from a health platform
- * @param {number} patientId The patient ID
- * @param {string} platform The platform name
+ * Execute the disconnection from a health platform.
+ * Makes the API call to disconnect the specified health platform from the patient's
+ * account, updates the UI during the process, and handles success/failure states.
+ * This is called after user confirmation from disconnectHealthPlatform.
+ * 
+ * @param {number} patientId The patient ID associated with the connection
+ * @param {string} platform The platform name to disconnect from (e.g., 'fitbit')
  */
 function executeDisconnection(patientId, platform) {
     // Disable buttons during the request
@@ -409,9 +521,13 @@ function executeDisconnection(patientId, platform) {
 }
 
 /**
- * Show a temporary notification
- * @param {string} message The message to display
- * @param {string} type The type of notification (success, danger, etc.)
+ * Show a temporary notification.
+ * Creates and displays a Bootstrap alert component with the specified message
+ * and styling. The notification automatically dismisses itself after 5 seconds.
+ * It's used to provide feedback after operations like connecting or disconnecting.
+ * 
+ * @param {string} message The message to display in the notification
+ * @param {string} type The type of notification that determines styling (success, danger, warning, info)
  */
 function showNotification(message, type) {
     // Instead of creating a custom container, we use the same method as showAlert
@@ -452,8 +568,11 @@ function showNotification(message, type) {
 }
 
 /**
- * Extract patient ID from the current URL
- * @returns {number|null} The patient ID or null if not found
+ * Extract patient ID from the current URL.
+ * Parses the current window URL to extract the patient ID from paths like '/patients/123'.
+ * This allows the script to determine which patient is being viewed without additional API calls.
+ * 
+ * @returns {number|null} The patient ID as a number if found, null otherwise
  */
 function getPatientIdFromUrl() {
     const urlPath = window.location.pathname;
@@ -462,8 +581,12 @@ function getPatientIdFromUrl() {
 }
 
 /**
- * Create a modal dialog for selecting a health platform
- * @param {number} patientId The patient ID
+ * Create a modal dialog for selecting a health platform.
+ * Dynamically generates a Bootstrap modal dialog that allows the user to select
+ * which health platform they want to connect to. The modal contains buttons for
+ * each supported platform and handles the connection process.
+ * 
+ * @param {number} patientId The patient ID to create the health platform connection for
  */
 function createHealthPlatformModal(patientId) {
     // Create modal element if it doesn't exist
@@ -524,9 +647,13 @@ function createHealthPlatformModal(patientId) {
 }
 
 /**
- * Create a health platform connection link
- * @param {number} patientId The patient ID
- * @param {string} platform The platform name (from PLATFORMS enum)
+ * Create a health platform connection link.
+ * Makes an API call to generate a unique connection URL that patients can use
+ * to connect their health platform accounts (like Fitbit) to the VitaLink system.
+ * Displays the generated link in the modal with copy functionality.
+ * 
+ * @param {number} patientId The patient ID to create the connection for
+ * @param {string} platform The platform name (from PLATFORMS enum, e.g., 'fitbit')
  */
 function createHealthPlatformLink(patientId, platform) {
     // Disable platform buttons
@@ -570,23 +697,35 @@ function createHealthPlatformLink(patientId, platform) {
                     <i class="fas fa-check-circle me-2"></i>
                     ${translateText('Link created successfully!')}
                 `;
-
+                const URL = data.connect_url;
                 // Create a new element outside the alert to contain the link
                 // This element won't be affected by any automatic alert behavior
                 const linkContainer = document.createElement('div');
                 linkContainer.id = 'healthPlatformLinkContainer';
-                linkContainer.className = 'mt-3';
+                linkContainer.className = 'mt-3 w-100'; // Add w-100 for full width
+
                 linkContainer.innerHTML = `
+                    <div class="mb-1 d-flex justify-content-center" id="qrcode"></div>
                     <p class="mb-1">${translateText('Connection link (valid for 24 hours):')}</p>
                     <div class="input-group mb-3">
-                        <input type="text" class="form-control" id="linkCopyInput" value="${data.connect_url}" readonly>
+                        <input type="text" class="form-control" id="linkCopyInput" value="${URL}" readonly>
                         <button class="btn btn-outline-primary" type="button" id="copyLinkBtn">
                             <i class="fas fa-copy"></i> ${translateText('Copy')}
                         </button>
                     </div>
                     <small class="text-muted">${translateText('Provide this link to the patient to connect their data collection service.')}</small>
                 `;
-
+                // Insert new container after connectionStatusElem
+                connectionStatusElem.parentNode.insertBefore(linkContainer, connectionStatusElem.nextSibling);
+                // Generate QR code for the connection link
+                if (window.QRCode) {
+                    new QRCode(linkContainer.querySelector('#qrcode'), {
+                        text: URL,
+                        colorDark: '#000',
+                        colorLight: '#fff',
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+                }
                 // Insert new container after connectionStatusElem
                 connectionStatusElem.parentNode.insertBefore(linkContainer, connectionStatusElem.nextSibling);
 
@@ -651,8 +790,12 @@ function createHealthPlatformLink(patientId, platform) {
 }
 
 /**
- * Load data from health platform API for a specific data type
- * @param {string} dataType The type of data to load (heart_rate, steps, etc.)
+ * Load data from health platform API for a specific data type.
+ * Retrieves health data of the specified type from the server, with smart caching
+ * to avoid redundant API calls. Displays loading states and handles error conditions.
+ * Data is fetched for the current patient and passed to the chart rendering function.
+ * 
+ * @param {string} dataType The type of health data to load (e.g., 'heart_rate', 'steps', 'sleep')
  */
 function loadHealthPlatformData(dataType) {
     // Check if we have cached data that's still valid
@@ -728,9 +871,13 @@ function loadHealthPlatformData(dataType) {
 }
 
 /**
- * Populate a chart with data from health platform
- * @param {string} dataType The type of data to display
- * @param {Array} data The data to display
+ * Populate a chart with data from health platform.
+ * Creates or updates a Chart.js visualization with the provided health data.
+ * Handles empty data sets gracefully with informative messages, and adds
+ * a report generation button for exporting chart data as reports.
+ * 
+ * @param {string} dataType The type of health data to display (e.g., 'heart_rate', 'steps')
+ * @param {Array} data Array of data points with timestamp, value, and unit properties
  */
 function populateChart(dataType, data) {
     const chartContainer = document.getElementById(`chart-tab-${dataType}`);
@@ -844,8 +991,11 @@ function populateChart(dataType, data) {
 }
 
 /**
- * Helper function to get CSRF token from cookies
- * @returns {string} CSRF token
+ * Helper function to get CSRF token from cookies.
+ * Extracts the Cross-Site Request Forgery (CSRF) token from browser cookies,
+ * which is required for making secure POST requests to the server.
+ * 
+ * @returns {string} The CSRF token value or an empty string if not found
  */
 function getCSRFToken() {
     const cookieValue = document.cookie
@@ -856,11 +1006,13 @@ function getCSRFToken() {
 }
 
 /**
- * Helper function for text translation
- * Just returns the input text for now
- * Can be expanded later to use actual translations
- * @param {string} text Text to translate
- * @returns {string} Translated text
+ * Helper function for text translation.
+ * A placeholder function for internationalization. Currently returns the input text unchanged,
+ * but this can be expanded later to use actual translation services or dictionaries
+ * to support multiple languages in the interface.
+ * 
+ * @param {string} text Text to be translated
+ * @returns {string} Translated text (currently returns the same text)
  */
 function translateText(text) {
     return text;

@@ -220,7 +220,21 @@
     <script src="{{ url_for('static', filename='js/patients.js') }}"></script>
     <script src="{{ url_for('static', filename='js/health_platforms.js') }}"></script>
     <script>
-// Note deletion handling
+/**
+ * Patient detail page JavaScript functionality
+ * 
+ * This script handles the note deletion functionality on the patient detail page.
+ * It manages modal dialogs, deletion confirmation, and UI updates after deletion.
+ */
+
+/**
+ * Initialize note deletion functionality when DOM is fully loaded
+ * 
+ * Sets up event listeners for delete buttons, handles deletion confirmation,
+ * and updates the UI after successful deletion.
+ * 
+ * @listens DOMContentLoaded
+ */
 document.addEventListener('DOMContentLoaded', function() {
     // Modal references
     const deleteNoteModal = new bootstrap.Modal(document.getElementById('deleteNoteModal'));
@@ -290,7 +304,16 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Function to show alerts
+    /**
+     * Display an alert message to the user
+     * 
+     * Creates and displays a Bootstrap alert with the specified type and message.
+     * The alert is automatically dismissed after 5 seconds.
+     * 
+     * @param {string} type - The Bootstrap alert type ('success', 'danger', 'warning', 'info')
+     * @param {string} message - The message to display in the alert
+     * @returns {void}
+     */
     function showAlert(type, message) {
         const alertDiv = document.createElement('div');
         alertDiv.className = `alert alert-${type} alert-dismissible fade show`;

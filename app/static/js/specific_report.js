@@ -2,6 +2,26 @@
  * Specific Report Form JavaScript
  * Handles UI interactions for patient-specific report generation form.
  */
+
+/**
+ * Initialize the specific report generator interface when the DOM is loaded.
+ * 
+ * This function handles all aspects of the patient-specific report form including:
+ * - Processing URL parameters for pre-selecting vital types and periods
+ * - Implementing "select all" functionality for notes, observations, and vital types
+ * - Managing visual feedback for selected items with highlighting
+ * - Setting up event listeners for select/deselect buttons
+ * - Implementing client-side validation to ensure proper form submission
+ * - Providing error notifications and visual cues for invalid selections
+ * - Handling automatic scrolling to relevant sections
+ * 
+ * The form allows users to generate comprehensive reports that include:
+ * 1. Selected clinical notes
+ * 2. Clinical observations for specific vital parameters
+ * 3. Charts and data visualizations for selected vital parameters and time periods
+ * 
+ * @listens DOMContentLoaded
+ */
 document.addEventListener('DOMContentLoaded', function () {
     // Check if there are URL parameters indicating a specific vital type
     const urlParams = new URLSearchParams(window.location.search);

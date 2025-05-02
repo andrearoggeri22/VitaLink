@@ -333,13 +333,27 @@
 {% block scripts %}
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
     <script>
+    /**
+ * Sets the maximum allowed date to today for date inputs
+ * 
+ * Restricts the date range inputs to prevent selection of future dates,
+ * as audit logs can only exist for past dates.
+ */
     const today = new Date();
     const isoToday = today.toISOString().split('T')[0];
     start_date.max = isoToday;
     end_date.max = isoToday;
     </script>
     <script>
-    // Check date validity when the form is submitted
+    /**
+ * Validates date range selection in the filter form
+ * 
+ * Ensures that the start date is before the end date when filtering audit logs.
+ * Prevents form submission and displays an error message if the validation fails.
+ * Clears the error when the user modifies the input.
+ * 
+ * @listens submit - Form submission event
+ */
     document.getElementById('filterForm').addEventListener('submit', function(event) {
         const startDate = document.getElementById('start_date').value;
         const endDate = document.getElementById('end_date').value;
@@ -358,7 +372,7 @@
             // Force the display of the error message
             startDateInput.reportValidity();
             
-            // Aggiungi un listener per ripulire l'errore quando il valore cambia
+            // Add a listener to clear the error when the value changes
             startDateInput.addEventListener('input', function() {
                 this.setCustomValidity('');
                 const today = new Date();
@@ -369,6 +383,14 @@
         }
     });
     
+/**
+ * Initialize audit log charts when DOM content is fully loaded
+ * 
+ * Fetches statistical data from the server via AJAX and creates visualization charts
+ * for action types, entity types, and activity timeline.
+ * 
+ * @listens DOMContentLoaded
+ */
 document.addEventListener('DOMContentLoaded', function() {
     // Fetch statistics data
     fetch('{{ url_for("audit.get_audit_stats") }}')
@@ -383,6 +405,17 @@ document.addEventListener('DOMContentLoaded', function() {
         .catch(error => console.error('Error fetching audit statistics:', error));
 });
 
+/**
+ * Creates a bar chart displaying the distribution of actions by type
+ * 
+ * Generates a Chart.js bar chart showing the frequency of each action type
+ * (create, update, delete, etc.) with custom colors for each action type.
+ * 
+ * @param {Array} actionStats - Array of objects containing action type statistics
+ * @param {string} actionStats[].type - The action type name
+ * @param {number} actionStats[].count - The number of occurrences of this action type
+ * @returns {void}
+ */
 function createActionTypeChart(actionStats) {
     if (!actionStats || actionStats.length === 0) return;
     
@@ -427,6 +460,17 @@ function createActionTypeChart(actionStats) {
     });
 }
 
+/**
+ * Creates a pie chart displaying the distribution of entities by type
+ * 
+ * Generates a Chart.js pie chart showing the proportion of each entity type
+ * (patient, note, report, etc.) involved in audit logs with custom colors.
+ * 
+ * @param {Array} entityStats - Array of objects containing entity type statistics
+ * @param {string} entityStats[].type - The entity type name
+ * @param {number} entityStats[].count - The number of occurrences of this entity type
+ * @returns {void}
+ */
 function createEntityTypeChart(entityStats) {
     if (!entityStats || entityStats.length === 0) return;
     
@@ -464,6 +508,17 @@ function createEntityTypeChart(entityStats) {
     });
 }
 
+/**
+ * Creates a line chart showing the activity timeline
+ * 
+ * Generates a Chart.js line chart displaying the activity volume over time,
+ * showing trends and patterns in system usage through audit logs.
+ * 
+ * @param {Object} timeline - Object containing timeline data
+ * @param {Array<string>} timeline.labels - Array of date/time labels for the X-axis
+ * @param {Array<number>} timeline.counts - Array of action counts corresponding to each label
+ * @returns {void}
+ */
 function createTimelineChart(timeline) {
     if (!timeline || !timeline.labels || timeline.labels.length === 0) return;
     

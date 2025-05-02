@@ -1,9 +1,27 @@
-// translations.js - Translations for user interface elements in JavaScript
+/**
+ * translations.js - Manages translations for user interface elements in JavaScript
+ * 
+ * This file provides translation functionality for the VitaLink system, supporting
+ * internationalization of the user interface. It includes a main translation function
+ * and predefined text strings for various UI elements.
+ */
 
-// Check the current language
+/**
+ * @type {string}
+ * The current language set in the application.
+ * Retrieved from the 'lang' attribute of the HTML root element or set to 'en' (English) as default
+ */
 const currentLanguage = document.documentElement.lang || 'en';
 
-// Translation function for dynamic texts
+/**
+ * Translates a text from English to the currently set language
+ * 
+ * @param {string} text - The English text to translate
+ * @returns {string} The translated text in the current language or the original text if no translation is available
+ * @example
+ * // Returns "Salva" in Italian or "Save" in English
+ * const buttonLabel = translateText('Save');
+ */
 function translateText(text) {
     // This function allows for future integration with proper translation systems
     // For now, it returns hardcoded translations based on current language
@@ -87,7 +105,7 @@ function translateText(text) {
             'day': 'giorno',
             'days': 'giorni',
             
-            // Messaggi per console.log e debugging
+            // Messages for console and debugging
             'Initializing observations management': 'Inizializzazione gestione osservazioni',
             'Observations loaded:': 'Osservazioni caricate:',
             'updateObservationsUI: observations is not an array': 'updateObservationsUI: observations non è un array',
@@ -99,7 +117,7 @@ function translateText(text) {
             'Deleting observation with ID:': 'Eliminazione osservazione con ID:',
             'Observation deleted:': 'Osservazione eliminata:',
             
-            // Messaggi di errore tecnici
+            // Tecnical error messages
             'Network response was not ok': 'Risposta di rete non valida',
             'Tab container not found': 'Container delle schede non trovato',
             'Canvas not found for chart': 'Canvas non trovato per il grafico',
@@ -113,7 +131,7 @@ function translateText(text) {
             'Period shown: active connection with': 'Periodo mostrato: connessione attiva con',
             'Error hiding period buttons:': 'Errore nel nascondere i pulsanti del periodo:',
             
-            // Altre stringhe da vitals_charts.js
+            // Other messages
             'Initializing vital parameters charts': 'Inizializzazione grafici dei parametri vitali',
             'Loading...': 'Caricamento...',
             'Heart Rate': 'Frequenza cardiaca',
@@ -158,11 +176,52 @@ function translateText(text) {
     return text;
 }
 
-// Translation strings based on language
-let deletePatientTitle, deletePatientMessage, deleteItemMessage, addNoteForText, confirmButtonText, cancelButtonText;
-let dateText, normalText, highText, lowText, saveText, deviceConnectedText, deviceNotConnectedText;
-let noDataText, loadingText, errorText, successText, vitalsChartTitleText;
+/**
+ * Preconfigured translation strings based on language
+ * These variables are used throughout the project for UI elements that require
+ * consistent translations across the application
+ */
 
+/** @type {string} Title for the patient deletion dialog */
+let deletePatientTitle;
+/** @type {string} Confirmation message for patient deletion */
+let deletePatientMessage;
+/** @type {string} Generic confirmation message for item deletion */
+let deleteItemMessage;
+/** @type {string} Text for add note button */
+let addNoteForText;
+/** @type {string} Text for the confirm button */
+let confirmButtonText;
+/** @type {string} Text for the cancel button */
+let cancelButtonText;
+
+/** @type {string} Label for date fields */
+let dateText;
+/** @type {string} Text for normal vital values */
+let normalText;
+/** @type {string} Text for high vital values */
+let highText;
+/** @type {string} Text for low vital values */
+let lowText;
+/** @type {string} Text for the save button */
+let saveText;
+/** @type {string} Connected device message */
+let deviceConnectedText;
+/** @type {string} No device connected message */
+let deviceNotConnectedText;
+
+/** @type {string} No data available message */
+let noDataText;
+/** @type {string} Loading data in progress text */
+let loadingText;
+/** @type {string} Generic error message */
+let errorText;
+/** @type {string} Generic success message */
+let successText;
+/** @type {string} Title for vital parameters charts */
+let vitalsChartTitleText;
+
+// Set variable values based on the current language
 if (currentLanguage === 'it') {
     // Italian translations
     deletePatientTitle = 'Elimina Paziente';
@@ -172,24 +231,24 @@ if (currentLanguage === 'it') {
     confirmButtonText = 'Conferma';
     cancelButtonText = 'Annulla';
     
-    // Data e valori vitali
+    // Data and vital values
     dateText = 'Data';
     normalText = 'Normale';
     highText = 'Alto';
     lowText = 'Basso';
     saveText = 'Salva';
     
-    // Messaggi dispositivo
+    // Devices messages
     deviceConnectedText = 'Dispositivo connesso';
     deviceNotConnectedText = 'Nessun dispositivo connesso';
     
-    // Messaggi generali
+    // General messages
     noDataText = 'Nessun dato disponibile';
     loadingText = 'Caricamento in corso...';
     errorText = 'Si è verificato un errore';
     successText = 'Operazione completata con successo';
     
-    // Grafici
+    // Graphs
     vitalsChartTitleText = 'Andamento dei parametri vitali';
 } else {
     // Default English translations

@@ -1,5 +1,18 @@
-// vitals.js - JavaScript for vital signs functionality
+/**
+ * vitals.js - JavaScript for vital signs functionality
+ * 
+ * This file provides functionality for managing, displaying, and filtering vital signs data
+ * including charts visualization, form handling, and data filtering.
+ */
 
+/**
+ * Initialize all vital signs components when the DOM is fully loaded
+ * 
+ * This event handler serves as the main entry point for the vital signs functionality.
+ * It initializes the form, charts, and filter components in the correct sequence.
+ * 
+ * @listens DOMContentLoaded
+ */
 document.addEventListener('DOMContentLoaded', function () {
     // Initialize the vital signs form
     initVitalsForm();
@@ -13,6 +26,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
 /**
  * Initialize the functionality of the vital signs form
+ * 
+ * Sets up unit auto-selection based on the selected vital sign type and 
+ * implements form validation. The function automatically updates the unit field
+ * when a user selects a different vital sign type.
+ *
+ * @returns {void}
  */
 function initVitalsForm() {
     const vitalsForm = document.getElementById('vitalsForm');
@@ -78,6 +97,12 @@ function initVitalsForm() {
 
 /**
  * Initialize charts for vital signs visualization
+ * 
+ * Fetches vital signs data from the API based on URL parameters (patient ID, date range, type),
+ * and creates interactive line charts for each vital sign type using Chart.js.
+ * Each chart displays the recorded values over time with appropriate formatting and units.
+ * 
+ * @returns {void}
  */
 function initVitalsCharts() {
     // Check if we are on the vital parameters page
@@ -203,8 +228,13 @@ function initVitalsCharts() {
 /**
  * Display a message when no data is available for a chart
  * 
+ * Removes any existing chart from the canvas, hides the canvas element,
+ * and displays a user-friendly message in its place. This provides feedback
+ * to the user when no data is available for visualization.
+ * 
  * @param {HTMLCanvasElement} canvas - The canvas element where the chart would be displayed
- * @param {string} message - The message to display
+ * @param {string} message - The message to display to the user
+ * @returns {void}
  */
 function displayNoDataMessage(canvas, message) {
     // Remove any existing chart
@@ -231,6 +261,13 @@ function displayNoDataMessage(canvas, message) {
 
 /**
  * Initialize the filter functionality for vital signs
+ * 
+ * Sets up the date range filter form with validation logic to ensure
+ * that the start date is not after the end date and vice versa.
+ * Also sets the maximum selectable date to the current date to prevent
+ * future date selection.
+ * 
+ * @returns {void}
  */
 function initVitalsFilter() {
     const filterForm = document.getElementById('vitalsFilterForm');
@@ -264,6 +301,16 @@ function initVitalsFilter() {
 
 /**
  * Format a date object to a readable string
+ * 
+ * Converts a date object or timestamp string into a localized, human-readable
+ * date and time string using the browser's locale settings or the document's
+ * language setting. Includes year, month, day, hour, and minute.
+ * 
+ * @param {Date|string|number} date - Date object or timestamp to format
+ * @returns {string} Formatted date string or empty string if input is invalid
+ * @example
+ * // Returns "May 2, 2025, 10:30 AM" (format depends on locale)
+ * formatDate(new Date(2025, 4, 2, 10, 30));
  */
 function formatDate(date) {
     if (!date) return '';
@@ -273,6 +320,15 @@ function formatDate(date) {
 
 /**
  * Generate a random color for charts
+ * 
+ * Returns a random color from a predefined palette of visually distinct colors
+ * for use in charts and visualizations. The palette includes colors that are
+ * accessible and work well together for data visualization.
+ * 
+ * @returns {string} Hex color code (e.g., "#4285F4")
+ * @example
+ * // Might return "#4285F4" or any other color from the palette
+ * const lineColor = getRandomColor();
  */
 function getRandomColor() {
     const colors = [

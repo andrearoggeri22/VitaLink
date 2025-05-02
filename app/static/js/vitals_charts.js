@@ -101,6 +101,10 @@ function initVitalsCharts() {
 
 /**
  * Check if there's an active connection with a health platform
+ * Queries the server to determine if the current patient has a connected health platform
+ * and updates the UI accordingly
+ * 
+ * @returns {Promise<string|null>} A promise that resolves to the connected platform name or null if none
  */
 function checkPlatformConnection() {
     const patientId = getPatientIdFromUrl();
@@ -134,7 +138,8 @@ function checkPlatformConnection() {
 }
 
 /**
- * Update the interface when there's no active connection
+ * Update the interface when there's no active connection with a health platform
+ * Disables period buttons and displays a message to connect a health platform
  */
 function updateUIForNoConnection() {
     // Show no data message
@@ -174,8 +179,10 @@ function updateUIForNoConnection() {
 }
 
 /**
- * Update the interface when there's an active connection
- * @param {string} platform Name of the connected platform
+ * Update the interface when there's an active connection with a health platform
+ * Enables period buttons, hides the connection message, and loads available data types
+ * 
+ * @param {string} platform Name of the connected platform (e.g., "FITBIT", "GOOGLE")
  */
 function updateUIForConnectedPlatform(platform) {
     try {
@@ -205,7 +212,10 @@ function updateUIForConnectedPlatform(platform) {
 
 /**
  * Load available data types for the specified platform
- * @param {string} platform Platform name
+ * Identifies supported data types for the platform and updates the UI tabs
+ * 
+ * @param {string} platform Platform name (e.g., "FITBIT", "GOOGLE")
+ * @throws {Error} If the platform is not supported
  */
 function loadAvailableDataTypes(platform) {
     platform = platform.toUpperCase();
@@ -240,7 +250,11 @@ function loadAvailableDataTypes(platform) {
 
 /**
  * Update chart tabs with available data types
- * @param {Array} dataTypes Array of available data types
+ * Creates tab navigation and content containers for each data type
+ * 
+ * @param {Array<Object>} dataTypes Array of available data types
+ * @param {string} dataTypes[].id - Unique identifier for the data type
+ * @param {string} dataTypes[].name - Display name of the data type
  */
 function updateChartTabs(dataTypes) {
     const tabsContainer = document.getElementById('vitalsChartTabs');
@@ -328,7 +342,10 @@ function updateChartTabs(dataTypes) {
 
 /**
  * Load data for specific type and display on chart
- * @param {string} typeId Data type ID
+ * Fetches data from the API for the specified type and time period,
+ * then updates both the chart and data table
+ * 
+ * @param {string} typeId Data type ID (e.g., "heart_rate", "steps")
  */
 function loadDataForType(typeId) {
     const patientId = getPatientIdFromUrl();
@@ -369,6 +386,8 @@ function loadDataForType(typeId) {
 
 /**
  * Reload all active charts
+ * Identifies the currently active tab/chart and reloads its data
+ * Also triggers observation reload if that function is available
  */
 function reloadAllCharts() {
     // Find the active tab
@@ -392,7 +411,9 @@ function reloadAllCharts() {
 
 /**
  * Show loading indicator on chart
- * @param {string} typeId Data type ID
+ * Creates or displays a loading overlay with spinner on the chart container
+ * 
+ * @param {string} typeId Data type ID to identify which chart to show loading on
  */
 function showChartLoading(typeId) {
     const chartContainer = document.querySelector(`#chart-tab-${typeId} .vitals-chart-container`);
@@ -431,7 +452,9 @@ function showChartLoading(typeId) {
 
 /**
  * Show error on chart
- * @param {string} typeId Data type ID
+ * Removes loading indicator and creates an error overlay with a retry button
+ * 
+ * @param {string} typeId Data type ID to identify which chart to show error on
  */
 function showChartError(typeId) {
     const chartContainer = document.querySelector(`#chart-tab-${typeId} .vitals-chart-container`);
@@ -484,8 +507,13 @@ function showChartError(typeId) {
 
 /**
  * Update the chart with received data
+ * Finds the data type information, removes loading/error overlays,
+ * and creates or updates the chart with the received data
+ * 
  * @param {string} typeId ID of the data type
- * @param {Array} data Data received from the API
+ * @param {Array<Object>} data Data received from the API
+ * @param {string} data[].timestamp - Timestamp of the measurement
+ * @param {number} data[].value - Value of the measurement
  */
 function updateChart(typeId, data) {
     // Find information about the data type
@@ -527,9 +555,16 @@ function updateChart(typeId, data) {
 
 /**
  * Prepare data for the chart
- * Generate an array of dates for the selected period, even if there's no data for all dates
- * @param {Array} data Data received from the API
+ * Generate an array of dates for the selected period, even if there's no data for all dates.
+ * Maps API data to a consistent format for Chart.js with proper handling of missing values.
+ * 
+ * @param {Array<Object>} data Data received from the API
+ * @param {string} data[].timestamp - Timestamp of the measurement
+ * @param {number} data[].value - Value of the measurement
  * @param {Object} typeInfo Information about the data type
+ * @param {string} typeInfo.name - Display name of the data type
+ * @param {string} typeInfo.unit - Unit of measurement
+ * @param {string} typeInfo.color - Chart color in hex format
  * @returns {Object} Data formatted for Chart.js
  */
 function prepareChartData(data, typeInfo) {
@@ -603,9 +638,15 @@ function prepareChartData(data, typeInfo) {
 
 /**
  * Update or create a chart
+ * Creates a new Chart.js instance or updates an existing one with new data
+ * 
  * @param {string} typeId Data type ID
  * @param {Object} chartData Data formatted for Chart.js
+ * @param {Array<string>} chartData.labels - Labels for the X axis (dates)
+ * @param {Array<Object>} chartData.datasets - Dataset configurations
  * @param {Object} typeInfo Information about the data type
+ * @param {string} typeInfo.name - Display name of the data type
+ * @param {string} typeInfo.unit - Unit of measurement
  */
 function updateOrCreateChart(typeId, chartData, typeInfo) {
     const canvas = document.getElementById(`chart-${typeId}`);
@@ -668,9 +709,13 @@ function updateOrCreateChart(typeId, chartData, typeInfo) {
 
 /**
  * Update the data table in "Vital Parameters History"
- * Shows only data of currently selected type, to sync with chart
+ * Shows only data of currently selected type, to sync with chart.
+ * Sorts data by timestamp (newest first) and limits to 50 entries for performance.
+ * 
  * @param {string} typeId Data type ID
- * @param {Array} data Data received from API
+ * @param {Array<Object>} data Data received from API
+ * @param {string} data[].timestamp - Timestamp of the measurement
+ * @param {number} data[].value - Value of the measurement
  */
 function updateDataTable(typeId, data) {
     const tableBody = document.querySelector('#vitalsDataTable tbody');
