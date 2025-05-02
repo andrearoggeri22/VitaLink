@@ -1,10 +1,12 @@
 import os
 import logging
+import sys
 from datetime import datetime, timedelta, timezone
 
 from flask import Flask, request, session
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy import text
 from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_login import LoginManager
 from flask_jwt_extended import JWTManager
@@ -12,7 +14,12 @@ from flask_babel import Babel
 from flask_migrate import Migrate
 
 # Configure logging
-logging.basicConfig(level=logging.DEBUG)
+logging_level = os.environ.get("LOG_LEVEL", "DEBUG").upper()
+logging.basicConfig(
+    level=getattr(logging, logging_level),
+    format='[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
+    stream=sys.stdout
+)
 logger = logging.getLogger(__name__)
 
 # Define base class for SQLAlchemy models
@@ -22,16 +29,45 @@ class Base(DeclarativeBase):
 # Initialize SQLAlchemy with the Base class
 db = SQLAlchemy(model_class=Base)
 
+# Function to configure database URI based on environment
+def get_database_uri():
+    is_cloud_environment = os.environ.get("CLOUD_RUN_ENVIRONMENT", "false").lower() == "true"
+    logger.info(f"Running in cloud environment: {is_cloud_environment}")
+    
+    if is_cloud_environment:
+        # Cloud SQL with Unix socket connection
+        try:
+            db_user = os.environ["DB_USER"]
+            db_pass = os.environ["DB_PASS"]
+            db_name = os.environ["DB_NAME"]
+            unix_socket_path = os.environ["INSTANCE_UNIX_SOCKET"]
+            
+            # PostgreSQL connection via Unix socket
+            db_uri = f"postgresql://{db_user}:{db_pass}@/{db_name}?host={unix_socket_path}"
+            logger.info(f"Configured Cloud SQL connection via Unix socket at {unix_socket_path}")
+            return db_uri
+        except KeyError as e:
+            logger.error(f"Missing required environment variable for Cloud SQL: {e}")
+            logger.error("Falling back to default connection string")
+    
+    # Default database connection (local environment)
+    db_uri = os.environ.get("DATABASE_URL", "sqlite:///healthcare.db")
+    logger.info(f"Using database connection: {db_uri}")
+    return db_uri
+
 # Create the Flask application
 app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key")
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)  # needed for url_for to generate with https
 
 # Configure SQLAlchemy
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///healthcare.db")
+app.config["SQLALCHEMY_DATABASE_URI"] = get_database_uri()
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_recycle": 300,
     "pool_pre_ping": True,
+    "pool_timeout": 30,
+    "pool_size": 5,
+    "max_overflow": 10,
 }
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
@@ -116,10 +152,26 @@ with app.app_context():
     app.register_blueprint(health_bp)
     app.register_blueprint(observations_bp)
     
-    # Create database tables
-    db.create_all()
+    # Test database connection
+    try:
+        with db.engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+            logger.info("Successfully connected to the database")
+    except Exception as e:
+        logger.error(f"Failed to connect to the database: {e}")
     
-    logger.info("Application initialized successfully")
+    # Create database tables
+    try:
+        db.create_all()
+        logger.info("Database tables created successfully")
+    except Exception as e:
+        logger.error(f"Error creating database tables: {e}")
+    
+    # Log application startup information
+    cloud_env = os.environ.get("CLOUD_RUN_ENVIRONMENT", "false").lower() == "true"
+    env_type = "Cloud Run" if cloud_env else "Local"
+    logger.info(f"Application initialized successfully in {env_type} environment")
+    logger.info(f"Host: {os.environ.get('HOST', '0.0.0.0')}, Port: {os.environ.get('PORT', '5000')}")
 
 # Initialize login manager
 from .models import Doctor
@@ -127,3 +179,34 @@ from .models import Doctor
 @login_manager.user_loader
 def load_user(user_id):
     return Doctor.query.get(int(user_id))
+
+# Health check endpoint for Cloud Run
+@app.route('/healthz', methods=['GET'])
+def health_check():
+    """Health check endpoint for Cloud Run.
+    
+    Returns a 200 OK status with basic service info if the application is healthy,
+    or a 500 status if there's a database connection issue.
+    """
+    try:
+        # Check database connection
+        with db.engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        
+        # Basic system info
+        cloud_env = os.environ.get("CLOUD_RUN_ENVIRONMENT", "false").lower() == "true"
+        env_type = "Cloud Run" if cloud_env else "Local"
+        
+        return {
+            "status": "healthy",
+            "environment": env_type,
+            "timestamp": datetime.now().isoformat(),
+            "version": "0.1.0"
+        }, 200
+    except Exception as e:
+        logger.error(f"Health check failed: {e}")
+        return {
+            "status": "unhealthy",
+            "error": str(e),
+            "timestamp": datetime.now().isoformat()
+        }, 500
