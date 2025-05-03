@@ -670,6 +670,9 @@ function createHealthPlatformLink(patientId, platform) {
             ${translateText('Creating connection link...')}
         `;
     }
+    
+    const Containers = document.querySelectorAll('#healthPlatformLinkContainer');
+    Containers.forEach(container => container.innerHTML = '');
 
     // Make API request to create link
     fetch(`/health/create_link/${patientId}/${platform}`, {
