@@ -98,3 +98,4 @@ migrations/
 instance/
 
 *.pot
+*.mo

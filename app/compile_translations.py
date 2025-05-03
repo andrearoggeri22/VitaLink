@@ -38,7 +38,7 @@ def compile_po_to_mo(po_path: Path) -> bool:
     try:
         mo_path = po_path.with_suffix(".mo")
         polib.pofile(po_path).save_as_mofile(mo_path)
-        print(f"✅  {po_path.relative_to(BASE_DIR)} → {mo_path.name}")
+        print(f"{po_path.relative_to(BASE_DIR)} → {mo_path.name}")
         return True
     except Exception as exc:
         print(f"NO {po_path}: {exc}")
