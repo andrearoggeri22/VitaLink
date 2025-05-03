@@ -424,17 +424,23 @@ function createActionTypeChart(actionStats) {
     const ctx = document.getElementById('actionTypeChart').getContext('2d');
     const labels = actionStats.map(item => item.type.charAt(0).toUpperCase() + item.type.slice(1).toLowerCase());
     const counts = actionStats.map(item => item.count);
-    const colors = [
-        'rgba(54, 162, 235, 0.7)',   // Create - Blue
-        'rgba(255, 206, 86, 0.7)',   // Update - Yellow
-        'rgba(255, 99, 132, 0.7)',   // Delete - Red
-        'rgba(75, 192, 192, 0.7)',   // View - Green
-        'rgba(153, 102, 255, 0.7)',  // Export - Purple
-        'rgba(255, 159, 64, 0.7)',   // Generate Link - Orange
-        'rgba(40, 167, 69, 0.7)',    // Connect - Green
-        'rgba(220, 53, 69, 0.7)',    // Disconnect - Red
-        'rgba(23, 162, 184, 0.7)'    // Sync - Cyan
-    ];
+    
+    // Complete map of all action types available in the system
+    const actionTypeColors = {
+        'CREATE': 'rgba(54, 162, 235, 0.7)',      // Create - Blu
+        'UPDATE': 'rgba(255, 206, 86, 0.7)',      // Update - Yellow
+        'DELETE': 'rgba(255, 99, 132, 0.7)',      // Delete - Red
+        'VIEW': 'rgba(75, 192, 192, 0.7)',        // View - Green
+        'EXPORT': 'rgba(153, 102, 255, 0.7)',     // Export - Purple
+        'GENERATE_LINK': 'rgba(255, 159, 64, 0.7)', // Generate Link - Orange
+        'CONNECT': 'rgba(40, 167, 69, 0.7)',      // Connect - Green Dark
+        'DISCONNECT': 'rgba(220, 53, 69, 0.7)',   // Disconnect - Red Dark
+        'SYNC': 'rgba(23, 162, 184, 0.7)',        // Sync - Cyan
+        'IMPORT': 'rgba(108, 117, 125, 0.7)'      // Import - Grey
+    };
+    
+    // Create an array of colors based on the received data
+    const colors = actionStats.map(item => actionTypeColors[item.type.toUpperCase()] || 'rgba(108, 117, 125, 0.7)');
     
     new Chart(ctx, {
         type: 'bar',
@@ -477,16 +483,22 @@ function createEntityTypeChart(entityStats) {
     if (!entityStats || entityStats.length === 0) return;
     
     const ctx = document.getElementById('entityTypeChart').getContext('2d');
-    const labels = entityStats.map(item => item.type.replace('_', ' ').replace(/(^\w{1})|(\s+\w{1})/g, letter => letter.toUpperCase()));
+    const labels = entityStats.map(item => item.type.replace(/_/g, ' ').replace(/(^\w{1})|(\s+\w{1})/g, letter => letter.toUpperCase()));
     const counts = entityStats.map(item => item.count);
-    const colors = [
-        'rgba(255, 99, 132, 0.7)',     // Patient - Red
-        'rgba(255, 206, 86, 0.7)',     // Note - Yellow
-        'rgba(75, 192, 192, 0.7)',     // Report - Green
-        'rgba(153, 102, 255, 0.7)',    // Health Platform - Purple
-        'rgba(255, 159, 64, 0.7)',     // Health Link - Orange
-        'rgba(54, 162, 235, 0.7)'      // Observation - Blue
-    ];
+    
+    // Complete map of all entity types available in the system
+    const entityTypeColors = {
+        'patient': 'rgba(255, 99, 132, 0.7)',       // Patient - Red
+        'note': 'rgba(255, 206, 86, 0.7)',          // Note - Yellow
+        'report': 'rgba(75, 192, 192, 0.7)',        // Report - Green
+        'health_platform': 'rgba(153, 102, 255, 0.7)', // Health Platform - Purple
+        'health_link': 'rgba(255, 159, 64, 0.7)',   // Health Link - Orange
+        'observation': 'rgba(54, 162, 235, 0.7)',   // Observation - Blue
+        'vital_sign': 'rgba(40, 167, 69, 0.7)'      // Vital Sign - Green Dark
+    };
+    
+    // Create an array of colors based on the received data
+    const colors = entityStats.map(item => entityTypeColors[item.type.toLowerCase()] || 'rgba(108, 117, 125, 0.7)');
     
     new Chart(ctx, {
         type: 'pie',

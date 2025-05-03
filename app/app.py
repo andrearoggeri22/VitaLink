@@ -117,7 +117,6 @@ app.config['LANGUAGES'] = {
     'en': 'English',
     'it': 'Italiano'
 }
-
 # Function to determine which language to use
 def get_locale():
     """
@@ -149,6 +148,7 @@ migrate = Migrate(app, db)
 jwt = JWTManager(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'auth.login'
+login_manager.login_message = ''
 babel = Babel(app, locale_selector=get_locale)
 
 # Custom template filters
