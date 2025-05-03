@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-05-02 22:31+0200\n"
+"POT-Creation-Date: 2025-05-03 02:18+0200\n"
 "PO-Revision-Date: 2025-04-29 09:44+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: it\n"
@@ -166,7 +166,7 @@ msgid "Error during entity filtering: %(error)s"
 msgstr "Errore durante il filtraggio delle entità: %(error)s"
 
 #: app/auth.py:65 app/reports.py:349 app/reports.py:365
-#: app/templates/patients.html:93 app/templates/patients.html:200
+#: app/templates/patients.html:94 app/templates/patients.html:202
 msgid "Email"
 msgstr "Email"
 
@@ -427,6 +427,7 @@ msgid "Missing JSON data in request"
 msgstr "JSON mancante nella richiesta"
 
 #: app/observations.py:141
+#, python-format
 msgid "Required field missing: %(field)s"
 msgstr "Campo obbligatorio mancante: %(field)s"
 
@@ -443,17 +444,17 @@ msgid "Patient Information"
 msgstr "Informazioni Paziente"
 
 #: app/reports.py:345 app/reports.py:363 app/templates/dashboard.html:114
-#: app/templates/patients.html:33 app/templates/patients.html:135
-#: app/templates/patients.html:299
+#: app/templates/patients.html:33 app/templates/patients.html:136
+#: app/templates/patients.html:301
 msgid "Name"
 msgstr "Nome"
 
-#: app/reports.py:346 app/templates/patients.html:301
+#: app/reports.py:346 app/templates/patients.html:303
 msgid "Date of Birth"
 msgstr "Data di Nascita"
 
-#: app/reports.py:347 app/templates/patients.html:68
-#: app/templates/patients.html:173
+#: app/reports.py:347 app/templates/patients.html:69
+#: app/templates/patients.html:175
 msgid "Gender"
 msgstr "Sesso"
 
@@ -486,27 +487,27 @@ msgid "Clinical Notes"
 msgstr "Note Cliniche"
 
 #: app/reports.py:412 app/templates/vitals.html:3 app/templates/vitals.html:15
-#: app/templates/vitals.html:421
+#: app/templates/vitals.html:423
 msgid "Vital Signs"
 msgstr "Parametri Vitali"
 
 #: app/reports.py:465 app/templates/specific_report_form.html:294
-#: app/templates/vitals.html:454
+#: app/templates/vitals.html:456
 msgid "1 Day"
 msgstr "1 Giorno"
 
 #: app/reports.py:467 app/templates/specific_report_form.html:303
-#: app/templates/vitals.html:462
+#: app/templates/vitals.html:464
 msgid "7 Days"
 msgstr "7 Giorni"
 
 #: app/reports.py:469 app/templates/specific_report_form.html:312
-#: app/templates/vitals.html:470
+#: app/templates/vitals.html:472
 msgid "1 Month"
 msgstr "1 Mese"
 
 #: app/reports.py:471 app/templates/specific_report_form.html:321
-#: app/templates/vitals.html:478
+#: app/templates/vitals.html:480
 msgid "3 Months"
 msgstr "3 Mesi"
 
@@ -554,7 +555,7 @@ msgstr "La password è forte"
 msgid "Invalid date format. Please use YYYY-MM-DD"
 msgstr "Formato data non valido. Utilizzare YYYY-MM-DD"
 
-#: app/views.py:219 app/views.py:356
+#: app/views.py:219
 msgid "Name, surname and date of birth are mandatory fields"
 msgstr "Nome, cognome e data di nascita sono campi obbligatori"
 
@@ -578,6 +579,10 @@ msgstr "Non sei autorizzato a visualizzare questo paziente"
 #: app/views.py:342
 msgid "You are not authorized to modify this patient."
 msgstr "Non sei autorizzato a modificare questo paziente"
+
+#: app/views.py:356
+msgid "First name, second name and date of birth are mandatory fields"
+msgstr "Nome, cognome e data di nascita sono campi obbligatori"
 
 #: app/views.py:381
 msgid "Patient information updated successfully"
@@ -653,7 +658,7 @@ msgstr "Log di Audit"
 msgid "VitaLink"
 msgstr "VitaLink"
 
-#: app/templates/audit_logs.html:9 app/templates/patients.html:231
+#: app/templates/audit_logs.html:9 app/templates/patients.html:233
 msgid "Back to Dashboard"
 msgstr "Ritorna a Dashboard"
 
@@ -665,178 +670,178 @@ msgstr "Filtra Log"
 msgid "Start Date"
 msgstr "Data Inizio"
 
-#: app/templates/audit_logs.html:37 app/templates/vitals.html:329
+#: app/templates/audit_logs.html:38 app/templates/vitals.html:330
 msgid "End Date"
 msgstr "Data Fine"
 
-#: app/templates/audit_logs.html:47
+#: app/templates/audit_logs.html:49
 msgid "Action Type"
 msgstr "Tipo Azione"
 
-#: app/templates/audit_logs.html:49
+#: app/templates/audit_logs.html:51
 msgid "All Actions"
 msgstr "Tutte le Azioni"
 
-#: app/templates/audit_logs.html:52
+#: app/templates/audit_logs.html:54
 msgid "Create"
 msgstr "Crea"
 
-#: app/templates/audit_logs.html:56
+#: app/templates/audit_logs.html:58
 msgid "Update"
 msgstr "Aggiorna"
 
-#: app/templates/audit_logs.html:60 app/templates/vitals.html:357
+#: app/templates/audit_logs.html:62 app/templates/vitals.html:359
 msgid "Delete"
 msgstr "Elimina"
 
-#: app/templates/audit_logs.html:64
+#: app/templates/audit_logs.html:66
 msgid "View"
 msgstr "Visualizza"
 
-#: app/templates/audit_logs.html:68
+#: app/templates/audit_logs.html:70
 msgid "Export"
 msgstr "Esporta"
 
-#: app/templates/audit_logs.html:72
+#: app/templates/audit_logs.html:74
 msgid "Generate Link"
 msgstr "Genera Link"
 
-#: app/templates/audit_logs.html:76
+#: app/templates/audit_logs.html:78
 msgid "Connect"
 msgstr "Connetti"
 
-#: app/templates/audit_logs.html:80
+#: app/templates/audit_logs.html:82
 msgid "Disconnect"
 msgstr "Disconnetti"
 
-#: app/templates/audit_logs.html:84
+#: app/templates/audit_logs.html:86
 msgid "Sync"
 msgstr "Sincronizza"
 
-#: app/templates/audit_logs.html:91 app/templates/audit_logs.html:244
+#: app/templates/audit_logs.html:93 app/templates/audit_logs.html:246
 msgid "Entity Type"
 msgstr "Tipo Entità"
 
-#: app/templates/audit_logs.html:93
+#: app/templates/audit_logs.html:95
 msgid "All Entities"
 msgstr "Tutte le Entità"
 
-#: app/templates/audit_logs.html:96 app/templates/audit_logs.html:139
-#: app/templates/audit_logs.html:180 app/templates/audit_logs.html:253
+#: app/templates/audit_logs.html:98 app/templates/audit_logs.html:141
+#: app/templates/audit_logs.html:182 app/templates/audit_logs.html:255
 #: app/templates/dashboard.html:167
 msgid "Patient"
 msgstr "Paziente"
 
-#: app/templates/audit_logs.html:100
+#: app/templates/audit_logs.html:102
 msgid "Note"
 msgstr "Nota"
 
-#: app/templates/audit_logs.html:104
+#: app/templates/audit_logs.html:106
 msgid "Report"
 msgstr "Report"
 
-#: app/templates/audit_logs.html:108 app/templates/vitals.html:32
+#: app/templates/audit_logs.html:110 app/templates/vitals.html:32
 msgid "Health Platform"
 msgstr "Piattaforma Sanitaria"
 
-#: app/templates/audit_logs.html:112
+#: app/templates/audit_logs.html:114
 msgid "Health Link"
 msgstr "Health Link"
 
-#: app/templates/audit_logs.html:116 app/templates/vitals.html:308
+#: app/templates/audit_logs.html:118 app/templates/vitals.html:308
 msgid "Observation"
 msgstr "Osservazione"
 
-#: app/templates/audit_logs.html:124 app/templates/audit_logs.html:236
+#: app/templates/audit_logs.html:126 app/templates/audit_logs.html:238
 msgid "Doctor"
 msgstr "Dottore"
 
-#: app/templates/audit_logs.html:126
+#: app/templates/audit_logs.html:128
 msgid "All Doctors"
 msgstr "Tutti i Dottori"
 
-#: app/templates/audit_logs.html:141
+#: app/templates/audit_logs.html:143
 msgid "All Patients"
 msgstr "Tutti i Pazienti"
 
-#: app/templates/audit_logs.html:154
+#: app/templates/audit_logs.html:156
 msgid "Clear Filters"
 msgstr "Rimuovi Filtri"
 
-#: app/templates/audit_logs.html:156
+#: app/templates/audit_logs.html:158
 msgid "Apply Filters"
 msgstr "Applica Filtri"
 
-#: app/templates/audit_logs.html:166
+#: app/templates/audit_logs.html:168
 msgid "Audit History"
 msgstr "Cronologia Audit"
 
-#: app/templates/audit_logs.html:168
+#: app/templates/audit_logs.html:170
 msgid "Records"
 msgstr "Records"
 
-#: app/templates/audit_logs.html:176 app/templates/vitals.html:259
+#: app/templates/audit_logs.html:178 app/templates/vitals.html:259
 msgid "Date & Time"
 msgstr "Data & Ora"
 
-#: app/templates/audit_logs.html:177
+#: app/templates/audit_logs.html:179
 msgid "User"
 msgstr "Utente"
 
-#: app/templates/audit_logs.html:178 app/templates/audit_logs.html:240
+#: app/templates/audit_logs.html:180 app/templates/audit_logs.html:242
 #: app/templates/dashboard.html:165
 msgid "Action"
 msgstr "Azione"
 
-#: app/templates/audit_logs.html:179 app/templates/dashboard.html:166
+#: app/templates/audit_logs.html:181 app/templates/dashboard.html:166
 msgid "Entity"
 msgstr "Entità"
 
-#: app/templates/audit_logs.html:181 app/templates/audit_logs.html:258
+#: app/templates/audit_logs.html:183 app/templates/audit_logs.html:260
 msgid "IP Address"
 msgstr "Indirizzo IP"
 
-#: app/templates/audit_logs.html:182 app/templates/audit_logs.html:263
+#: app/templates/audit_logs.html:184 app/templates/audit_logs.html:265
 msgid "Details"
 msgstr "Dettagli"
 
-#: app/templates/audit_logs.html:214
+#: app/templates/audit_logs.html:216
 msgid "View Details"
 msgstr "Visualizza Dettagli"
 
-#: app/templates/audit_logs.html:224
+#: app/templates/audit_logs.html:226
 msgid "Audit Log Details"
 msgstr "Dettagli del Registro di Audit"
 
-#: app/templates/audit_logs.html:232
+#: app/templates/audit_logs.html:234
 msgid "Timestamp"
 msgstr "Timestamp"
 
-#: app/templates/audit_logs.html:248
+#: app/templates/audit_logs.html:250
 msgid "Entity ID"
 msgstr "ID Entità"
 
-#: app/templates/audit_logs.html:271
+#: app/templates/audit_logs.html:273
 msgid "Close"
 msgstr "Chiudi"
 
-#: app/templates/audit_logs.html:282
+#: app/templates/audit_logs.html:284
 msgid "No audit logs found matching your criteria"
 msgstr "Nessun registro di Audit trovato che corrisponda ai tuoi criteri"
 
-#: app/templates/audit_logs.html:297
+#: app/templates/audit_logs.html:299
 msgid "Actions by Type"
 msgstr "Azioni per Tipo"
 
-#: app/templates/audit_logs.html:309
+#: app/templates/audit_logs.html:311
 msgid "Entities by Type"
 msgstr "Entità per Tipo"
 
-#: app/templates/audit_logs.html:323
+#: app/templates/audit_logs.html:325
 msgid "Activity Timeline"
 msgstr "Azioni nel Tempo"
 
-#: app/templates/audit_logs.html:442 app/templates/audit_logs.html:532
+#: app/templates/audit_logs.html:444 app/templates/audit_logs.html:534
 msgid "Number of Actions"
 msgstr "Numero di Azioni"
 
@@ -854,7 +859,7 @@ msgid "Dashboard"
 msgstr "Dashboard"
 
 #: app/templates/base.html:54 app/templates/dashboard.html:13
-#: app/templates/patients.html:8 app/templates/patients.html:226
+#: app/templates/patients.html:8 app/templates/patients.html:228
 msgid "Patients"
 msgstr "Pazienti"
 
@@ -928,15 +933,15 @@ msgstr "Pazienti Recenti"
 msgid "View All"
 msgstr "Visualizza Tutto"
 
-#: app/templates/dashboard.html:115 app/templates/patients.html:300
+#: app/templates/dashboard.html:115 app/templates/patients.html:302
 msgid "ID"
 msgstr "ID"
 
-#: app/templates/dashboard.html:116 app/templates/patients.html:302
+#: app/templates/dashboard.html:116 app/templates/patients.html:304
 msgid "Added"
 msgstr "Aggiunto"
 
-#: app/templates/dashboard.html:117 app/templates/patients.html:303
+#: app/templates/dashboard.html:117 app/templates/patients.html:305
 msgid "Actions"
 msgstr "Azioni"
 
@@ -1108,8 +1113,8 @@ msgstr "Numero di Telefono"
 msgid "No email provided"
 msgstr "Nessuna email fornita"
 
-#: app/templates/patient_detail.html:51 app/templates/patients.html:102
-#: app/templates/patients.html:209
+#: app/templates/patient_detail.html:51 app/templates/patients.html:103
+#: app/templates/patients.html:211
 msgid "Address"
 msgstr "Indirizzo"
 
@@ -1142,7 +1147,7 @@ msgid "Delete Patient Record"
 msgstr "Elimina Record Paziente"
 
 #: app/templates/patient_detail.html:108
-#: app/templates/specific_report_form.html:139 app/templates/vitals.html:399
+#: app/templates/specific_report_form.html:139 app/templates/vitals.html:401
 msgid "Medical Notes"
 msgstr "Note mediche"
 
@@ -1175,9 +1180,9 @@ msgstr ""
 "informazioni pertinenti"
 
 #: app/templates/patient_detail.html:187 app/templates/patient_detail.html:215
-#: app/templates/patients.html:107 app/templates/patients.html:214
-#: app/templates/patients.html:273 app/templates/vitals.html:351
-#: app/templates/vitals.html:356 app/templates/vitals.html:511
+#: app/templates/patients.html:108 app/templates/patients.html:216
+#: app/templates/patients.html:275 app/templates/vitals.html:353
+#: app/templates/vitals.html:358 app/templates/vitals.html:513
 msgid "Cancel"
 msgstr "Annulla"
 
@@ -1194,88 +1199,92 @@ msgid "Are you sure you want to delete this note?"
 msgstr "Sei sicuro di voler eliminare questa nota?"
 
 #: app/templates/patients.html:4 app/templates/patients.html:17
-#: app/templates/patients.html:357
+#: app/templates/patients.html:359
 msgid "Add New Patient"
 msgstr "Aggiungi Nuovo Paziente"
 
-#: app/templates/patients.html:6 app/templates/patients.html:119
-#: app/templates/patients.html:332
+#: app/templates/patients.html:6 app/templates/patients.html:120
+#: app/templates/patients.html:334
 msgid "Edit Patient"
 msgstr "Modifica Paziente"
 
-#: app/templates/patients.html:40 app/templates/patients.html:143
-msgid "Name is mandatory"
+#: app/templates/patients.html:40 app/templates/patients.html:144
+msgid "First name is mandatory"
 msgstr "Il nome è obbligatorio"
 
-#: app/templates/patients.html:44 app/templates/patients.html:147
+#: app/templates/patients.html:44
 msgid "Surname"
 msgstr "Cognome"
 
-#: app/templates/patients.html:51 app/templates/patients.html:155
-msgid "Surname is mandatory"
+#: app/templates/patients.html:51 app/templates/patients.html:156
+msgid "Second name is mandatory"
 msgstr "Il cognome è obbligatorio"
 
-#: app/templates/patients.html:57 app/templates/patients.html:161
+#: app/templates/patients.html:57 app/templates/patients.html:162
 msgid "Date of birth"
 msgstr "Data di Nascita"
 
-#: app/templates/patients.html:64 app/templates/patients.html:169
+#: app/templates/patients.html:65 app/templates/patients.html:171
 msgid "Date of birth is mandatory"
 msgstr "La data di nascita è obbligatoria"
 
-#: app/templates/patients.html:72 app/templates/patients.html:176
+#: app/templates/patients.html:73 app/templates/patients.html:178
 msgid "Male"
 msgstr "Maschio"
 
-#: app/templates/patients.html:73 app/templates/patients.html:177
+#: app/templates/patients.html:74 app/templates/patients.html:179
 msgid "Female"
 msgstr "Femmina"
 
-#: app/templates/patients.html:74 app/templates/patients.html:178
+#: app/templates/patients.html:75 app/templates/patients.html:180
 msgid "Other"
 msgstr "Altro"
 
-#: app/templates/patients.html:75 app/templates/patients.html:181
+#: app/templates/patients.html:76 app/templates/patients.html:183
 msgid "Prefer not to say"
 msgstr "Preferisco non rispondere"
 
-#: app/templates/patients.html:82
+#: app/templates/patients.html:83
 msgid "Contact Number"
 msgstr "Numero di Telefono"
 
-#: app/templates/patients.html:109
+#: app/templates/patients.html:110
 msgid "Save Patient"
 msgstr "Salva Paziente"
 
-#: app/templates/patients.html:123 app/templates/vitals.html:22
+#: app/templates/patients.html:124 app/templates/vitals.html:22
 msgid "Back to Patient"
 msgstr "Ritorna a Paziente"
 
-#: app/templates/patients.html:189
+#: app/templates/patients.html:148
+msgid "Second name"
+msgstr "Cognome"
+
+#: app/templates/patients.html:191
 msgid "Phone Number"
 msgstr "Numero di Telefono"
 
-#: app/templates/patients.html:216
+#: app/templates/patients.html:218
 msgid "Update Patient"
 msgstr "Aggiorna Paziente"
 
-#: app/templates/patients.html:235
+#: app/templates/patients.html:237
 msgid "Add new Patient"
 msgstr "Aggiungi nuovo Paziente"
 
-#: app/templates/patients.html:238 app/templates/patients.html:251
+#: app/templates/patients.html:240 app/templates/patients.html:253
 msgid "Import Patient by UUID"
 msgstr "Importa Paziente tramite UUID"
 
-#: app/templates/patients.html:261
+#: app/templates/patients.html:263
 msgid "Patient UUID"
 msgstr "UUID paziente"
 
-#: app/templates/patients.html:266
+#: app/templates/patients.html:268
 msgid "Enter patient UUID..."
 msgstr "Inserisci UUID paziente..."
 
-#: app/templates/patients.html:269
+#: app/templates/patients.html:271
 msgid ""
 "Enter the UUID of the patient you want to import. The patient will be "
 "linked to your account."
@@ -1283,31 +1292,31 @@ msgstr ""
 "Inserisci l'UUID del paziente che desideri importare. Il paziente sarà "
 "collegato al tuo account"
 
-#: app/templates/patients.html:275
+#: app/templates/patients.html:277
 msgid "Import Patient"
 msgstr "Importa Paziente"
 
-#: app/templates/patients.html:293
+#: app/templates/patients.html:295
 msgid "Search by name or ID..."
 msgstr "Cerca per nome o ID..."
 
-#: app/templates/patients.html:322
+#: app/templates/patients.html:324
 msgid "View Patient"
 msgstr "Visualizza Paziente"
 
-#: app/templates/patients.html:327
+#: app/templates/patients.html:329
 msgid "View Vitals"
 msgstr "Visualizza Parametri Vitali"
 
-#: app/templates/patients.html:339
+#: app/templates/patients.html:341
 msgid "Delete Patient"
 msgstr "Elimina Paziente"
 
-#: app/templates/patients.html:354
+#: app/templates/patients.html:356
 msgid "No patient found"
 msgstr "Nessun paziente trovato"
 
-#: app/templates/patients.html:366
+#: app/templates/patients.html:368
 msgid "No patients match your search"
 msgstr "Nessun paziente corrisponde alla tua ricerca"
 
@@ -1331,7 +1340,7 @@ msgstr "Non  puoi cambiare il tuo indirizzo email"
 msgid "Update Profile"
 msgstr "Aggiorna Profilo"
 
-#: app/templates/profile.html:62 app/templates/profile.html:94
+#: app/templates/profile.html:62 app/templates/profile.html:96
 msgid "Change Password"
 msgstr "Cambia Password"
 
@@ -1339,17 +1348,19 @@ msgstr "Cambia Password"
 msgid "Current Password"
 msgstr "Password Corrente"
 
-#: app/templates/profile.html:75
+#: app/templates/profile.html:76
 msgid "New Password"
 msgstr "Nuova Password"
 
-#: app/templates/profile.html:82 app/templates/register.html:56
+#: app/templates/profile.html:83 app/templates/register.html:56
 msgid ""
 "Password must be at least 8 characters and include uppercase and special "
-"characters."
-msgstr "La password deve contenere almeno 8 caratteri e includere lettere maiuscole e caratteri speciali."
+"characters and a number."
+msgstr ""
+"La password deve contenere almeno 8 caratteri e includere lettere "
+"maiuscole e caratteri speciali e numeri."
 
-#: app/templates/profile.html:85
+#: app/templates/profile.html:86
 msgid "Confirm New Password"
 msgstr "Conferma Nuova Password"
 
@@ -1390,7 +1401,7 @@ msgstr "Genera Report Paziente"
 msgid "Create Custom Report"
 msgstr "Crea Report Personalizzato"
 
-#: app/templates/specific_report_form.html:121 app/templates/vitals.html:388
+#: app/templates/specific_report_form.html:121 app/templates/vitals.html:390
 msgid "Summary (Optional)"
 msgstr "Riepilogo (Facoltativo)"
 
@@ -1412,8 +1423,8 @@ msgstr "CONTENUTO DEL REPORT"
 
 #: app/templates/specific_report_form.html:142
 #: app/templates/specific_report_form.html:188
-#: app/templates/specific_report_form.html:246 app/templates/vitals.html:405
-#: app/templates/vitals.html:427
+#: app/templates/specific_report_form.html:246 app/templates/vitals.html:407
+#: app/templates/vitals.html:429
 msgid "Select All"
 msgstr "Seleziona Tutti"
 
@@ -1464,7 +1475,7 @@ msgid "Health Sync"
 msgstr "Health Sync"
 
 #: app/templates/vitals.html:42 app/templates/vitals.html:232
-#: app/templates/vitals.html:414 app/templates/vitals.html:499
+#: app/templates/vitals.html:416 app/templates/vitals.html:501
 msgid "Loading..."
 msgstr "Caricamento..."
 
@@ -1560,7 +1571,7 @@ msgstr "Osservazioni per il Periodo Corrente"
 msgid "Add Observation"
 msgstr "Aggiungi Osservazione"
 
-#: app/templates/vitals.html:234 app/templates/vitals.html:501
+#: app/templates/vitals.html:234 app/templates/vitals.html:503
 msgid "Loading observations..."
 msgstr "Caricamento osservazioni..."
 
@@ -1592,29 +1603,29 @@ msgstr "Caricamento dati..."
 msgid "Vital Parameter"
 msgstr "Parametro Vitale"
 
-#: app/templates/vitals.html:343
+#: app/templates/vitals.html:345
 msgid "Are you sure you want to delete this observation?"
 msgstr "Sei sicuro di voler eliminare questa osservazione?"
 
-#: app/templates/vitals.html:352
+#: app/templates/vitals.html:354
 msgid "Save"
 msgstr "Salva"
 
-#: app/templates/vitals.html:375
+#: app/templates/vitals.html:377
 msgid "Generate Specific Report"
 msgstr "Genera Report Specifico"
 
-#: app/templates/vitals.html:385
+#: app/templates/vitals.html:387
 msgid "Create a customized report by selecting specific elements to include:"
 msgstr ""
 "Crea un report personalizzato selezionando gli elementi specifici da "
 "includere:"
 
-#: app/templates/vitals.html:393
+#: app/templates/vitals.html:395
 msgid "Add an optional summary for this report."
 msgstr "Aggiungi un riepilogo facoltativo per questo report"
 
-#: app/templates/vitals.html:395
+#: app/templates/vitals.html:397
 msgid ""
 "This summary will only be included in this report and will not be saved "
 "for future reference."
@@ -1622,35 +1633,35 @@ msgstr ""
 "Questo riepilogo sarà incluso solo in questo report e non sarà salvato "
 "per riferimenti futuri"
 
-#: app/templates/vitals.html:401
+#: app/templates/vitals.html:403
 msgid "Select notes to include in the report:"
 msgstr "Seleziona le note da includere nel report:"
 
-#: app/templates/vitals.html:408 app/templates/vitals.html:430
+#: app/templates/vitals.html:410 app/templates/vitals.html:432
 msgid "Deselect All"
 msgstr "Deseleziona Tutto"
 
-#: app/templates/vitals.html:416
+#: app/templates/vitals.html:418
 msgid "Loading notes..."
 msgstr "Caricamento note..."
 
-#: app/templates/vitals.html:423
+#: app/templates/vitals.html:425
 msgid "Select vital sign types to include:"
 msgstr "Seleziona i tipi di parametri vitali da includere:"
 
-#: app/templates/vitals.html:446
+#: app/templates/vitals.html:448
 msgid "Select time periods for charts:"
 msgstr "Seleziona il periodo temporale per i grafici:"
 
-#: app/templates/vitals.html:486
+#: app/templates/vitals.html:488
 msgid "1 Year"
 msgstr "1 Anno"
 
-#: app/templates/vitals.html:491
+#: app/templates/vitals.html:493
 msgid "Select observations:"
 msgstr "Seleziona osservazioni:"
 
-#: app/templates/vitals.html:512
+#: app/templates/vitals.html:514
 msgid "Generate Report"
 msgstr "Genera Report"
 
@@ -1704,4 +1715,13 @@ msgstr "Genera Report"
 
 #~ msgid "Password must be at least 8 characters"
 #~ msgstr "La password deve contenere almeno 8 caratteri"
+
+#~ msgid "Surname is mandatory"
+#~ msgstr "Il cognome è obbligatorio"
+
+#~ msgid "First is mandatory"
+#~ msgstr "Il nome è obbligatorio"
+
+#~ msgid "Second is mandatory"
+#~ msgstr "Il nome è obbligatorio"
 

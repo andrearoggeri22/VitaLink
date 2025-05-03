@@ -37,7 +37,7 @@
                                    id="first_name"
                                    name="first_name"
                                    required>
-                            <div class="invalid-feedback">{{ _("Name is mandatory") }}</div>
+                            <div class="invalid-feedback">{{ _("First name is mandatory") }}</div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="last_name" class="form-label">
@@ -48,7 +48,7 @@
                                    id="last_name"
                                    name="last_name"
                                    required>
-                            <div class="invalid-feedback">{{ _("Surname is mandatory") }}</div>
+                            <div class="invalid-feedback">{{ _("Second name is mandatory") }}</div>
                         </div>
                     </div>
                     <div class="row">
@@ -60,6 +60,7 @@
                                    class="form-control"
                                    id="date_of_birth"
                                    name="date_of_birth"
+                                   min="1900-01-01"
                                    required>
                             <div class="invalid-feedback">{{ _("Date of birth is mandatory") }}</div>
                         </div>
@@ -140,11 +141,11 @@
                                    name="first_name"
                                    value="{{ patient.first_name }}"
                                    required>
-                            <div class="invalid-feedback">{{ _("Name is mandatory") }}</div>
+                            <div class="invalid-feedback">{{ _("First name is mandatory") }}</div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="last_name" class="form-label">
-                                {{ _("Surname") }} <span class="text-danger">*</span>
+                                {{ _("Second name") }} <span class="text-danger">*</span>
                             </label>
                             <input type="text"
                                    class="form-control"
@@ -152,7 +153,7 @@
                                    name="last_name"
                                    value="{{ patient.last_name }}"
                                    required>
-                            <div class="invalid-feedback">{{ _("Surname is mandatory") }}</div>
+                            <div class="invalid-feedback">{{ _("Second name is mandatory") }}</div>
                         </div>
                     </div>
                     <div class="row">
@@ -164,6 +165,7 @@
                                    class="form-control"
                                    id="date_of_birth"
                                    name="date_of_birth"
+                                   min="1900-01-01"
                                    value="{{ patient.date_of_birth.strftime("%Y-%m-%d") }}"
                                    required>
                             <div class="invalid-feedback">{{ _("Date of birth is mandatory") }}</div>

@@ -353,7 +353,7 @@ def edit_patient(patient_id):
         
         # Validate required fields
         if not first_name or not last_name or not date_of_birth:
-            flash(_('Name, surname and date of birth are mandatory fields'), 'danger')
+            flash(_('First name, second name and date of birth are mandatory fields'), 'danger')
             return redirect(url_for('views.edit_patient', patient_id=patient_id))
         
         try:

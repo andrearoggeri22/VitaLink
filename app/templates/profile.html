@@ -69,6 +69,7 @@
                                    class="form-control"
                                    id="current_password"
                                    name="current_password"
+                                   minlength="8"
                                    required>
                         </div>
                         <div class="mb-3">
@@ -79,7 +80,7 @@
                                    name="new_password"
                                    required
                                    minlength="8">
-                            <div class="form-text">{{ _("Password must be at least 8 characters and include uppercase and special characters.") }}</div>
+                            <div class="form-text">{{ _("Password must be at least 8 characters and include uppercase and special characters and a number.") }}</div>
                         </div>
                         <div class="mb-3">
                             <label for="confirm_password" class="form-label">{{ _("Confirm New Password") }}</label>
@@ -87,6 +88,7 @@
                                    class="form-control"
                                    id="confirm_password"
                                    name="confirm_password"
+                                   minlength="8"
                                    required>
                         </div>
                         <div class="d-grid mt-4">
