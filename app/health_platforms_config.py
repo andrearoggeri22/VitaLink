@@ -21,10 +21,7 @@ FITBIT_CONFIG = {
     'client_secret':
     os.environ["FITBIT_CLIENT_SECRET"],
     'redirect_uri': 
-        os.environ.get(
-            "FITBIT_REDIRECT_URI",
-            "http://localhost:5000/health/oauth_callback",
-        ),
+    os.environ["FITBIT_REDIRECT_URI"],
     'authorize_url':
     'https://www.fitbit.com/oauth2/authorize',
     'token_url':

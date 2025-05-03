@@ -91,7 +91,7 @@ def get_database_uri():
 
 # Create the Flask application
 app = Flask(__name__)
-app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key")
+app.secret_key = os.environ["SESSION_SECRET"]
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)  # needed for url_for to generate with https
 
 # Configure SQLAlchemy
@@ -106,7 +106,7 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 # Configure JWT
-app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY", app.secret_key)
+app.config["JWT_SECRET_KEY"] = os.environ["JWT_SECRET_KEY"]
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = 3600  # 1 hour
 app.config["JWT_REFRESH_TOKEN_EXPIRES"] = 86400  # 24 hours
 

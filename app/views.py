@@ -872,8 +872,7 @@ def create_specific_patient_report(patient_id):
             
             # Generate a filename for the report
             filename = f"specific_report_{patient.last_name}_{datetime.now().strftime('%Y%m%d_%H%M')}.pdf"
-            
-            # Log the report generation
+              # Log the report generation
             log_report_generation(
                 current_user.id, 
                 patient.id, 
@@ -888,6 +887,30 @@ def create_specific_patient_report(patient_id):
             )
             
             logger.info(f"Doctor {current_user.id} generated specific report for patient {patient_id}")
+            
+            # Check if the report should be sent via email
+            send_via_email = request.form.get('send_via_email') == '1'
+            if send_via_email and patient.email:
+                # Import email utilities
+                from .email_utils import send_report_email
+                
+                # Send the email with the report
+                success, message = send_report_email(
+                    current_user, 
+                    patient,
+                    pdf_buffer,
+                    filename,
+                    language=current_language
+                )
+                
+                # Seek back to the beginning of the buffer after it's been read
+                pdf_buffer.seek(0)
+                
+                # Show feedback to the doctor about the email status
+                if success:
+                    flash(message, 'success')
+                else:
+                    flash(message, 'warning')
             
             # Return the PDF as a downloadable file
             return send_file(
