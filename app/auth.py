@@ -108,31 +108,31 @@ def register():
             if existing_doctor:
                 flash(_('An account with this Email already exists'), 'danger')
                 return render_template('register.html', form=form, now=datetime.now())
-            
-            # Check password strength
+              # Check password strength
             is_strong, message = is_valid_password(form.password.data)
             if not is_strong:
                 flash(message, 'danger')
                 return render_template('register.html', form=form, now=datetime.now())
-          # Create new doctor account
-        doctor = Doctor(
-            email=form.email.data,
-            first_name=form.first_name.data,
-            last_name=form.last_name.data,
-            specialty=form.specialty.data
-        )
-        doctor.set_password(form.password.data)
-        
-        try:
-            db.session.add(doctor)
-            db.session.commit()
-            flash(_('Registration completed. Now you can access'), 'success')
-            logger.info(f"New doctor registered: {email}")
-            return redirect(url_for('auth.login'))
-        except Exception as e:
-            db.session.rollback()
-            logger.error(f"Error during registration: {str(e)}")
-            flash(_('An error occurred. Please try again'), 'danger')
+                
+            # Create new doctor account
+            doctor = Doctor(
+                email=form.email.data,
+                first_name=form.first_name.data,
+                last_name=form.last_name.data,
+                specialty=form.specialty.data
+            )
+            doctor.set_password(form.password.data)
+            
+            try:
+                db.session.add(doctor)
+                db.session.commit()
+                flash(_('Registration completed. Now you can access'), 'success')
+                logger.info(f"New doctor registered: {email}")
+                return redirect(url_for('auth.login'))
+            except Exception as e:
+                db.session.rollback()
+                logger.error(f"Error during registration: {str(e)}")
+                flash(_('An error occurred. Please try again'), 'danger')
     
     return render_template('register.html', form=form, now=datetime.now())
     
