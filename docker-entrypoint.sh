@@ -41,7 +41,6 @@ try:
     from app import app, db
     with app.app_context():
         db.create_all()
-        run_migration()
     print("Database initialization completed successfully")
 except Exception as e:
     print(f"Error initializing database: {e}")
