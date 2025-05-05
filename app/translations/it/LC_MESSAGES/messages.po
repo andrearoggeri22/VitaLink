@@ -321,7 +321,7 @@ msgstr "Medicina Generale"
 
 #: app/email_utils.py:129
 msgid "Report sent successfully to {email}"
-msgstr "Report inviato con successo a (email)"
+msgstr "Report inviato con successo a {email}"
 
 #: app/email_utils.py:133
 msgid "Error sending email: {error}"
