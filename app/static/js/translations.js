@@ -11,7 +11,7 @@
  * The current language set in the application.
  * Retrieved from the 'lang' attribute of the HTML root element or set to 'en' (English) as default
  */
-const currentLanguage = document.documentElement.lang || 'en';
+var currentLanguage = document.documentElement.lang || 'en';
 
 /**
  * Translates a text from English to the currently set language
@@ -23,6 +23,7 @@ const currentLanguage = document.documentElement.lang || 'en';
  * const buttonLabel = translateText('Save');
  */
 function translateText(text) {
+    currentLanguage = document.documentElement.lang || 'en';
     // This function allows for future integration with proper translation systems
     // For now, it returns hardcoded translations based on current language
     if (currentLanguage === 'it') {
