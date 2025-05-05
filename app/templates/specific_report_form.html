@@ -127,15 +127,15 @@
                                   placeholder="{{ _('Add an optional summary for this report. It will appear in the report but will not be saved in the database.') }}"></textarea>
                         <div class="form-text">{{ _("This summary will only be included in this report and will not be saved.") }}</div>
                     </div>                    <!-- Email options section -->
-                    <div class="form-check form-switch mb-3">
-                        <input class="form-check-input" type="checkbox" role="switch" id="sendViaEmail" name="send_via_email" value="1">
+                    <div class="form-check form-switch mb-3" {% if not patient.email %}style="pointer-events: none; opacity: 0.6;"{% endif %}>
+                        <input class="form-check-input" type="checkbox" role="switch" id="sendViaEmail" name="send_via_email" value="1" {% if not patient.email %}disabled{% endif %}>
                         <label class="form-check-label" for="sendViaEmail">
                             <i class="fas fa-envelope me-1"></i> 
                             {{ _("Send via email to patient") }}
                             {% if patient.email %}
                                 <span class="text-muted ms-2">({{ patient.email }})</span>
                             {% else %}
-                                <span class="text-danger ms-2 disabled">({{ _("No email address available") }})</span>
+                                <span class="text-danger ms-2">({{ _("No email address available") }})</span>
                             {% endif %}
                         </label>
                     </div>
