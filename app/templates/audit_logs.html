@@ -357,16 +357,13 @@
 function analyzeTableData() {
     // Get all rows from the table body (excluding header)
     const tableRows = document.querySelectorAll('.table tbody tr:not(:has(td[colspan]))');
-    
     // Initialize counters and data structures
     const actionCounts = {};
     const entityCounts = {};
     const timelineCounts = {}; // Date -> count
-    
     // Process each row
     tableRows.forEach(row => {
         if (row.cells.length < 4) return; // Skip rows that don't have enough cells
-        
     // Get action type (cell index 2)
         const actionBadge = row.cells[2].querySelector('.badge');
         if (actionBadge) {
@@ -375,7 +372,6 @@ function analyzeTableData() {
             const actionType = actionText.toUpperCase().replace(/ /g, '_');
             actionCounts[actionType] = (actionCounts[actionType] || 0) + 1;
         }
-        
     // Get entity type (cell index 3)
         const entityBadge = row.cells[3].querySelector('.badge');
         if (entityBadge) {
@@ -384,7 +380,6 @@ function analyzeTableData() {
             const entityType = entityText.toUpperCase().replace(/ /g, '_');
             entityCounts[entityType] = (entityCounts[entityType] || 0) + 1;
         }
-        
         // Get date for timeline (cell index 0)
         if (row.cells[0]) {
             const timestamp = row.cells[0].textContent.trim();
@@ -392,13 +387,11 @@ function analyzeTableData() {
             timelineCounts[date] = (timelineCounts[date] || 0) + 1;
         }
     });
-    
     // Convert action counts to the format expected by createActionTypeChart
     const actionStats = Object.keys(actionCounts).map(type => ({
         type: type,
         count: actionCounts[type]
     }));
-    
     // Convert entity counts to the format expected by createEntityTypeChart
     const entityStats = Object.keys(entityCounts).map(type => ({
         type: type,
@@ -408,10 +401,8 @@ function analyzeTableData() {
     const startDateInput = document.getElementById('start_date');
     const endDateInput = document.getElementById('end_date');
     const hasDateFilter = startDateInput.value || endDateInput.value;
-    
     // If no date filter is specified, use the last week as the default period
     let startDate, endDate;
-    
     if (hasDateFilter) {
         // Use the filter dates if provided
         startDate = startDateInput.value ? new Date(startDateInput.value) : null;
@@ -425,15 +416,12 @@ function analyzeTableData() {
       // Make sure we have valid dates
     if (!startDate) startDate = new Date(Math.min(...timelineDates.map(date => new Date(date))));
     if (!endDate) endDate = new Date();
-    
     // Generate all dates for the selected range
     const allDates = [];
     const currentDate = new Date(startDate);
-    
     // Adjust the end date to include the entire day
     const adjustedEndDate = new Date(endDate);
     adjustedEndDate.setHours(23, 59, 59, 999);
-    
     // Make sure we include up to the end date (including it)
     // For single day selection, we ensure at least that day is included
     do {
@@ -441,7 +429,6 @@ function analyzeTableData() {
         allDates.push(dateStr);
         currentDate.setDate(currentDate.getDate() + 1);
     } while (currentDate <= adjustedEndDate);
-    
     // If there are no dates in the range, ensure we display at least one point
     if (allDates.length === 0) {
         // If no dates, add today's date
@@ -449,20 +436,17 @@ function analyzeTableData() {
         const todayStr = today.toISOString().split('T')[0];
         allDates.push(todayStr);
     }
-    
     // Convert timeline data to format expected by createTimelineChart
     const timeline = {
         labels: allDates,
         counts: allDates.map(date => timelineCounts[date] || 0)
     };
-    
     return {
         actionStats,
         entityStats,
         timeline
     };
 }
-
     /**
  * Validates date range selection in the filter form
  * 
@@ -474,21 +458,16 @@ function analyzeTableData() {
  */    document.getElementById('filterForm').addEventListener('submit', function(event) {
         const startDate = document.getElementById('start_date').value;
         const endDate = document.getElementById('end_date').value;
-        
         // Verify that both dates are entered and that the start date is before the end date
         if (startDate && endDate && (new Date(startDate) > new Date(endDate))) {
             // Prevent form submission
             event.preventDefault();
-            
             // Get references to date fields
             const startDateInput = document.getElementById('start_date');
-            
             // Set custom validity on the start date field            
             startDateInput.setCustomValidity(translateText("Start date must be before end date"));
-                
             // Force the display of the error message
             startDateInput.reportValidity();
-            
             // Add a listener to clear the error when the value changes
             startDateInput.addEventListener('input', function() {
                 this.setCustomValidity('');
@@ -498,11 +477,9 @@ function analyzeTableData() {
                 end_date.max = isoToday;
             }, { once: true });
         }
-        
         // We don't need to handle chart updates here since the page will be reloaded with new data
         // The DOMContentLoaded event will trigger chart creation with the filtered data
     });
-    
 /**
  * Initialize audit log charts when DOM content is fully loaded
  * 
@@ -514,13 +491,11 @@ function analyzeTableData() {
 document.addEventListener('DOMContentLoaded', function() {
     // Analyze the current table data and create statistics
     const tableStats = analyzeTableData();
-    
     // Create charts based on the table data
     createActionTypeChart(tableStats.actionStats);
     createEntityTypeChart(tableStats.entityStats);
     createTimelineChart(tableStats.timeline);
 });
-
 /**
  * Creates a bar chart displaying the distribution of actions by type
  * 
@@ -534,9 +509,7 @@ document.addEventListener('DOMContentLoaded', function() {
  */
 function createActionTypeChart(actionStats) {
     if (!actionStats || actionStats.length === 0) return;
-    
     const ctx = document.getElementById('actionTypeChart').getContext('2d');
-    
     // Complete map of all action types available in the system
     const actionTypeColors = {
         'CREATE': 'rgba(54, 162, 235, 0.7)',      // Create - Blu
@@ -550,11 +523,9 @@ function createActionTypeChart(actionStats) {
         'SYNC': 'rgba(23, 162, 184, 0.7)',        // Sync - Cyan
         'IMPORT': 'rgba(108, 117, 125, 0.7)'      // Import - Grey
     };
-    
     // Ensure all action types from the dropdown are included in the chart
     // even if they have zero occurrences
     const allActionTypes = ['CREATE', 'UPDATE', 'DELETE', 'VIEW', 'EXPORT', 'GENERATE_LINK', 'CONNECT', 'DISCONNECT', 'SYNC', 'IMPORT'];
-    
     // Create a map for quick lookup of existing stats
     const statsMap = {};
     actionStats.forEach(item => {
@@ -564,7 +535,6 @@ function createActionTypeChart(actionStats) {
     const labels = [];
     const counts = [];
     const colors = [];
-    
     allActionTypes.forEach(actionType => {
         labels.push(actionType.charAt(0).toUpperCase() + actionType.slice(1).toLowerCase());
         counts.push(statsMap[actionType] || 0);
@@ -595,7 +565,6 @@ function createActionTypeChart(actionStats) {
         }
     });
 }
-
 /**
  * Creates a pie chart displaying the distribution of entities by type
  * 
@@ -609,9 +578,7 @@ function createActionTypeChart(actionStats) {
  */
 function createEntityTypeChart(entityStats) {
     if (!entityStats || entityStats.length === 0) return;
-    
     const ctx = document.getElementById('entityTypeChart').getContext('2d');
-    
     // Complete map of all entity types available in the system
     const entityTypeColors = {
         'PATIENT': 'rgba(255, 99, 132, 0.7)',       // Patient - Red
@@ -622,11 +589,9 @@ function createEntityTypeChart(entityStats) {
         'OBSERVATION': 'rgba(54, 162, 235, 0.7)',   // Observation - Blue
         'VITAL_SIGN': 'rgba(40, 167, 69, 0.7)'      // Vital Sign - Green Dark
     };
-    
     // Ensure all entity types from the dropdown are included in the chart
     // even if they have zero occurrences
     const allEntityTypes = ['PATIENT', 'NOTE', 'REPORT', 'HEALTH_PLATFORM', 'HEALTH_LINK', 'OBSERVATION', 'VITAL_SIGN'];
-    
     // Create a map for quick lookup of existing stats
     const statsMap = {};
     entityStats.forEach(item => {
@@ -636,7 +601,6 @@ function createEntityTypeChart(entityStats) {
     const labels = [];
     const counts = [];
     const colors = [];
-    
     allEntityTypes.forEach(entityType => {
         labels.push(entityType.replace(/_/g, ' ').replace(/(^\w{1})|(\s+\w{1})/g, letter => letter.toUpperCase()));
         counts.push(statsMap[entityType] || 0);
@@ -663,7 +627,6 @@ function createEntityTypeChart(entityStats) {
         }
     });
 }
-
 /**
  * Creates a line chart showing the activity timeline
  * 
@@ -677,27 +640,22 @@ function createEntityTypeChart(entityStats) {
  */
 function createTimelineChart(timeline) {
     if (!timeline || !timeline.labels || timeline.labels.length === 0) return;
-    
     // Sort dates chronologically if not already sorted
     if (timeline.labels.length > 1) {
         const sortedIndices = timeline.labels
             .map((date, index) => ({ date, index }))
             .sort((a, b) => new Date(a.date) - new Date(b.date))
             .map(item => item.index);
-        
         timeline.labels = sortedIndices.map(idx => timeline.labels[idx]);
         timeline.counts = sortedIndices.map(idx => timeline.counts[idx]);
     }
-    
     const ctx = document.getElementById('timelineChart').getContext('2d');
-    
     // Format the dates for display (depends on the number of dates)
     const displayLabels = timeline.labels.map(date => {
         const dateObj = new Date(date);
         // Format: DD/MM/YY
         return dateObj.toLocaleDateString('it-IT', {day: '2-digit', month: '2-digit', year: '2-digit'});
     });
-    
     new Chart(ctx, {
         type: 'line',
         data: {

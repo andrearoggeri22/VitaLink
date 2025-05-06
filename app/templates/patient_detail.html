@@ -44,7 +44,6 @@
                                 <i class="fas fa-envelope me-2"></i> <span class="text-muted">{{ _("No email provided") }}</span>
                                 <br>
                             {% endif %}
-                            
                         </p>
                     </div>
                     <div class="mb-3">
@@ -229,7 +228,6 @@
  * This script handles the note deletion functionality on the patient detail page.
  * It manages modal dialogs, deletion confirmation, and UI updates after deletion.
  */
-
 /**
  * Initialize note deletion functionality when DOM is fully loaded
  * 
@@ -243,7 +241,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const deleteNoteModal = new bootstrap.Modal(document.getElementById('deleteNoteModal'));
     const confirmDeleteNoteBtn = document.getElementById('confirmDeleteNote');
     let noteIdToDelete = null;
-
     // Click event on delete buttons
     document.querySelectorAll('.delete-note-btn').forEach(button => {
         button.addEventListener('click', function() {
@@ -251,11 +248,9 @@ document.addEventListener('DOMContentLoaded', function() {
             deleteNoteModal.show();
         });
     });
-
     // Confirmation action for deletion
     confirmDeleteNoteBtn.addEventListener('click', function() {
         if (!noteIdToDelete) return;
-        
         // Make DELETE request to endpoint
         fetch(`/notes/${noteIdToDelete}`, {
             method: 'DELETE',
@@ -274,16 +269,13 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {            
             // Hide modal
             deleteNoteModal.hide();
-            
             // Remove note from page
             const noteElement = document.getElementById(`note-${noteIdToDelete}`);
             if (noteElement) {
                 noteElement.remove();
             }
-              
             // Show success message
             showAlert('success', translateText('Note deleted successfully'));
-            
             // Check if there are no more notes and show appropriate message
             const remainingNotes = document.querySelectorAll('.note-card');
             if (remainingNotes.length === 0) {
@@ -306,7 +298,6 @@ document.addEventListener('DOMContentLoaded', function() {
             noteIdToDelete = null;
         });
     });
-    
     /**
      * Display an alert message to the user
      * 
@@ -325,7 +316,6 @@ document.addEventListener('DOMContentLoaded', function() {
             ${message}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         `;
-          
         // Insert the alert in the same position as Flask flash messages (at the beginning of the main container)
         const mainContainer = document.querySelector('main.container');
         // Check if an alert already exists, if so insert before it,
@@ -336,7 +326,6 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             mainContainer.insertBefore(alertDiv, mainContainer.firstChild);
         }
-        
         // Hide automatically after 5 seconds
         setTimeout(() => {
             const bsAlert = new bootstrap.Alert(alertDiv);

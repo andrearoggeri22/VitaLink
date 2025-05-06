@@ -8,27 +8,22 @@
  * - Adding, editing and deleting observations
  * - Displaying observations in the UI
  */
-
 /**
  * Global variables used throughout the observations management system.
  */
-
 /**
  * Array containing all loaded observations for the current patient.
  * This cache is updated whenever observations are loaded, added, or deleted.
  * @type {Array}
  */
 let currentObservations = [];
-
 /**
  * Reference to the Bootstrap modal instance for observation management.
  * Used for adding new observations or confirming deletion of existing ones.
  * @type {bootstrap.Modal|null}
  */
 let observationModal = null;
-
 // We use the currentVitalType variable defined in vitals_charts.js
-
 /**
  * Initialize observations management functionality.
  * 
@@ -38,10 +33,8 @@ let observationModal = null;
  */
 function initObservations() {
     console.log(translateText('Initializing observations management'));
-    
     // Initialize observation modal
     observationModal = new bootstrap.Modal(document.getElementById('observationModal'));
-    
     // Add event listener to add observation button
     const addObservationBtn = document.getElementById('addObservationBtn');
     if (addObservationBtn) {
@@ -53,16 +46,13 @@ function initObservations() {
     if (observationForm) {
         observationForm.addEventListener('submit', function(event) {
             event.preventDefault();
-            
             // Check which action to perform (add or delete)
             const action = document.getElementById('formAction').value;
-            
             if (action === 'add') {
                 submitAddObservation(this);
             }
         });
     }
-    
     // Add event listener to delete button
     const deleteObservationBtn = document.getElementById('deleteObservationBtn');
     if (deleteObservationBtn) {
@@ -70,7 +60,6 @@ function initObservations() {
             deleteObservation();
         });
     }
-    
     // Add event listener to period change
     const periodButtons = document.querySelectorAll('.period-btn');
     periodButtons.forEach(btn => {
@@ -79,11 +68,9 @@ function initObservations() {
             setTimeout(loadObservations, 500);
         });
     });
-    
     // Load initial observations
     loadObservations();
 }
-
 /**
  * Load all observations for the current patient.
  * 
@@ -100,23 +87,19 @@ function loadObservations() {
         console.error('The currentVitalType variable is not available');
         // We don't block execution, as loading should work anyway
     }
-    
     const patientId = getPatientIdFromUrl();
     if (!patientId) {
         console.error('Unable to determine patient ID');
         updateObservationsUI([]);
         return;
     }
-    
     // Show loading
     document.getElementById('observationsLoading').classList.remove('d-none');
     document.getElementById('noObservations').classList.add('d-none');
     document.getElementById('observationsList').classList.add('d-none');
-    
     // Build API URL without date parameters
     // to retrieve ALL observations for the patient
     const apiUrl = `/web/observations/${patientId}`;
-    
     fetch(apiUrl)
         .then(response => {
             if (!response.ok) {
@@ -134,7 +117,6 @@ function loadObservations() {
             updateObservationsUI([]);
         });
 }
-
 /**
  * Update the interface with loaded observations.
  * 
@@ -147,22 +129,18 @@ function loadObservations() {
 function updateObservationsUI(observations) {
     // Hide loading
     document.getElementById('observationsLoading').classList.add('d-none');
-    
     // Ensure observations is an array
     if (!Array.isArray(observations)) {
         console.error(translateText('updateObservationsUI: observations is not an array'), observations);
         observations = [];
     }
-    
     // Container for observations list
     const observationsList = document.getElementById('observationsList');
-    
     // Filter observations based on currently selected vital parameter type
     let filteredObservations = observations;
     try {
         if (typeof currentVitalType !== 'undefined' && currentVitalType !== null) {
             console.log(translateText("Current type:"), currentVitalType, typeof currentVitalType);
-            
             // Extract vital parameter type ID (handle both string and object)
             let vitalTypeId;
             if (typeof currentVitalType === 'string') {
@@ -172,7 +150,6 @@ function updateObservationsUI(observations) {
             } else {
                 vitalTypeId = '';
             }
-            
             if (vitalTypeId) {
                 filteredObservations = observations.filter(obs => obs.vital_type === vitalTypeId);
                 console.log(translateText(`Showing only observations for type: ${vitalTypeId}`));
@@ -183,21 +160,17 @@ function updateObservationsUI(observations) {
         // In case of error, show all observations
         filteredObservations = observations;
     }
-    
     if (filteredObservations.length === 0) {
         // Show no observations message
         document.getElementById('noObservations').classList.remove('d-none');
         observationsList.classList.add('d-none');
         return;
     }
-    
     // Show observations list
     document.getElementById('noObservations').classList.add('d-none');
     observationsList.classList.remove('d-none');
-    
     // Empty the list
     observationsList.innerHTML = '';
-    
     // Group observations by type
     const groupedObservations = {};
     filteredObservations.forEach(obs => {
@@ -206,14 +179,12 @@ function updateObservationsUI(observations) {
         }
         groupedObservations[obs.vital_type].push(obs);
     });
-    
     // Create UI elements for each observation group
     for (const type in groupedObservations) {
         const typeObservations = groupedObservations[type];
         // Find the information about the type
         let typeName = type.replace('_', ' ');
         let typeColor = '#007bff'; // Default blue
-        
         // Search in the definitions of supported types
         for (const platform in SUPPORTED_DATA_TYPES) {
             const supportedTypes = SUPPORTED_DATA_TYPES[platform];
@@ -241,7 +212,6 @@ function updateObservationsUI(observations) {
             const item = document.createElement('li');
             item.className = 'list-group-item';
             item.setAttribute('data-id', obs.id);
-            
             // Format the dates
             const startDate = new Date(obs.start_date);
             const endDate = new Date(obs.end_date);
@@ -251,9 +221,7 @@ function updateObservationsUI(observations) {
                 // Get the current doctor ID from the meta tag
                 const currentDoctorIdElement = document.querySelector('meta[name="current-doctor-id"]');
                 const currentDoctorId = currentDoctorIdElement ? parseInt(currentDoctorIdElement.getAttribute('content')) : null;
-                
                 console.log('Checking property:', obs.id, '- Current doctor:', currentDoctorId, '- Observation doctor:', obs.doctor_id);
-                
                 // Convert both IDs to integers to make a consistent comparison
                 // If both IDs are available, compare them
                 if (currentDoctorId && obs.doctor_id) {
@@ -296,14 +264,11 @@ function updateObservationsUI(observations) {
                     openObservationModal(obs);
                 });
             }
-            
             observationList.appendChild(item);
         });
-        
         observationsList.appendChild(observationGroup);
     }
 }
-
 /**
  * Opens modal to add a new observation or delete an existing one.
  * 
@@ -323,25 +288,20 @@ function openObservationModal(observation = null) {
     const addObs = document.getElementById('modal-footer-add');
     const delObs = document.getElementById('modal-footer-delete');
     const observationIdInput = document.getElementById('observationId');
-    
     if (observation) {
         // If it's an existing observation, show deletion confirmation
         modalTitle.textContent = translateText('Delete observation');
-        
         // Setup for deletion
         formAction.value = 'delete';
         addObs.classList.add('d-none');
         delObs.classList.remove('d-none');
-        
         // Show deletion content and hide add form
         addContent.classList.add('d-none');
         deleteContent.classList.remove('d-none');
-        
         // Prepare deletion content
         if (deleteContent) {
             // Ensure container is visible
             deleteContent.classList.remove('d-none');
-            
             // Clear previous content and insert new message
             deleteContent.innerHTML = `
                 <div>
@@ -350,7 +310,6 @@ function openObservationModal(observation = null) {
                 </div>
             `;
         }
-        
         // Save observation ID
         if (observationIdInput) {
             observationIdInput.value = observation.id;
@@ -358,36 +317,28 @@ function openObservationModal(observation = null) {
     } else {
         // If it's a new observation
         modalTitle.textContent = translateText('Add observation');
-        
         // Setup for addition
         formAction.value = 'add';
         delObs.classList.add('d-none');
         addObs.classList.remove('d-none');
-        
         // Show add form and hide deletion content
         addContent.classList.remove('d-none');
         deleteContent.classList.add('d-none');
-        
         // Reset form
         if (form) {
             form.reset();
         }
-        
         // Populate options for available vital types
         populateVitalTypeOptions();
-        
         // Default dates based on current period
         const startDateInput = document.getElementById('observationStartDate');
         const endDateInput = document.getElementById('observationEndDate');
-        
         if (startDateInput && endDateInput) {
             const endDate = new Date();
             const startDate = new Date();
-            
             // Use current period if available, otherwise use 7 days as default
             const period = (typeof currentPeriod !== 'undefined' && currentPeriod) ? currentPeriod : 7;
             startDate.setDate(startDate.getDate() - period);
-            
             startDateInput.value = formatDateForInput(startDate);
             endDateInput.value = formatDateForInput(endDate);
         }// Automatically select the current vital parameter type
@@ -404,7 +355,6 @@ function openObservationModal(observation = null) {
                     } else {
                         vitalTypeId = '';
                     }
-                    
                     if (vitalTypeId) {
                         typeSelect.value = vitalTypeId;
                     }
@@ -415,11 +365,9 @@ function openObservationModal(observation = null) {
             // In case of error, don't set any default value
         }
     }
-    
     // Show the modal
     observationModal.show();
 }
-
 /**
  * Populate options for available vital types in the observation form.
  * 
@@ -430,12 +378,10 @@ function openObservationModal(observation = null) {
 function populateVitalTypeOptions() {
     const typeSelect = document.getElementById('observationType');
     if (!typeSelect) return;
-    
     // Clear existing options, except the first one (empty selection)
     while (typeSelect.options.length > 1) {
         typeSelect.remove(1);
     }
-    
     try {
         // Add options for types supported by the current platform
         // Check that currentPlatform is defined (it might be defined in vitals_charts.js)
@@ -452,7 +398,6 @@ function populateVitalTypeOptions() {
         console.error(translateText('Error populating options') + ':', error);
     }
 }
-
 /**
  * Submit the form to add a new observation.
  * 
@@ -464,7 +409,6 @@ function populateVitalTypeOptions() {
  */
 function submitAddObservation(form) {
     if (!form) return;
-    
     const errorDiv = document.getElementById('observationError');
     // Hide any previous error messages in the error div
     if (errorDiv) {
@@ -476,7 +420,6 @@ function submitAddObservation(form) {
     const content = formData.get('content');
     const startDate = formData.get('start_date');
     const endDate = formData.get('end_date');
-    
     // Reset any previous custom validation messages
     const inputs = form.querySelectorAll('input, textarea, select');
     inputs.forEach(input => {
@@ -489,13 +432,10 @@ function submitAddObservation(form) {
     if (new Date(startDate) > new Date(endDate)) {
         // Get references to date fields
         const startDateInput = document.getElementById('observationStartDate');
-        
         // Set custom validity on end date field
     startDateInput.setCustomValidity(translateText("Start date must be before end date"));
-            
         // Force display of error message
         startDateInput.reportValidity();
-        
         // Add listener to clear error when value changes
         startDateInput.addEventListener('input', function() {
             this.setCustomValidity('');
@@ -504,10 +444,8 @@ function submitAddObservation(form) {
             observationStartDate.max = isoToday;
             observationEndDate.max = isoToday;
         }, { once: true });
-        
         return;
     }
-    
     // Add patient ID to the data
     const patientId = PATIENT_ID || getPatientIdFromUrl();
     const observationData = {
@@ -517,12 +455,9 @@ function submitAddObservation(form) {
         start_date: startDate,
         end_date: endDate
     };
-    
     // URL for the API request
     const apiUrl = `/web/observations`;
-    
     console.log(translateText('Sending observation:'), observationData);
-    
     // API call
     fetch(apiUrl, {
         method: 'POST',
@@ -539,22 +474,17 @@ function submitAddObservation(form) {
     })
     .then(data => {
         console.log(translateText('Observation saved:'), data);
-        
         // Close the modal
         observationModal.hide();
-        
         // Show success message
         showAlert(translateText('Observation added successfully'), 'success');
-        
         // Reload observations
         loadObservations();
     })
     .catch(error => {
         console.error('Error saving observation:', error);
-        
         // Show the API error as a custom message visible at the top of the form
         const errorMessage = error.message || translateText("Error saving observation. Please try again later.");
-            
         // Show the error at the top of the form
         if (errorDiv) {
             errorDiv.textContent = errorMessage;
@@ -564,7 +494,6 @@ function submitAddObservation(form) {
         }
     });
 }
-
 /**
  * Delete an observation from the system.
  * 
@@ -576,19 +505,15 @@ function deleteObservation() {
     // Get observation ID
     const id = document.getElementById('observationId').value;
     if (!id) return;
-    
     // API URL (browser confirmation not needed anymore, we already have confirmation in the modal)
     const apiUrl = `/web/observations/${id}`;
     const errorDiv = document.getElementById('observationError');
-    
     // Hide any previous error messages
     if (errorDiv) {
         errorDiv.textContent = '';
         errorDiv.style.display = 'none';
     }
-    
     console.log(translateText('Deleting observation with ID:'), id);
-    
     // API call
     fetch(apiUrl, {
         method: 'DELETE'
@@ -601,19 +526,15 @@ function deleteObservation() {
     })
     .then(data => {
         console.log(translateText('Observation deleted:'), data);
-        
         // Close the modal
         observationModal.hide();
-        
         // Show success message
         showAlert(translateText('Observation deleted successfully'), 'success');
-        
         // Reload observations
         loadObservations();
     })
     .catch(error => {
         console.error('Error deleting observation:', error);
-        
         if (errorDiv) {            errorDiv.textContent = error.message || translateText("Error deleting observation. Please try again later.");
             errorDiv.style.display = 'block';
             errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -622,7 +543,6 @@ function deleteObservation() {
         }
     });
 }
-
 /**
  * Shows an alert message in the interface.
  * 
@@ -639,7 +559,6 @@ function showAlert(message, type = 'info') {
     const alertDiv = document.createElement('div');
     alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
     alertDiv.setAttribute('role', 'alert');
-    
     alertDiv.innerHTML = `
         ${message}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -662,14 +581,12 @@ function showAlert(message, type = 'info') {
             container.insertBefore(alertDiv, container.firstChild);
         }
     }
-    
     // Automatically remove after 5 seconds
     setTimeout(() => {
         alertDiv.classList.remove('show');
         setTimeout(() => alertDiv.remove(), 150);
     }, 5000);
 }
-
 /**
  * Formats a date for a date input
  * @param {Date} date Date to format
@@ -681,7 +598,6 @@ function formatDateForInput(date) {
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
 }
-
 /**
  * Format a date object for API requests.
  * 
@@ -695,7 +611,6 @@ function formatDateForInput(date) {
 function formatDateForAPI(date) {
     return formatDateForInput(date);
 }
-
 /**
  * Format a date object for user-friendly display.
  * 
@@ -712,7 +627,6 @@ function formatDateForDisplay(date) {
     const year = date.getFullYear();
     return `${day}/${month}/${year}`;
 }
-
 /**
  * Initialize observations functionality when the document is fully loaded.
  * 

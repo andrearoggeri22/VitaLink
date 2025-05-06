@@ -2,7 +2,6 @@
  * Specific Report Form JavaScript
  * Handles UI interactions for patient-specific report generation form.
  */
-
 /**
  * Initialize the specific report generator interface when the DOM is loaded.
  * 
@@ -28,37 +27,30 @@ document.addEventListener('DOMContentLoaded', function () {
     const vitalTypeParam = urlParams.get('vital_type');
     const periodParam = urlParams.get('period');
     const selectAllParam = urlParams.get('select_all');
-
     // If select_all parameter is present, select all data
     if (selectAllParam === 'true') {
         console.log('Automatic selection of all data activated');
-
         // Select all notes
         document.querySelectorAll('.note-checkbox').forEach(checkbox => {
             checkbox.checked = true;
             checkbox.closest('.form-check').classList.add('selected-item');
         });
-
         // Select all observations
         document.querySelectorAll('.observation-checkbox').forEach(checkbox => {
             checkbox.checked = true;
             checkbox.closest('.form-check').classList.add('selected-item');
         });
-
         // Select all vital types and periods
         document.querySelectorAll('.vital-type-checkbox').forEach(checkbox => {
             checkbox.checked = true;
-
             // Highlight vital type card
             const card = checkbox.closest('.vital-type-card');
             card.classList.add('selected');
-
             // Show options for periods
             const chartsSelection = card.querySelector('.charts-selection');
             if (chartsSelection) {
                 chartsSelection.classList.remove('d-none');
             }
-
             // Select all periods for this vital type
             const vitalType = checkbox.value;
             document.querySelectorAll(`.period-checkbox[data-vital-type="${vitalType}"]`).forEach(periodCheckbox => {
@@ -81,7 +73,6 @@ document.addEventListener('DOMContentLoaded', function () {
                         default:
                             periodValue = '7d'; // Default to 7 days
                     }
-
                     if (periodCheckbox.value === periodValue) {
                         periodCheckbox.checked = true;
                     }
@@ -92,7 +83,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     }
-
     // Show/hide charts selection when vital type is checked/unchecked
     const vitalTypeCheckboxes = document.querySelectorAll('.vital-type-checkbox');
     if (vitalTypeCheckboxes) {
@@ -104,13 +94,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Highlight vital type card
                 const card = checkbox.closest('.vital-type-card');
                 card.classList.add('selected');
-
                 // Show options for periods
                 const chartsSelection = card.querySelector('.charts-selection');
                 if (chartsSelection) {
                     chartsSelection.classList.remove('d-none');
                 }
-
                 // If a period parameter is also specified, select that one
                 if (periodParam) {
                     let periodValue;
@@ -130,7 +118,6 @@ document.addEventListener('DOMContentLoaded', function () {
                         default:
                             periodValue = '7d'; // Default to 7 days
                     }
-
                     // Find and select the corresponding period checkbox
                     const periodCheckboxes = card.querySelectorAll(`.period-checkbox`);
                     periodCheckboxes.forEach(periodCheckbox => {
@@ -139,18 +126,15 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
                     });
                 }
-
                 // Auto-scroll to this section
                 setTimeout(() => {
                     card.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }, 500);
             }
-
             // Add event listener to show/hide period options
             checkbox.addEventListener('change', function () {
                 const card = this.closest('.vital-type-card');
                 const chartsSelection = card.querySelector('.charts-selection');
-
                 if (this.checked) {
                     chartsSelection.classList.remove('d-none');
                     card.classList.add('selected');
@@ -165,7 +149,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     }
-
     // Select/deselect all notes with visual feedback
     const selectAllNotesBtn = document.getElementById('selectAllNotes');
     if (selectAllNotesBtn) {
@@ -176,7 +159,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     }
-
     const deselectAllNotesBtn = document.getElementById('deselectAllNotes');
     if (deselectAllNotesBtn) {
         deselectAllNotesBtn.addEventListener('click', function () {
@@ -186,7 +168,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     }
-
     // Add selection style to note checkboxes
     document.querySelectorAll('.note-checkbox').forEach(checkbox => {
         checkbox.addEventListener('change', function () {
@@ -197,7 +178,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
-
     // Select/deselect all observations with visual feedback
     const selectAllObservationsBtn = document.getElementById('selectAllObservations');
     if (selectAllObservationsBtn) {
@@ -208,7 +188,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     }
-
     const deselectAllObservationsBtn = document.getElementById('deselectAllObservations');
     if (deselectAllObservationsBtn) {
         deselectAllObservationsBtn.addEventListener('click', function () {
@@ -218,7 +197,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     }
-
     // Add selection style to observation checkboxes
     document.querySelectorAll('.observation-checkbox').forEach(checkbox => {
         checkbox.addEventListener('change', function () {
@@ -229,7 +207,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
-
     // Select/deselect all vital types
     const selectAllVitalTypesBtn = document.getElementById('selectAllVitalTypes');
     if (selectAllVitalTypesBtn) {
@@ -240,7 +217,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     }
-
     const deselectAllVitalTypesBtn = document.getElementById('deselectAllVitalTypes');
     if (deselectAllVitalTypesBtn) {
         deselectAllVitalTypesBtn.addEventListener('click', function () {
@@ -250,7 +226,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     }
-
     // Select/deselect all time periods for a specific vital type
     const selectAllPeriodsButtons = document.querySelectorAll('.select-all-periods');
     if (selectAllPeriodsButtons) {
@@ -273,7 +248,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     }
-
     const deselectAllPeriodsButtons = document.querySelectorAll('.deselect-all-periods');
     if (deselectAllPeriodsButtons) {
         deselectAllPeriodsButtons.forEach(button => {
@@ -285,18 +259,15 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     }
-
     // Form validation before submission
     const specificReportForm = document.getElementById('specificReportForm');
     if (specificReportForm) {
         specificReportForm.addEventListener('submit', function (event) {
             let isValid = true;
-
             // Check that selected vital types have at least one time period selected
             document.querySelectorAll('.vital-type-checkbox:checked').forEach(checkbox => {
                 const vitalType = checkbox.value;
                 const periodCheckboxes = document.querySelectorAll(`.period-checkbox[data-vital-type="${vitalType}"]:checked`);
-
                 if (periodCheckboxes.length === 0) {
                     // Show error message
                     const periodError = checkbox.closest('.vital-type-card').querySelector('.period-error');
@@ -304,7 +275,6 @@ document.addEventListener('DOMContentLoaded', function () {
                         periodError.classList.remove('d-none');
                     }
                     isValid = false;
-
                     // Add red border to the card
                     checkbox.closest('.vital-type-card').classList.add('border-danger');
                 } else {
@@ -313,17 +283,14 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (periodError) {
                         periodError.classList.add('d-none');
                     }
-
                     // Remove red border
                     checkbox.closest('.vital-type-card').classList.remove('border-danger');
                 }
             });
-
             // Prevent form submission if validation fails
             if (!isValid) {
                 event.preventDefault(); 
                 const message = translateText('Please select at least one time period for each selected vital type');
-
                 // Create a toast notification instead of alert
                 const toastHtml = `
                         <div class="toast align-items-center bg-danger text-white border-0 fade show" role="alert" aria-live="assertive" aria-atomic="true">
@@ -335,7 +302,6 @@ document.addEventListener('DOMContentLoaded', function () {
                             </div>
                         </div>
                     `;
-
                 // Create toast container if it doesn't exist
                 let toastContainer = document.querySelector('.toast-container');
                 if (!toastContainer) {
@@ -343,15 +309,12 @@ document.addEventListener('DOMContentLoaded', function () {
                     toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
                     document.body.appendChild(toastContainer);
                 }
-
                 // Add toast to container
                 toastContainer.innerHTML = toastHtml;
-
                 // Initialize BS toast
                 const toastEl = toastContainer.querySelector('.toast');
                 const toast = new bootstrap.Toast(toastEl, { autohide: true, delay: 5000 });
                 toast.show();
-
                 // Scroll to first error
                 const firstErrorCard = document.querySelector('.vital-type-card.border-danger');
                 if (firstErrorCard) {

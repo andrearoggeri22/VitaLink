@@ -1,5 +1,4 @@
 // main.js - Common JavaScript functions for the application
-
 /**
  * Deletes a patient note with confirmation.
  * 
@@ -15,7 +14,6 @@ function deleteNote(noteId, patientId) {
     let confirmTitle = translateText('Confirm Deletion');
     let confirmButton = translateText('Delete');
     let cancelButton = translateText('Cancel');
-
     showConfirmationModal(confirmTitle, confirmMessage, confirmButton, cancelButton, function () {
         // Send DELETE request to delete the note
         fetch(`/notes/${noteId}`, {
@@ -38,10 +36,8 @@ function deleteNote(noteId, patientId) {
                 if (noteElement) {
                     noteElement.remove();
                 }
-
                 // Show success message
                 showToast(data.message || 'Note deleted successfully', 'success');
-
                 // If we're on the patient detail page, update the note count
                 const noteCountElement = document.querySelector('#note-count');
                 if (noteCountElement) {
@@ -57,7 +53,6 @@ function deleteNote(noteId, patientId) {
             });
     });
 }
-
 /**
  * Initializes common UI components when the DOM is fully loaded.
  * 
@@ -73,13 +68,11 @@ document.addEventListener('DOMContentLoaded', function () {
     tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl);
     });
-
     // Initialize Bootstrap popovers
     const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
     popoverTriggerList.map(function (popoverTriggerEl) {
         return new bootstrap.Popover(popoverTriggerEl);
     });
-
     // Handle alerts dismissal after 5 seconds
     setTimeout(function () {
         const alerts = document.querySelectorAll('.alert:not(.alert-permanent)');
@@ -88,19 +81,16 @@ document.addEventListener('DOMContentLoaded', function () {
             bsAlert.close();
         });
     }, 5000);
-
     // Add confirmation to delete buttons
     const deleteButtons = document.querySelectorAll('.delete-confirm');
     deleteButtons.forEach(function (button) {
         button.addEventListener('click', function (event) {
             let confirmMessage = translateText('Are you sure you want to delete this item? This action cannot be undone.');
-
             if (!confirm(confirmMessage)) {
                 event.preventDefault();
             }
         });
     });
-
     // Format date-time inputs to local timezone
     const datetimeInputs = document.querySelectorAll('input[type="datetime-local"]');
     datetimeInputs.forEach(function (input) {
@@ -111,12 +101,10 @@ document.addEventListener('DOMContentLoaded', function () {
             const day = String(now.getDate()).padStart(2, '0');
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
-
             input.value = `${year}-${month}-${day}T${hours}:${minutes}`;
         }
     });
 });
-
 /**
  * Formats a date string for display in the UI.
  * 
@@ -130,26 +118,21 @@ document.addEventListener('DOMContentLoaded', function () {
  */
 function formatDate(dateString, includeTime = true) {
     if (!dateString) return '';
-
     const date = new Date(dateString);
     const options = {
         year: 'numeric',
         month: 'short',
         day: 'numeric'
     };
-
     if (includeTime) {
         options.hour = '2-digit';
         options.minute = '2-digit';
     }
-
     // Use the current language from HTML lang attribute, default to 'en-US'
     const language = document.documentElement.lang || 'en';
     const locale = language === 'it' ? 'it-IT' : 'en-US';
-
     return date.toLocaleDateString(locale, options);
 }
-
 /**
  * Generates a random color in HSL format.
  * 
@@ -163,7 +146,6 @@ function getRandomColor() {
     const hue = Math.floor(Math.random() * 360);
     return `hsl(${hue}, 70%, 50%)`;
 }
-
 /**
  * Displays a toast notification to provide feedback to the user.
  * 
@@ -177,14 +159,12 @@ function getRandomColor() {
 function showToast(message, type = 'info') {
     // Create toast container if it doesn't exist
     let toastContainer = document.getElementById('toast-container');
-
     if (!toastContainer) {
         toastContainer = document.createElement('div');
         toastContainer.id = 'toast-container';
         toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
         document.body.appendChild(toastContainer);
     }
-
     // Create toast element
     const toastId = 'toast-' + Date.now();
     const toast = document.createElement('div');
@@ -193,12 +173,10 @@ function showToast(message, type = 'info') {
     toast.setAttribute('role', 'alert');
     toast.setAttribute('aria-live', 'assertive');
     toast.setAttribute('aria-atomic', 'true');
-
     // Set toast content
     const bgColor = type === 'danger' ? 'bg-danger' :
         type === 'success' ? 'bg-success' :
             type === 'warning' ? 'bg-warning' : 'bg-info';
-
     toast.innerHTML = `
         <div class="toast-header ${bgColor} text-white">
             <strong class="me-auto">${type.charAt(0).toUpperCase() + type.slice(1)}</strong>
@@ -208,20 +186,16 @@ function showToast(message, type = 'info') {
             ${message}
         </div>
     `;
-
     // Add toast to container
     toastContainer.appendChild(toast);
-
     // Initialize and show the toast
     const bsToast = new bootstrap.Toast(toast, { autohide: true, delay: 5000 });
     bsToast.show();
-
     // Remove toast from DOM after it's hidden
     toast.addEventListener('hidden.bs.toast', function () {
         toast.remove();
     });
 }
-
 /**
  * Displays a customizable confirmation modal dialog.
  * 
@@ -239,7 +213,6 @@ function showToast(message, type = 'info') {
 function showConfirmationModal(title, message, confirmButtonText, cancelButtonText, onConfirm) {
     // Check if a modal already exists
     let modal = document.getElementById('confirmModal');
-
     if (!modal) {
         // Create modal element
         modal = document.createElement('div');
@@ -248,7 +221,6 @@ function showConfirmationModal(title, message, confirmButtonText, cancelButtonTe
         modal.tabIndex = '-1';
         modal.setAttribute('aria-labelledby', 'confirmModalLabel');
         modal.setAttribute('aria-hidden', 'true');
-
         modal.innerHTML = `
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -266,7 +238,6 @@ function showConfirmationModal(title, message, confirmButtonText, cancelButtonTe
                 </div>
             </div>
         `;
-
         document.body.appendChild(modal);
     } else {
         // Update existing modal
@@ -275,27 +246,21 @@ function showConfirmationModal(title, message, confirmButtonText, cancelButtonTe
         modal.querySelector('.modal-footer .btn-secondary').textContent = cancelButtonText;
         modal.querySelector('#confirmButton').textContent = confirmButtonText;
     }
-
     // Initialize Bootstrap modal
     const modalInstance = new bootstrap.Modal(modal);
-
     // Set up confirm button action
     const confirmButton = document.getElementById('confirmButton');
-
     // Remove any existing event listeners
     const newConfirmButton = confirmButton.cloneNode(true);
     confirmButton.parentNode.replaceChild(newConfirmButton, confirmButton);
-
     // Add new event listener
     newConfirmButton.addEventListener('click', function () {
         modalInstance.hide();
         onConfirm();
     });
-
     // Show the modal
     modalInstance.show();
 }
-
 /**
  * Creates a simpler confirmation modal dialog.
  * 
@@ -311,7 +276,6 @@ function showConfirmationModal(title, message, confirmButtonText, cancelButtonTe
 function confirmAction(title, message, onConfirm) {
     // Check if a modal already exists
     let modal = document.getElementById('confirmModal');
-
     if (!modal) {
         // Create modal element
         modal = document.createElement('div');
@@ -320,7 +284,6 @@ function confirmAction(title, message, onConfirm) {
         modal.tabIndex = '-1';
         modal.setAttribute('aria-labelledby', 'confirmModalLabel');
         modal.setAttribute('aria-hidden', 'true');
-
         modal.innerHTML = `
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -333,7 +296,6 @@ function confirmAction(title, message, onConfirm) {
                                 <i class="fas fa-exclamation-triangle me-2"></i>
                                 ${message}
                             </div>
-                        
                     </div>
                     <div class="modal-footer">                        
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">${translateText('Cancel')}</button>
@@ -342,30 +304,24 @@ function confirmAction(title, message, onConfirm) {
                 </div>
             </div>
         `;
-
         document.body.appendChild(modal);
     } else {
         // Update existing modal
         modal.querySelector('.modal-title').textContent = title;
         modal.querySelector('.modal-body').textContent = message;
     }
-
     // Initialize Bootstrap modal
     const modalInstance = new bootstrap.Modal(modal);
-
     // Set up confirm button action
     const confirmButton = document.getElementById('confirmButton');
-
     // Remove any existing event listeners
     const newConfirmButton = confirmButton.cloneNode(true);
     confirmButton.parentNode.replaceChild(newConfirmButton, confirmButton);
-
     // Add new event listener
     newConfirmButton.addEventListener('click', function () {
         modalInstance.hide();
         onConfirm();
     });
-
     // Show the modal
     modalInstance.show();
 }

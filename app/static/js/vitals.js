@@ -4,7 +4,6 @@
  * This file provides functionality for managing, displaying, and filtering vital signs data
  * including charts visualization, form handling, and data filtering.
  */
-
 /**
  * Initialize all vital signs components when the DOM is fully loaded
  * 
@@ -16,14 +15,11 @@
 document.addEventListener('DOMContentLoaded', function () {
     // Initialize the vital signs form
     initVitalsForm();
-
     // Initialize charts for vital signs visualization
     initVitalsCharts();
-
     // Initialize filter functionality
     initVitalsFilter();
 });
-
 /**
  * Initialize the functionality of the vital signs form
  * 
@@ -35,7 +31,6 @@ document.addEventListener('DOMContentLoaded', function () {
  */
 function initVitalsForm() {
     const vitalsForm = document.getElementById('vitalsForm');
-
     if (vitalsForm) {
         // Update units based on the selected vital sign type
         const typeSelect = document.getElementById('vitalType');
@@ -49,7 +44,6 @@ function initVitalsForm() {
                 'weight': 'kg',
                 'temperature_core': '°C',
                 'temperature_skin': '°C',
-
                 // Physical activity parameters
                 'steps': translateText('steps'),
                 'calories': 'kcal',
@@ -58,43 +52,35 @@ function initVitalsForm() {
                 'sleep_duration': translateText('hours'),
                 'floors_climbed': translateText('floors'),
                 'elevation': 'm',
-
                 // Metabolism and detailed activity parameters
                 'activity_calories': 'kcal',
                 'calories_bmr': 'kcal',
                 'minutes_sedentary': translateText('min'),
                 'minutes_lightly_active': translateText('min'),
                 'minutes_fairly_active': translateText('min'),
-
                 // Nutrition and hydration
                 'calories_in': 'kcal',
                 'water': 'ml'
             };
-
-
             // Set initial unit
             if (typeSelect.value) {
                 unitInput.value = units[typeSelect.value] || '';
             }
-
             // Update unit on type change
             typeSelect.addEventListener('change', function () {
                 unitInput.value = units[this.value] || '';
             });
         }
-
         // Form validation
         vitalsForm.addEventListener('submit', function (event) {
             if (!vitalsForm.checkValidity()) {
                 event.preventDefault();
                 event.stopPropagation();
             }
-
             vitalsForm.classList.add('was-validated');
         });
     }
 }
-
 /**
  * Initialize charts for vital signs visualization
  * 
@@ -108,27 +94,21 @@ function initVitalsCharts() {
     // Check if we are on the vital parameters page
     const patientIdMatch = window.location.pathname.match(/\/patients\/(\d+)\/vitals/);
     if (!patientIdMatch) return;
-
     const patientId = patientIdMatch[1];
-
     // Extract filter parameters from URL
     const urlParams = new URLSearchParams(window.location.search);
     const startDate = urlParams.get('start_date');
     const endDate = urlParams.get('end_date');
     const vitalType = urlParams.get('type');
-
     // Build API URL with filter parameters
     let apiUrl = `/api/patients/${patientId}/vitals`;
     const apiParams = [];
-
     if (startDate) apiParams.push(`start_date=${startDate}`);
     if (endDate) apiParams.push(`end_date=${endDate}`);
     if (vitalType) apiParams.push(`type=${vitalType}`);
-
     if (apiParams.length > 0) {
         apiUrl += `?${apiParams.join('&')}`;
     }
-
     // Get data via API
     fetch(apiUrl)
         .then(response => {
@@ -141,21 +121,16 @@ function initVitalsCharts() {
             // Create charts for each vital sign type
             for (const [type, values] of Object.entries(vitalsData)) {
                 if (!values || values.length === 0) continue;
-
                 const canvasId = `chart-${type}`;
-
                 // Check if canvas element exists
                 const canvas = document.getElementById(canvasId);
                 if (!canvas) continue;
-
                 // Prepare data for the chart
                 const labels = values.map(v => new Date(v.recorded_at || v.timestamp));
                 const data = values.map(v => v.value);
                 const unit = values[0].unit || '';
-
                 // Format type name for display
                 const typeDisplay = type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-
                 // Create the chart
                 new Chart(canvas, {
                     type: 'line',
@@ -224,7 +199,6 @@ function initVitalsCharts() {
             console.error(translateText('Error fetching vital signs data:'), error);
         });
 }
-
 /**
  * Display a message when no data is available for a chart
  * 
@@ -241,10 +215,8 @@ function displayNoDataMessage(canvas, message) {
     if (Chart.getChart(canvas)) {
         Chart.getChart(canvas).destroy();
     }
-
     // Get the canvas container
     const container = canvas.parentElement;
-
     // Create a message element
     const messageElement = document.createElement('div');
     messageElement.className = 'no-data-message';
@@ -253,12 +225,10 @@ function displayNoDataMessage(canvas, message) {
     messageElement.style.padding = '20px';
     messageElement.style.color = '#666';
     messageElement.style.fontStyle = 'italic';
-
     // Hide the canvas and add the message
     canvas.style.display = 'none';
     container.appendChild(messageElement);
 }
-
 /**
  * Initialize the filter functionality for vital signs
  * 
@@ -275,20 +245,16 @@ function initVitalsFilter() {
         // Set the maximum date for date inputs to today
         const startDateInput = document.getElementById('startDate');
         const endDateInput = document.getElementById('endDate');
-
         if (startDateInput && endDateInput) {
             const today = new Date().toISOString().split('T')[0];
-
             startDateInput.setAttribute('max', today);
             endDateInput.setAttribute('max', today);
-
             // Ensure start date is not after end date
             startDateInput.addEventListener('change', function () {
                 if (endDateInput.value && this.value > endDateInput.value) {
                     endDateInput.value = this.value;
                 }
             });
-
             // Ensure end date is not before start date
             endDateInput.addEventListener('change', function () {
                 if (startDateInput.value && this.value < startDateInput.value) {
@@ -298,7 +264,6 @@ function initVitalsFilter() {
         }
     }
 }
-
 /**
  * Format a date object to a readable string
  * 
@@ -317,7 +282,6 @@ function formatDate(date) {
     const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
     return new Date(date).toLocaleDateString(document.documentElement.lang || 'en', options);
 }
-
 /**
  * Generate a random color for charts
  * 
@@ -343,6 +307,5 @@ function getRandomColor() {
         '#009688', // Teal
         '#FF5722'  // Deep orange
     ];
-
     return colors[Math.floor(Math.random() * colors.length)];
 }

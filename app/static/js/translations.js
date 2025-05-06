@@ -5,14 +5,12 @@
  * internationalization of the user interface. It includes a main translation function
  * and predefined text strings for various UI elements.
  */
-
 /**
  * @type {string}
  * The current language set in the application.
  * Retrieved from the 'lang' attribute of the HTML root element or set to 'en' (English) as default
  */
 var currentLanguage = document.documentElement.lang || 'en';
-
 /**
  * Translates a text from English to the currently set language
  * 
@@ -31,7 +29,6 @@ function translateText(text) {
         const translations = {
             // Form validation messages
             'Please select at least one time period for each selected vital type': 'Seleziona almeno un periodo di tempo per ogni tipo di parametro vitale selezionato',
-            
             // Error messages
             'An error occurred while deleting the note.': 'Si è verificato un errore durante l\'eliminazione della nota.',
             'Error saving observation. Please try again later.': 'Errore nel salvataggio dell\'osservazione. Riprova più tardi.',
@@ -105,7 +102,6 @@ function translateText(text) {
             'Last': 'Ultimi',
             'day': 'giorno',
             'days': 'giorni',
-            
             // Messages for console and debugging
             'Initializing observations management': 'Inizializzazione gestione osservazioni',
             'Observations loaded:': 'Osservazioni caricate:',
@@ -117,7 +113,6 @@ function translateText(text) {
             'Showing API error:': 'Mostrando errore API:',
             'Deleting observation with ID:': 'Eliminazione osservazione con ID:',
             'Observation deleted:': 'Osservazione eliminata:',
-            
             // Tecnical error messages
             'Network response was not ok': 'Risposta di rete non valida',
             'Tab container not found': 'Container delle schede non trovato',
@@ -131,7 +126,6 @@ function translateText(text) {
             'Period hidden: no active connection': 'Periodo nascosto: nessuna connessione attiva',
             'Period shown: active connection with': 'Periodo mostrato: connessione attiva con',
             'Error hiding period buttons:': 'Errore nel nascondere i pulsanti del periodo:',
-            
             // Other messages
             'Initializing vital parameters charts': 'Inizializzazione grafici dei parametri vitali',
             'Loading...': 'Caricamento...',
@@ -170,19 +164,15 @@ function translateText(text) {
             'Data': 'Dati',
             'hours': 'ore',
         };
-        
         return translations[text] || text;
     }
-    
     return text;
 }
-
 /**
  * Preconfigured translation strings based on language
  * These variables are used throughout the project for UI elements that require
  * consistent translations across the application
  */
-
 /** @type {string} Title for the patient deletion dialog */
 let deletePatientTitle;
 /** @type {string} Confirmation message for patient deletion */
@@ -195,7 +185,6 @@ let addNoteForText;
 let confirmButtonText;
 /** @type {string} Text for the cancel button */
 let cancelButtonText;
-
 /** @type {string} Label for date fields */
 let dateText;
 /** @type {string} Text for normal vital values */
@@ -210,7 +199,6 @@ let saveText;
 let deviceConnectedText;
 /** @type {string} No device connected message */
 let deviceNotConnectedText;
-
 /** @type {string} No data available message */
 let noDataText;
 /** @type {string} Loading data in progress text */
@@ -221,7 +209,6 @@ let errorText;
 let successText;
 /** @type {string} Title for vital parameters charts */
 let vitalsChartTitleText;
-
 // Set variable values based on the current language
 if (currentLanguage === 'it') {
     // Italian translations
@@ -231,24 +218,20 @@ if (currentLanguage === 'it') {
     addNoteForText = 'Aggiungi nota';
     confirmButtonText = 'Conferma';
     cancelButtonText = 'Annulla';
-    
     // Data and vital values
     dateText = 'Data';
     normalText = 'Normale';
     highText = 'Alto';
     lowText = 'Basso';
     saveText = 'Salva';
-    
     // Devices messages
     deviceConnectedText = 'Dispositivo connesso';
     deviceNotConnectedText = 'Nessun dispositivo connesso';
-    
     // General messages
     noDataText = 'Nessun dato disponibile';
     loadingText = 'Caricamento in corso...';
     errorText = 'Si è verificato un errore';
     successText = 'Operazione completata con successo';
-    
     // Graphs
     vitalsChartTitleText = 'Andamento dei parametri vitali';
 } else {
@@ -259,24 +242,20 @@ if (currentLanguage === 'it') {
     addNoteForText = 'Add Note';
     confirmButtonText = 'Confirm';
     cancelButtonText = 'Cancel';
-    
     // Date and vital values
     dateText = 'Date';
     normalText = 'Normal';
     highText = 'High';
     lowText = 'Low';
     saveText = 'Save';
-    
     // Device messages
     deviceConnectedText = 'Device connected';
     deviceNotConnectedText = 'No device connected';
-    
     // General messages
     noDataText = 'No data available';
     loadingText = 'Loading...';
     errorText = 'An error occurred';
     successText = 'Operation completed successfully';
-    
     // Charts
     vitalsChartTitleText = 'Vital Signs Trend';
 }

@@ -6,62 +6,50 @@
         transition: all 0.3s ease;
         border-radius: 0.5rem;
     }
-    
     .vital-type-card.selected {
         box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
     }
-    
     .vital-type-card.border-danger {
         border-color: #dc3545 !important;
         box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
     }
-    
     .period-error {
         color: #dc3545;
         font-size: 0.875em;
         margin-top: 0.25rem;
     }
-    
     .charts-selection {
         border-top: 1px solid rgba(255,255,255,.1);
         padding-top: 1rem;
     }
-    
     .card-header.with-checkbox {
         padding-bottom: 0.75rem;
     }
-    
     .card-body-scrollable {
         max-height: 300px;
         overflow-y: auto;
         scrollbar-width: thin;
     }
-    
     .data-timestamp {
         font-size: 0.8rem;
         color: #6c757d;
     }
-    
     .data-author {
         font-size: 0.85rem;
         color: #20c997;
         font-style: italic;
     }
-    
     .selected-item {
         background-color: rgba(13, 110, 253, 0.1);
     }
-    
     .form-check-input:checked ~ .form-check-label {
         font-weight: bold;
     }
-    
     .section-divider {
         position: relative;
         text-align: center;
         margin: 2rem 0;
     }
-    
     .section-divider::before {
         content: '';
         position: absolute;
@@ -72,7 +60,6 @@
         background: rgba(255,255,255,.1);
         z-index: 0;
     }
-    
     .section-divider span {
         position: relative;
         background: var(--bs-body-bg);
@@ -81,7 +68,6 @@
         font-weight: 500;
         z-index: 1;
     }
-    
     .period-badge {
         font-size: 0.75rem;
         padding: 0.25rem 0.5rem;
@@ -139,7 +125,6 @@
                             {% endif %}
                         </label>
                     </div>
-
                     <div class="section-divider">
                         <span><i class="fas fa-clipboard-list me-1"></i> {{ _("REPORT CONTENTS") }}</span>
                     </div>

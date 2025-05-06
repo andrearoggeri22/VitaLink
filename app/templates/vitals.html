@@ -541,19 +541,16 @@
      * This script handles the functionality for generating specific patient reports,
      * including loading notes and observations, managing UI selections, and form submissions.
      */
-    
     /**
      * Base URL for API endpoints
      * @type {string}
      */
     const BASE_URL = "{{ url_for('views.index') }}";
-    
     /**
      * Patient ID for the current page
      * @type {number}
      */
     const PATIENT_ID = {{ patient.id }};
-    
     /**
      * Initialize the specific report generation modal
      * 
@@ -564,13 +561,10 @@
      */
     document.getElementById('generateSpecificReportBtn').addEventListener('click', function(e) {
         e.preventDefault();
-        
         // Load notes for the specific report
         loadNotesForSpecificReport();
-        
         // Load observations for each vital type
         loadObservationsForSpecificReport();
-        
         // Show/hide charts and observations selections when vital type is checked/unchecked
         const vitalTypeCheckboxes = document.querySelectorAll('.vital-type-checkbox');
         vitalTypeCheckboxes.forEach(checkbox => {
@@ -578,7 +572,6 @@
                 const parent = this.closest('.vital-type-item');
                 const chartsSelection = parent.querySelector('.charts-selection');
                 const observationsSelection = parent.querySelector('.observations-selection');
-                
                 if (this.checked) {
                     chartsSelection.classList.remove('d-none');
                     observationsSelection.classList.remove('d-none');
@@ -588,20 +581,17 @@
                 }
             });
         });
-        
         // Select/deselect all notes
         document.getElementById('selectAllNotes').addEventListener('click', function() {
             document.querySelectorAll('.note-checkbox').forEach(checkbox => {
                 checkbox.checked = true;
             });
         });
-        
         document.getElementById('deselectAllNotes').addEventListener('click', function() {
             document.querySelectorAll('.note-checkbox').forEach(checkbox => {
                 checkbox.checked = false;
             });
         });
-        
         // Select/deselect all vital types
         document.getElementById('selectAllVitalTypes').addEventListener('click', function() {
             document.querySelectorAll('.vital-type-checkbox').forEach(checkbox => {
@@ -609,14 +599,12 @@
                 checkbox.dispatchEvent(new Event('change'));
             });
         });
-        
         document.getElementById('deselectAllVitalTypes').addEventListener('click', function() {
             document.querySelectorAll('.vital-type-checkbox').forEach(checkbox => {
                 checkbox.checked = false;
                 checkbox.dispatchEvent(new Event('change'));
             });
         });
-        
         // Open the specific report modal
         const specificReportModal = new bootstrap.Modal(document.getElementById('specificReportModal'));
         specificReportModal.show();
@@ -633,12 +621,10 @@
     function loadNotesForSpecificReport() {
         const notesContainer = document.querySelector('#notesSelectionContainer .notes-list');
         const loadingElement = document.getElementById('notesLoading');
-        
         // Show loading state
         if (loadingElement) {
             loadingElement.classList.remove('d-none');
         }
-        
         fetch(`${BASE_URL}api/patients/${PATIENT_ID}/notes`)
             .then(response => response.json())
             .then(data => {
@@ -646,19 +632,16 @@
                 if (loadingElement) {
                     loadingElement.classList.add('d-none');
                 }
-                
                 // If there are no notes
                 if (data.length === 0) {
                     notesContainer.innerHTML = `<p class="text-center text-muted py-2">${translateText('No notes available')}</p>`;
                     return;
                 }
-                
                 // Create checkboxes for each note
                 let html = '';
                 data.forEach(note => {
                     const date = new Date(note.created_at).toLocaleString();
                     const preview = note.content.length > 50 ? note.content.substring(0, 50) + '...' : note.content;
-                    
                     html += `
                     <div class="form-check mb-2">
                         <input class="form-check-input note-checkbox" type="checkbox" id="note${note.id}" name="selected_notes" value="${note.id}">
@@ -668,7 +651,6 @@
                     </div>
                     `;
                 });
-                
                 notesContainer.innerHTML = html;
             })
             .catch(error => {
@@ -700,23 +682,19 @@
                     }
                     observationsByType[obs.vital_type].push(obs);
                 });
-                
                 // Update each observation list
                 document.querySelectorAll('.observations-list').forEach(container => {
                     const vitalType = container.dataset.vitalType;
                     const observations = observationsByType[vitalType] || [];
-                    
                     if (observations.length === 0) {
                         container.innerHTML = `<p class="text-center text-muted py-2">${translateText('No observations available for this vital type')}</p>`;
                         return;
                     }
-                    
                     let html = '';
                     observations.forEach(obs => {
                         const startDate = new Date(obs.start_date).toLocaleDateString();
                         const endDate = new Date(obs.end_date).toLocaleDateString();
                         const preview = obs.content.length > 30 ? obs.content.substring(0, 30) + '...' : obs.content;
-                        
                         html += `
                         <div class="form-check mb-2">
                             <input class="form-check-input observation-checkbox" type="checkbox" id="obs${obs.id}" name="selected_observations" value="${obs.id}">
@@ -726,7 +704,6 @@
                         </div>
                         `;
                     });
-                    
                     container.innerHTML = html;
                 });
             })
