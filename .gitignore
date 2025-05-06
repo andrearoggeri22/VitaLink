@@ -4,6 +4,8 @@
 *.key
 *.crt
 *.env.cloud
+*.env.tests 
+*.env.local
 
 # Cache Python
 __pycache__/

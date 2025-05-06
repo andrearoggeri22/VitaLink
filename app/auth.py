@@ -232,10 +232,9 @@ def api_login():
     
     if not doctor or not doctor.check_password(password):
         return jsonify({"error": _("Invalid email or password")}), 401
-    
-    # Create access token and refresh token
-    access_token = create_access_token(identity=doctor.id)
-    refresh_token = create_refresh_token(identity=doctor.id)
+      # Create access token and refresh token - Identity must be a string
+    access_token = create_access_token(identity=str(doctor.id))
+    refresh_token = create_refresh_token(identity=str(doctor.id))
     
     logger.info(f"API login successful for doctor {doctor.id}")
     
@@ -302,7 +301,13 @@ def api_doctor_required(f):
     @jwt_required()
     def decorated(*args, **kwargs):
         doctor_id = get_jwt_identity()
-        doctor = Doctor.query.get(doctor_id)
+        # Ensure that doctor_id is a string and convert to int if necessary
+        try:
+            if isinstance(doctor_id, str) and doctor_id.isdigit():
+                doctor_id = int(doctor_id)
+            doctor = Doctor.query.get(doctor_id)
+        except Exception:
+            return jsonify({"error": _("Invalid authentication token")}), 401
         
         if not doctor:
             return jsonify({"error": _("Doctor not found")}), 404

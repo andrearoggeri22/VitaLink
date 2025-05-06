@@ -734,14 +734,19 @@ def log_health_link_creation(doctor_id, link):
     Note:
         The details field includes information about the platform type and
         link expiration date for tracking purposes.
-    """
+    """    # Gestione sia di enum HealthPlatform che di stringhe
+    if hasattr(link.platform, 'value'):
+        platform_value = link.platform.value
+    else:
+        platform_value = link.platform
+        
     return log_action(
         doctor_id=doctor_id,
         action_type=ActionType.GENERATE_LINK,
         entity_type=EntityType.HEALTH_LINK,
         entity_id=link.id,
         details={
-            'platform': link.platform.value,
+            'platform': platform_value,
             'expires_at': link.expires_at.isoformat() if link.expires_at else None
         },
         patient_id=link.patient_id
@@ -834,11 +839,10 @@ def log_data_sync(doctor_id, patient, platform_name, data_type, result_summary):
         auxiliary function to the core medical record system.
     """
     try:
-        # Utilizziamo ActionType("sync") per assicurarci di usare il valore minuscolo
-        sync_action = ActionType.SYNC
+        # Use ActionType.SYNC directly instead of trying to convert a string
         return log_action(
             doctor_id=doctor_id,
-            action_type=sync_action,
+            action_type=ActionType.SYNC,
             entity_type=EntityType.HEALTH_PLATFORM,
             entity_id=0,  # Using 0 as placeholder since sync doesn't have an ID
             details={

@@ -15,7 +15,7 @@ consistent behavior for frequently needed operations.
 
 import re
 import uuid
-from datetime import datetime
+from datetime import datetime, date
 from flask_babel import gettext as _
 def validate_email(email):
     """
@@ -35,7 +35,12 @@ def validate_email(email):
         True
         >>> validate_email("invalid-email")
         False
+        >>> validate_email(None)
+        False
     """
+    if email is None:
+        return False
+    
     email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     return re.match(email_pattern, email) is not None
 
@@ -63,7 +68,12 @@ def is_valid_password(password):
         (True, "The password is strong")
         >>> is_valid_password("password")
         (False, "The password must contain at least one uppercase letter")
-    """    
+        >>> is_valid_password(None)
+        (False, "The password must be at least 8 characters long")
+    """
+    if password is None:
+        return False, _("The password must be at least 8 characters long")
+        
     if len(password) < 8:
         return False, _("The password must be at least 8 characters long")
     
@@ -101,11 +111,16 @@ def validate_uuid(uuid_string):
         True
         >>> validate_uuid("invalid-uuid")
         False
+        >>> validate_uuid(None)
+        False
     """
+    if uuid_string is None:
+        return False
+        
     try:
         uuid_obj = uuid.UUID(uuid_string)
         return str(uuid_obj) == uuid_string
-    except (ValueError, AttributeError):
+    except (ValueError, AttributeError, TypeError):
         return False
 
 def parse_date(date_string):
@@ -123,14 +138,19 @@ def parse_date(date_string):
         date: A Python date object representing the parsed date
         
     Raises:
-        ValueError: If the date string is not in the expected format
+        ValueError: If the date string is not in the expected format or is None
         
     Example:
         >>> parse_date("2023-05-15")
         datetime.date(2023, 5, 15)
         >>> parse_date("15/05/2023")
         ValueError: Invalid date format. Please use YYYY-MM-DD
+        >>> parse_date(None)
+        ValueError: Invalid date format. Please use YYYY-MM-DD
     """
+    if date_string is None:
+        raise ValueError(_("Invalid date format. Please use YYYY-MM-DD"))
+        
     try:
         return datetime.strptime(date_string, '%Y-%m-%d').date()
     except ValueError:
@@ -147,6 +167,7 @@ def to_serializable_dict(obj):
     - Dictionaries (recursively converts each value)
     - Lists (recursively converts each element)
     - Datetime objects (converts to ISO format strings)
+    - Date objects (converts to ISO format strings YYYY-MM-DD)
     - Objects with to_dict() method (calls that method)
     - Other types are returned as-is
     
@@ -165,8 +186,10 @@ def to_serializable_dict(obj):
     if isinstance(obj, dict):
         return {k: to_serializable_dict(v) for k, v in obj.items()}
     elif isinstance(obj, list):
-        return [to_serializable_dict(i) for i in obj]
+        return [to_serializable_dict(i) for i in obj]    
     elif isinstance(obj, datetime):
+        return obj.isoformat()
+    elif isinstance(obj, date):
         return obj.isoformat()
     elif hasattr(obj, 'to_dict'):
         return obj.to_dict()
