@@ -2,6 +2,10 @@
 
 Questo documento fornisce una descrizione dettagliata di tutti gli endpoint API disponibili nell'applicazione VitaLink. Gli endpoint sono organizzati per modulo e includono informazioni sul loro scopo, parametri accettati, formati di risposta e codici di stato.
 
+**Ultima revisione**: 06/05/2025 
+**Versione**: 1.0
+**Autore**: Roggeri Andrea
+
 ## Indice
 - [Autenticazione](#autenticazione)
 - [Gestione Pazienti](#gestione-pazienti)

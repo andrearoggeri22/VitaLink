@@ -1,19 +1,14 @@
 """
 Health Platforms Configuration Module.
-
 This module contains configuration settings for integrations with external health platforms
 like Fitbit, Google Fit, Apple Health, etc. It defines:
-
 1. API endpoints, credentials and authentication settings
 2. Data mapping from external platforms to internal data models
 3. Configuration for data retrieval, processing, and visualization
 4. Rate limiting and caching parameters
-
 Environment variables are used for sensitive information like client IDs and secrets.
 """
-
 import os
-
 # Fitbit API configuration
 FITBIT_CONFIG = {
     'client_id':
@@ -31,7 +26,6 @@ FITBIT_CONFIG = {
     'api_base_url':
     'https://api.fitbit.com'
 }
-
 # Mapping of Fitbit endpoints to VitalSignType
 FITBIT_ENDPOINTS = {    
     'heart_rate': {
