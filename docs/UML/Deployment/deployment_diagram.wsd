@@ -28,10 +28,6 @@ node "Client Devices" as ClientDevices {
     rectangle "Web Browser" as WebBrowser {
         component "HTML/CSS/JS Frontend" as WebFrontend
     }
-    
-    rectangle "Mobile App" as MobileApp {
-        component "Native Frontend" as MobileFrontend
-    }
 
     rectangle "API Client" as APIClientDevice {
         component "Third-party Application" as APIApp
@@ -71,7 +67,7 @@ node "Production Environment" as ProdEnv {
         }
     }
     
-    ' Database server
+    ' Server database
     node "Database Server" as DBServer {
         database "PostgreSQL" as PostgreSQL {
             component "Patient Data" as PatientData
@@ -81,37 +77,34 @@ node "Production Environment" as ProdEnv {
     }
 }
 
-' Cloud services
+' Servizi cloud
 cloud "External Services" as ExternalServices {
     rectangle "Fitbit API" as FitbitAPI
     rectangle "Google Fit API" as GoogleFitAPI
     rectangle "Apple Health API" as AppleHealthAPI
-    rectangle "S3-Compatible Storage" as S3Storage
 }
 
-' Development connections
+' Connessioni sviluppo
 PythonDev -right-> FlaskDev : "executes"
 FlaskDev -down-> SqliteDev : "CRUD operations"
 FlaskDev -up-> VSCode : "debugging"
 
-' Client to server connections
+' Connessioni client-server
 WebBrowser -down-> Nginx : "HTTPS (443)"
-MobileApp -down-> Nginx : "HTTPS (443)"
 APIClientDevice -down-> Nginx : "HTTPS (443)"
 
-' Server internal connections
+' Connessioni interne server
 Nginx -down-> uWSGI : "uWSGI protocol"
 Proxy -down-> uWSGI : "forwards requests"
 uWSGI -down-> FlaskApp : "executes"
 FlaskApp -down-> PostgreSQL : "SQL (5432)"
 
-' External service connections
+' Connessioni servizi esterni
 VitaLinkCore -down-> FitbitAPI : "REST API (HTTPS)"
 VitaLinkCore -down-> GoogleFitAPI : "REST API (HTTPS)"
 VitaLinkCore -down-> AppleHealthAPI : "REST API (HTTPS)"
-VitaLinkCore -down-> S3Storage : "HTTPS"
 
-' Cache and message queue
+' Cache e message queue
 node "Auxiliary Services" as AuxServices {
     database "Redis Cache" as Redis {
         component "Session Store" as Sessions
@@ -120,7 +113,7 @@ node "Auxiliary Services" as AuxServices {
     }
 }
 
-' Auxiliary connections
+' Connessioni ausiliarie
 FlaskApp -left-> Redis : "Caching, Sessions"
 
 @enduml

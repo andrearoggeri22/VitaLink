@@ -210,12 +210,11 @@ function updateObservationsUI(observations) {
     // Create UI elements for each observation group
     for (const type in groupedObservations) {
         const typeObservations = groupedObservations[type];
-        
-        // Trova le informazioni sul tipo
+        // Find the information about the type
         let typeName = type.replace('_', ' ');
         let typeColor = '#007bff'; // Default blue
         
-        // Cerca nelle definizioni dei tipi supportati
+        // Search in the definitions of supported types
         for (const platform in SUPPORTED_DATA_TYPES) {
             const supportedTypes = SUPPORTED_DATA_TYPES[platform];
             const typeInfo = supportedTypes.find(t => t.id === type);
@@ -225,8 +224,7 @@ function updateObservationsUI(observations) {
                 break;
             }
         }
-        
-        // Crea il gruppo di osservazioni
+        // Create the observations group
         const observationGroup = document.createElement('div');
         observationGroup.className = 'card mb-3';
         observationGroup.innerHTML = `
@@ -238,42 +236,40 @@ function updateObservationsUI(observations) {
             <div class="card-body p-0">
                 <ul class="list-group list-group-flush observation-list" data-type="${type}"></ul>
             </div>
-        `;            // Aggiungi le singole osservazioni alla lista
+        `;            // Add the individual observations to the list
         const observationList = observationGroup.querySelector('.observation-list');        typeObservations.forEach(obs => {
             const item = document.createElement('li');
             item.className = 'list-group-item';
             item.setAttribute('data-id', obs.id);
             
-            // Formatta le date
+            // Format the dates
             const startDate = new Date(obs.start_date);
             const endDate = new Date(obs.end_date);
-            const dateStr = `${formatDateForDisplay(startDate)} - ${formatDateForDisplay(endDate)}`;            // Verifica se l'osservazione appartiene al medico corrente
+            const dateStr = `${formatDateForDisplay(startDate)} - ${formatDateForDisplay(endDate)}`;            // Check if the observation belongs to the current doctor
             let isCurrentDoctorObservation = false;
               try {
-                // Recupera l'ID del medico corrente dal meta tag
+                // Get the current doctor ID from the meta tag
                 const currentDoctorIdElement = document.querySelector('meta[name="current-doctor-id"]');
                 const currentDoctorId = currentDoctorIdElement ? parseInt(currentDoctorIdElement.getAttribute('content')) : null;
                 
-                console.log('Controllo proprietà:', obs.id, '- Medico attuale:', currentDoctorId, '- Medico osservazione:', obs.doctor_id);
+                console.log('Checking property:', obs.id, '- Current doctor:', currentDoctorId, '- Observation doctor:', obs.doctor_id);
                 
-                // Converti entrambi gli ID in numeri interi per fare un confronto coerente
-                // Se entrambi gli ID sono disponibili, confrontali
+                // Convert both IDs to integers to make a consistent comparison
+                // If both IDs are available, compare them
                 if (currentDoctorId && obs.doctor_id) {
                     const doctorIdFromObs = parseInt(obs.doctor_id);
                     isCurrentDoctorObservation = doctorIdFromObs === currentDoctorId;
-                    console.log('Confronto ID:', doctorIdFromObs, '===', currentDoctorId, '=', isCurrentDoctorObservation);
-                } else {
-                    // Se mancano gli ID, mostriamo sempre il pulsante per mantenere la funzionalità esistente
-                    // Questo è un fallback che assicura di non bloccare le funzionalità base
+                    console.log('ID comparison:', doctorIdFromObs, '===', currentDoctorId, '=', isCurrentDoctorObservation);
+                } else {                    // If the IDs are missing, we always show the button to maintain existing functionality
+                    // This is a fallback that ensures basic functionality is not blocked
                     isCurrentDoctorObservation = true;
-                    console.log('ID mancanti, mostrando pulsante per sicurezza');
+                    console.log('Missing IDs, showing button for safety');
                 }
             } catch (error) {
-                // In caso di errore, mostriamo il pulsante per mantenere la funzionalità
+                // In case of error, we show the button to maintain functionality
                 isCurrentDoctorObservation = true;
                 console.error('Error checking observation owner:', error);
-            }
-              // HTML con nome del dottore e pulsante di eliminazione solo se è il proprietario
+            }              // HTML with doctor name and delete button only if they are the owner
             item.innerHTML = `
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
@@ -293,8 +289,7 @@ function updateObservationsUI(observations) {
                        </button>` : ''}
                 </div>
             `;
-            
-            // Aggiungi event listener al pulsante di eliminazione solo se esiste
+            // Add event listener to the delete button only if it exists
             const deleteBtn = item.querySelector('.delete-observation-btn');
             if (deleteBtn) {
                 deleteBtn.addEventListener('click', function() {

@@ -18,19 +18,6 @@ concise "TokenState" as Token
 concise "APIRateLimit" as RateLimit
 concise "VitalCache" as Cache
 
-' Stati dei componenti
-Health is "Idle" then "CheckingCache" then "CacheHit" then "Idle" then "CheckingCache" then "CacheMiss" then "CheckingToken" then "TokenValid" then "PreparingRequest" then "AwaitingResponse" then "ProcessingData" then "UpdatingCache" then "Idle"
-
-Fitbit is "Ready" then "Busy" then "Responding" then "Ready"
-
-DB is "Idle" then "Reading" then "Idle" then "Reading" then "Idle" then "Reading" then "Writing" then "Idle" 
-
-Token is "Valid" then "Checked" then "Valid" then "Checked" then "Valid" then "Checked" then "Valid"
-
-RateLimit is "Ok" then "Checked" then "Ok" then "Checked" then "Ok" then "Checked" then "Ok" then "Checked" then "Updated"
-
-Cache is "Populated" then "Checked" then "Serving" then "Populated" then "Checked" then "Expired" then "Populated" then "Updated" then "Populated"
-
 ' Timeline
 @0
 Health is Idle

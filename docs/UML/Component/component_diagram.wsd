@@ -75,14 +75,30 @@ package "VitaLink Application" {
 }
 
 ' Sistemi esterni
-node "External Systems" {
+node "External Health Platforms" {
     component [Fitbit API] as FitbitAPI
     component [Google Fit API] as GoogleFitAPI
     component [Apple Health API] as AppleHealthAPI
+    
+    interface "OAuth 2.0" as OAuth
+    interface "REST APIs" as RestAPI
+    
+    FitbitAPI -- OAuth
+    FitbitAPI -- RestAPI
+    GoogleFitAPI -- OAuth
+    GoogleFitAPI -- RestAPI
+    AppleHealthAPI -- OAuth
+    AppleHealthAPI -- RestAPI
+}
+
+' Cache temporanea
+component "Temporary Data Cache" as Cache {
+    component [Vital Signs Cache] as VitalsCache
+    component [Rate Limiter] as RateLimiter
 }
 
 ' Database
-database "SQLite / PostgreSQL" as Database {
+database "PostgreSQL" as Database {
     component [Patients] as PatientDB
     component [Doctors] as DoctorDB
     component [Vital Signs] as VitalDB
@@ -93,11 +109,51 @@ database "SQLite / PostgreSQL" as Database {
 }
 
 ' Connessioni esterne
+HealthInt -- OAuth : << uses >>
+HealthInt -- RestAPI : << calls >>
 HealthInt --> FitbitAPI
 HealthInt --> GoogleFitAPI
 HealthInt --> AppleHealthAPI
 
+' Connessione alla cache
+HealthInt ..> Cache : << uses temporarily >>
+VitalMon ..> Cache : << reads from >>
+
 ' Connessione al database
 DAL --> Database
+DAL ..> PatientDB : << accesses >>
+DAL ..> DoctorDB : << accesses >>
+DAL ..> ObsDB : << accesses >>
+DAL ..> NoteDB : << accesses >>
+DAL ..> AuditDB : << accesses >>
+DAL ..> LinkDB : << accesses >>
+
+' Note esplicative
+note right of VitalsCache
+  I dati dei parametri vitali sono memorizzati
+  temporaneamente nella cache e vengono
+  eliminati quando la sessione termina
+end note
+
+note right of RateLimiter
+  Gestisce i limiti di chiamate API
+  di ciascuna piattaforma (es. 150/ora per Fitbit)
+end note
+
+note right of PatientDB
+  I pazienti sono identificati tramite UUID
+  permettendo l'importazione tra medici
+end note
+
+note right of LinkDB
+  Link temporanei per l'autorizzazione
+  OAuth con le piattaforme sanitarie
+end note
+
+note bottom of HealthInt
+  Gestisce l'integrazione con tutte le
+  piattaforme sanitarie supportate
+  tramite OAuth 2.0
+end note
 
 @enduml

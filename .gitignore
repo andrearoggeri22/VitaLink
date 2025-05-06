@@ -99,7 +99,6 @@ public/
 migrations/
 instance/
 
-*.pot
 *.mo
 
 site/

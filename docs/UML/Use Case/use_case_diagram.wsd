@@ -22,7 +22,9 @@ title VitaLink - Use Case Diagram
 ' Attori
 actor "Medico" as Doctor
 actor "Paziente" as Patient
-actor "Sistema Fitbit" as Fitbit
+actor "Fitbit API" as Fitbit
+actor "Google Fit API" as GoogleFit #LightBlue
+actor "Apple Health API" as AppleHealth #LightBlue
 actor "Amministratore\ndi Sistema" as Admin
 
 ' Pacchetti di casi d'uso principale
@@ -54,6 +56,8 @@ package "Monitoraggio Parametri Vitali" {
     usecase "Visualizzare parametri\nvitali" as UC_ViewVitals
     usecase "Sincronizzare dati\nda Fitbit" as UC_SyncFitbit
     usecase "Disconnettere dispositivo\nFitbit" as UC_DisconnectFitbit
+    usecase "Autorizzare accesso\na piattaforma sanitaria" as UC_AuthorizePlatform #LightBlue
+    usecase "Visualizzare grafici\ntrend parametri vitali" as UC_ViewTrendCharts #LightBlue
 }
 
 package "Gestione Osservazioni" {
@@ -85,7 +89,7 @@ Doctor --> UC_ViewPatients
 Doctor --> UC_AddPatient
 Doctor --> UC_EditPatient
 Doctor --> UC_DeletePatient
-Doctor --> UC_ImportPatient
+Doctor --> UC_ImportPatient #LightBlue
 Doctor --> UC_ViewPatientDetails
 
 Doctor --> UC_AddNote
@@ -94,6 +98,7 @@ Doctor --> UC_DeleteNote
 
 Doctor --> UC_ConnectFitbit
 Doctor --> UC_ViewVitals
+Doctor --> UC_ViewTrendCharts #LightBlue
 Doctor --> UC_SyncFitbit
 Doctor --> UC_DisconnectFitbit
 
@@ -110,11 +115,31 @@ Doctor --> UC_ViewStatistics
 Doctor --> UC_ChangeLanguage
 
 ' Relazioni per il Paziente
-' Nota: al momento il paziente non ha un'interfaccia diretta nel sistema
-' quindi non ci sono casi d'uso associati a loro
+Patient --> UC_AuthorizePlatform #LightBlue
 
-' Relazioni per Fitbit
+' Relazioni per le piattaforme sanitarie
 Fitbit --> UC_SyncFitbit
+GoogleFit --> UC_SyncFitbit #LightBlue
+AppleHealth --> UC_SyncFitbit #LightBlue
+
+' Note esplicative
+note bottom of UC_ImportPatient #LightBlue
+  Nuova funzionalità che consente
+  ai medici di importare pazienti
+  esistenti tramite UUID
+end note
+
+note bottom of UC_AuthorizePlatform #LightBlue
+  Il paziente autorizza l'accesso
+  ai propri dati sanitari tramite
+  il processo OAuth della piattaforma
+end note
+
+note bottom of UC_ViewTrendCharts #LightBlue
+  I dati vengono recuperati in tempo reale
+  dalle piattaforme sanitarie e mostrati
+  in grafici trend per diversi intervalli temporali
+end note
 
 ' Relazioni per l'Admin
 Admin --> UC_ViewAuditLogs

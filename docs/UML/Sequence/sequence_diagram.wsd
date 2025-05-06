@@ -19,29 +19,83 @@ title VitaLink - Sequence Diagram: Health Platform Integration
 
 actor "Medico" as Doctor
 participant "Frontend\nVitaLink" as Frontend
-participant "Backend\nVitaLink" as Backend
+participant "API\nController" as API
+participant "HealthService" as HealthService
+participant "FitbitAPI" as FitbitAPI
+participant "Audit" as Audit
 participant "Database" as DB
 actor "Paziente" as Patient 
 participant "Piattaforma Salute\n(Fitbit/Google/Apple)" as HealthPlatform
 
 == Creazione Link di Integrazione ==
 
-Doctor -> Frontend : Richiede creazione link
+Doctor -> Frontend : Richiede creazione link di connessione
 activate Frontend
-Frontend -> Backend : POST /api/health/create-link
-activate Backend
-Backend -> DB : Verifica medico e paziente
+Frontend -> API : POST /api/health/create-link
+activate API
+API -> HealthService : generate_auth_link(doctor_id, patient_id, platform)
+activate HealthService
+HealthService -> DB : Verifica medico e paziente
 activate DB
-DB --> Backend : Conferma dati
+DB --> HealthService : Conferma dati
 deactivate DB
-Backend -> DB : Crea HealthPlatformLink
+HealthService -> DB : Crea HealthPlatformLink con UUID unico
 activate DB
-DB --> Backend : Link creato con UUID
+DB --> HealthService : Link creato con UUID
 deactivate DB
-Backend --> Frontend : Restituisce UUID del link
-deactivate Backend
+HealthService -> HealthService : Genera URL OAuth per piattaforma
+HealthService -> Audit : log_link_generation(doctor, patient, platform)
+activate Audit
+Audit -> DB : Insert audit log
+DB --> Audit : Conferma
+Audit --> HealthService : OK
+deactivate Audit
+HealthService --> API : Restituisce URL di autorizzazione
+deactivate HealthService
+API --> Frontend : Restituisce URL con UUID
+deactivate API
 Frontend --> Doctor : Mostra link di integrazione
 deactivate Frontend
+
+== Autorizzazione del Paziente ==
+
+Doctor -> Patient : Comunica link al paziente
+Patient -> HealthPlatform : Accede al link di autorizzazione
+activate HealthPlatform
+HealthPlatform -> HealthPlatform : Chiede autenticazione (se necessario)
+HealthPlatform -> Patient : Mostra richiesta di autorizzazione
+Patient -> HealthPlatform : Concede l'autorizzazione
+HealthPlatform -> API : Callback OAuth con codice di autorizzazione
+deactivate HealthPlatform
+activate API
+API -> HealthService : handle_oauth_callback(code, state)
+activate HealthService
+HealthService -> DB : Recupera HealthPlatformLink tramite UUID
+activate DB
+DB --> HealthService : Dettagli link (paziente, medico, ecc)
+deactivate DB
+HealthService -> FitbitAPI : Scambia codice per token di accesso
+activate FitbitAPI
+FitbitAPI --> HealthService : Access token, refresh token, scadenza
+deactivate FitbitAPI
+HealthService -> DB : Salva token nel profilo del paziente
+activate DB
+DB --> HealthService : Conferma salvataggio
+deactivate DB
+HealthService -> DB : Aggiorna HealthPlatformLink a 'used'
+activate DB
+DB --> HealthService : Conferma aggiornamento
+deactivate DB
+HealthService -> Audit : log_platform_connection(doctor, patient, platform)
+activate Audit
+Audit -> DB : Insert audit log
+DB --> Audit : Conferma
+Audit --> HealthService : OK
+deactivate Audit
+HealthService --> API : Conferma connessione riuscita
+deactivate HealthService
+API --> HealthPlatform : Redirect a pagina di successo
+deactivate API
 
 ' Flusso principale
 Doctor -> Frontend: Richiede sincronizzazione dati Fitbit\nper un paziente
@@ -162,5 +216,48 @@ deactivate API
 
 Frontend --> Doctor: Mostra conferma di salvataggio
 deactivate Frontend
+
+== Importazione Paziente Esistente ==
+
+Doctor -> Frontend: Richiede importazione paziente tramite UUID
+activate Frontend
+
+Frontend -> API: POST /api/patients/import
+activate API
+
+API -> DB: Verifica esistenza UUID
+activate DB
+DB --> API: Paziente trovato
+deactivate DB
+
+API -> DB: Verifica associazione esistente
+activate DB
+DB --> API: Nessuna associazione con questo medico
+deactivate DB
+
+API -> DB: Crea associazione DoctorPatient
+activate DB
+DB --> API: Associazione creata
+deactivate DB
+
+API -> Audit: log_patient_import(doctor, patient)
+activate Audit
+Audit -> DB: Insert audit log
+DB --> Audit: Conferma
+Audit --> API: OK
+deactivate Audit
+
+API --> Frontend: Conferma importazione
+deactivate API
+
+Frontend --> Doctor: Mostra conferma e dettagli paziente
+deactivate Frontend
+
+note right
+  Il paziente mantiene tutte le sue
+  connessioni alle piattaforme sanitarie
+  esistenti quando viene importato
+  da un medico all'altro
+end note
 
 @enduml

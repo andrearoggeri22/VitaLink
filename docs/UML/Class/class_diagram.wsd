@@ -93,6 +93,7 @@ class Patient {
     +date_of_birth: Date
     +gender: String
     +contact_number: String
+    +email: String
     +address: String
     +created_at: DateTime
     +updated_at: DateTime
@@ -104,6 +105,9 @@ class Patient {
     +to_dict(): dict
     +get_vital_observations(vital_type: VitalSignType, start_date: DateTime, end_date: DateTime): list[VitalObservation]
     +get_notes(): list[Note]
+    +is_connected_to_platform(): boolean
+    +disconnect_platform(): void
+    +update_platform_tokens(access_token: String, refresh_token: String, expires_at: DateTime): void
 }
 
 class Note {
@@ -179,6 +183,57 @@ Patient "1" *-- "many" HealthPlatformLink: has >
 Doctor "1" *-- "many" AuditLog: generates >
 AuditLog "0..*" -- "0..1" Patient: refers to >
 Doctor "1" *-- "many" HealthPlatformLink: creates >
+
+' Classi di servizio
+class HealthPlatformService {
+    +generate_auth_link(doctor_id: Integer, patient_id: Integer, platform: HealthPlatform): String
+    +handle_oauth_callback(code: String, state: String): Tuple[bool, String]
+    +disconnect_platform(patient_id: Integer): boolean
+    +refresh_tokens(patient: Patient): boolean
+    +is_rate_limited(): boolean
+    +reset_rate_limit_counter(): void
+    +increment_rate_limit_counter(): void
+}
+
+class HealthDataService {
+    -cache: Dict
+    -cache_ttl: Integer
+    --
+    +get_vital_data(patient: Patient, vital_type: VitalSignType, start_date: DateTime, end_date: DateTime): List[Dict]
+    +check_cache(patient_id: Integer, vital_type: VitalSignType, start_date: DateTime, end_date: DateTime): Optional[List[Dict]]
+    +update_cache(patient_id: Integer, vital_type: VitalSignType, start_date: DateTime, end_date: DateTime, data: List[Dict]): void
+    +clear_patient_cache(patient_id: Integer): void
+    +clear_all_cache(): void
+}
+
+class ObservationService {
+    +create_observation(patient_id: Integer, doctor_id: Integer, vital_type: VitalSignType, content: String, start_date: DateTime, end_date: DateTime): VitalObservation
+    +update_observation(observation_id: Integer, content: String, start_date: DateTime, end_date: DateTime): VitalObservation
+    +delete_observation(observation_id: Integer): boolean
+    +get_observations(patient_id: Integer, vital_type: VitalSignType, start_date: DateTime, end_date: DateTime): List[VitalObservation]
+}
+
+class ReportService {
+    +generate_specific_report(patient_id: Integer, doctor_id: Integer, components: List[String], start_date: DateTime, end_date: DateTime, summary: String): BytesIO
+    +generate_pdf(title: String, content: Dict, patient: Patient, doctor: Doctor): BytesIO
+    +format_vital_data_for_report(vital_data: List[Dict], vital_type: VitalSignType): Dict
+    +format_observations_for_report(observations: List[VitalObservation]): Dict
+}
+
+class FitbitAPIClient {
+    +get_activity_data(access_token: String, start_date: DateTime, end_date: DateTime): Dict
+    +get_heart_rate_data(access_token: String, start_date: DateTime, end_date: DateTime): Dict
+    +get_sleep_data(access_token: String, start_date: DateTime, end_date: DateTime): Dict
+    +get_weight_data(access_token: String, start_date: DateTime, end_date: DateTime): Dict
+    +refresh_token(refresh_token: String): Tuple[String, String, DateTime]
+}
+
+' Relazioni di servizio
+HealthPlatformService ..> FitbitAPIClient: uses >
+HealthDataService ..> FitbitAPIClient: uses >
+HealthDataService ..> HealthPlatformService: uses tokens from >
+ReportService ..> HealthDataService: retrieves data from >
+ReportService ..> ObservationService: retrieves observations from >
 
 ' Applicazione Flask
 package "Flask Application Components" {

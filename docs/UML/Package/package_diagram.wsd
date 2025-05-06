@@ -15,35 +15,35 @@ title VitaLink - Package Diagram
 ' Pacchetto principale
 package "VitaLink" {
     package "app" as App {
-        ' Core application
+        ' Applicazione principale
         package "__init__" as Init
         package "app" as AppCore
         package "main" as Main
         
-        ' Data models
+        ' Modelli dati
         package "models" as Models
         
-        ' Authentication and user management
+        ' Autenticazione e gestione utenti
         package "auth" as Auth
         
-        ' Views and controllers
+        ' Viste e controller
         package "views" as Views
         package "api" as API
         
-        ' Health platform integration
+        ' Integrazione piattaforme sanitarie
         package "health_platforms" as HealthPlatforms
         package "health_platforms_config" as HealthPlatformsConfig
         
-        ' Observations system
+        ' Sistema osservazioni
         package "observations" as Observations
         
-        ' Utilities and support
+        ' Utilità e supporto
         package "utils" as Utils
         package "audit" as Audit
         package "reports" as Reports
         package "language" as Language
         
-        ' Database migration tools
+        ' Strumenti migrazione database
         package "migrate" as Migrate
         package "compile_translations" as CompileTranslations
     }
