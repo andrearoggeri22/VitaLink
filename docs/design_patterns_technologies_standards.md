@@ -32,16 +32,17 @@ Utilizzato per l'accesso ai dati e la separazione della logica di business dalla
 **Riferimenti nel codice**:
 - Le classi con metodi come `find_by_id`, `save`, `delete` implementano questo pattern
 
-#### Service Layer Pattern
-Implementato per incapsulare la logica di business complessa e per fungere da intermediario tra i controller e i repository:
-- Classe `HealthPlatformService`: Gestisce l'integrazione con le piattaforme sanitarie
-- Classe `HealthDataService`: Gestisce il recupero e l'elaborazione dei dati sanitari
-- Classe `ObservationService`: Gestisce le operazioni sulle osservazioni mediche
-- Classe `ReportService`: Gestisce la generazione di report
+#### Modular Function Organization Pattern
+Implementato per incapsulare la logica di business complessa in moduli funzionali, invece che in classi di servizio:
+- Modulo `health_platforms.py`: Gestisce l'integrazione con le piattaforme sanitarie tramite funzioni specializzate
+- Modulo `observations.py`: Gestisce le operazioni sulle osservazioni mediche tramite funzioni dedicate
+- Modulo `reports.py`: Gestisce la generazione di report tramite funzioni specifiche
 
 **Riferimenti nel codice**:
-- `app/health_platforms.py`: Servizi per l'integrazione con piattaforme sanitarie
-- `app/reports.py`: Servizi per la generazione di report
+- `app/health_platforms.py`: Funzioni per l'integrazione con piattaforme sanitarie (es. `get_processed_fitbit_data`, `process_fitbit_data`)
+- `app/reports.py`: Funzioni per la generazione di report (es. `generate_specific_report`, `create_vital_chart`)
+- `app/observations.py`: Funzioni per la gestione delle osservazioni
+
 
 ### 1.2 Pattern di Progettazione
 
@@ -242,8 +243,8 @@ Linguaggio di modellazione unificato per la documentazione dell'architettura:
 ### 4.1 SOLID
 
 #### Single Responsibility
-Ogni classe ha una sola responsabilità:
-- Esempio: Classe `Doctor` gestisce solo i dati del medico, `HealthPlatformService` gestisce solo l'integrazione
+Ogni modulo e funzione ha una sola responsabilità:
+- Esempio: Classe `Doctor` gestisce solo i dati del medico, modulo `health_platforms.py` contiene funzioni specializzate per l'integrazione
 
 #### Open/Closed
 Classi aperte all'estensione ma chiuse alla modifica:

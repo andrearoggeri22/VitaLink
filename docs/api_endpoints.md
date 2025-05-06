@@ -306,7 +306,7 @@ Questo documento fornisce una descrizione dettagliata di tutti gli endpoint API 
 
 ### Aggiunta Osservazione
 **POST `/api/observations`**
-- **Modulo**: `app/observations.py`
+- **Modulo**: `app/api.py`
 - **Descrizione**: Crea una nuova osservazione sui parametri vitali di un paziente.
 - **Autenticazione**: JWT richiesto
 - **Corpo Richiesta**:
@@ -343,7 +343,7 @@ Questo documento fornisce una descrizione dettagliata di tutti gli endpoint API 
 
 ### Modifica Osservazione
 **PUT `/api/observations/<int:observation_id>`**
-- **Modulo**: `app/observations.py`
+- **Modulo**: `app/api.py`
 - **Descrizione**: Aggiorna una osservazione sui parametri vitali esistente.
 - **Autenticazione**: JWT richiesto
 - **Parametri URL**: `observation_id` - ID dell'osservazione
@@ -381,7 +381,7 @@ Questo documento fornisce una descrizione dettagliata di tutti gli endpoint API 
 
 ### Eliminazione Osservazione
 **DELETE `/api/observations/<int:observation_id>`**
-- **Modulo**: `app/observations.py`
+- **Modulo**: `app/api.py`
 - **Descrizione**: Elimina un'osservazione sui parametri vitali.
 - **Autenticazione**: JWT richiesto
 - **Parametri URL**: `observation_id` - ID dell'osservazione
