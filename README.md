@@ -298,6 +298,8 @@ mkdocs build
 VitaLink include una documentazione completa:
 
 - [API Endpoints](docs/api_endpoints.md): Descrizione di tutti gli endpoint API REST
+- [Project Plan](docs/project_plan.md): Project Plan per la soluzione
+- [Design Pattern/Tecnologie/Standard](docs/project_plan.md): File riepilogativo che descrive i Design Pattern, le tecnologie e gli standard
 - [Requisiti](docs/requirements.md): Requisiti funzionali e non funzionali del sistema
 - [Guida per l'uso](docs/use_guide.md): Descrizione dei flussi di operazioni per le principali attività
 

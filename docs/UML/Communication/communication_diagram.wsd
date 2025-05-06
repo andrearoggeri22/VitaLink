@@ -18,7 +18,7 @@ object "AuthController" as Auth
 object "PatientController" as PatientCtrl
 object "ObservationController" as ObsCtrl
 object "VitalsController" as VitalsCtrl
-object "HealthPlatformService" as HealthService
+object "health_platforms.py" as HealthModule
 object "AuditService" as AuditService
 object "PatientModel" as PatientModel
 object "VitalObservationModel" as ObsModel
@@ -47,19 +47,19 @@ App -left-> Doctor : "15: Visualizza dettaglio paziente"
 
 ' Collegamento Fitbit
 Doctor -right-> App : "16: Richiede collegamento Fitbit"
-App -right-> HealthService : "17: Genera link di collegamento"
-HealthService -down-> DB : "18: INSERT link Fitbit"
-DB -up-> HealthService : "19: UUID link"
-HealthService -left-> App : "20: URL di autorizzazione"
+App -right-> HealthModule : "17: generate_platform_link()"
+HealthModule -down-> DB : "18: INSERT link Fitbit"
+DB -up-> HealthModule : "19: UUID link"
+HealthModule -left-> App : "20: URL di autorizzazione"
 App -left-> Doctor : "21: URL di collegamento mostrato"
 
 ' Sincronizzazione dati Fitbit
 Doctor -right-> App : "22: Richiede visualizzazione parametri"
 App -right-> VitalsCtrl : "23: Richiede parametri vitali"
-VitalsCtrl -right-> HealthService : "24: Richiede dati Fitbit"
-HealthService -right-> FitbitAPI : "25: Richiesta API"
-FitbitAPI -left-> HealthService : "26: Dati parametri vitali"
-HealthService -left-> VitalsCtrl : "27: Dati elaborati"
+VitalsCtrl -right-> HealthModule : "24: get_vitals_data()"
+HealthModule -right-> FitbitAPI : "25: get_fitbit_data()"
+FitbitAPI -left-> HealthModule : "26: Dati parametri vitali"
+HealthModule -left-> VitalsCtrl : "27: Dati elaborati"
 VitalsCtrl -left-> App : "28: Dati formattati"
 App -left-> Doctor : "29: Visualizza grafici"
 

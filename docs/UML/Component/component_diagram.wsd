@@ -22,8 +22,8 @@ package "VitaLink Application" {
     component [Frontend / User Interface] as UI
     component [Authentication Module] as Auth
     component [Patient Management] as PatientMgmt
-    component [Health Platform Integration] as HealthInt
-    component [Vital Signs Monitoring] as VitalMon
+    component [Health Platform Module (health_platforms.py)] as HealthInt
+    component [Vital Signs Module (api.py, get_vitals)] as VitalMon
     component [Observation System] as Obs
     component [Audit System] as Audit
     component [Reporting Module] as Report

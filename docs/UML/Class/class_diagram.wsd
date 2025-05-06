@@ -185,55 +185,66 @@ AuditLog "0..*" -- "0..1" Patient: refers to >
 Doctor "1" *-- "many" HealthPlatformLink: creates >
 
 ' Classi di servizio
-class HealthPlatformService {
-    +generate_auth_link(doctor_id: Integer, patient_id: Integer, platform: HealthPlatform): String
-    +handle_oauth_callback(code: String, state: String): Tuple[bool, String]
-    +disconnect_platform(patient_id: Integer): boolean
-    +refresh_tokens(patient: Patient): boolean
-    +is_rate_limited(): boolean
-    +reset_rate_limit_counter(): void
-    +increment_rate_limit_counter(): void
+package "health_platforms.py" {
+    class HealthPlatformModule <<Module>> {
+        ' Variabili globali
+        +vitals_cache: Dict
+        +api_rate_limit: Dict
+        --
+        ' Funzioni di generazione link
+        +generate_platform_link(patient: Patient, doctor: Doctor, platform: HealthPlatform): HealthPlatformLink
+        +get_link_by_uuid(uuid: String): HealthPlatformLink
+        
+        ' Funzioni OAuth per Fitbit
+        +get_fitbit_authorization_url(link_uuid: String): String
+        +exchange_fitbit_code_for_token(authorization_code: String): Dict
+        +refresh_fitbit_token(refresh_token: String): Dict
+        +save_fitbit_tokens(patient: Patient, token_response: Dict): boolean
+        +ensure_fresh_token(patient: Patient): String
+        
+        ' Gestione API e rate limit
+        +check_rate_limit(): boolean
+        +increment_api_call_counter(response: Response): void
+        
+        ' Recupero e gestione dati
+        +get_fitbit_data(patient: Patient, data_type: String, start_date: DateTime, end_date: DateTime): Dict
+        +process_fitbit_data(data: Dict, data_type: String): List[Dict]
+        +get_vitals_data(patient: Patient, data_type: VitalSignType, start_date: DateTime, end_date: DateTime, cache_duration: Integer): List[Dict]
+        +get_processed_fitbit_data(patient: Patient, data_type: String, start_date: DateTime, end_date: DateTime): List[Dict]
+        
+        ' Funzioni di elaborazione dati
+        +process_heart_rate_data(data: Dict, unit: String, request_id: String): List[Dict]
+        +process_nested_value_list(data_list: List, timestamp_key: String, value_path: String, unit: String, transform: Function, request_id: String): List[Dict]
+        +process_nested_value_dict(data_dict: Dict, timestamp_key: String, value_path: String, unit: String, transform: Function, request_id: String): List[Dict]
+        +process_standard_list(data_list: List, timestamp_key: String, value_key: String, unit: String, transform: Function, request_id: String): List[Dict]
+    }
 }
 
-class HealthDataService {
-    -cache: Dict
-    -cache_ttl: Integer
-    --
-    +get_vital_data(patient: Patient, vital_type: VitalSignType, start_date: DateTime, end_date: DateTime): List[Dict]
-    +check_cache(patient_id: Integer, vital_type: VitalSignType, start_date: DateTime, end_date: DateTime): Optional[List[Dict]]
-    +update_cache(patient_id: Integer, vital_type: VitalSignType, start_date: DateTime, end_date: DateTime, data: List[Dict]): void
-    +clear_patient_cache(patient_id: Integer): void
-    +clear_all_cache(): void
+package "observations.py" {
+    class ObservationsModule <<Module>> {
+        +get_web_observations(patient_id: Integer): List[VitalObservation]
+        +add_web_observation(): VitalObservation
+        +update_web_observation(observation_id: Integer): VitalObservation
+        +delete_web_observation(observation_id: Integer): boolean
+    }
 }
 
-class ObservationService {
-    +create_observation(patient_id: Integer, doctor_id: Integer, vital_type: VitalSignType, content: String, start_date: DateTime, end_date: DateTime): VitalObservation
-    +update_observation(observation_id: Integer, content: String, start_date: DateTime, end_date: DateTime): VitalObservation
-    +delete_observation(observation_id: Integer): boolean
-    +get_observations(patient_id: Integer, vital_type: VitalSignType, start_date: DateTime, end_date: DateTime): List[VitalObservation]
+package "reports.py" {
+    class ReportsModule <<Module>> {
+        ' Costanti
+        +PERIOD_DAYS: Dict
+        --
+        +create_vital_chart(vitals_data: List[Dict], period_name: String, vital_type: String): Drawing
+        +generate_specific_report(patient: Patient, doctor: Doctor, selected_notes: List[Note], selected_vital_types: List[VitalSignType], selected_charts: Dict, selected_observations: List[VitalObservation], summary: String, language: String): BytesIO
+    }
 }
 
-class ReportService {
-    +generate_specific_report(patient_id: Integer, doctor_id: Integer, components: List[String], start_date: DateTime, end_date: DateTime, summary: String): BytesIO
-    +generate_pdf(title: String, content: Dict, patient: Patient, doctor: Doctor): BytesIO
-    +format_vital_data_for_report(vital_data: List[Dict], vital_type: VitalSignType): Dict
-    +format_observations_for_report(observations: List[VitalObservation]): Dict
-}
-
-class FitbitAPIClient {
-    +get_activity_data(access_token: String, start_date: DateTime, end_date: DateTime): Dict
-    +get_heart_rate_data(access_token: String, start_date: DateTime, end_date: DateTime): Dict
-    +get_sleep_data(access_token: String, start_date: DateTime, end_date: DateTime): Dict
-    +get_weight_data(access_token: String, start_date: DateTime, end_date: DateTime): Dict
-    +refresh_token(refresh_token: String): Tuple[String, String, DateTime]
-}
-
-' Relazioni di servizio
-HealthPlatformService ..> FitbitAPIClient: uses >
-HealthDataService ..> FitbitAPIClient: uses >
-HealthDataService ..> HealthPlatformService: uses tokens from >
-ReportService ..> HealthDataService: retrieves data from >
-ReportService ..> ObservationService: retrieves observations from >
+' Relazioni tra moduli e dati
+HealthPlatformModule ..> Patient: manipulates >
+HealthPlatformModule ..> HealthPlatformLink: creates/manages >
+ObservationsModule ..> VitalObservation: creates/manages >
+ReportsModule ..> HealthPlatformModule: gets data from >
+ReportsModule ..> ObservationsModule: gets observations from >
 
 ' Applicazione Flask
 package "Flask Application Components" {

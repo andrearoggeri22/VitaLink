@@ -20,7 +20,7 @@ title VitaLink - Sequence Diagram: Health Platform Integration
 actor "Medico" as Doctor
 participant "Frontend\nVitaLink" as Frontend
 participant "API\nController" as API
-participant "HealthService" as HealthService
+participant "health_platforms.py" as HealthModule
 participant "FitbitAPI" as FitbitAPI
 participant "Audit" as Audit
 participant "Database" as DB
@@ -33,25 +33,25 @@ Doctor -> Frontend : Richiede creazione link di connessione
 activate Frontend
 Frontend -> API : POST /api/health/create-link
 activate API
-API -> HealthService : generate_auth_link(doctor_id, patient_id, platform)
-activate HealthService
-HealthService -> DB : Verifica medico e paziente
+API -> HealthModule : generate_platform_link(doctor, patient, platform)
+activate HealthModule
+HealthModule -> DB : Verifica medico e paziente
 activate DB
-DB --> HealthService : Conferma dati
+DB --> HealthModule : Conferma dati
 deactivate DB
-HealthService -> DB : Crea HealthPlatformLink con UUID unico
+HealthModule -> DB : Crea HealthPlatformLink con UUID unico
 activate DB
-DB --> HealthService : Link creato con UUID
+DB --> HealthModule : Link creato con UUID
 deactivate DB
-HealthService -> HealthService : Genera URL OAuth per piattaforma
-HealthService -> Audit : log_link_generation(doctor, patient, platform)
+HealthModule -> HealthModule : get_fitbit_authorization_url(link_uuid)
+HealthModule -> Audit : log_link_generation(doctor, patient, platform)
 activate Audit
 Audit -> DB : Insert audit log
 DB --> Audit : Conferma
-Audit --> HealthService : OK
+Audit --> HealthModule : OK
 deactivate Audit
-HealthService --> API : Restituisce URL di autorizzazione
-deactivate HealthService
+HealthModule --> API : Restituisce URL di autorizzazione
+deactivate HealthModule
 API --> Frontend : Restituisce URL con UUID
 deactivate API
 Frontend --> Doctor : Mostra link di integrazione
@@ -68,32 +68,32 @@ Patient -> HealthPlatform : Concede l'autorizzazione
 HealthPlatform -> API : Callback OAuth con codice di autorizzazione
 deactivate HealthPlatform
 activate API
-API -> HealthService : handle_oauth_callback(code, state)
-activate HealthService
-HealthService -> DB : Recupera HealthPlatformLink tramite UUID
+API -> HealthModule : handle_oauth_callback(code, state)
+activate HealthModule
+HealthModule -> DB : get_link_by_uuid(uuid)
 activate DB
-DB --> HealthService : Dettagli link (paziente, medico, ecc)
+DB --> HealthModule : Dettagli link (paziente, medico, ecc)
 deactivate DB
-HealthService -> FitbitAPI : Scambia codice per token di accesso
+HealthModule -> FitbitAPI : exchange_fitbit_code_for_token(authorization_code)
 activate FitbitAPI
-FitbitAPI --> HealthService : Access token, refresh token, scadenza
+FitbitAPI --> HealthModule : Access token, refresh token, scadenza
 deactivate FitbitAPI
-HealthService -> DB : Salva token nel profilo del paziente
+HealthModule -> DB : save_fitbit_tokens(patient, token_response)
 activate DB
-DB --> HealthService : Conferma salvataggio
+DB --> HealthModule : Conferma salvataggio
 deactivate DB
-HealthService -> DB : Aggiorna HealthPlatformLink a 'used'
+HealthModule -> DB : Aggiorna HealthPlatformLink a 'used'
 activate DB
-DB --> HealthService : Conferma aggiornamento
+DB --> HealthModule : Conferma aggiornamento
 deactivate DB
-HealthService -> Audit : log_platform_connection(doctor, patient, platform)
+HealthModule -> Audit : log_platform_connection(doctor, patient, platform)
 activate Audit
 Audit -> DB : Insert audit log
 DB --> Audit : Conferma
-Audit --> HealthService : OK
+Audit --> HealthModule : OK
 deactivate Audit
-HealthService --> API : Conferma connessione riuscita
-deactivate HealthService
+HealthModule --> API : Conferma connessione riuscita
+deactivate HealthModule
 API --> HealthPlatform : Redirect a pagina di successo
 deactivate API
 
@@ -104,81 +104,81 @@ activate Frontend
 Frontend -> API: GET /api/patients/{patient_id}/vitals?type=heart_rate
 activate API
 
-API -> HealthService: get_vitals_data(patient, type, start_date, end_date)
-activate HealthService
+API -> HealthModule: get_vitals_data(patient, type, start_date, end_date)
+activate HealthModule
 
 ' Controllo cache
-HealthService -> HealthService: check_cache(patient, type, dates)
+HealthModule -> HealthModule: Verifica cache per la chiave
 alt Dati in cache e validi
-    HealthService --> API: Ritorna dati dalla cache
+    HealthModule --> API: Ritorna dati dalla cache
 else Dati non in cache o non validi
 
     ' Controllo token
-    HealthService -> DB: Query token informazioni del paziente
+    HealthModule -> DB: Query token informazioni del paziente
     activate DB
-    DB --> HealthService: Token e data di scadenza
+    DB --> HealthModule: Token e data di scadenza
     deactivate DB
     
-    HealthService -> HealthService: ensure_fresh_token(patient)
+    HealthModule -> HealthModule: ensure_fresh_token(patient)
     
     alt Token invalido o scaduto
-        HealthService -> FitbitAPI: Richiede refresh token
+        HealthModule -> FitbitAPI: refresh_fitbit_token(refresh_token)
         activate FitbitAPI
-        FitbitAPI --> HealthService: Nuovi access token e refresh token
+        FitbitAPI --> HealthModule: Nuovi access token e refresh token
         deactivate FitbitAPI
         
-        HealthService -> DB: Salva nuovi token
+        HealthModule -> DB: save_fitbit_tokens(patient, token_response)
         activate DB
-        DB --> HealthService: Conferma salvataggio
+        DB --> HealthModule: Conferma salvataggio
         deactivate DB
     end
     
     ' Controllo rate limit
-    HealthService -> HealthService: check_rate_limit()
+    HealthModule -> HealthModule: check_rate_limit()
     
     alt Rate limit raggiunto
-        HealthService --> API: Errore di rate limit
+        HealthModule --> API: Errore di rate limit
         API --> Frontend: 429 Too Many Requests
         Frontend --> Doctor: Mostra errore di rate limit
     else Rate limit OK
     
         ' Chiamata a Fitbit API
-        HealthService -> FitbitAPI: GET /1/user/-/activities/heart/date/.../...
+        HealthModule -> FitbitAPI: get_fitbit_data(patient, data_type, start_date, end_date)
         activate FitbitAPI
         
         alt Chiamata API riuscita
-            FitbitAPI --> HealthService: Dati sulle frequenze cardiache
+            FitbitAPI --> HealthModule: Dati sulle frequenze cardiache
             deactivate FitbitAPI
             
             ' Elaborazione dati
-            HealthService -> HealthService: process_fitbit_data(data, type)
+            HealthModule -> HealthModule: process_fitbit_data(data, data_type)
             
             ' Aggiornamento cache
-            HealthService -> HealthService: update_cache(key, data)
+            HealthModule -> HealthModule: Memorizza nella cache con TTL
             
             ' Logging
-            HealthService -> Audit: log_data_sync(doctor, patient, platform, type, summary)
+            HealthModule -> Audit: log_data_sync(doctor, patient, platform, type, summary)
             activate Audit
             Audit -> DB: Insert audit log
             DB --> Audit: Conferma
-            Audit --> HealthService: OK
+            Audit --> HealthModule: OK
             deactivate Audit
             
             ' Risposta
-            HealthService --> API: Dati elaborati
+            HealthModule --> API: Dati elaborati
             
         else Errore API
-            FitbitAPI --> HealthService: Errore (401, 403, 429, 500)
+            FitbitAPI --> HealthModule: Errore (401, 403, 429, 500)
             deactivate FitbitAPI
             
-            HealthService -> Audit: log_error(doctor, patient, platform, type, error)
+            HealthModule -> Audit: log_error(doctor, patient, platform, type, error)
             activate Audit
             Audit -> DB: Insert error log
             DB --> Audit: Conferma
-            Audit --> HealthService: OK
+            Audit --> HealthModule: OK
             deactivate Audit
             
-            HealthService --> API: Errore con dettagli
+            HealthModule --> API: Errore con dettagli
         end
     
     end
