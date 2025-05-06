@@ -299,6 +299,7 @@ VitaLink include una documentazione completa:
 
 - [API Endpoints](docs/api_endpoints.md): Descrizione di tutti gli endpoint API REST
 - [Requisiti](docs/requirements.md): Requisiti funzionali e non funzionali del sistema
+- [Guida per l'uso](docs/use_guide.md): Descrizione dei flussi di operazioni per le principali attività
 
 ### Diagrammi UML
 
