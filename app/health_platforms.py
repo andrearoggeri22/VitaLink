@@ -654,6 +654,241 @@ def get_fitbit_data(patient, data_type, start_date=None, end_date=None):
         api_logger.error(f"[{request_id}] Exception during data retrieval: {str(e)}")
         return None
 
+def extract_nested_value(obj, path):
+    """
+    Extract a nested value from an object based on a path.
+    
+    Args:
+        obj (dict): The dictionary to extract the value from
+        path (list): List of keys forming the path to the value
+        
+    Returns:
+        The value at the specified path, or None if not found
+    """
+    if not path or not isinstance(obj, dict):
+        return None
+
+    key = path[0]
+    if key not in obj:
+        return None
+
+    if len(path) == 1:
+        return obj[key]
+
+    return extract_nested_value(obj[key], path[1:])
+
+
+def process_heart_rate_data(data, unit, request_id):
+    """
+    Process heart rate data from Fitbit API into standardized format.
+    
+    Args:
+        data (dict): Raw heart rate data from Fitbit API
+        unit (str): The unit for heart rate values
+        request_id (str): Request ID for logging
+        
+    Returns:
+        list: Processed heart rate data in standardized format
+    """
+    heart_results = []
+    
+    if 'activities-heart' not in data:
+        return []
+        
+    for heart_data in data['activities-heart']:
+        if 'dateTime' in heart_data and 'value' in heart_data and isinstance(heart_data['value'], dict):
+            timestamp = heart_data['dateTime']
+            heart_value = None
+            value_type = None
+
+            # First check if there's a resting heart rate value
+            if 'restingHeartRate' in heart_data['value']:
+                heart_value = heart_data['value']['restingHeartRate']
+                value_type = 'resting'
+                api_logger.info(f"[{request_id}] Found resting heart rate value: {heart_value} for {timestamp}")
+            # If not, calculate an average from heart rate zones
+            elif 'heartRateZones' in heart_data['value'] and heart_data['value']['heartRateZones']:
+                zones = heart_data['value']['heartRateZones']
+                zone_values = []
+
+                for zone in zones:
+                    if 'min' in zone and 'max' in zone:
+                        # Calculate the average of each zone
+                        zone_avg = (float(zone['min']) + float(zone['max'])) / 2
+                        zone_values.append(zone_avg)
+
+                if zone_values:
+                    heart_value = sum(zone_values) / len(zone_values)
+                    value_type = 'zone_avg'
+                    api_logger.info(f"[{request_id}] Calculated average value from zones: {heart_value} for {timestamp}")
+
+            if heart_value is not None:
+                heart_results.append({
+                    'timestamp': timestamp,
+                    'recorded_at': timestamp,
+                    'value': float(heart_value),
+                    'unit': unit,
+                    'type': value_type
+                })
+
+    api_logger.info(f"[{request_id}] Processed {len(heart_results)} heart rate values")
+    return heart_results
+
+
+def process_nested_value_list(data_list, timestamp_key, value_path, unit, transform, request_id):
+    """
+    Process a list of data items with nested value paths.
+    
+    Args:
+        data_list (list): List of data items to process
+        timestamp_key (str): Key to extract timestamp from
+        value_path (list): Path to the nested value
+        unit (str): Unit for the values
+        transform (callable): Function to transform values
+        request_id (str): Request ID for logging
+        
+    Returns:
+        list: Processed data items
+    """
+    results = []
+    
+    for item in data_list:
+        if timestamp_key in item:
+            try:
+                nested_value = extract_nested_value(item, value_path)
+                if nested_value is not None:
+                    value = float(nested_value)
+                    timestamp = item[timestamp_key]
+
+                    # Apply transformations
+                    value = transform(value)
+
+                    results.append({
+                        'timestamp': timestamp,
+                        'recorded_at': timestamp,
+                        'value': value,
+                        'unit': unit
+                    })
+            except (ValueError, TypeError) as e:
+                api_logger.error(f"[{request_id}] Error during value processing: {str(e)}")
+                
+    return results
+
+
+def process_nested_value_dict(data_dict, timestamp_key, value_path, unit, transform, request_id):
+    """
+    Process a dictionary with nested value paths.
+    
+    Args:
+        data_dict (dict): Dictionary to process
+        timestamp_key (str): Key to extract timestamp from
+        value_path (list): Path to the nested value
+        unit (str): Unit for the values
+        transform (callable): Function to transform values
+        request_id (str): Request ID for logging
+        
+    Returns:
+        list: Processed data items
+    """
+    results = []
+    
+    if timestamp_key in data_dict:
+        try:
+            nested_value = extract_nested_value(data_dict, value_path)
+            if nested_value is not None:
+                value = float(nested_value)
+                timestamp = data_dict[timestamp_key]
+
+                # Apply transformations
+                value = transform(value)
+
+                results.append({
+                    'timestamp': timestamp,
+                    'recorded_at': timestamp,
+                    'value': value,
+                    'unit': unit
+                })
+        except (ValueError, TypeError) as e:
+            api_logger.error(f"[{request_id}] Error during value processing: {str(e)}")
+            
+    return results
+
+
+def process_standard_list(data_list, timestamp_key, value_key, unit, transform, request_id):
+    """
+    Process a list of data items with standard key-value structure.
+    
+    Args:
+        data_list (list): List of data items to process
+        timestamp_key (str): Key to extract timestamp from
+        value_key (str): Key to extract value from
+        unit (str): Unit for the values
+        transform (callable): Function to transform values
+        request_id (str): Request ID for logging
+        
+    Returns:
+        list: Processed data items
+    """
+    results = []
+    
+    for item in data_list:
+        if value_key in item and timestamp_key in item:
+            try:
+                value = float(item[value_key])
+                timestamp = item[timestamp_key]
+
+                # Apply transformations
+                value = transform(value)
+
+                results.append({
+                    'timestamp': timestamp,
+                    'recorded_at': timestamp,
+                    'value': value,
+                    'unit': unit
+                })
+            except (ValueError, TypeError) as e:
+                api_logger.error(f"[{request_id}] Error in value processing: {str(e)}")
+                
+    return results
+
+
+def process_standard_dict(data_dict, timestamp_key, value_key, unit, transform, request_id):
+    """
+    Process a dictionary with standard key-value structure.
+    
+    Args:
+        data_dict (dict): Dictionary to process
+        timestamp_key (str): Key to extract timestamp from
+        value_key (str): Key to extract value from
+        unit (str): Unit for the values
+        transform (callable): Function to transform values
+        request_id (str): Request ID for logging
+        
+    Returns:
+        list: Processed data items
+    """
+    results = []
+    
+    if value_key in data_dict and timestamp_key in data_dict:
+        try:
+            value = float(data_dict[value_key])
+            timestamp = data_dict[timestamp_key]
+
+            # Apply transformations
+            value = transform(value)
+
+            results.append({
+                'timestamp': timestamp,
+                'recorded_at': timestamp,
+                'value': value,
+                'unit': unit
+            })
+        except (ValueError, TypeError) as e:
+            api_logger.error(f"[{request_id}] Error in value processing: {str(e)}")
+            
+    return results
+
+
 def process_fitbit_data(data, data_type):
     """
     Process raw Fitbit API data into a standardized format for the application.
@@ -701,48 +936,9 @@ def process_fitbit_data(data, data_type):
     api_logger.info(f"[{request_id}] Processing data {data_type}, response with key {response_key}")
 
     # Special handling for heart rate
-    if data_type == 'heart_rate' and 'activities-heart' in data:
-        # Special processing for heart rate responses
-        heart_results = []
-
-        for heart_data in data['activities-heart']:
-            if 'dateTime' in heart_data and 'value' in heart_data and isinstance(heart_data['value'], dict):
-                timestamp = heart_data['dateTime']
-                heart_value = None
-                value_type = None
-
-                # First check if there's a resting heart rate value
-                if 'restingHeartRate' in heart_data['value']:
-                    heart_value = heart_data['value']['restingHeartRate']
-                    value_type = 'resting'
-                    api_logger.info(f"[{request_id}] Found resting heart rate value: {heart_value} for {timestamp}")
-                # If not, calculate an average from heart rate zones
-                elif 'heartRateZones' in heart_data['value'] and heart_data['value']['heartRateZones']:
-                    zones = heart_data['value']['heartRateZones']
-                    zone_values = []
-
-                    for zone in zones:
-                        if 'min' in zone and 'max' in zone:
-                            # Calculate the average of each zone
-                            zone_avg = (float(zone['min']) + float(zone['max'])) / 2
-                            zone_values.append(zone_avg)
-
-                    if zone_values:
-                        heart_value = sum(zone_values) / len(zone_values)
-                        value_type = 'zone_avg'
-                        api_logger.info(f"[{request_id}] Calculated average value from zones: {heart_value} for {timestamp}")
-
-                if heart_value is not None:
-                    heart_results.append({
-                        'timestamp': timestamp,
-                        'recorded_at': timestamp,
-                        'value': float(heart_value),
-                        'unit': unit,
-                        'type': value_type
-                    })
-
+    if data_type == 'heart_rate':
+        heart_results = process_heart_rate_data(data, unit, request_id)
         if heart_results:
-            api_logger.info(f"[{request_id}] Processed {len(heart_results)} heart rate values")
             return heart_results
 
     # Standard processing
@@ -753,110 +949,34 @@ def process_fitbit_data(data, data_type):
         api_logger.error(f"[{request_id}] Response key {response_key} not found in data")
         return []
 
-    # Handling of different data structures
     results = []
-
-    # Helper function to extract nested values
-    def extract_nested_value(obj, path):
-        """Extract a nested value from an object based on a path."""
-        if not path or not isinstance(obj, dict):
-            return None
-
-        key = path[0]
-        if key not in obj:
-            return None
-
-        if len(path) == 1:
-            return obj[key]
-
-        return extract_nested_value(obj[key], path[1:])
-
+    
     # Handling of nested values (e.g., value.restingHeartRate, value.avg)
     if '.' in value_key:
         value_path = value_key.split('.')
-
+        
         if isinstance(current_data, list):
             # Process data in list format
-            for item in current_data:
-                if timestamp_key in item:
-                    try:
-                        nested_value = extract_nested_value(item, value_path)
-                        if nested_value is not None:
-                            value = float(nested_value)
-                            timestamp = item[timestamp_key]
-
-                            # Apply transformations
-                            value = transform(value)
-
-                            results.append({
-                                'timestamp': timestamp,
-                                'recorded_at': timestamp,
-                                'value': value,
-                                'unit': unit
-                            })
-                    except (ValueError, TypeError) as e:
-                        api_logger.error(f"[{request_id}] Error during value processing: {str(e)}")
-
+            results = process_nested_value_list(
+                current_data, timestamp_key, value_path, unit, transform, request_id
+            )
         elif isinstance(current_data, dict):
             # Process data in dict format
-            if timestamp_key in current_data:
-                try:
-                    nested_value = extract_nested_value(current_data, value_path)
-                    if nested_value is not None:
-                        value = float(nested_value)
-                        timestamp = current_data[timestamp_key]
-
-                        # Apply transformations
-                        value = transform(value)
-
-                        results.append({
-                            'timestamp': timestamp,
-                            'recorded_at': timestamp,
-                            'value': value,
-                            'unit': unit
-                        })
-                except (ValueError, TypeError) as e:
-                    api_logger.error(f"[{request_id}] Error during value processing: {str(e)}")
+            results = process_nested_value_dict(
+                current_data, timestamp_key, value_path, unit, transform, request_id
+            )
     else:
         # Standard key-value processing
         if isinstance(current_data, list):
             # Process list format
-            for item in current_data:
-                if value_key in item and timestamp_key in item:
-                    try:
-                        value = float(item[value_key])
-                        timestamp = item[timestamp_key]
-
-                        # Apply transformations
-                        value = transform(value)
-
-                        results.append({
-                            'timestamp': timestamp,
-                            'recorded_at': timestamp,
-                            'value': value,
-                            'unit': unit
-                        })
-                    except (ValueError, TypeError) as e:
-                        api_logger.error(f"[{request_id}] Error in value processing: {str(e)}")
-
+            results = process_standard_list(
+                current_data, timestamp_key, value_key, unit, transform, request_id
+            )
         elif isinstance(current_data, dict):
             # Process single dict format
-            if value_key in current_data and timestamp_key in current_data:
-                try:
-                    value = float(current_data[value_key])
-                    timestamp = current_data[timestamp_key]
-
-                    # Apply transformations
-                    value = transform(value)
-
-                    results.append({
-                        'timestamp': timestamp,
-                        'recorded_at': timestamp,
-                        'value': value,
-                        'unit': unit
-                    })
-                except (ValueError, TypeError) as e:
-                    api_logger.error(f"[{request_id}] Error in value processing: {str(e)}")
+            results = process_standard_dict(
+                current_data, timestamp_key, value_key, unit, transform, request_id
+            )
 
     api_logger.info(f"[{request_id}] Processed {len(results)} results for {data_type}")
     return results
