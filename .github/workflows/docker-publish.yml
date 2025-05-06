@@ -4,7 +4,7 @@ on:
     branches: [ "main" ]
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME: vitalink          
 permissions:
   contents: read
   packages: write
@@ -29,4 +29,4 @@ jobs:
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           labels: |
-            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.source=https://github.com/andrearoggeri22/vitalink:latest
