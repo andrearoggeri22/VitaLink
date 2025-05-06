@@ -102,4 +102,4 @@ instance/
 *.pot
 *.mo
 
-docs/code/site
+site/

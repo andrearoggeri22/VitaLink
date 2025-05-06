@@ -16,7 +16,7 @@ VitaLink is designed to make it easy for both doctors and patients to manage and
 
 ## Documentation Structure
 
-- **Modules**: Details about the main modules of the application
+- **Tests**: Details about the test cases and their implementation
 
 ## Get Started
 
