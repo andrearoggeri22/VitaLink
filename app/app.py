@@ -63,7 +63,7 @@ def get_database_uri():
             db_name = os.environ["DB_NAME"]
             unix_socket_path = os.environ["INSTANCE_UNIX_SOCKET"]
             # PostgreSQL connection via Unix socket
-            db_uri = f"postgresql://{db_user}:{db_pass}@/{db_name}?host={unix_socket_path}"
+            db_uri = f"postgresql://{db_user}:{db_pass}@{unix_socket_path}/{db_name}"
             logger.info(f"Configured Cloud SQL connection via Unix socket at {unix_socket_path}")
             return db_uri
         except KeyError as e:
