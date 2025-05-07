@@ -102,3 +102,10 @@ instance/
 *.mo
 
 site/
+
+thesis.fdb_latexmk
+thesis.fls
+thesis.out
+thesis.synctex.gz
+thesis.toc
+thesis.aux

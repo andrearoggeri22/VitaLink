@@ -31,7 +31,7 @@ Questo documento utilizza la metodologia di prioritizzazione MoSCoW:
    - Il sistema deve fornire un meccanismo sicuro di registrazione per i medici
    - Gli utenti devono potersi autenticare tramite email e password
    - Il sistema deve supportare l'autenticazione API tramite token JWT
-   - Le password devono essere memorizzate con crittografia sicura (bcrypt)
+   - Le password devono essere memorizzate con crittografia sicura (werkzeug)
 
 2. **Gestione Pazienti**
    - I medici devono poter creare nuovi record paziente con informazioni anagrafiche di base
@@ -75,7 +75,7 @@ Questo documento utilizza la metodologia di prioritizzazione MoSCoW:
 
 4. **Reportistica**
    - Il sistema dovrebbe generare report base sui dati dei pazienti
-   - I report dovrebbero essere esportabili in formati standard (PDF, CSV)
+   - I report dovrebbero essere esportabili in formati standard (PDF)
    - I report dovrebbero essere inviabili al paziente tramite email
    - I medici dovrebbero poter personalizzare alcuni parametri dei report
    - I report generati dovrebbero essere archiviati per consultazioni future
@@ -140,7 +140,6 @@ Questo documento utilizza la metodologia di prioritizzazione MoSCoW:
 
 1. **Sicurezza e Privacy**
    - Tutti i dati personali dei pazienti devono essere crittografati a riposo
-   - Tutte le comunicazioni di rete devono utilizzare TLS 1.2 o superiore
    - Deve essere implementato un sistema completo di log per gli audit di sicurezza
 
 2. **Performance**
@@ -212,10 +211,8 @@ Questo documento utilizza la metodologia di prioritizzazione MoSCoW:
 ### Won't Have (W)
 
 1. **Supporto Legacy**
-   - Il sistema non supporterà Internet Explorer
    - Non ci sarà compatibilità con sistemi operativi obsoleti
    - Non verranno fornite versioni desktop standalone
-   - Non ci sarà compatibilità con hardware datato o sistemi con risorse limitate
 
 2. **Alta Disponibilità Geografica**
    - Il sistema non implementerà il deployment multi-regione nella prima fase
@@ -224,7 +221,6 @@ Questo documento utilizza la metodologia di prioritizzazione MoSCoW:
    - Non ci sarà un sistema di content delivery network globale
 
 3. **Integrazione Enterprise Completa**
-   - Il sistema non supporterà l'integrazione con tutti i sistemi di directory aziendale
    - Non ci sarà supporto per Single Sign-On aziendale completo
    - Non ci sarà integrazione con sistemi ERP legacy
    - Non ci saranno connettori personalizzati per ogni sistema clinico
