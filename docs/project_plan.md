@@ -493,7 +493,7 @@ La documentazione viene gestita con i seguenti criteri:
 #### Requisiti per lo Sviluppo
 
 - **Ambiente**: Computer personale con ambiente di sviluppo Python
-- **Account**: Account sviluppatore Fitbit per ottenere credenziali OAuth e Google Cloud per eventuale deployment
+- **Account**: Account sviluppatore Fitbit per ottenere credenziali OAuth e Koyeb per eventuale deployment
 - **Conoscenze Tecniche**: Python, Flask, OAuth 2.0, frontend web
 
 #### Piano di Sviluppo Dettagliato

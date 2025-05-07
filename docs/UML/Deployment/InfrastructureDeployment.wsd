@@ -1,0 +1,76 @@
+@startuml "DiagrammaDeployment-InfrastruttraVitaLink"
+
+' Deployment diagram for VitaLink infrastructure
+title Diagramma di Deployment - Infrastruttura VitaLink
+
+' Client devices
+node "Dispositivo Client" as ClientDevice {
+  component [Browser Web] as WebBrowser
+}
+
+' Development environment
+node "Ambiente di Sviluppo" as DevEnv {
+  component [Flask Development Server] as FlaskDev
+  database "SQLite DB" as SQLiteDB
+  
+  FlaskDev --> SQLiteDB : usa
+}
+
+' Production Cloud environment
+cloud "Ambiente di Produzione (Koyeb)" as ProdEnv {
+  node "Server Web" as WebServer {
+    component [Gunicorn] as Gunicorn
+    component [Flask Application] as FlaskApp
+    
+    Gunicorn --> FlaskApp : WSGI
+  }
+  
+  node "Database Server" as DBServer {
+    database "PostgreSQL" as PostgreSQL
+  }
+  
+  WebServer --> DBServer : TCP/IP
+  FlaskApp --> PostgreSQL : connessione con socket Unix
+}
+
+' Third-party services
+cloud "Servizi Esterni" as ExternalServices {
+  component [Fitbit API Services] as FitbitAPI
+  component [Google Health Connect API] as GoogleHealth
+  component [Apple Health API] as AppleHealth
+  component [SMTP Service] as SMTPService
+}
+
+' Connections
+ClientDevice --> DevEnv : HTTP (Sviluppo)
+ClientDevice --> ProdEnv : HTTPS (Produzione)
+ProdEnv --> ExternalServices : HTTPS/OAuth2
+DevEnv --> ExternalServices : HTTPS/OAuth2
+
+' Equipment needed by devices
+node "Dispositivi di Monitoraggio" as MonitoringDevices {
+  component [Fitbit] as FitbitDevice
+  component [Smart Watch] as SmartWatch
+  component [Altri Dispositivi Salute] as OtherDevices
+}
+
+MonitoringDevices --> ExternalServices : Bluetooth/WiFi
+
+' Deployment notes
+note right of ClientDevice
+  Browser web moderno con supporto a
+  HTML5, CSS3 e JavaScript ES6+
+end note
+
+note bottom of ProdEnv
+  Infrastruttura cloud scalabile
+  con supporto a high-availability
+  e backup automatici
+end note
+
+note right of DevEnv
+  SQLite per lo sviluppo locale,
+  PostgreSQL per produzione
+end note
+
+@enduml

@@ -1,0 +1,177 @@
+@startuml "DiagrammaClassi"
+
+' Class Diagram for VitaLink application
+title Diagramma delle Classi - VitaLink
+
+' Enums
+enum VitalSignType {
+    +HEART_RATE
+    +OXYGEN_SATURATION
+    +BREATHING_RATE
+    +WEIGHT
+    +TEMPERATURE_CORE
+    +TEMPERATURE_SKIN
+    +STEPS
+    +CALORIES
+    +DISTANCE
+    +ACTIVE_MINUTES
+    +SLEEP_DURATION
+    +FLOORS_CLIMBED
+    +ELEVATION
+    +ACTIVITY_CALORIES
+    +CALORIES_BMR
+    +MINUTES_SEDENTARY
+    +MINUTES_LIGHTLY_ACTIVE
+    +MINUTES_FAIRLY_ACTIVE
+    +CALORIES_IN
+    +WATER
+}
+
+enum HealthPlatform {
+    +FITBIT
+    +GOOGLE_HEALTH_CONNECT
+    +APPLE_HEALTH
+}
+
+enum ActionType {
+    +CREATE
+    +UPDATE
+    +DELETE
+    +VIEW
+    +EXPORT
+    +GENERATE_LINK
+    +CONNECT
+    +DISCONNECT
+    +SYNC
+    +IMPORT
+}
+
+enum EntityType {
+    +PATIENT
+    +VITAL_SIGN
+    +NOTE
+    +REPORT
+    +HEALTH_PLATFORM
+    +HEALTH_LINK
+    +OBSERVATION
+}
+
+' Main Classes
+class Doctor {
+    +id: Integer [PK]
+    +email: String
+    +password_hash: String
+    +first_name: String
+    +last_name: String
+    +specialty: String
+    +created_at: DateTime
+    +updated_at: DateTime
+    --
+    +set_password(password: String): void
+    +check_password(password: String): Boolean
+    +to_dict(): Dictionary
+    +get_patients(): List<Patient>
+    +add_patient(patient: Patient): void
+    +remove_patient(patient: Patient): void
+}
+
+class Patient {
+    +id: Integer [PK]
+    +uuid: String
+    +first_name: String
+    +last_name: String
+    +date_of_birth: Date
+    +gender: String
+    +contact_number: String
+    +email: String
+    +address: Text
+    +created_at: DateTime
+    +updated_at: DateTime
+    +connected_platform: HealthPlatform
+    +platform_access_token: String
+    +platform_refresh_token: String
+    +platform_token_expires_at: DateTime
+    --
+    +to_dict(): Dictionary
+    +get_vital_observations(vital_type: VitalSignType, start_date: DateTime, end_date: DateTime): List
+    +get_notes(): List<Note>
+}
+
+class DoctorPatient {
+    +doctor_id: Integer [PK, FK]
+    +patient_id: Integer [PK, FK]
+    +assigned_date: DateTime
+}
+
+class Note {
+    +id: Integer [PK]
+    +patient_id: Integer [FK]
+    +doctor_id: Integer [FK]
+    +content: Text
+    +created_at: DateTime
+    +updated_at: DateTime
+    --
+    +to_dict(): Dictionary
+}
+
+class VitalObservation {
+    +id: Integer [PK]
+    +patient_id: Integer [FK]
+    +doctor_id: Integer [FK]
+    +vital_type: VitalSignType
+    +content: Text
+    +start_date: DateTime
+    +end_date: DateTime
+    +created_at: DateTime
+    +updated_at: DateTime
+    --
+    +to_dict(): Dictionary
+}
+
+class AuditLog {
+    +id: Integer [PK]
+    +doctor_id: Integer [FK]
+    +timestamp: DateTime
+    +action_type: ActionType
+    +entity_type: EntityType
+    +entity_id: Integer
+    +details: Text
+    +patient_id: Integer [FK]
+    +ip_address: String
+    --
+    +get_details(): Dictionary
+    +to_dict(): Dictionary
+}
+
+class HealthPlatformLink {
+    +id: Integer [PK]
+    +uuid: String
+    +patient_id: Integer [FK]
+    +doctor_id: Integer [FK]
+    +created_at: DateTime
+    +expires_at: DateTime
+    +used: Boolean
+    +platform: HealthPlatform
+    --
+    +is_expired(): Boolean
+    +to_dict(): Dictionary
+}
+
+' Relationships
+Doctor "1" -- "*" DoctorPatient : medico
+Patient "1" -- "*" DoctorPatient : paziente
+Doctor "1" -- "*" Note : creato da >
+Patient "1" -- "*" Note : relativo a >
+Doctor "1" -- "*" VitalObservation : creato da >
+Patient "1" -- "*" VitalObservation : relativo a >
+Doctor "1" -- "*" AuditLog : eseguito da >
+Patient "0..1" -- "*" AuditLog : relativo a >
+Doctor "1" -- "*" HealthPlatformLink : generato da >
+Patient "1" -- "*" HealthPlatformLink : associato a >
+VitalSignType -- VitalObservation : tipo >
+HealthPlatform -- Patient : connesso a >
+HealthPlatform -- HealthPlatformLink : piattaforma >
+ActionType -- AuditLog : tipo azione >
+EntityType -- AuditLog : tipo entità >
+
+@enduml

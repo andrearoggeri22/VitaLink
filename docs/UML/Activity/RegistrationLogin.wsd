@@ -1,0 +1,65 @@
+@startuml "DiagrammaAttivita-RegistrazioneAccesso"
+
+' Activity diagram for registration and login
+title Diagramma di Attività - Registrazione e Accesso
+
+start
+
+' Initial decision - register or login
+if (Utente registrato?) then (Sì)
+  :Vai alla pagina di login;
+  :Inserisci email e password;
+  
+  if (Credenziali valide?) then (Sì)
+    :Crea sessione utente;
+    :Registra accesso nel log di audit;
+    :Reindirizza alla dashboard;
+  else (No)
+    :Mostra messaggio di errore;
+    :Richiedi nuovamente le credenziali;
+    goto EndLogin;
+  endif
+  
+else (No)
+  :Vai alla pagina di registrazione;
+  :Compila form di registrazione:
+  - Email
+  - Nome
+  - Cognome
+  - Specialità
+  - Password
+  - Conferma Password;
+  
+  if (Email già utilizzata?) then (Sì)
+    :Mostra errore email duplicata;
+    goto EndRegistration;
+  else (No)
+    if (Password valida?) then (No)
+      :Mostra requisiti password;
+      goto EndRegistration;
+    else (Sì)
+      if (Password e conferma corrispondono?) then (No)
+        :Mostra errore di corrispondenza;
+        goto EndRegistration;
+      else (Sì)
+        :Crea nuovo account medico;
+        :Crittografa password;
+        :Salva dati nel database;
+        :Mostra messaggio di successo;
+        :Reindirizza alla pagina di login;
+      endif
+    endif
+  endif
+  
+endif
+
+' End markers for visual clarity
+if (Fine registrazione?) then (Sì)
+  label EndRegistration
+else (No)
+  label EndLogin
+endif
+
+stop
+
+@enduml

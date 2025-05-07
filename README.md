@@ -244,13 +244,13 @@ LOG_LEVEL=INFO
 EMAIL_SENDER=<email_mittente_produzione>
 ```
 
-##### 4.2 Con Google Cloud SQL (consigliato per produzione)
+##### 4.2 Con Koyeb (consigliato per produzione)
 
-Il progetto è già configurato per connettersi a un'istanza Cloud SQL.
+Il progetto è già configurato per connettersi a un'istanza Koyeb.
 
-File `.env` completo per connessione a Cloud SQL:
+File `.env` completo per connessione a Koyeb:
 ```bash
-# Configurazione Cloud SQL
+# Configurazione Koyeb
 DB_USER=<user_cloud_sql>
 DB_PASS=<password_cloud_sql>
 DB_NAME=<db_name_cloud_sql>

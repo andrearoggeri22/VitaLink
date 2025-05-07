@@ -56,7 +56,7 @@ def get_database_uri():
     is_cloud_environment = os.environ.get("CLOUD_RUN_ENVIRONMENT", "false").lower() == "true"
     logger.info(f"Running in cloud environment: {is_cloud_environment}")
     if is_cloud_environment:
-        # Cloud SQL with Unix socket connection
+        # Koyeb SQL with Unix socket connection
         try:
             db_user = os.environ["DB_USER"]
             db_pass = os.environ["DB_PASS"]
@@ -64,10 +64,10 @@ def get_database_uri():
             unix_socket_path = os.environ["INSTANCE_UNIX_SOCKET"]
             # PostgreSQL connection via Unix socket
             db_uri = f"postgresql://{db_user}:{db_pass}@{unix_socket_path}/{db_name}"
-            logger.info(f"Configured Cloud SQL connection via Unix socket at {unix_socket_path}")
+            logger.info(f"Configured Koyeb SQL connection via Unix socket at {unix_socket_path}")
             return db_uri
         except KeyError as e:
-            logger.error(f"Missing required environment variable for Cloud SQL: {e}")
+            logger.error(f"Missing required environment variable for Koyeb SQL: {e}")
             logger.error("Falling back to default connection string")
     # Default database connection (local environment)
     db_uri = os.environ.get("DATABASE_URL", "sqlite:///healthcare.db")

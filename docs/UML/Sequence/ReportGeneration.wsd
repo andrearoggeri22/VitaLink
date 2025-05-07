@@ -1,0 +1,93 @@
+@startuml "DiagrammaSequenza-GenerazioneReport"
+
+' Sequence diagram for report generation
+title Diagramma di Sequenza - Generazione Report
+
+actor "Medico" as Doctor
+participant "Frontend" as Frontend
+participant "Backend" as Backend
+participant "Database" as DB
+participant "ServizioEmail" as EmailService
+
+' Start report generation
+Doctor -> Frontend: Accede alla pagina di generazione report
+activate Frontend
+Frontend -> Backend: GET /reports/generate/{patient_id}
+activate Backend
+Backend -> DB: Recupera dati paziente
+activate DB
+DB --> Backend: Dati paziente
+deactivate DB
+Backend -> DB: Recupera osservazioni
+activate DB
+DB --> Backend: Osservazioni
+deactivate DB
+Backend -> DB: Recupera note
+activate DB
+DB --> Backend: Note
+deactivate DB
+Backend -> DB: Recupera parametri vitali
+activate DB
+DB --> Backend: Parametri vitali
+deactivate DB
+Backend --> Frontend: Dati per form report
+deactivate Backend
+Frontend --> Doctor: Mostra form configurazione report
+deactivate Frontend
+
+' Configure report
+Doctor -> Frontend: Configura report (selezione elementi)
+activate Frontend
+Doctor -> Frontend: Seleziona osservazioni da includere
+Doctor -> Frontend: Seleziona note da includere
+Doctor -> Frontend: Seleziona parametri vitali da includere
+Doctor -> Frontend: Seleziona grafici da includere
+Doctor -> Frontend: Sceglie opzione invio email
+Doctor -> Frontend: Conferma generazione
+Frontend -> Backend: POST /reports/generate
+activate Backend
+
+' Generate report
+Backend -> Backend: Elabora dati selezionati
+Backend -> Backend: Genera PDF report
+Backend -> DB: Salva report
+activate DB
+DB --> Backend: Report salvato
+deactivate DB
+Backend -> DB: Registra log di audit
+activate DB
+DB --> Backend: Log creato
+deactivate DB
+
+' Handle email option if selected
+alt Invio tramite email
+    Backend -> EmailService: Invia email con report
+    activate EmailService
+    EmailService --> Backend: Email inviata
+    deactivate EmailService
+    Backend -> DB: Registra log invio email
+    activate DB
+    DB --> Backend: Log creato
+    deactivate DB
+end
+
+Backend --> Frontend: URL download report
+deactivate Backend
+Frontend --> Doctor: Link per scaricare il report
+deactivate Frontend
+
+' Download report
+Doctor -> Frontend: Scarica report
+activate Frontend
+Frontend -> Backend: GET /reports/download/{report_id}
+activate Backend
+Backend -> DB: Recupera report
+activate DB
+DB --> Backend: File report
+deactivate DB
+Backend --> Frontend: File report
+deactivate Backend
+Frontend --> Doctor: Download report completo
+deactivate Frontend
+
+@enduml

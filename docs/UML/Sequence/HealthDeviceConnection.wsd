@@ -1,0 +1,84 @@
+@startuml "DiagrammaSequenza-ConnessioneDispositivo"
+
+' Sequence diagram for connecting health devices
+title Diagramma di Sequenza - Connessione Dispositivo Salute
+
+actor "Medico" as Doctor
+participant "Frontend" as Frontend
+participant "Backend" as Backend
+participant "Database" as DB
+participant "PiattaformaSalute" as HealthPlatform
+actor "Paziente" as Patient
+
+' Generate connection link
+Doctor -> Frontend: Richiesta generazione link
+activate Frontend
+Frontend -> Backend: POST /health/generate-link
+activate Backend
+Backend -> DB: Cerca paziente
+activate DB
+DB --> Backend: Dettagli paziente
+deactivate DB
+Backend -> DB: Crea HealthPlatformLink
+activate DB
+DB --> Backend: Link creato
+deactivate DB
+Backend -> DB: Registra log di audit
+activate DB
+DB --> Backend: Log creato
+deactivate DB
+Backend --> Frontend: Link per connessione
+deactivate Backend
+Frontend --> Doctor: Mostra link per connessione
+deactivate Frontend
+
+' Share link with patient
+Doctor -> Patient: Condivide link (email, messaggio, ecc.)
+
+' Patient uses the link
+Patient -> Frontend: Accede al link di connessione
+activate Frontend
+Frontend -> Backend: GET /health/connect/{link_uuid}
+activate Backend
+Backend -> DB: Verifica validità link
+activate DB
+DB --> Backend: Link valido
+deactivate DB
+Backend -> HealthPlatform: Richiede autorizzazione OAuth
+activate HealthPlatform
+HealthPlatform --> Patient: Richiede login/consenso
+Patient -> HealthPlatform: Fornisce consenso
+HealthPlatform --> Backend: Codice autorizzazione
+deactivate HealthPlatform
+
+' Exchange authorization code for tokens
+Backend -> HealthPlatform: Richiede token di accesso
+activate HealthPlatform
+HealthPlatform --> Backend: Access token + Refresh token
+deactivate HealthPlatform
+
+' Save tokens to database
+Backend -> DB: Salva token nel profilo paziente
+activate DB
+DB --> Backend: Token salvati
+deactivate DB
+Backend -> DB: Aggiorna link come usato
+activate DB
+DB --> Backend: Link aggiornato
+deactivate DB
+Backend -> DB: Registra log connessione
+activate DB
+DB --> Backend: Log creato
+deactivate DB
+Backend --> Frontend: Connessione completata
+deactivate Backend
+Frontend --> Patient: Conferma connessione riuscita
+deactivate Frontend
+
+' Notify doctor
+Backend -> Frontend: Notifica di connessione avvenuta
+activate Frontend
+Frontend --> Doctor: Mostra notifica di connessione avvenuta
+deactivate Frontend
+
+@enduml

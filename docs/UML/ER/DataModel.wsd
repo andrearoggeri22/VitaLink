@@ -1,0 +1,168 @@
+@startuml "DiagrammaER-ModelloDati"
+
+' Entity Relationship diagram for VitaLink
+title Diagramma ER - Modello Dati VitaLink
+
+' Styling
+!define TABLE_BORDER_COLOR #073B4C
+!define PRIMARY_KEY_COLOR #06D6A0
+!define FOREIGN_KEY_COLOR #EF476F
+!define ATTRIBUTE_COLOR #118AB2
+!define ENUM_COLOR #FFD166
+skinparam linetype ortho
+skinparam roundcorner 15
+
+' Enum Entities
+entity "VitalSignType" as VitalSignType << Enum >> {
+  + HEART_RATE
+  + OXYGEN_SATURATION
+  + BREATHING_RATE
+  + WEIGHT
+  + TEMPERATURE_CORE
+  + TEMPERATURE_SKIN
+  + STEPS
+  + CALORIES
+  + DISTANCE
+  + ACTIVE_MINUTES
+  + SLEEP_DURATION
+  + ...altri tipi di parametri vitali
+}
+
+entity "HealthPlatform" as HealthPlatform << Enum >> {
+  + FITBIT
+  + GOOGLE_HEALTH_CONNECT
+  + APPLE_HEALTH
+}
+
+entity "ActionType" as ActionType << Enum >> {
+  + CREATE
+  + UPDATE
+  + DELETE
+  + VIEW
+  + EXPORT
+  + GENERATE_LINK
+  + CONNECT
+  + DISCONNECT
+  + SYNC
+  + IMPORT
+}
+
+entity "EntityType" as EntityType << Enum >> {
+  + PATIENT
+  + VITAL_SIGN
+  + NOTE
+  + REPORT
+  + HEALTH_PLATFORM
+  + HEALTH_LINK
+  + OBSERVATION
+}
+
+' Main Entities
+entity "Doctor" as Doctor {
+  * id : Integer <<PK>>
+  --
+  * email : String <<unique>>
+  * password_hash : String
+  * first_name : String
+  * last_name : String
+  specialty : String
+  * created_at : DateTime
+  * updated_at : DateTime
+}
+
+entity "Patient" as Patient {
+  * id : Integer <<PK>>
+  --
+  * uuid : String <<unique>>
+  * first_name : String
+  * last_name : String
+  * date_of_birth : Date
+  gender : String
+  * contact_number : String
+  email : String
+  address : Text
+  * created_at : DateTime
+  * updated_at : DateTime
+  connected_platform : HealthPlatform <<FK>>
+  platform_access_token : String
+  platform_refresh_token : String
+  platform_token_expires_at : DateTime
+}
+
+entity "DoctorPatient" as DoctorPatient {
+  * doctor_id : Integer <<PK, FK>>
+  * patient_id : Integer <<PK, FK>>
+  * assigned_date : DateTime
+}
+
+entity "Note" as Note {
+  * id : Integer <<PK>>
+  --
+  * patient_id : Integer <<FK>>
+  * doctor_id : Integer <<FK>>
+  * content : Text
+  * created_at : DateTime
+  * updated_at : DateTime
+}
+
+entity "VitalObservation" as VitalObservation {
+  * id : Integer <<PK>>
+  --
+  * patient_id : Integer <<FK>>
+  * doctor_id : Integer <<FK>>
+  * vital_type : VitalSignType <<FK>>
+  * content : Text
+  * start_date : DateTime
+  * end_date : DateTime
+  * created_at : DateTime
+  * updated_at : DateTime
+}
+
+entity "AuditLog" as AuditLog {
+  * id : Integer <<PK>>
+  --
+  * doctor_id : Integer <<FK>>
+  * timestamp : DateTime
+  * action_type : ActionType <<FK>>
+  * entity_type : EntityType <<FK>>
+  * entity_id : Integer
+  details : Text
+  patient_id : Integer <<FK>>
+  ip_address : String
+}
+
+entity "HealthPlatformLink" as HealthPlatformLink {
+  * id : Integer <<PK>>
+  --
+  * uuid : String <<unique>>
+  * patient_id : Integer <<FK>>
+  * doctor_id : Integer <<FK>>
+  * created_at : DateTime
+  * expires_at : DateTime
+  * used : Boolean
+  * platform : HealthPlatform <<FK>>
+}
+
+' Define the relationships
+Doctor ||--o{ DoctorPatient
+Patient ||--o{ DoctorPatient
+
+Doctor ||--o{ Note
+Patient ||--o{ Note
+
+Doctor ||--o{ VitalObservation
+Patient ||--o{ VitalObservation
+VitalSignType ||--o{ VitalObservation
+
+Doctor ||--o{ AuditLog
+Patient |o--o{ AuditLog
+ActionType ||--o{ AuditLog
+EntityType ||--o{ AuditLog
+
+Doctor ||--o{ HealthPlatformLink
+Patient ||--o{ HealthPlatformLink
+HealthPlatform ||--o{ HealthPlatformLink
+
+HealthPlatform |o--o{ Patient
+
+@enduml
