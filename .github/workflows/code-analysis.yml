@@ -11,17 +11,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # 1. Checkout del repository
     - name: Checkout Repository
       uses: actions/checkout@v4
 
-    # 2. Configurazione di Python
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.11'
 
-    # 3. Installazione delle dipendenze
     - name: Install dependencies
       env:
         DATABASE_URL: "sqlite:///test_healthcare.db"
@@ -44,7 +41,6 @@ jobs:
         pip install .
         pip install pytest coverage radon pipdeptree
 
-    # 4. Esecuzione dei test con Coverage.py
     - name: Run Coverage Analysis
       env:
         DATABASE_URL: "sqlite:///test_healthcare.db"
@@ -67,19 +63,16 @@ jobs:
         coverage report > coverage-report.txt
         coverage html
 
-    # 5. Calcolo di Complessità Ciclomatica, Halstead Metrics e Maintainability Index con Radon
     - name: Run Radon Analysis
       run: |
         radon cc app -s -n B > radon-cyclomatic-report.txt
         radon mi app > radon-maintainability-report.txt
         radon hal app > radon-halstead-report.txt
 
-    # 6. Rilevazione delle dipendenze e conflitti con Pipdeptree
     - name: Run Pipdeptree
       run: |
         pipdeptree > pipdeptree-report.txt
 
-    # 7. Installazione di Cloc per le statistiche sulle righe di codice
     - name: Install Cloc
       run: sudo apt-get install -y cloc
 
@@ -87,7 +80,6 @@ jobs:
       run: |
         cloc . --out=cloc-report.txt
 
-    # 8. Generazione del report HTML
     - name: Generate HTML Report
       run: |
         mkdir -p analysis
@@ -120,7 +112,6 @@ jobs:
         echo "</pre></div>" >> analysis/index.html
         echo "</body></html>" >> analysis/index.html
 
-    # 9. Pubblicazione su GitHub Pages
     - name: Deploy Analysis to gh-pages
       uses: peaceiris/actions-gh-pages@v4
       with:
