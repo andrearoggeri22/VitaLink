@@ -15,45 +15,59 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v4
 
-    # 2. Installazione di Python e dipendenze
+    # 2. Configurazione di Python
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: 3.11
+        python-version: '3.11'
 
-    - name: Install Python dependencies
+    # 3. Installazione delle dipendenze
+    - name: Install dependencies
+      env:
+        DATABASE_URL: "sqlite:///test_healthcare.db"
+        CLOUD_RUN_ENVIRONMENT: "false"
+        FLASK_APP: "app:app"
+        SESSION_SECRET: "noKey"
+        PORT: "5000"
+        HOST: "0.0.0.0"
+        DEBUG: "true"
+        JWT_SECRET_KEY: "noKey"
+        FITBIT_CLIENT_ID: "noKey"
+        FITBIT_CLIENT_SECRET: "noKey"
+        FITBIT_REDIRECT_URI: "noKey"
+        MJ_APIKEY: "noKey"
+        MJ_APIKEY_SECRET: "noKey"
+        LOG_LEVEL: "INFO"
+        EMAIL_SENDER: "test@test.com"
       run: |
         python -m pip install --upgrade pip
-        pip install pylint radon bandit flake8 coverage
+        pip install .
+        pip install pytest coverage
 
-    # 3. Analisi con Pylint
-    - name: Run Pylint
-      run: |
-        pylint app > pylint-report.txt || true
-
-    # 4. Calcolo complessità ciclomatica con Radon
-    - name: Run Radon Cyclomatic Complexity
-      run: |
-        radon cc app -s -n B > radon-report.txt || true
-
-    # 5. Analisi di sicurezza con Bandit
-    - name: Run Bandit Security Analysis
-      run: |
-        bandit -r app > bandit-report.txt || true
-
-    # 6. Controllo di conformità PEP8 con Flake8
-    - name: Run Flake8 Style Check
-      run: |
-        flake8 app > flake8-report.txt || true
-
-    # 7. Misurazione della copertura del codice con Coverage.py
+    # 4. Esecuzione dei test con Coverage.py
     - name: Run Coverage Analysis
+      env:
+        DATABASE_URL: "sqlite:///test_healthcare.db"
+        CLOUD_RUN_ENVIRONMENT: "false"
+        FLASK_APP: "app:app"
+        SESSION_SECRET: "noKey"
+        PORT: "5000"
+        HOST: "0.0.0.0"
+        DEBUG: "true"
+        JWT_SECRET_KEY: "noKey"
+        FITBIT_CLIENT_ID: "noKey"
+        FITBIT_CLIENT_SECRET: "noKey"
+        FITBIT_REDIRECT_URI: "noKey"
+        MJ_APIKEY: "noKey"
+        MJ_APIKEY_SECRET: "noKey"
+        LOG_LEVEL: "INFO"
+        EMAIL_SENDER: "test@test.com"
       run: |
         coverage run -m pytest
         coverage report > coverage-report.txt
         coverage html
 
-    # 8. Installazione di Cloc per statistiche sulle righe di codice
+    # 5. Installazione di Cloc per statistiche sulle righe di codice
     - name: Install Cloc
       run: sudo apt-get install -y cloc
 
@@ -61,21 +75,7 @@ jobs:
       run: |
         cloc . --out=cloc-report.txt
 
-    # 9. Analisi di duplicazione del codice con jscpd
-    - name: Run Code Duplication Check (jscpd)
-      run: |
-        npx jscpd --reporters text --output jscpd-report.txt .
-
-    # 10. Installazione di ESLint per JavaScript e HTML
-    - name: Install ESLint
-      run: |
-        npm install -g eslint
-
-    - name: Run ESLint
-      run: |
-        eslint . > eslint-report.txt || true
-
-    # 11. Generazione del report HTML
+    # 6. Generazione del report HTML
     - name: Generate HTML Report
       run: |
         mkdir -p analysis
@@ -86,35 +86,17 @@ jobs:
         echo "nav a { color: white; margin: 0 15px; text-decoration: none; }" >> analysis/index.html
         echo ".section { margin-bottom: 20px; }" >> analysis/index.html
         echo "</style></head><body>" >> analysis/index.html
-        echo "<nav><a href='#pylint'>Pylint Report</a> | <a href='#radon'>Cyclomatic Complexity</a> | <a href='#bandit'>Bandit Report</a> | <a href='#flake8'>Flake8 Report</a> | <a href='#coverage'>Coverage Report</a> | <a href='#cloc'>Cloc Report</a> | <a href='#jscpd'>Code Duplication</a> | <a href='#eslint'>ESLint Report</a></nav>" >> analysis/index.html
+        echo "<nav><a href='#coverage'>Coverage Report</a> | <a href='#cloc'>Cloc Report</a></nav>" >> analysis/index.html
         echo "<h1>Static Analysis Report</h1>" >> analysis/index.html
-        echo "<div class='section' id='pylint'><h2>Pylint Report</h2><pre>" >> analysis/index.html
-        cat pylint-report.txt >> analysis/index.html
-        echo "</pre></div>" >> analysis/index.html
-        echo "<div class='section' id='radon'><h2>Cyclomatic Complexity</h2><pre>" >> analysis/index.html
-        cat radon-report.txt >> analysis/index.html
-        echo "</pre></div>" >> analysis/index.html
-        echo "<div class='section' id='bandit'><h2>Bandit Report</h2><pre>" >> analysis/index.html
-        cat bandit-report.txt >> analysis/index.html
-        echo "</pre></div>" >> analysis/index.html
-        echo "<div class='section' id='flake8'><h2>Flake8 Report</h2><pre>" >> analysis/index.html
-        cat flake8-report.txt >> analysis/index.html
-        echo "</pre></div>" >> analysis/index.html
         echo "<div class='section' id='coverage'><h2>Coverage Report</h2><pre>" >> analysis/index.html
         cat coverage-report.txt >> analysis/index.html
         echo "</pre></div>" >> analysis/index.html
         echo "<div class='section' id='cloc'><h2>Cloc Report</h2><pre>" >> analysis/index.html
         cat cloc-report.txt >> analysis/index.html
         echo "</pre></div>" >> analysis/index.html
-        echo "<div class='section' id='jscpd'><h2>Code Duplication Report</h2><pre>" >> analysis/index.html
-        cat jscpd-report.txt >> analysis/index.html
-        echo "</pre></div>" >> analysis/index.html
-        echo "<div class='section' id='eslint'><h2>ESLint Report</h2><pre>" >> analysis/index.html
-        cat eslint-report.txt >> analysis/index.html
-        echo "</pre></div>" >> analysis/index.html
         echo "</body></html>" >> analysis/index.html
 
-    # 12. Pubblicazione su GitHub Pages
+    # 7. Pubblicazione su GitHub Pages
     - name: Deploy Analysis to gh-pages
       uses: peaceiris/actions-gh-pages@v4
       with:
