@@ -161,8 +161,8 @@ Questa tesi esplora la progettazione, implementazione e validazione della soluzi
 \newpage
 
 % Eventuale lista delle figure
-%\listoffigures
-%\newpage
+\listoffigures
+\newpage
 
 % Impostiamo la numerazione araba a partire dal primo capitolo
 \pagenumbering{arabic}  % Numeri di pagina arabi per il contenuto principale
@@ -2041,7 +2041,7 @@ Questi strumenti sono stati integrati nel processo di integrazione continua tram
 \appendix
 
 \chapter{Glossario}
-\begin{description}    
+\begin{description}
     \item[API] Application Programming Interface
     \item[Bootstrap] Framework CSS per lo sviluppo di interfacce web responsive e moderne
     \item[CI/CD] Continuous Integration/Continuous Deployment
@@ -2680,10 +2680,14 @@ FlaskApp ..> FlaskMigrate : configura
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{images/uml/HealthDeviceConnection.png}
+    \caption{Grafico UML di sequenza per la connessione al dispositivo}
+    \label{fig:uml-seq-conn-graph}
 \end{figure}
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{images/uml/ReportGeneration.png}
+    \caption{Grafico UML di sequenza per la generazione del report}
+    \label{fig:uml-seq-report}
 \end{figure}
 \begin{lstlisting}[basicstyle=\small\ttfamily, breaklines=true, caption={connessione al dispositivo}]
 @startuml "DiagrammaSequenza-ConnessioneDispositivo"
@@ -2873,6 +2877,8 @@ deactivate Frontend
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{images/uml/PatientLifecycle.png}
+    \caption{Grafico UML di stato per il ciclo di vita del paziente}
+    \label{fig:uml-state-graph}
 \end{figure}
 
 \begin{lstlisting}[basicstyle=\small\ttfamily, breaklines=true, caption={ciclo di vita del paziente}]
@@ -2942,6 +2948,8 @@ end note
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{images/uml/RegistrationLogin.png}
+    \caption{Grafico UML di attività per la registrazione e il login}
+    \label{fig:uml-act-graph}
 \end{figure}
 \begin{lstlisting}[basicstyle=\small\ttfamily, breaklines=true, caption={gestione del paziente}]
 @startuml "DiagrammaAttivita-GestionePazienti"
@@ -3220,6 +3228,8 @@ stop
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{images/uml/InfrastructureDeployment.png}
+    \caption{Grafico UML di deployment}
+    \label{fig:uml-depl-graph}
 \end{figure}
 \begin{lstlisting}[basicstyle=\small\ttfamily, breaklines=true]
 @startuml "DiagrammaDeployment-InfrastruttraVitaLink"
@@ -3304,6 +3314,8 @@ end note
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{images/uml/DataModel.png}
+    \caption{Grafico UML ER per il modello dati}
+    \label{fig:uml-ER-graph}
 \end{figure}
 \begin{lstlisting}[basicstyle=\small\ttfamily, breaklines=true]
 @startuml "DiagrammaER-ModelloDati"
@@ -3480,6 +3492,8 @@ HealthPlatform |o--o{ Patient
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{images/uml/VitalSignsVisualization.png}
+    \caption{Grafico UML di comunicazione per la visualizzazione dei parametri vitali}
+    \label{fig:uml-com-vit-graph}
 \end{figure}
 \begin{lstlisting}[basicstyle=\small\ttfamily, breaklines=true, caption={visualizzazione dei parametri vitali}]
 @startuml "DiagrammaComunicazione-ParametriVitali"
@@ -3551,6 +3565,8 @@ end
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{images/uml/SystemArchitecture.png}
+    \caption{Grafico UML delle componenti per l'architettura del sistema}
+    \label{fig:uml-comp-graph}
 \end{figure}
 \begin{lstlisting}[basicstyle=\small\ttfamily, breaklines=true]
 @startuml "DiagrammaComponenti-ArchitetturaVitaLink"
@@ -3880,6 +3896,8 @@ PatientVerdi -- Audit3
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{images/uml/DataSynchronization.png}
+    \caption{Grafico UML temporale per la sincronizzazione dei dati}
+    \label{fig:uml-temp-graph}
 \end{figure}
 \begin{lstlisting}[basicstyle=\small\ttfamily, breaklines=true, caption={sincronizzatione dei dati}]
     @startuml "DiagrammaTiming-SincronizzazioneDati"
