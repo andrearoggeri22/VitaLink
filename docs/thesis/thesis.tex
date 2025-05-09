@@ -1,7 +1,5 @@
-% Configurazione tesi secondo le indicazioni tipografiche
 \documentclass[12pt,a4paper,oneside]{report}
 \usepackage[hyphens]{url} % Permette la sillabazione degli URL
-\usepackage{hyperref} % Migliora la gestione dei link e URL
 
 % Pacchetti necessari
 \usepackage[italian]{babel} % Per la lingua italiana
@@ -42,7 +40,7 @@
 \hypersetup{
     colorlinks=true,
     linkcolor=black,
-    filecolor=black,      
+    filecolor=black,
     urlcolor=black,
     citecolor=black,
 }
@@ -63,32 +61,32 @@
     \begin{center}
         {\fontsize{18}{22}\bfseries UNIVERSITÀ DEGLI STUDI DI BERGAMO}
     \end{center}
-    
+
     \vspace{1cm}
-    
+
     \begin{flushleft}
         {\fontsize{14}{18} Dipartimento di}\\
         {\fontsize{14}{18} Ingegneria}
-        
+
         \vspace{1cm}
-        
+
         {\fontsize{14}{18} Corso di laurea in}\\
         {\fontsize{14}{18} Ingegneria Informatica}
-        
+
         \vspace{0.5cm}
-        
+
         {\fontsize{14}{18} Classe n. LM-32 - Ingegneria informatica}
     \end{flushleft}
-    
+
     \vspace{2.5cm}
-    
+
     \begin{center}
         {\fontsize{20}{24}\bfseries Soluzione software per la raccolta dei parametri vitali}
         {\fontsize{20}{24}\bfseries da dispositivi wearable via API e per il follow‑up clinico.}
     \end{center}
-    
+
     \vfill
-    
+
     \begin{flushleft}
         \begin{minipage}[t]{0.47\textwidth}
             {\fontsize{12}{14}\selectfont\textbf{Candidato:}}\\
@@ -105,9 +103,9 @@
             {\fontsize{12}{14}\selectfont\textbf{Correlatore (se applicabile):}}\\
             {\fontsize{14}{18}\selectfont\textit{Dott. (Dott.ssa) Nome Cognome}}
         \end{minipage}\end{flushleft}
-    
+
     \vfill
-    
+
     \begin{center}
         {\fontsize{12}{14}\selectfont Anno Accademico 2024/2025}
     \end{center}
@@ -118,7 +116,7 @@
 \thispagestyle{empty}
 
 \begin{center}
-\textbf{Ringraziamenti}
+    \textbf{Ringraziamenti}
 \end{center}
 
 \vspace{0.5cm}
@@ -131,7 +129,7 @@ Vorrei infine ringraziare con affetto la mia famiglia per il sostegno ed il gran
 
 \vfill
 \begin{flushright}
-Andrea Roggeri
+    Andrea Roggeri
 \end{flushright}
 
 \newpage
@@ -141,7 +139,7 @@ Andrea Roggeri
 \thispagestyle{empty}
 
 \begin{center}
-\textbf{Abstract}
+    \textbf{Abstract}
 \end{center}
 
 \vspace{0.5cm}
@@ -194,7 +192,7 @@ Risulta quindi chiaro che l'implementazione nel contesto sanitario di un sistema
 In questo scenario, emerge la necessità di una piattaforma software integrata che permetta di colmare il divario tra i dispositivi wearable attualmente in commercio e i sistemi sanitari, consentendo ai medici di accedere, analizzare e valutare efficacemente i dati dei pazienti per migliorare diagnosi, trattamenti e follow-up clinico.
 
 \section{Obiettivi del progetto}
-Il progetto VitaLink nasce con l'obiettivo di sviluppare una piattaforma web in grado di fornire ai medici e agli operatori sanitari la possibilità di integrare nel loro flusso di lavoro un nuovo strumento, capace di semplificare e migliorare quello che è il monitoraggio dei parametri vitali dei pazienti. 
+Il progetto VitaLink nasce con l'obiettivo di sviluppare una piattaforma web in grado di fornire ai medici e agli operatori sanitari la possibilità di integrare nel loro flusso di lavoro un nuovo strumento, capace di semplificare e migliorare quello che è il monitoraggio dei parametri vitali dei pazienti.
 La piattaforma si propone di affrontare le problematiche sopra menzionate, fornendo un sistema integrato e modulare per la raccolta, l'analisi e la valutazione dei dati sanitari dei pazienti.
 
 \begin{itemize}
@@ -450,37 +448,37 @@ Per l'analisi dei requisiti (funzionali e non funzionali) è stata utilizzata la
 \subsection{Prescrizione Elettronica - W}
 
 \begin{itemize}
-   \item Il sistema non supporterà la generazione di prescrizioni elettroniche.
-   \item Non ci sarà integrazione con farmacie o sistemi di prescrizione nazionali.
-   \item Non sarà possibile tracciare l'aderenza ai farmaci prescritti.
-   \item Non ci sarà un modulo di gestione inventario farmaci.
+    \item Il sistema non supporterà la generazione di prescrizioni elettroniche.
+    \item Non ci sarà integrazione con farmacie o sistemi di prescrizione nazionali.
+    \item Non sarà possibile tracciare l'aderenza ai farmaci prescritti.
+    \item Non ci sarà un modulo di gestione inventario farmaci.
 \end{itemize}
 
 \subsection{Cartella Clinica Elettronica Completa  - W}
 
 \begin{itemize}
-   \item Il sistema non sostituirà una cartella clinica elettronica completa.
-   \item Non ci saranno moduli per la gestione di esami di laboratorio.
-   \item Non ci sarà integrazione con sistemi ospedalieri.
-   \item Non ci sarà supporto per la gestione di immagini diagnostiche.
+    \item Il sistema non sostituirà una cartella clinica elettronica completa.
+    \item Non ci saranno moduli per la gestione di esami di laboratorio.
+    \item Non ci sarà integrazione con sistemi ospedalieri.
+    \item Non ci sarà supporto per la gestione di immagini diagnostiche.
 \end{itemize}
 
 \subsection{Telemedicina  - W}
 
 \begin{itemize}
-   \item Il sistema non includerà funzionalità di videoconferenza.
-   \item Non ci sarà supporto per consultazioni remote in tempo reale.
-   \item Non ci saranno strumenti per la pianificazione di visite virtuali.
-   \item Non ci sarà integrazione con sistemi di pagamento per visite telematiche.
+    \item Il sistema non includerà funzionalità di videoconferenza.
+    \item Non ci sarà supporto per consultazioni remote in tempo reale.
+    \item Non ci saranno strumenti per la pianificazione di visite virtuali.
+    \item Non ci sarà integrazione con sistemi di pagamento per visite telematiche.
 \end{itemize}
 
 \subsection{App Mobile Dedicata  - W}
 
 \begin{itemize}
-   \item Non verrà sviluppata un'app mobile dedicata nella prima fase.
-   \item I pazienti non avranno accesso diretto al sistema.
-   \item Non ci sarà supporto per notifiche push su dispositivi mobili.
-   \item Non ci sarà funzionalità offline per l'app mobile.
+    \item Non verrà sviluppata un'app mobile dedicata nella prima fase.
+    \item I pazienti non avranno accesso diretto al sistema.
+    \item Non ci sarà supporto per notifiche push su dispositivi mobili.
+    \item Non ci sarà funzionalità offline per l'app mobile.
 \end{itemize}
 
 
@@ -489,136 +487,135 @@ Per l'analisi dei requisiti (funzionali e non funzionali) è stata utilizzata la
 \subsection{Sicurezza e Privacy - M}
 
 \begin{itemize}
-   \item Tutti i dati personali dei pazienti devono essere crittografati a riposo.
-   \item Deve essere implementato un sistema completo di log per gli audit di sicurezza.
+    \item Tutti i dati personali dei pazienti devono essere crittografati a riposo.
+    \item Deve essere implementato un sistema completo di log per gli audit di sicurezza.
 \end{itemize}
 
 \subsection{Performance  - M}
 
 \begin{itemize}
-   \item Il tempo di risposta per le operazioni di base deve essere inferiore a 2 secondi.
-   \item Il sistema deve supportare almeno 1000 utenti concorrenti.
-   \item Il caricamento della dashboard non deve richiedere più di 3 secondi.
-   \item Il sistema deve supportare la gestione di almeno 100.000 record paziente.
+    \item Il tempo di risposta per le operazioni di base deve essere inferiore a 2 secondi.
+    \item Il sistema deve supportare almeno 1000 utenti concorrenti.
+    \item Il caricamento della dashboard non deve richiedere più di 3 secondi.
+    \item Il sistema deve supportare la gestione di almeno 100.000 record paziente.
 \end{itemize}
 
 \subsection{Disponibilità  - M}
 
 \begin{itemize}
-   \item Il sistema deve avere un uptime del 99,9\% durante le ore lavorative.
-   \item I backup del database devono essere eseguiti quotidianamente.
+    \item Il sistema deve avere un uptime del 99,9\% durante le ore lavorative.
+    \item I backup del database devono essere eseguiti quotidianamente.
 \end{itemize}
 
 \subsection{Usabilità  - M}
 
 \begin{itemize}
-   \item L'interfaccia utente deve essere utilizzabile senza formazione specifica ed essere user-friendly.
-   \item I flussi di lavoro principali non devono richiedere più di 3 clic.
-   \item I messaggi di errore devono essere chiari e fornire indicazioni per la risoluzione.
+    \item L'interfaccia utente deve essere utilizzabile senza formazione specifica ed essere user-friendly.
+    \item I flussi di lavoro principali non devono richiedere più di 3 clic.
+    \item I messaggi di errore devono essere chiari e fornire indicazioni per la risoluzione.
 \end{itemize}
 
 \subsection{Scalabilità - S}
 
 \begin{itemize}
-   \item  L'architettura dovrebbe supportare lo scaling orizzontale.
-   \item Il database dovrebbe gestire efficacemente l'aumento di volume dei dati.
-   \item Le prestazioni non dovrebbero degradarsi significativamente con l'aumentare degli utenti.
-   \item Il sistema dovrebbe implementare tecniche di caching per migliorare la reattività.
+    \item  L'architettura dovrebbe supportare lo scaling orizzontale.
+    \item Il database dovrebbe gestire efficacemente l'aumento di volume dei dati.
+    \item Le prestazioni non dovrebbero degradarsi significativamente con l'aumentare degli utenti.
+    \item Il sistema dovrebbe implementare tecniche di caching per migliorare la reattività.
 \end{itemize}
 
 \subsection{Manutenibilità - S}
 
 \begin{itemize}
-   \item Il codice dovrebbe seguire standard di codifica e best practice.
-   \item La documentazione del codice dovrebbe essere completa e aggiornata.
-   \item L'architettura dovrebbe essere modulare per facilitare gli aggiornamenti.
-   \item Il sistema dovrebbe supportare aggiornamenti con tempi di inattività minimi.
+    \item Il codice dovrebbe seguire standard di codifica e best practice.
+    \item La documentazione del codice dovrebbe essere completa e aggiornata.
+    \item L'architettura dovrebbe essere modulare per facilitare gli aggiornamenti.
+    \item Il sistema dovrebbe supportare aggiornamenti con tempi di inattività minimi.
 \end{itemize}
 
 \subsection{Portabilità - S}
 
 \begin{itemize}
-   \item Il sistema dovrebbe funzionare sui principali browser web (Chrome, Firefox, Edge, Safari).
-   \item L'interfaccia utente dovrebbe adattarsi a diverse risoluzioni dello schermo.
-   \item Il sistema dovrebbe essere containerizzato per facilitare il deployment.
-   \item Il backend dovrebbe funzionare su diversi sistemi operativi server.
+    \item Il sistema dovrebbe funzionare sui principali browser web (Chrome, Firefox, Edge, Safari).
+    \item L'interfaccia utente dovrebbe adattarsi a diverse risoluzioni dello schermo.
+    \item Il sistema dovrebbe essere containerizzato per facilitare il deployment.
+    \item Il backend dovrebbe funzionare su diversi sistemi operativi server.
 \end{itemize}
 
 \subsection{Interoperabilità - S}
 
 \begin{itemize}
-   \item Le API dovrebbero seguire standard RESTful.
-   \item Il sistema dovrebbe supportare almeno il formato JSON per lo scambio di dati.
-   \item Il sistema dovrebbe utilizzare formati standard per date, orari e dati medici.
+    \item Le API dovrebbero seguire standard RESTful.
+    \item Il sistema dovrebbe supportare almeno il formato JSON per lo scambio di dati.
+    \item Il sistema dovrebbe utilizzare formati standard per date, orari e dati medici.
 \end{itemize}
 
 \subsection{Prestazioni Avanzate - C}
 
 \begin{itemize}
-   \item Il sistema potrebbe implementare tecniche di precaricamento dei dati.
-   \item L'interfaccia utente potrebbe utilizzare rendering lato server per il caricamento iniziale.
-   \item Il sistema potrebbe implementare la compressione delle risposte API.
-   \item Il database potrebbe essere ottimizzato con indici avanzati e strategie di partizionamento.
+    \item Il sistema potrebbe implementare tecniche di precaricamento dei dati.
+    \item L'interfaccia utente potrebbe utilizzare rendering lato server per il caricamento iniziale.
+    \item Il sistema potrebbe implementare la compressione delle risposte API.
+    \item Il database potrebbe essere ottimizzato con indici avanzati e strategie di partizionamento.
 \end{itemize}
 
 \subsection{Monitoraggio e Analytics - C}
 
 \begin{itemize}
-   \item Il sistema potrebbe implementare dashboard di monitoraggio in tempo reale.
-   \item Le metriche di prestazione potrebbero essere raccolte e analizzate.
-   \item Il sistema potrebbe implementare alerting automatico per problemi prestazionali.
-   \item Gli errori utente potrebbero essere tracciati per identificare problemi di usabilità
+    \item Il sistema potrebbe implementare dashboard di monitoraggio in tempo reale.
+    \item Le metriche di prestazione potrebbero essere raccolte e analizzate.
+    \item Il sistema potrebbe implementare alerting automatico per problemi prestazionali.
+    \item Gli errori utente potrebbero essere tracciati per identificare problemi di usabilità
 \end{itemize}
 
 \subsection{Supporto Offline - C}
 
 \begin{itemize}
-   \item L'interfaccia utente potrebbe implementare funzionalità progressive web app.
-   \item I dati critici potrebbero essere memorizzati nella cache del browser.
-   \item Il sistema potrebbe supportare la sincronizzazione dei dati dopo la riconnessione.
-   \item Le modifiche potrebbero essere accodate quando offline.
+    \item L'interfaccia utente potrebbe implementare funzionalità progressive web app.
+    \item I dati critici potrebbero essere memorizzati nella cache del browser.
+    \item Il sistema potrebbe supportare la sincronizzazione dei dati dopo la riconnessione.
+    \item Le modifiche potrebbero essere accodate quando offline.
 \end{itemize}
 
 \subsection{Testing Automatizzato - C}
 
 \begin{itemize}
-   \item Il sistema potrebbe avere una copertura di test unitari superiore all'85\%.
-   \item I test di integrazione potrebbero essere eseguiti automaticamente.
-   \item Il sistema potrebbe implementare test di carico programmati.
-   \item Il processo di CI/CD potrebbe includere test di sicurezza automatizzati.
+    \item Il sistema potrebbe avere una copertura di test unitari superiore all'85\%.
+    \item Il sistema potrebbe implementare test di carico programmati.
+    \item Il processo di CI/CD potrebbe includere test di sicurezza automatizzati.
 \end{itemize}
 
 \subsection{Supporto Legacy - W}
 
 \begin{itemize}
-   \item Non ci sarà compatibilità con sistemi operativi obsoleti.
-   \item Non verranno fornite versioni desktop standalone.
+    \item Non ci sarà compatibilità con sistemi operativi obsoleti.
+    \item Non verranno fornite versioni desktop standalone.
 \end{itemize}
 
 \subsection{Alta Disponibilità Geografica - W}
 
 \begin{itemize}
-   \item Il sistema non implementerà il deployment multi-regione nella prima fase.
-   \item Non ci sarà failover automatico tra diversi data center.
-   \item Non ci sarà ottimizzazione per utenti in regioni geografiche specifiche.
-   \item Non ci sarà un sistema di content delivery network globale.
+    \item Il sistema non implementerà il deployment multi-regione nella prima fase.
+    \item Non ci sarà failover automatico tra diversi data center.
+    \item Non ci sarà ottimizzazione per utenti in regioni geografiche specifiche.
+    \item Non ci sarà un sistema di content delivery network globale.
 \end{itemize}
 
 \subsection{Integrazione Enterprise Completa - W}
 
 \begin{itemize}
-   \item Non ci sarà supporto per Single Sign-On aziendale completo.
-   \item Non ci sarà integrazione con sistemi ERP legacy.
-   \item Non ci saranno connettori personalizzati per ogni sistema clinico.
+    \item Non ci sarà supporto per Single Sign-On aziendale completo.
+    \item Non ci sarà integrazione con sistemi ERP legacy.
+    \item Non ci saranno connettori personalizzati per ogni sistema clinico.
 \end{itemize}
 
 \subsection{Conformità Internazionale Completa - W}
 
 \begin{itemize}
-   \item Il sistema non sarà inizialmente certificato per standard internazionali come HIPAA.
-   \item Non ci sarà supporto completo per tutti i requisiti normativi regionali.
-   \item Non ci saranno localizzazioni complete per tutti i paesi.
-   \item Non ci sarà certificazione FDA come dispositivo medico.
+    \item Il sistema non sarà inizialmente certificato per standard internazionali come HIPAA.
+    \item Non ci sarà supporto completo per tutti i requisiti normativi regionali.
+    \item Non ci saranno localizzazioni complete per tutti i paesi.
+    \item Non ci sarà certificazione FDA come dispositivo medico.
 
 \end{itemize}
 
@@ -626,70 +623,69 @@ Per l'analisi dei requisiti (funzionali e non funzionali) è stata utilizzata la
 \subsection{Attori principali}
 I principali attori del sistema risultano essere i medici e gli operatori sanitari, i quali si interfacciano con il sistema per la gestione dei pazienti e dei dati clinici.
 I pazienti non hanno accesso diretto al sistema, ma possono comunque ricevere via email i report generati e sono necessari nel flusso di autenticazione necessario per concedere l'accesso dei proprio dati al sistema.
-Possiamo considerare anche le API esterne come attori: esse si interfacciano con gli endpoint del sistema per interagire con esso.
 \subsection{Gestione dei pazienti}
 I medici e gli operatori sanitari possono:
 \begin{itemize}
-   \item Visualizzare i pazienti.
-   \item Creare nuovi pazienti.
-   \item Importare pazienti tramite UUID.
-   \item Visualizzare i dettagli di un paziente.
-   \item Modificare i dettagli di un paziente.
-   \item Eliminare un paziente(dissociandolo dal proprio account).
+    \item Visualizzare i pazienti.
+    \item Creare nuovi pazienti.
+    \item Importare pazienti tramite UUID.
+    \item Visualizzare i dettagli di un paziente.
+    \item Modificare i dettagli di un paziente.
+    \item Eliminare un paziente(dissociandolo dal proprio account).
 \end{itemize}
 \subsection{Gestione dell'account}
-I medici e gli operatori sanitari, oltre alle API esterne, possono:
+I medici e gli operatori sanitari possono:
 \begin{itemize}
-   \item Registrare un nuovo account.
-   \item Eseguire il login.
-   \item Eseguire il logout.
+    \item Registrare un nuovo account.
+    \item Eseguire il login.
+    \item Eseguire il logout.
 \end{itemize}
 \subsection{Visualizzazione dei parametri vitali}
 I medici e gli operatori sanitari possono:
 \begin{itemize}
-   \item Visualizzare grafici dei parametri vitali.
-   \item Visualizzare i parametri vitali in formato di tabelle.
-   \item Selezionare un livello di dettaglio per la visualizzazione dei dati (1g, 7g, 30g, 90g).
+    \item Visualizzare grafici dei parametri vitali.
+    \item Visualizzare i parametri vitali in formato di tabelle.
+    \item Selezionare un livello di dettaglio per la visualizzazione dei dati (1g, 7g, 30g, 90g).
 \end{itemize}
 \subsection{Gestione note}
 I medici e gli operatori sanitari possono:
 \begin{itemize}
-   \item Creare nuove note cliniche.
-   \item Visualizzare note esistenti.
-   \item Eliminare note(solo quelle create da loro).
-   \item Visualizzare i dettagli di un paziente.
-   \item Modificare i dettagli di un paziente.
-   \item Eliminare un paziente.
+    \item Creare nuove note cliniche.
+    \item Visualizzare note esistenti.
+    \item Eliminare note(solo quelle create da loro).
+    \item Visualizzare i dettagli di un paziente.
+    \item Modificare i dettagli di un paziente.
+    \item Eliminare un paziente.
 \end{itemize}
 \subsection{Gestione report}
 I medici e gli operatori sanitari possono:
 \begin{itemize}
-   \item Generare report specifici relativi ad un parametro vitale.
-   \item Generare un report generale relativo a tutti i parametri vitali.
-   \item Selezionare gli elementi(note, osservazioni, grafici) da includere nel report.
-   \item Scaricare il report in formato PDF.
-   \item Inviare una copia per email al paziente del report in formato PDF.
+    \item Generare report specifici relativi ad un parametro vitale.
+    \item Generare un report generale relativo a tutti i parametri vitali.
+    \item Selezionare gli elementi(note, osservazioni, grafici) da includere nel report.
+    \item Scaricare il report in formato PDF.
+    \item Inviare una copia per email al paziente del report in formato PDF.
 \end{itemize}
 \subsection{Integrazione con piattaforme sanitarie}
 I pazienti possono:
 \begin{itemize}
-   \item Autorizzare la connessione del proprio account alla piattaforma.
+    \item Autorizzare la connessione del proprio account alla piattaforma.
 \end{itemize}
 La piattaforma su cui sono salvati i dati può:
 \begin{itemize}
-   \item Revocare l'autorizzazione di accesso al sistema.
+    \item Revocare l'autorizzazione di accesso al sistema.
 \end{itemize}
 I medici e gli operatori sanitari possono:
 \begin{itemize}
-   \item Generare un link valido 24h per permettere all'utente di fornire l'accesso da parte della piattaforma ai suoi dati.
-   \item Reimuovere il collegamento alla della piattaforma alla piattaforma su cui sono salvati i dati.
+    \item Generare un link valido 24h per permettere all'utente di fornire l'accesso da parte della piattaforma ai suoi dati.
+    \item Reimuovere il collegamento alla della piattaforma alla piattaforma su cui sono salvati i dati.
 \end{itemize}
 \subsection{Gestione delle osservazioni cliniche}
 I medici e gli operatori sanitari possono:
 \begin{itemize}
-   \item Creare un'osservazione clinica relativa ad un parametro vitale e ad un periodo temporale specifico.
-   \item Visualizzare le note esistenti per ciascun paziente.
-   \item Eliminare un'osservazione clinica(solo quelle create da loro).
+    \item Creare un'osservazione clinica relativa ad un parametro vitale e ad un periodo temporale specifico.
+    \item Visualizzare le note esistenti per ciascun paziente.
+    \item Eliminare un'osservazione clinica(solo quelle create da loro).
 \end{itemize}
 
 
@@ -707,13 +703,13 @@ I medici e gli operatori sanitari possono:
 \end{itemize}
 \subsection{Importazione e gestione pazienti}
 \begin{itemize}
-\item Il medico o il personale sanitario accede e si trova davanti alla Dashboard.
-\item Decide di aggiungere un paziente: clicca sulla shortcut nella Dashboard "Nuovo Paziente" nel Menù Azioni rapide(oppure va nella pagina "Visualizza tutti i pazienti" e clicca sul pulsante "Aggiungi nuovo paziente").
-\item Nel form che si apre, l'utente compila i campi obbligatori richiesti e, se desidera, quelli opzionali.
-\item Dopo aver compilato il form, se i dati inseriti sono validi e se il sistema non ha restituito errori, dopo aver cliccato il pulsante "Salva Paziente" verrà creato un nuovo account.
-\item Dalla schermata "Visualizza tutti i pazienti" l'utente può importare un paziente esistente tramite UUID cliccando sul pulsante "Importa Paziente tramite UUID".
-\item Nel modale che si aprirà, l'utente inserirà il codice di associazione richiesto.
-\item Se il codice di associazione inserito è valido e associato ad un account paziente esistente (e se il sistema non ha restituito errori), dopo il click sul pulsante "Importa Paziente" il paziente verrà aggiunto alla lista dei pazienti seguiti dall'operatore.
+    \item Il medico o il personale sanitario accede e si trova davanti alla Dashboard.
+    \item Decide di aggiungere un paziente: clicca sulla shortcut nella Dashboard "Nuovo Paziente" nel Menù Azioni rapide(oppure va nella pagina "Visualizza tutti i pazienti" e clicca sul pulsante "Aggiungi nuovo paziente").
+    \item Nel form che si apre, l'utente compila i campi obbligatori richiesti e, se desidera, quelli opzionali.
+    \item Dopo aver compilato il form, se i dati inseriti sono validi e se il sistema non ha restituito errori, dopo aver cliccato il pulsante "Salva Paziente" verrà creato un nuovo account.
+    \item Dalla schermata "Visualizza tutti i pazienti" l'utente può importare un paziente esistente tramite UUID cliccando sul pulsante "Importa Paziente tramite UUID".
+    \item Nel modale che si aprirà, l'utente inserirà il codice di associazione richiesto.
+    \item Se il codice di associazione inserito è valido e associato ad un account paziente esistente (e se il sistema non ha restituito errori), dopo il click sul pulsante "Importa Paziente" il paziente verrà aggiunto alla lista dei pazienti seguiti dall'operatore.
 \end{itemize}
 \subsection{Collegamento dispositivi wearable}
 \begin{itemize}
@@ -775,22 +771,139 @@ I medici e gli operatori sanitari possono:
 \chapter{Progettazione}
 \section{Architettura del sistema}
 \subsection{Architettura generale e componenti principali}
+VitaLink è strutturata come un'applicazione web progettata per essere altamente scalabile e modulabile. Essa utilizza il Framework Flask (Python) per il backend, Bootstrap per il frontend e PostgreSQL come database relazionale(ma è possibile sostiturlo facilmente con un DBMS analogamente relazionale).
+La piattaforma è progettata per essere inizialmente accessibile solo tramite browser web, ma sono state inserite anche delle API per permettere l'integrazione futura con possibili app mobile o altri sistemi esterni.
 \subsection{Modularità e separazione delle responsabilità}
+La piattaforma è divisa in 15 moduli principali, ai quali vanno ad affiancarsi due moduli di supporto per la gestione delle migrazioni e per la compilazione delle traduzioni al momento dell'istanziazione di un un container.
+Vi sono poi le directory dei file static e dei template per quanto concerne il frontend, e la directory delle traduzioni per contenere le varie localizzazioni seguendo lo standard di Flask Babel.
+Infine nella root del progetto è presente la cartella dei test. La cartella contiene inoltre un file di configurazione per la creazione di un ambiente e la fornitura di funzioni per la gestione dei test.
+\begin{itemize}
+    \item docs/ (cartella per la documentazione)
+    \item app/
+          \begin{itemize}
+              \item static/ (cartella per i file statici, come CSS e JavaScript)
+                    \begin{itemize}
+                        \item css/ (cartella per i file CSS)
+                              \begin{itemize}
+                                  \item custom.css (file CSS personalizzato per lo stile dell'applicazione)
+                                  \item health\_connect.css (file CSS specifico per lo stile della pagina di collegamento ai dispositivi)
+                              \end{itemize}
+                    \end{itemize}
+                    \begin{itemize}
+                        \item img/ (cartella per le immagini)
+                              \begin{itemize}
+                                  \item fitbit-logo.png (logo di Fitbit)
+                                  \item apple-health-logo.png (logo di Apple Health)
+                                  \item health-connect-logo.png (logo di Google Health Connect)
+                              \end{itemize}
+                    \end{itemize}
+                    \begin{itemize}
+                        \item js/ (cartella per i file JavaScript)
+                              \begin{itemize}
+                                  \item health\_platforms.js
+                                  \item main.js
+                                  \item observations.js
+                                  \item patients.js
+                                  \item specific\_report.js
+                                  \item translations.js
+                                  \item vital\_charts.js
+                                  \item vitals.js
+                              \end{itemize}
+                    \end{itemize}
+              \item templates/ (cartella per i template HTML)
+                    \begin{itemize}
+                        \item audit\_logs.html
+                        \item base-no-session.html
+                        \item base.html
+                        \item dashboard.html
+                        \item health\_connect\_result.html
+                        \item health\_connect.html
+                        \item login.html
+                        \item patient\_detail.html
+                        \item patients.html
+                        \item patients.html
+                        \item profile.html
+                        \item register.html
+                        \item specific\_report\_form.html
+                        \item vitals.html
+                    \end{itemize}
+              \item translations/ (cartella per i file di traduzione)
+                    \begin{itemize}
+                        \item babel.cfg (file di configurazione per Babel)
+                        \item messages.pot (file di template per le traduzioni)
+                        \item it/ (cartella per le traduzioni in italiano)
+                    \end{itemize}
+              \item \_\_init\_\_.py
+              \item app.py (modulo di configurazione per l'applicazione e il database)
+              \item audit.py (modulo per la gestione dei log di audit)
+              \item auth.py (modulo per la definizione delle autorizzazioni)
+              \item compile\_translations.py (modulo per la compilazione delle traduzioni)
+              \item email\_utils.py (modulo per l'integrazione del servizio di API per l'invio di email)
+              \item health\_platforms\_config.py (modulo per la definizione delle API delle piattaforme sanitarie da cui recuperare i dati)
+              \item health\_platforms.py (modulo per la configurazione del recupero dei dati dalle API definite in health\_platforms\_config.py)
+              \item language.py (modulo per la gestione delle lingue)
+              \item main.py (modulo punto di ingresso per l'applicazione)
+              \item migrate.py (modulo per la gestione della migrazione del database. N.B che in caso di esecuzione locale è necessario configurare dapprima il database su psql andando a creare user, password, db e fornendo i permessi all'utente creato su tale db)
+              \item models.py (modulo per la definizione dei modelli del database)
+              \item observations.py (modulo per la gestione delle osservazionei cliniche)
+              \item reports.py (modulo per la generazione dei report)
+              \item utils.py (modulo per le funzioni di utilità)
+              \item views.py (modulo controller per le viste web)
+          \end{itemize}
+    \item tests/
+    \item Dockerfile (file di configurazione per la creazione dell'immagine Docker)
+    \item docker-compose.yml (file di configurazione per la creazione e configurazione del container Docker)
+    \item docker-entrypoint.sh (script di avvio del container Docker per la verifica della salute del DB)
+    \item .env.example (file di esempio contenente la struttura necessaria per il settaggio dell'ambiente in ciascuna configurazione)
+    \item .env (da configurare per sviluppo/test locale)
+    \item db\_migrate.yml (script di migrazione per migrazione automatica in ambiente Docker)
+    \item pyproject.toml (file di configurabilità per la gestione delle dipendenze e dei test)
+    \item .dockerignore (file per escludere file e cartelle dalla creazione dell'immagine Docker)
+    \item .gitignore (file per escludere file e cartelle dalla gestione di Git)
+\end{itemize}
 \subsection{Flusso dei dati e interazioni tra componenti}
+Il frontend interagisce con il backend mediante richieste HTTP alle API RESTful della piattaforma, ricevendo risposte in formato JSON.
+Queste API sono protette mediante autenticazione JWT o sessioni, facendo in modo che solo gli utenti autorizzati possano accedere ai dati. Il backend, implementato con Flask, gestisce tali richieste attraverso moduli specializzati come \texttt{auth.py} per l'autenticazione, \texttt{views.py} per le viste web e \texttt{api.py} per gli endpoint REST.
+I dati rimangono immagazzinati nel database PostgreSQL, accessibile tramite l'ORM SQLAlchemy \cite{sqlalchemy} che astrae le interazioni a livello SQL.
+Una componente chiave per l'obiettivo della piattaforma è il modulo \texttt{health\_platforms.py} che gestisce l'integrazione con servizi esterni come Fitbit mediante OAuth 2.0: quando un paziente autorizza l'accesso ai propri dati, il sistema riceve token di accesso e refresh che vengono memorizzati e associati al profilo dell'utente interessato.
+Successivamente, il sistema può recuperare i dati sanitari chiamando le API esterne, elaborarli secondo le regole in \texttt{health\_platforms\_config.py} e memorizzarli temporaneamente nella cache per ottimizzare le prestazioni e ridurre le chiamate API (mitigando la possibilità di incorrere in blocchi).
 
 \section{Design pattern}
+Tra i pattern architetturali adottati nel progetto possiamo citare i più rilevanti.
 \subsection{Pattern architetturali}
+\begin{itemize}
+    \item MVC (Model-View-Controller): separa la logica di business dalla presentazione, dell'interazione con la base di dati e della logica di controllo.
+    \item Function Organization Pattern : ogni modulo è organizzato in funzioni, ciascuna delle quali ha una responsabilità specifica e coerente con la natura del modulo stesso.
+\end{itemize}
 \subsection{Pattern di progettazione}
-\subsection{Pattern per la sicurezza e l'autenticazione}
-
+\begin{itemize}
+    \item Factory Pattern: utilizzato per creare oggetti in una superclasse, permettendo alle sottoclassi di alterare il tipo di oggetto creato.
+    \item Strategy Pattern: permette di definire una famiglia di algoritmi incapsulati in classi separate.
+    \item Decorator Pattern: permette di aggiungere responsabilità aggiuntive ad un oggetto senza modificarne la struttura.
+\end{itemize}
 \section{Modello dei dati}
-\subsection{Entità principali}
-\subsection{Relazioni tra entità}
+Per il modello dei dati è stato scelto un'approccio relazionale in quanto non vi è una particolare necessità di un modello noSQL, essendo i dati sanitari di tipo strutturato e relazionabile.
+\subsection{Entità principali e relazioni - Schema ER}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/DataModel.png}
+    \caption{Schema ER completo del database}
+    \label{fig:Schema-ER}
+\end{figure}
 \subsection{Enumerazioni e tipi di dati}
-
+È stato scelto di utilizzare i tipi di dati standard di PostgreSQL per la definizione dei campi del database, in quanto sono sufficienti a soddisfare gli obiettivi perseguiti.
+Sono presenti 4 Enum nel database utilizzati per casi specifici per garantire l'integrità dei dati e limitare i valori possibili ad un insieme predefinito di costanti.
+\begin{itemize}
+    \item Tipi di parametri vitali
+    \item Tipo di piattaforma sanitaria
+    \item Tipo di attività per l'audit
+    \item Tipo di entità per l'audit
+\end{itemize}
 \section{Architettura del database}
+È stato scelto PostgreSQL come DBMS relazionale in quanto risulta essere uno dei più diffusi e supportati dalle piattaforme per il deployment.
+Non è comunque esclusa la possibilità di poter riconfigurare il sistema per l'utilizzo di un altro DBMS relazionale, come ad esempio MySQL o Microsoft SQL Server.
 \subsection{Schema relazionale}
-\subsection{Indici e ottimizzazioni}
+Per ovvie ragioni s
 \subsection{Strategia di migrazione}
 
 \section{Interfaccia utente}
@@ -803,6 +916,10 @@ I medici e gli operatori sanitari possono:
 \subsection{Integrazione OAuth con Fitbit}
 \subsection{Sistema di caching temporaneo}
 \subsection{Estendibilità per future piattaforme}
+
+
+
+
 
 \chapter{Implementazione}
 \section{Stack tecnologico}
@@ -843,6 +960,10 @@ I medici e gli operatori sanitari possono:
 \subsection{JWT per autenticazione API}
 \subsection{Logging di sicurezza e audit}
 
+
+
+
+
 \chapter{Testing e Validazione}
 \section{Strategia di testing}
 \subsection{Approccio al testing}
@@ -870,6 +991,10 @@ I medici e gli operatori sanitari possono:
 \subsection{Analisi dei requisiti non funzionali}
 \subsection{Completezza della soluzione}
 
+
+
+
+
 \chapter{Deployment e Operations}
 \section{Ambiente di deployment}
 \subsection{Architettura dell'ambiente di produzione}
@@ -891,6 +1016,10 @@ I medici e gli operatori sanitari possono:
 \subsection{Monitoraggio delle performance}
 \subsection{Gestione degli errori in produzione}
 
+
+
+
+
 \chapter{Risultati e valutazione}
 \section{Obiettivi raggiunti}
 \subsection{Funzionalità implementate}
@@ -911,6 +1040,10 @@ I medici e gli operatori sanitari possono:
 \subsection{Sfide tecniche}
 \subsection{Limitazioni delle API esterne}
 \subsection{Compromessi di design}
+
+
+
+
 
 \chapter{Conclusioni e sviluppi futuri}
 \section{Conclusioni}
@@ -944,7 +1077,7 @@ I medici e gli operatori sanitari possono:
     \item[UI] User Interface
     \item[UML] Unified Modeling Language
     \item[UUID] Universally Unique Identifier
-    % Aggiungere altri termini rilevanti
+          % Aggiungere altri termini rilevanti
 \end{description}
 
 \chapter{Codice sorgente significativo}
@@ -994,5 +1127,6 @@ I medici e gli operatori sanitari possono:
     \bibitem{moscow} contributori di Wikipedia. (2024, September 5). \textit{Metodo MOSCOW}. Wikipedia. \url{https://it.wikipedia.org/wiki/Metodo_MoSCoW}
     \bibitem{werkzeug} \textit{Werkzeug — Werkzeug Documentation (3.1.x)}. (n.d.). \url{https://werkzeug.palletsprojects.com/en/stable/}
     \bibitem{oauth-image} Google Cloud. (n.d.). \textit{Flusso di autorizzazione OAuth 2.0}. Google Cloud Apigee. \url{https://cloud.google.com/static/apigee/docs/api-platform/images/oauth-abstract.png}
+    \bibitem{sqlalchemy} SQLAlchemy. (n.d.). \url{https://www.sqlalchemy.org/}
 \end{thebibliography}
 \end{document}

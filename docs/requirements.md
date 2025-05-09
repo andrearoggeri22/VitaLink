@@ -204,7 +204,6 @@ Questo documento utilizza la metodologia di prioritizzazione MoSCoW:
 
 4. **Testing Automatizzato**
    - Il sistema potrebbe avere una copertura di test unitari superiore all'85%
-   - I test di integrazione potrebbero essere eseguiti automaticamente
    - Il sistema potrebbe implementare test di carico programmati
    - Il processo di CI/CD potrebbe includere test di sicurezza automatizzati
 

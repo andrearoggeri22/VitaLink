@@ -13,7 +13,6 @@ left to right direction
 ' Actors
 actor "Medico" as Doctor
 actor "Paziente" as Patient
-actor "API Esterna" as API
 actor "Piattaforma Sanitaria" as HealthPlatform
 
 ' Use cases groups
@@ -135,8 +134,6 @@ UC24 <.. UC26 : <<include>>
 ' Relazioni aggiuntive per altri attori
 Patient --> UC17 : Autorizza connessione
 HealthPlatform --> UC18 : Fornisce dati
-API --> UC1 : Registrazione API
-API --> UC2 : Autenticazione API
 
 ' Note informative
 note "Il sistema VitaLink permette ai medici di gestire i pazienti\ne monitorare i loro parametri vitali." as N1

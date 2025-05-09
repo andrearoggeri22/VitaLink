@@ -23,15 +23,6 @@ L'architettura principale del sistema segue il pattern MVC, separando chiarament
 - `app/views.py`: Gestione delle viste web
 - `app/api.py`: Endpoints API RESTful
 
-#### Repository Pattern
-Utilizzato per l'accesso ai dati e la separazione della logica di business dalla persistenza dei dati:
-- Incapsula la logica di accesso al database
-- Fornisce metodi coerenti per le operazioni CRUD
-- Facilita i test e la manutenzione
-
-**Riferimenti nel codice**:
-- Le classi con metodi come `find_by_id`, `save`, `delete` implementano questo pattern
-
 #### Modular Function Organization Pattern
 Implementato per incapsulare la logica di business complessa in moduli funzionali, invece che in classi di servizio:
 - Modulo `health_platforms.py`: Gestisce l'integrazione con le piattaforme sanitarie tramite funzioni specializzate
@@ -195,7 +186,7 @@ Standard per la creazione di token di accesso basati su JSON:
 
 #### Pytest
 Framework di testing per Python:
-- Funzionalità: Test unitari, test di integrazione, fixtures
+- Funzionalità: Test unitari, fixtures
 
 ## 3. Standard Utilizzati
 

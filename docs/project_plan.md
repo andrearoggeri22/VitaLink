@@ -334,7 +334,6 @@ La documentazione viene gestita con i seguenti criteri:
 
 #### Ambiente di Test
 - **Locale**: Ambiente di sviluppo per test rapidi
-- **Docker**: Container per test di integrazione
 
 #### Tipi di Test
 - **Test Manuali**: Verifica del comportamento atteso
@@ -423,7 +422,6 @@ La documentazione viene gestita con i seguenti criteri:
 
 4. **Testing**
    4.1. Test unitari per componenti critici
-   4.2. Test di integrazione OAuth
    4.3. Test manuali dell'interfaccia
 
 5. **Documentazione**
@@ -558,7 +556,6 @@ I cambiamenti significativi vengono documentati in un semplice messaggio nel com
 ### Testing Finale
 
 - **Test Funzionali**: Verifica di tutte le features implementate
-- **Test di Integrazione**: Verifica della corretta integrazione con Fitbit
 - **Test Manuali**: Verifica dell'usabilità e dell'interfaccia utente
 
 ### Documentazione Utente
