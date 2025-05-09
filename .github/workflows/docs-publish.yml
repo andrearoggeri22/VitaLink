@@ -21,7 +21,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install mkdocs mkdocs-material mkdocstrings mkdocstrings-python mkdocs-autorefs
+        pip install mkdocs mkdocs-material mkdocstrings  mkdocstrings-python mkdocs-autorefs
 
     - name: Set PYTHONPATH
       run: echo "PYTHONPATH=$(pwd)" >> $GITHUB_ENV
@@ -29,10 +29,6 @@ jobs:
     - name: Build documentation from docs/code
       working-directory: docs/code
       run: mkdocs build
-
-    - name: Debug mkdocs build (docs/code)
-      working-directory: docs/code
-      run: ls -al
 
     - name: Move docs/code/site to a temporary directory
       run: |
@@ -47,10 +43,6 @@ jobs:
       working-directory: docs/tests
       run: mkdocs build
 
-    - name: Debug mkdocs build (docs/tests)
-      working-directory: docs/tests
-      run: ls -al
-
     - name: Move docs/tests/site to a temporary directory
       run: |
         if [ -d "docs/tests/site" ]; then
@@ -64,23 +56,13 @@ jobs:
       run: |
         mkdir -p combined-site/code
         mkdir -p combined-site/tests
-        if [ -d "code-site" ] && [ "$(ls -A code-site)" ]; then
-          mv code-site/* combined-site/code/
-        else
-          echo "Directory 'code-site' is empty or missing!"
-          exit 1
-        fi
-        if [ -d "tests-site" ] && [ "$(ls -A tests-site)" ]; then
-          mv tests-site/* combined-site/tests/
-        else
-          echo "Directory 'tests-site' is empty or missing!"
-          exit 1
-        fi
+        mv code-site/* combined-site/code/
+        mv tests-site/* combined-site/tests/
 
-    - name: Debug after combining documentation
+    - name: Debug combined site
       run: |
         echo "Combined site structure:"
-        tree -L 3 combined-site
+        tree combined-site
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v4
