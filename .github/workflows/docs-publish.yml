@@ -3,54 +3,63 @@ name: Deploy Documentation to GitHub Pages
 on:
   push:
     branches:
-      - main  # Esegui il workflow su ogni commit nel branch "main"
+      - main
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-    # Checkout del repository
     - name: Checkout Repository
       uses: actions/checkout@v4
 
-    # Configurazione di Python
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.11'  # Sostituisci con la versione di Python che utilizzi
+        python-version: '3.11'
 
-    # Installazione delle dipendenze
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install mkdocs mkdocs-material mkdocstrings mkdocstrings-python mkdocs-autorefs
 
-    # Configurazione del PYTHONPATH
     - name: Set PYTHONPATH
       run: echo "PYTHONPATH=$(pwd)" >> $GITHUB_ENV
 
-    # Compilazione della documentazione dalla cartella docs/code
     - name: Build documentation from docs/code
       working-directory: docs/code
       run: mkdocs build
 
-    # Spostamento della documentazione dalla cartella docs/code/site
+    - name: Debug mkdocs build (docs/code)
+      working-directory: docs/code
+      run: ls -al
+
     - name: Move docs/code/site to a temporary directory
       run: |
-        mv site ../code-site
+        if [ -d "docs/code/site" ]; then
+          mv docs/code/site ../code-site
+        else
+          echo "Directory 'site' not found in docs/code"
+          exit 1
+        fi
 
-    # Compilazione della documentazione dalla cartella docs/tests
     - name: Build documentation from docs/tests
       working-directory: docs/tests
       run: mkdocs build
 
-    # Spostamento della documentazione dalla cartella docs/tests/site
+    - name: Debug mkdocs build (docs/tests)
+      working-directory: docs/tests
+      run: ls -al
+
     - name: Move docs/tests/site to a temporary directory
       run: |
-        mv site ../tests-site
+        if [ -d "docs/tests/site" ]; then
+          mv docs/tests/site ../tests-site
+        else
+          echo "Directory 'site' not found in docs/tests"
+          exit 1
+        fi
 
-    # Unione delle due documentazioni in una singola directory
     - name: Combine documentation
       run: |
         mkdir -p combined-site/code
@@ -58,9 +67,8 @@ jobs:
         mv code-site/* combined-site/code/
         mv tests-site/* combined-site/tests/
 
-    # Deploy della documentazione combinata su GitHub Pages
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v4
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./combined-site  # Pubblica la documentazione combinata
+        publish_dir: ./combined-site
