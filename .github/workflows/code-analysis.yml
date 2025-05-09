@@ -1,4 +1,4 @@
-name: Static Code Analysis
+name: Static Code Analysis and Report
 
 on:
   push:
@@ -24,12 +24,17 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pylint
+        pip install pylint radon
 
     # Analisi con Pylint
     - name: Run Pylint
       run: |
         pylint app > pylint-report.txt || true
+
+    # Calcolo complessità ciclomatica con Radon
+    - name: Run Radon Cyclomatic Complexity
+      run: |
+        radon cc app -s -n B > radon-report.txt || true
 
     # Installazione di Cloc
     - name: Install Cloc
@@ -39,29 +44,28 @@ jobs:
       run: |
         cloc . --out=cloc-report.txt
 
-    # Analisi con CodeQL
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v2
-      with:
-        languages: python
-
-    - name: Run CodeQL Analysis
-      uses: github/codeql-action/analyze@v2
-      with:
-        category: "/codeql"
-
     # Generazione del report HTML
     - name: Generate HTML Report
       run: |
         mkdir -p analysis
-        echo "<html><head><title>Static Analysis Report</title></head><body>" > analysis/index.html
+        echo "<html><head><title>Static Analysis Report</title>" > analysis/index.html
+        echo "<style>" >> analysis/index.html
+        echo "body { font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; }" >> analysis/index.html
+        echo "nav { background: #333; color: white; padding: 10px; }" >> analysis/index.html
+        echo "nav a { color: white; margin: 0 15px; text-decoration: none; }" >> analysis/index.html
+        echo ".section { margin-bottom: 20px; }" >> analysis/index.html
+        echo "</style></head><body>" >> analysis/index.html
+        echo "<nav><a href='#pylint'>Pylint Report</a> | <a href='#radon'>Cyclomatic Complexity</a> | <a href='#cloc'>Cloc Report</a></nav>" >> analysis/index.html
         echo "<h1>Static Analysis Report</h1>" >> analysis/index.html
-        echo "<h2>Pylint Report</h2><pre>" >> analysis/index.html
+        echo "<div class='section' id='pylint'><h2>Pylint Report</h2><pre>" >> analysis/index.html
         cat pylint-report.txt >> analysis/index.html
-        echo "</pre>" >> analysis/index.html
-        echo "<h2>Cloc Report</h2><pre>" >> analysis/index.html
+        echo "</pre></div>" >> analysis/index.html
+        echo "<div class='section' id='radon'><h2>Cyclomatic Complexity</h2><pre>" >> analysis/index.html
+        cat radon-report.txt >> analysis/index.html
+        echo "</pre></div>" >> analysis/index.html
+        echo "<div class='section' id='cloc'><h2>Cloc Report</h2><pre>" >> analysis/index.html
         cat cloc-report.txt >> analysis/index.html
-        echo "</pre>" >> analysis/index.html
+        echo "</pre></div>" >> analysis/index.html
         echo "</body></html>" >> analysis/index.html
 
     # Pubblicazione su GitHub Pages
