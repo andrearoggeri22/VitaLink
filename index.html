@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VitaLink - Navigazione alle sezioni autogenerate di documentazione e analisi</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .code-links {
+            list-style-type: none;
+            padding: 0;
+        }
+        .code-links li {
+            margin-bottom: 15px;
+        }
+        .code-label {
+            display: inline-block;
+            background-color: #3498db;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .code-label:hover {
+            background-color: #2980b9;
+        }
+        .description {
+            margin-top: 8px;
+            font-size: 0.9em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>VitaLink - Navigazione Documentazione</h1>
+        
+        <ul class="code-links">
+            <li>
+                <a href="code/index.html" class="code-label">Documentazione del codice</a>
+                <p class="description">Visualizza la documentazione principale del codice sorgente.</p>
+            </li>
+            <li>
+                <a href="tests/index.html" class="code-label">Documentazione dei tests</a>
+                <p class="description">Visualizza la documentazione principale dei tests.</p>
+            </li>
+            <li>
+                <a href="analysis/index.html" class="code-label">Report di analisi statica del codice</a>
+                <p class="description">Visualizza i report relativi all'analisi statica del codice.</p>
+            </li>
+        </ul>
+    </div>
+
+    <script>
+        // Puoi aggiungere JavaScript qui se necessario per funzionalità aggiuntive
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Pagina di navigazione caricata correttamente');
+        });
+    </script>
+</body>
+</html>
