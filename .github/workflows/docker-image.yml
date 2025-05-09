@@ -22,6 +22,24 @@ jobs:
       with:
         python-version: '3.11' 
 
+    - name: Set environment variables
+      env:
+        DATABASE_URL: "sqlite:///:memory:"
+        CLOUD_RUN_ENVIRONMENT: "false"
+        FLASK_APP: "app:app"
+        SESSION_SECRET: "noKey"
+        PORT: "5000"
+        HOST: "0.0.0.0"
+        DEBUG: "true"
+        JWT_SECRET_KEY: "noKey"
+        FITBIT_CLIENT_ID: "noKey"
+        FITBIT_CLIENT_SECRET: "noKey"
+        FITBIT_REDIRECT_URI: "noKey"
+        MJ_APIKEY: "noKey"
+        MJ_APIKEY_SECRET: "noKey"
+        LOG_LEVEL: "LOG"
+        EMAIL_SENDER: "test@test.com"
+
     # Installazione delle dipendenze
     - name: Install dependencies
       run: |
