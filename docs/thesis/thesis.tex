@@ -1952,43 +1952,31 @@ Questi strumenti sono stati integrati nel processo di integrazione continua tram
 \chapter{Deployment e Operations}
 \section{Ambiente di deployment}
 \subsection{Architettura dell'ambiente di produzione}
-L'architettura dell'ambiente di produzione è progettata per essere scalabile, sicura e altamente disponibile. Essa prevede l'uso di container Docker per l'implementazione dei vari componenti dell'applicazione, inclusi il backend, il frontend e il database.
 
 \subsection{Configurazione del server}
-Il server di produzione è configurato per eseguire Docker e Docker Compose, che consentono di gestire facilmente i container e le loro interazioni. Sono state configurate anche le variabili d'ambiente necessarie per il corretto funzionamento dell'applicazione.
 
 \subsection{Gestione delle variabili d'ambiente}
-Le variabili d'ambiente sono utilizzate per configurare l'applicazione in base all'ambiente in cui viene eseguita (sviluppo, test, produzione). Esse includono informazioni sensibili come le credenziali del database e i segreti per la crittografia, e sono gestite in modo sicuro per prevenire accessi non autorizzati.
 
 \section{Containerizzazione e orchestrazione}
 \subsection{Docker e Docker Compose}
-Docker è stato utilizzato per containerizzare l'applicazione, creando immagini leggere e portabili che possono essere eseguite su qualsiasi sistema che supporti Docker. Docker Compose è stato utilizzato per definire e gestire i servizi dell'applicazione, semplificando l'orchestrazione dei vari componenti.
 
 \subsection{Immagini e configurazione}
-Le immagini Docker sono state create per ciascun componente dell'applicazione, inclusi il backend, il frontend e il database. Ogni immagine include tutto il necessario per eseguire il componente, comprese le dipendenze e le configurazioni di sistema.
 
 \subsection{Persistenza dei dati}
-Per garantire la persistenza dei dati, è stato utilizzato un volume Docker per il database, che consente di mantenere i dati anche quando il container viene arrestato o ricreato. Inoltre, sono stati configurati meccanismi di backup e ripristino per proteggere i dati da perdite o danneggiamenti.
 
 \section{Continuous Integration e Continuous Deployment}
 \subsection{Pipeline CI/CD}
-È stata implementata una pipeline CI/CD (Continuous Integration/Continuous Deployment) per automatizzare il processo di integrazione e distribuzione del codice. Questa pipeline include fasi per il build, il test e il deployment dell'applicazione, garantendo che ogni modifica al codice venga automaticamente testata e distribuita negli ambienti appropriati.
 
 \subsection{Automazione dei test}
-I test automatizzati sono eseguiti come parte della pipeline CI/CD per garantire che eventuali modifiche al codice non introducano regressioni o nuovi difetti. I test includono unit test, test di integrazione e test end-to-end.
 
 \subsection{Deployment automatizzato}
-Il deployment dell'applicazione è automatizzato tramite l'uso di script e strumenti di orchestrazione, che consentono di distribuire rapidamente e in modo affidabile nuove versioni dell'applicazione negli ambienti di test e produzione.
 
 \section{Monitoraggio e logging}
 \subsection{Strategia di logging}
-È stata implementata una strategia di logging centralizzato che raccoglie e memorizza i log di tutti i componenti dell'applicazione in un'unica posizione. Questo approccio semplifica il monitoraggio delle attività dell'applicazione e la diagnosi di eventuali problemi.
 
 \subsection{Monitoraggio delle performance}
-Il monitoraggio delle performance dell'applicazione è effettuato tramite strumenti di monitoring che raccolgono metriche sulle prestazioni, come il tempo di risposta delle API, l'utilizzo della CPU e della memoria, e il numero di richieste gestite. Queste metriche sono utilizzate per identificare e risolvere eventuali colli di bottiglia o problemi di prestazioni.
 
 \subsection{Gestione degli errori in produzione}
-È stato implementato un sistema di gestione degli errori in produzione che rileva e notifica automaticamente gli errori critici o le anomalie nel funzionamento dell'applicazione. Questo sistema consente di intervenire rapidamente per risolvere i problemi e ripristinare il normale funzionamento dell'applicazione.
 
 
 
@@ -1996,43 +1984,31 @@ Il monitoraggio delle performance dell'applicazione è effettuato tramite strume
 \chapter{Risultati e valutazione}
 \section{Obiettivi raggiunti}
 \subsection{Funzionalità implementate}
-Tutte le funzionalità principali previste dal progetto sono state implementate con successo, inclusa la registrazione e gestione degli utenti, la gestione dei pazienti, il monitoraggio dei parametri vitali, la generazione di report e l'integrazione con dispositivi wearable.
 
 \subsection{Conformità ai requisiti}
-L'applicazione è conforme ai requisiti funzionali e non funzionali definiti all'inizio del progetto. Tutti i requisiti sono stati verificati e validati attraverso test sistematici e revisioni del codice.
 
 \subsection{Innovazioni apportate}
-Il progetto ha portato a diverse innovazioni, tra cui un sistema integrato di monitoraggio remoto dei parametri vitali, un'interfaccia utente intuitiva e un'architettura software modulare e scalabile.
 
 \section{Metriche di performance}
 \subsection{Tempo di risposta}
-Il tempo di risposta medio per le operazioni di base è inferiore a 2 secondi, come richiesto. Le ottimizzazioni delle query e l'uso della cache hanno contribuito a raggiungere questo obiettivo.
 
 \subsection{Scalabilità e carico}
-L'applicazione è stata testata con carichi di lavoro simulati fino a 1000 utenti concorrenti, mostrando prestazioni stabili e tempi di risposta accettabili. La scalabilità orizzontale è stata verificata avviando più istanze dei container dell'applicazione.
 
 \subsection{Efficienza nell'uso delle risorse}
-L'applicazione mostra un'efficiente utilizzo delle risorse di sistema, con un consumo moderato di CPU e memoria anche sotto carico. Le tecniche di ottimizzazione, come il caricamento pigro e la memorizzazione nella cache, hanno contribuito a migliorare l'efficienza.
 
 \section{Feedback degli utenti}
 \subsection{Metodologia di raccolta feedback}
-Il feedback degli utenti è stato raccolto tramite sondaggi, interviste e sessioni di testing. Gli utenti sono stati invitati a fornire feedback sulle funzionalità, sull'usabilità e sulle prestazioni dell'applicazione.
 
 \subsection{Analisi delle risposte}
-Le risposte degli utenti sono state analizzate per identificare aree di miglioramento e funzionalità aggiuntive richieste. La maggior parte degli utenti ha espresso soddisfazione per le funzionalità offerte e per l'interfaccia utente.
 
 \subsection{Aree di miglioramento identificate}
-Alcune aree di miglioramento identificate includono l'aggiunta di funzionalità di analisi predittiva, l'integrazione con ulteriori dispositivi wearable e miglioramenti alla reportistica.
 
 \section{Limiti e problemi riscontrati}
 \subsection{Sfide tecniche}
-Sono state affrontate diverse sfide tecniche durante lo sviluppo del progetto, tra cui l'integrazione con le API di Fitbit, la gestione della sicurezza e dell'autenticazione, e l'ottimizzazione delle prestazioni.
 
 \subsection{Limitazioni delle API esterne}
-Le limitazioni imposte dalle API esterne, come i limiti di rate limiting e le restrizioni sui dati disponibili, hanno rappresentato una sfida significativa. È stato necessario implementare soluzioni creative per aggirare queste limitazioni e garantire un funzionamento fluido dell'applicazione.
 
 \subsection{Compromessi di design}
-Sono stati necessari alcuni compromessi di design per bilanciare le diverse esigenze e vincoli del progetto. Ad esempio, è stata data priorità alla semplicità d'uso e alla rapidità di sviluppo rispetto a funzionalità più avanzate che avrebbero richiesto tempi di sviluppo e complessità maggiori.
 
 
 
@@ -2040,70 +2016,1947 @@ Sono stati necessari alcuni compromessi di design per bilanciare le diverse esig
 \chapter{Conclusioni e sviluppi futuri}
 \section{Conclusioni}
 \subsection{Riepilogo del lavoro svolto}
-Il lavoro di sviluppo dell'applicazione VitaLink ha comportato la progettazione e implementazione di una piattaforma software innovativa per il monitoraggio remoto dei parametri vitali. L'applicazione consente ai medici di monitorare e gestire i pazienti in modo più efficace, migliorando la qualità delle cure e facilitando l'adozione di tecnologie digitali in ambito sanitario.
 
 \subsection{Contributi principali}
-I principali contributi del progetto includono lo sviluppo di un'architettura software modulare e scalabile, l'implementazione di un sistema sicuro di autenticazione e autorizzazione, e l'integrazione con dispositivi wearable per il monitoraggio dei parametri vitali.
 
 \subsection{Riflessione sul processo di sviluppo}
-Il processo di sviluppo ha seguito i principi dell'ingegneria del software, con particolare attenzione alla qualità, alla sicurezza e alla manutenibilità del codice. Sono state adottate pratiche di sviluppo agile, che hanno permesso di rispondere in modo flessibile e rapido ai cambiamenti e alle nuove esigenze emerse durante il progetto.
 
 \section{Sviluppi futuri}
 \subsection{Integrazione con ulteriori piattaforme sanitarie}
-In futuro, si prevede di estendere l'integrazione dell'applicazione con ulteriori piattaforme sanitarie e dispositivi wearable, per offrire ai medici una visione ancora più completa e integrata dei parametri di salute dei pazienti.
 
 \subsection{Funzionalità avanzate di analisi predittiva}
-Si prevede di sviluppare e implementare funzionalità avanzate di analisi predittiva, che utilizzino algoritmi di machine learning per fornire ai medici informazioni e raccomandazioni basate sui dati storici e sulle tendenze dei parametri vitali dei pazienti.
 
 \subsection{Espansione del sistema di reportistica}
-Il sistema di reportistica sarà ulteriormente sviluppato per includere report più dettagliati e personalizzabili, che possano essere facilmente condivisi con altri professionisti della salute o con i pazienti stessi.
 
 \subsection{Applicazione mobile companion}
-È prevista anche lo sviluppo di un'applicazione mobile companion, che permetta ai pazienti di monitorare i propri parametri vitali e di ricevere feedback e raccomandazioni direttamente sul proprio dispositivo mobile.
 
 \section{Considerazioni personali}
 \subsection{Apprendimenti chiave}
-Tra gli apprendimenti chiave vi è la comprensione approfondita delle sfide e delle opportunità offerte dalle tecnologie digitali in ambito sanitario, nonché lo sviluppo di competenze tecniche e professionali nella progettazione e implementazione di soluzioni software complesse.
 
 \subsection{Sfide personali}
-Le sfide personali hanno incluso la gestione del tempo e delle risorse, la risoluzione di problemi tecnici complessi e l'adattamento a nuove tecnologie e strumenti di sviluppo.
 
 \subsection{Valore aggiunto dell'esperienza}
-L'esperienza di sviluppo dell'applicazione VitaLink ha rappresentato un'importante opportunità di apprendimento e crescita professionale, offrendo la possibilità di contribuire in modo significativo a un progetto innovativo con un reale impatto positivo sulla salute e sul benessere delle persone.
 
 % Appendici
 \appendix
 
 \chapter{Glossario}
-\begin{description}
+\begin{description}    
     \item[API] Application Programming Interface
+    \item[Bootstrap] Framework CSS per lo sviluppo di interfacce web responsive e moderne
     \item[CI/CD] Continuous Integration/Continuous Deployment
+    \item[CRUD] Create, Read, Update, Delete - Le quattro operazioni fondamentali su dati persistenti
+    \item[DBMS] Database Management System - Sistema software per la gestione di basi di dati
+    \item[Flask] Framework web leggero per Python utilizzato per lo sviluppo di applicazioni web
+    \item[Gunicorn] Green Unicorn, server WSGI HTTP per applicazioni Python
     \item[JWT] JSON Web Token
     \item[MVC] Model-View-Controller
     \item[OAuth 2.0] Protocollo di autorizzazione standard dell'industria
     \item[ORM] Object-Relational Mapping
+    \item[PostgreSQL] Sistema di gestione di database relazionali open source
+    \item[Rate Limit] Limitazione del numero di richieste API in un determinato periodo di tempo
     \item[REST] Representational State Transfer
+    \item[SQLAlchemy] Toolkit SQL e ORM per Python
+    \item[TTL] Time-to-Live - Periodo di validità di un dato in cache
     \item[UI] User Interface
     \item[UML] Unified Modeling Language
     \item[UUID] Universally Unique Identifier
-          % Aggiungere altri termini rilevanti
+    \item[WSGI] Web Server Gateway Interface - Specifica per interfacce tra server web e applicazioni Python
 \end{description}
 
-\chapter{Codice sorgente significativo}
-\section{Modelli di dati}
-\section{Autenticazione e sicurezza}
-\section{Integrazione OAuth}
-\section{Sistema di osservazioni}
-\section{Generazione report}
-
 \chapter{Diagrammi UML}
+Alcuni diagrammi UML risultano eccessivamente complessi per essere riportati in forma di immagine. Viene fornito il codice PlantUML per la generazione dei diagrammi, i quali potranno essere visualizzati tramite l'estensione di VS Code \cite{plantvscode} oppure tramite il sito di PlantUML \cite{plantuml}.
 \section{Diagrammi dei casi d'uso}
+\begin{lstlisting}[basicstyle=\small\ttfamily, breaklines=true]
+@startuml "DiagrammaCasiDUso"
+
+' Use Case Diagram for VitaLink application
+title Diagramma dei Casi d'Uso - VitaLink
+
+' Style parameters
+skinparam actorStyle awesome
+skinparam shadowing false
+skinparam packageStyle rectangle
+
+left to right direction
+
+' Actors
+actor "Medico" as Doctor
+actor "Paziente" as Patient
+actor "Piattaforma Sanitaria" as HealthPlatform
+
+' Use cases groups
+rectangle "Sistema VitaLink" {
+    ' Authentication
+    rectangle "Gestione Account" {
+        usecase "Registrazione" as UC1
+        usecase "Login" as UC2
+        usecase "Logout" as UC3
+    }
+    
+    ' Dashboard
+    rectangle "Dashboard" {
+        usecase "Visualizzare Dashboard" as UC4
+    }
+    
+    ' Audit
+    rectangle "Gestione Audit" {
+        usecase "Visualizzare Log di Audit" as UC5
+        usecase "Visualizzare Dettagli Audit" as UC6
+        usecase "Filtrare Audit" as UC7
+    }
+    
+    ' Patient management
+    rectangle "Gestione Pazienti" {
+        usecase "Visualizzare Pazienti" as UC8
+        usecase "Creare Nuovo Paziente" as UC9
+        usecase "Importare Paziente tramite UUID" as UC10
+        usecase "Visualizzare Dettagli Paziente" as UC11
+        usecase "Modificare Paziente" as UC12
+    }
+    
+    ' Notes
+    rectangle "Gestione Note" {
+        usecase "Aggiungere Nota" as UC13
+        usecase "Visualizzare Note" as UC14
+        usecase "Eliminare Nota" as UC15
+    }
+    
+    ' Health platform integration
+    rectangle "Integrazione Piattaforme Salute" {
+        usecase "Generare Link per Connessione" as UC16
+        usecase "Connettere Dispositivo" as UC17
+        usecase "Disconnettere Dispositivo" as UC18
+        usecase "Visualizzare Parametri Vitali" as UC19
+    }
+    
+    ' Vital observations
+    rectangle "Gestione Osservazioni" {
+        usecase "Aggiungere Osservazione" as UC20
+        usecase "Visualizzare Osservazioni" as UC21
+        usecase "Eliminare Osservazione" as UC22
+    }
+    
+    ' Reports
+    rectangle "Gestione Report" {
+        usecase "Generare Report Generale" as UC23
+        usecase "Generare Report Specifico" as UC24
+        usecase "Selezionare Elementi da Includere" as UC25
+        usecase "Inviare Report per Email" as UC26
+    }
+    
+    ' Data visualization
+    rectangle "Visualizzazione Dati" {
+        usecase "Visualizzare Grafici Parametri Vitali" as UC27
+        usecase "Visualizzare Dati in Formato Tabellare" as UC28
+        usecase "Selezionare Intervallo Temporale (1g, 7g, 1m, 3m)" as UC29
+    }
+}
+
+' Relationships
+Doctor --> UC1
+Doctor --> UC2
+Doctor --> UC3
+Doctor --> UC4
+Doctor --> UC5
+Doctor --> UC6
+Doctor --> UC7
+Doctor --> UC8
+Doctor --> UC9
+Doctor --> UC10
+Doctor --> UC11
+Doctor --> UC12
+Doctor --> UC13
+Doctor --> UC14
+Doctor --> UC15
+Doctor --> UC16
+Doctor --> UC17
+Doctor --> UC18
+Doctor --> UC19
+Doctor --> UC20
+Doctor --> UC21
+Doctor --> UC22
+Doctor --> UC23
+Doctor --> UC24
+Doctor --> UC25
+Doctor --> UC26
+Doctor --> UC27
+Doctor --> UC28
+Doctor --> UC29
+
+' Extend/Include relationships
+UC11 <.. UC13 : <<include>>
+UC11 <.. UC14 : <<include>>
+UC11 <.. UC15 : <<include>>
+UC11 <.. UC16 : <<include>>
+UC11 <.. UC19 : <<include>>
+UC19 <.. UC20 : <<include>>
+UC19 <.. UC21 : <<include>>
+UC19 <.. UC22 : <<include>>
+UC19 <.. UC27 : <<include>>
+UC19 <.. UC28 : <<include>>
+UC27 <.. UC29 : <<include>>
+UC23 <.. UC25 : <<include>>
+UC23 <.. UC26 : <<include>>
+UC24 <.. UC25 : <<include>>
+UC24 <.. UC26 : <<include>>
+
+' Relazioni aggiuntive per altri attori
+Patient --> UC17 : Autorizza connessione
+HealthPlatform --> UC18 : Fornisce dati
+
+' Note informative
+note "Il sistema VitaLink permette ai medici di gestire i pazienti\ne monitorare i loro parametri vitali." as N1
+
+note right of UC17
+  Il paziente autorizza VitaLink ad accedere
+  ai propri dati sulla piattaforma sanitaria
+  tramite OAuth 2.0
+end note
+
+note right of UC4
+  La dashboard mostra un riepilogo dei pazienti,
+  attivita recenti e statistiche
+end note
+
+note right of UC5
+  I log di audit permettono di tracciare
+  tutte le azioni eseguite nel sistema
+end note
+
+@enduml
+
+\end{lstlisting}
 \section{Diagrammi delle classi}
+\begin{lstlisting}[basicstyle=\small\ttfamily, breaklines=true]
+@startuml "DiagrammaClassiCompleto"
+
+' Class Diagram for VitaLink application
+title Diagramma delle Classi Completo - VitaLink
+
+' Packages to organize classes
+package "Core & Configuration" {
+    ' Base Classes
+    abstract class Base {
+    }
+    
+    class ApplicationConfig << (S,lightblue) >> {
+        -debug: Boolean
+        -host: String
+        -port: Integer
+        -sqlalchemy_database_uri: String
+        -sqlalchemy_track_modifications: Boolean
+        -jwt_secret_key: String
+        -babel_default_locale: String
+        -languages: Dictionary
+    }
+    
+    class FlaskApp << (S,lightblue) >> {
+        +secret_key: String
+        +config: ApplicationConfig
+        +run(): void
+    }
+}
+
+package "Authentication" {
+    ' Forms and User Management
+    class RegistrationForm {
+        +email: EmailField
+        +first_name: StringField
+        +last_name: StringField
+        +specialty: StringField
+        +password: PasswordField
+        +confirm_password: PasswordField
+        +validate(): Boolean
+    }
+    
+    ' Flask-Login integration
+    class UserMixin {
+        +is_authenticated(): Boolean
+        +is_active(): Boolean
+        +is_anonymous(): Boolean
+        +get_id(): String
+    }
+    
+    ' Decorators 
+    class AuthDecorators << (D,orchid) >> {
+        +login_required(fn): Function
+        +doctor_required(fn): Function
+        +api_doctor_required(fn): Function
+    }
+}
+
+package "Data Models" {
+    ' Enums
+    enum VitalSignType {
+        +HEART_RATE
+        +OXYGEN_SATURATION
+        +BREATHING_RATE
+        +WEIGHT
+        +TEMPERATURE_CORE
+        +TEMPERATURE_SKIN
+        +STEPS
+        +CALORIES
+        +DISTANCE
+        +ACTIVE_MINUTES
+        +SLEEP_DURATION
+        +FLOORS_CLIMBED
+        +ELEVATION
+        +ACTIVITY_CALORIES
+        +CALORIES_BMR
+        +MINUTES_SEDENTARY
+        +MINUTES_LIGHTLY_ACTIVE
+        +MINUTES_FAIRLY_ACTIVE
+        +CALORIES_IN
+        +WATER
+    }
+
+    enum HealthPlatform {
+        +FITBIT
+        +GOOGLE_HEALTH_CONNECT
+        +APPLE_HEALTH
+    }
+
+    enum ActionType {
+        +CREATE
+        +UPDATE
+        +DELETE
+        +VIEW
+        +EXPORT
+        +GENERATE_LINK
+        +CONNECT
+        +DISCONNECT
+        +SYNC
+        +IMPORT
+    }
+
+    enum EntityType {
+        +PATIENT
+        +VITAL_SIGN
+        +NOTE
+        +REPORT
+        +HEALTH_PLATFORM
+        +HEALTH_LINK
+        +OBSERVATION
+    }
+
+    ' Main Classes
+    class Doctor {
+        +id: Integer [PK]
+        +email: String
+        +password_hash: String
+        +first_name: String
+        +last_name: String
+        +specialty: String
+        +created_at: DateTime
+        +updated_at: DateTime
+        --
+        +set_password(password: String): void
+        +check_password(password: String): Boolean
+        +to_dict(): Dictionary
+        +get_patients(): List<Patient>
+        +add_patient(patient: Patient): void
+        +remove_patient(patient: Patient): void
+    }
+
+    class Patient {
+        +id: Integer [PK]
+        +uuid: String
+        +first_name: String
+        +last_name: String
+        +date_of_birth: Date
+        +gender: String
+        +contact_number: String
+        +email: String
+        +address: Text
+        +created_at: DateTime
+        +updated_at: DateTime
+        +connected_platform: HealthPlatform
+        +platform_access_token: String
+        +platform_refresh_token: String
+        +platform_token_expires_at: DateTime
+        --
+        +to_dict(): Dictionary
+        +get_vital_observations(vital_type: VitalSignType, start_date: DateTime, end_date: DateTime): List
+        +get_notes(): List<Note>
+    }
+
+    class DoctorPatient {
+        +doctor_id: Integer [PK, FK]
+        +patient_id: Integer [PK, FK]
+        +assigned_date: DateTime
+    }
+
+    class Note {
+        +id: Integer [PK]
+        +patient_id: Integer [FK]
+        +doctor_id: Integer [FK]
+        +content: Text
+        +created_at: DateTime
+        +updated_at: DateTime
+        --
+        +to_dict(): Dictionary
+    }
+
+    class VitalObservation {
+        +id: Integer [PK]
+        +patient_id: Integer [FK]
+        +doctor_id: Integer [FK]
+        +vital_type: VitalSignType
+        +content: Text
+        +start_date: DateTime
+        +end_date: DateTime
+        +created_at: DateTime
+        +updated_at: DateTime
+        --
+        +to_dict(): Dictionary
+    }
+
+    class AuditLog {
+        +id: Integer [PK]
+        +doctor_id: Integer [FK]
+        +timestamp: DateTime
+        +action_type: ActionType
+        +entity_type: EntityType
+        +entity_id: Integer
+        +details: Text
+        +patient_id: Integer [FK]
+        +ip_address: String
+        --
+        +__init__(doctor_id, action_type, entity_type, entity_id, details, patient_id, ip_address)
+        +get_details(): Dictionary
+        +to_dict(): Dictionary
+    }
+
+    class HealthPlatformLink {
+        +id: Integer [PK]
+        +uuid: String
+        +patient_id: Integer [FK]
+        +doctor_id: Integer [FK]
+        +created_at: DateTime
+        +expires_at: DateTime
+        +used: Boolean
+        +platform: HealthPlatform
+        --
+        +is_expired(): Boolean
+        +to_dict(): Dictionary
+    }
+}
+
+package "Service Modules" {
+    class ObservationsService << (S,lightblue) >> {
+        +get_web_observations(patient_id): List
+        +add_web_observation(): VitalObservation
+        +update_web_observation(observation_id): VitalObservation
+        +delete_web_observation(observation_id): void
+    }
+
+    class HealthPlatformsService << (S,lightblue) >> {
+        +vitals_cache: Dictionary
+        +api_rate_limit: Dictionary
+        --
+        +generate_platform_link(patient_id, platform): HealthPlatformLink
+        +get_link_by_uuid(uuid_string): HealthPlatformLink
+        +get_fitbit_authorization_url(patient_id): String
+        +exchange_fitbit_code_for_token(code): Dictionary
+        +refresh_fitbit_token(refresh_token): Dictionary
+        +save_fitbit_tokens(patient, tokens): void
+        +ensure_fresh_token(patient): Boolean
+        +check_rate_limit(): Boolean
+        +increment_api_call_counter(): void
+        +get_fitbit_data(patient, endpoint_config, period): Dictionary
+        +process_fitbit_data(data, vital_type): Array
+        +process_standard_list(data_array): Array
+        +process_nested_value_list(data_array): Array
+        +process_heart_rate_data(data_array): Array
+        +get_vitals_data(patient, vital_type, period): Dictionary
+        +get_processed_fitbit_data(patient, vital_type, period): Dictionary
+    }
+    
+    class ReportsService << (S,lightblue) >> {
+        +PERIOD_DAYS: Dictionary
+        --
+        +generate_specific_report(patient, doctor, notes, vital_types, charts, observations, summary, language): PDF
+        +create_vital_chart(data, title, subtitle): Image
+    }
+    
+    class EmailService << (S,lightblue) >> {
+        +MJ_APIKEY: String
+        +MJ_APIKEY_SECRET: String
+        --
+        +send_report_email(doctor, patient, pdf_buffer, filename, language): Tuple<Boolean, String>
+    }
+    
+    class LanguageService << (S,lightblue) >> {
+        +change_language(lang_code): Redirect
+    }
+    
+    class AuditService << (S,lightblue) >> {
+        +log_action(doctor_id, action_type, entity_type, entity_id, details, patient_id, ip_address): AuditLog
+        +log_patient_creation(doctor, patient): AuditLog
+        +log_patient_update(doctor, patient): AuditLog
+        +log_patient_delete(doctor, patient): AuditLog
+        +log_vital_creation(doctor, vital_sign, patient_id): AuditLog
+        +log_note_creation(doctor, note): AuditLog
+        +log_note_delete(doctor, note): AuditLog
+        +log_report_generation(doctor, patient): AuditLog
+        +log_patient_view(doctor, patient): AuditLog
+        +log_patient_import(doctor, patient): AuditLog
+        +log_health_link_creation(doctor, link): AuditLog
+        +log_platform_connection(doctor, patient, platform): AuditLog
+        +log_platform_disconnection(doctor, patient, platform): AuditLog
+        +log_data_sync(doctor, patient, vital_type): AuditLog
+        +log_observation_creation(doctor, observation): AuditLog
+        +log_observation_update(doctor, observation): AuditLog
+        +log_observation_delete(doctor, observation): AuditLog
+    }
+    
+    class MigrationService << (S,lightblue) >> {
+        +run_migration(): void
+    }
+    
+    class UtilityService << (S,lightblue) >> {
+        +validate_email(email): Boolean
+        +is_valid_password(password): Tuple<Boolean, String>
+        +validate_uuid(uuid_string): Boolean
+        +parse_date(date_string): Date
+        +to_serializable_dict(obj): Dictionary
+    }
+}
+
+package "API & Web Controllers" {
+    class APIController << (C,orange) >> {
+        +get_patients(doctor): JSON
+        +get_patient(doctor, patient_id): JSON
+        +get_vitals(doctor, patient_id): JSON
+        +get_notes(doctor, patient_id): JSON
+        +add_note(doctor, patient_id): JSON
+        +delete_note(doctor, note_id): JSON
+        +get_observations(doctor, patient_id): JSON
+        +add_observation(doctor): JSON
+        +update_observation(doctor, observation_id): JSON
+        +delete_observation(doctor, observation_id): JSON
+        +import_patient(doctor): JSON
+    }
+    
+    class ViewController << (C,orange) >> {
+        +index(): HTML
+        +dashboard(): HTML
+        +patients(): HTML
+        +new_patient(): HTML
+        +patient_detail(patient_id): HTML
+        +edit_patient(patient_id): HTML
+        +delete_patient(patient_id): HTML
+        +patient_vitals(patient_id): HTML
+        +add_note(patient_id): HTML
+        +delete_note(note_id): HTML
+        +profile(): HTML
+        +create_specific_patient_report(patient_id): HTML
+    }
+    
+    class AuditController << (C,orange) >> {
+        +get_audit_logs(): HTML
+        +get_audit_stats(): JSON
+    }
+    
+    class HealthPlatformController << (C,orange) >> {
+        +create_link(patient_id): JSON
+        +connect_platform(patient_id, platform): HTML
+        +start_auth(link_id): HTML
+        +oauth_callback(): HTML
+        +check_connection(patient_id): JSON
+        +disconnect_platform(patient_id): JSON
+        +get_data(patient_id, vital_type): JSON
+    }
+    
+    class AuthController << (C,orange) >> {
+        +register(): HTML
+        +login(): HTML
+        +logout(): Redirect
+        +api_login(): JSON
+        +refresh_token(): JSON
+    }
+}
+
+package "Extensions & Integrations" {
+    class SQLAlchemy << (E,yellow) >> {
+        +Model
+        +Column
+        +relationship
+        +session
+    }
+    
+    class FlaskLogin << (E,yellow) >> {
+        +LoginManager
+        +current_user
+        +login_user()
+        +logout_user()
+    }
+    
+    class FlaskJWT << (E,yellow) >> {
+        +JWTManager
+        +create_access_token()
+        +create_refresh_token()
+        +get_jwt_identity()
+    }
+    
+    class FlaskBabel << (E,yellow) >> {
+        +Babel
+        +gettext()
+        +lazy_gettext()
+    }
+    
+    class FlaskMigrate << (E,yellow) >> {
+        +Migrate
+    }
+    
+    class FitbitAPI << (E,yellow) >> {
+        +API_BASE_URL
+        +ENDPOINTS
+        +OAuth2
+    }
+}
+
+' Inheritance Relationships
+Doctor --|> UserMixin
+Doctor --|> Base
+Patient --|> Base
+DoctorPatient --|> Base
+Note --|> Base
+VitalObservation --|> Base
+AuditLog --|> Base
+HealthPlatformLink --|> Base
+
+' Relationships between Models
+Doctor "1" -- "*" DoctorPatient : medico
+Patient "1" -- "*" DoctorPatient : paziente
+Doctor "1" -- "*" Note : creato da >
+Patient "1" -- "*" Note : relativo a >
+Doctor "1" -- "*" VitalObservation : creato da >
+Patient "1" -- "*" VitalObservation : relativo a >
+Doctor "1" -- "*" AuditLog : eseguito da >
+Patient "0..1" -- "*" AuditLog : relativo a >
+Doctor "1" -- "*" HealthPlatformLink : generato da >
+Patient "1" -- "*" HealthPlatformLink : associato a >
+
+VitalSignType -- VitalObservation : tipo >
+HealthPlatform -- Patient : connesso a >
+HealthPlatform -- HealthPlatformLink : piattaforma >
+ActionType -- AuditLog : tipo azione >
+EntityType -- AuditLog : tipo entita' >
+
+' Service Dependencies
+HealthPlatformsService ..> HealthPlatformLink : genera
+HealthPlatformsService ..> Patient : aggiorna
+ReportsService ..> VitalObservation : usa
+ReportsService ..> Note : usa
+ObservationsService ..> VitalObservation : gestisce
+AuditService ..> AuditLog : crea
+
+' Controller Dependencies
+APIController ..> HealthPlatformsService : utilizza
+APIController ..> ObservationsService : utilizza
+ViewController ..> ReportsService : utilizza
+ViewController ..> Doctor : gestisce
+ViewController ..> Patient : gestisce
+AuditController ..> AuditService : utilizza
+HealthPlatformController ..> HealthPlatformsService : utilizza
+AuthController ..> Doctor : autentica
+
+' Integration Relationships
+Doctor ..> FlaskLogin : utilizza
+FitbitAPI <.. HealthPlatformsService : integra
+FlaskBabel <.. LanguageService : configura
+FlaskMigrate <.. MigrationService : utilizza
+SQLAlchemy <.. Base : estende
+FlaskApp ..> FlaskLogin : configura
+FlaskApp ..> FlaskJWT : configura
+FlaskApp ..> FlaskBabel : configura
+FlaskApp ..> FlaskMigrate : configura
+
+@enduml
+\end{lstlisting}
 \section{Diagrammi di sequenza}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/uml/HealthDeviceConnection.png}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/uml/ReportGeneration.png}
+\end{figure}
+\begin{lstlisting}[basicstyle=\small\ttfamily, breaklines=true, caption={connessione al dispositivo}]
+@startuml "DiagrammaSequenza-ConnessioneDispositivo"
+
+' Sequence diagram for connecting health devices
+title Diagramma di Sequenza - Connessione Dispositivo Salute
+
+actor "Medico" as Doctor
+participant "Frontend" as Frontend
+participant "Backend" as Backend
+participant "Database" as DB
+participant "PiattaformaSalute" as HealthPlatform
+actor "Paziente" as Patient
+
+' Generate connection link
+Doctor -> Frontend: Richiesta generazione link
+activate Frontend
+Frontend -> Backend: POST /health/generate-link
+activate Backend
+Backend -> DB: Cerca paziente
+activate DB
+DB --> Backend: Dettagli paziente
+deactivate DB
+Backend -> DB: Crea HealthPlatformLink
+activate DB
+DB --> Backend: Link creato
+deactivate DB
+Backend -> DB: Registra log di audit
+activate DB
+DB --> Backend: Log creato
+deactivate DB
+Backend --> Frontend: Link per connessione
+deactivate Backend
+Frontend --> Doctor: Mostra link per connessione
+deactivate Frontend
+
+' Share link with patient
+Doctor -> Patient: Condivide link (email, messaggio, ecc.)
+
+' Patient uses the link
+Patient -> Frontend: Accede al link di connessione
+activate Frontend
+Frontend -> Backend: GET /health/connect/{link_uuid}
+activate Backend
+Backend -> DB: Verifica validita' link
+activate DB
+DB --> Backend: Link valido
+deactivate DB
+Backend -> HealthPlatform: Richiede autorizzazione OAuth
+activate HealthPlatform
+HealthPlatform --> Patient: Richiede login/consenso
+Patient -> HealthPlatform: Fornisce consenso
+HealthPlatform --> Backend: Codice autorizzazione
+deactivate HealthPlatform
+
+' Exchange authorization code for tokens
+Backend -> HealthPlatform: Richiede token di accesso
+activate HealthPlatform
+HealthPlatform --> Backend: Access token + Refresh token
+deactivate HealthPlatform
+
+' Save tokens to database
+Backend -> DB: Salva token nel profilo paziente
+activate DB
+DB --> Backend: Token salvati
+deactivate DB
+Backend -> DB: Aggiorna link come usato
+activate DB
+DB --> Backend: Link aggiornato
+deactivate DB
+Backend -> DB: Registra log connessione
+activate DB
+DB --> Backend: Log creato
+deactivate DB
+Backend --> Frontend: Connessione completata
+deactivate Backend
+Frontend --> Patient: Conferma connessione riuscita
+deactivate Frontend
+
+' Notify doctor
+Backend -> Frontend: Notifica di connessione avvenuta
+activate Frontend
+Frontend --> Doctor: Mostra notifica di connessione avvenuta
+deactivate Frontend
+
+@enduml
+
+\end{lstlisting}
+\begin{lstlisting}[basicstyle=\small\ttfamily, breaklines=true, caption={generazione del report}]
+@startuml "DiagrammaSequenza-GenerazioneReport"
+
+' Sequence diagram for report generation
+title Diagramma di Sequenza - Generazione Report
+
+actor "Medico" as Doctor
+participant "Frontend" as Frontend
+participant "Backend" as Backend
+participant "Database" as DB
+participant "ServizioEmail" as EmailService
+
+' Start report generation
+Doctor -> Frontend: Accede alla pagina di generazione report
+activate Frontend
+Frontend -> Backend: GET /reports/generate/{patient_id}
+activate Backend
+Backend -> DB: Recupera dati paziente
+activate DB
+DB --> Backend: Dati paziente
+deactivate DB
+Backend -> DB: Recupera osservazioni
+activate DB
+DB --> Backend: Osservazioni
+deactivate DB
+Backend -> DB: Recupera note
+activate DB
+DB --> Backend: Note
+deactivate DB
+Backend -> DB: Recupera parametri vitali
+activate DB
+DB --> Backend: Parametri vitali
+deactivate DB
+Backend --> Frontend: Dati per form report
+deactivate Backend
+Frontend --> Doctor: Mostra form configurazione report
+deactivate Frontend
+
+' Configure report
+Doctor -> Frontend: Configura report (selezione elementi)
+activate Frontend
+Doctor -> Frontend: Seleziona osservazioni da includere
+Doctor -> Frontend: Seleziona note da includere
+Doctor -> Frontend: Seleziona parametri vitali da includere
+Doctor -> Frontend: Seleziona grafici da includere
+Doctor -> Frontend: Sceglie opzione invio email
+Doctor -> Frontend: Conferma generazione
+Frontend -> Backend: POST /reports/generate
+activate Backend
+
+' Generate report
+Backend -> Backend: Elabora dati selezionati
+Backend -> Backend: Genera PDF report
+Backend -> DB: Salva report
+activate DB
+DB --> Backend: Report salvato
+deactivate DB
+Backend -> DB: Registra log di audit
+activate DB
+DB --> Backend: Log creato
+deactivate DB
+
+' Handle email option if selected
+alt Invio tramite email
+    Backend -> EmailService: Invia email con report
+    activate EmailService
+    EmailService --> Backend: Email inviata
+    deactivate EmailService
+    Backend -> DB: Registra log invio email
+    activate DB
+    DB --> Backend: Log creato
+    deactivate DB
+end
+
+Backend --> Frontend: URL download report
+deactivate Backend
+Frontend --> Doctor: Link per scaricare il report
+deactivate Frontend
+
+' Download report
+Doctor -> Frontend: Scarica report
+activate Frontend
+Frontend -> Backend: GET /reports/download/{report_id}
+activate Backend
+Backend -> DB: Recupera report
+activate DB
+DB --> Backend: File report
+deactivate DB
+Backend --> Frontend: File report
+deactivate Backend
+Frontend --> Doctor: Download report completo
+deactivate Frontend
+
+@enduml
+
+
+\end{lstlisting}
 \section{Diagrammi di stato}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/uml/PatientLifecycle.png}
+\end{figure}
+
+\begin{lstlisting}[basicstyle=\small\ttfamily, breaklines=true, caption={ciclo di vita del paziente}]
+@startuml "DiagrammaStati-CicloVitaPaziente"
+
+' State diagram for patient lifecycle
+title Diagramma di Stato - Ciclo di Vita del Paziente
+
+[*] --> Registrato : Creazione nuovo paziente
+
+state Registrato {
+  [*] --> SenzaDispositivo : Stato iniziale
+  
+  state SenzaDispositivo {
+    [*] --> ConNoteBase : Aggiunta prime note mediche
+  }
+  
+  state ConDispositivoConnesso {
+    [*] --> ConDatiIniziali : Prima sincronizzazione
+    ConDatiIniziali --> ConParametriVitali : Dati regolarmente sincronizzati
+    ConParametriVitali --> ConOsservazioni : Aggiunta osservazioni mediche
+  }
+  
+  SenzaDispositivo --> ConDispositivoConnesso : Connessione piattaforma salute
+  ConDispositivoConnesso --> SenzaDispositivo : Disconnessione piattaforma salute
+}
+
+state "SottoMonitoraggio" as Monitorato {
+  [*] --> MonitoraggioBase
+  MonitoraggioBase --> MonitoraggioAvanzato : Aggiunta osservazioni dettagliate
+  MonitoraggioAvanzato --> MonitoraggioBase : Rimozione osservazioni
+}
+
+Registrato --> Monitorato : Aggiunta di piu' osservazioni e note
+Monitorato --> Registrato : Nessuna nuova osservazione per un periodo
+
+state "ConReport" as Report {
+  [*] --> ReportGenerati
+  ReportGenerati --> ReportInviati : Invio report
+}
+
+Monitorato --> Report : Generazione primo report
+Report --> Monitorato : Generazione completata
+
+note right of Registrato
+  Un paziente e' considerato "Registrato" 
+  quando viene creato nel sistema,
+  indipendentemente dalla connessione 
+  a dispositivi esterni.
+end note
+
+note right of Monitorato
+  Un paziente e' "Sotto Monitoraggio" quando 
+  ha osservazioni attive e note mediche
+  aggiunte regolarmente dai medici.
+end note
+
+note right of Report
+  Stato temporaneo durante la generazione
+  e invio di report clinici.
+end note
+
+@enduml
+
+\end{lstlisting}
 \section{Diagrammi delle attività}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/uml/RegistrationLogin.png}
+\end{figure}
+\begin{lstlisting}[basicstyle=\small\ttfamily, breaklines=true, caption={gestione del paziente}]
+@startuml "DiagrammaAttivita-GestionePazienti"
+
+' Activity diagram for patient data management
+title Diagramma di Attivita' - Gestione Dati Pazienti
+
+|Medico|
+start
+:Accede alla dashboard;
+:Seleziona "Lista Pazienti";
+
+|#AntiqueWhite|Sistema|
+:Carica lista pazienti associati al medico;
+:Visualizza pazienti con informazioni principali;
+
+|Medico|
+if (Desidera gestire un paziente esistente?) then (si')
+  :Seleziona paziente dalla lista;
+  
+  |Sistema|
+  :Carica dati completi del paziente;
+  :Visualizza profilo dettagliato del paziente;
+  
+  |Medico|
+  split
+    :Visualizza dettagli paziente;
+    
+  split again
+    :Seleziona "Modifica Paziente";
+    
+    |Sistema|
+    :Mostra form di modifica paziente;
+    
+    |Medico|
+    :Aggiorna dati paziente;
+    :Invia form;
+    
+    |Sistema|
+    :Valida dati;
+    if (Dati validi?) then (si')
+      :Salva modifiche;
+      :Registra audit log;
+      :Mostra conferma;
+    else (no)
+      :Mostra errori di validazione;
+      :Richiede correzioni;
+    endif
+    
+  split again
+    :Seleziona "Parametri Vitali";
+    
+    |Sistema|
+    if (Paziente connesso a piattaforma?) then (si')
+      :Recupera parametri vitali da piattaforma;
+      :Elabora e organizza dati;
+      :Visualizza parametri vitali;
+      
+      |Medico|
+      :Seleziona intervallo di visualizzazione;
+      
+      |Sistema|
+      :Aggiorna visualizzazione per intervallo;
+      
+      |Medico|
+      :Aggiunge osservazione sui parametri;
+      
+      |Sistema|
+      :Salva nuova osservazione;
+      :Registra audit log;
+      
+    else (no)
+      :Mostra opzione di connessione;
+      
+      |Medico|
+      if (Desidera connettere?) then (si')
+        :Genera link per connessione;
+        
+        |Sistema|
+        :Crea link unico;
+        :Registra audit log;
+        
+        |Medico|
+        :Condivide link con paziente;
+        
+        |#LightBlue|Paziente|
+        :Utilizza link per connettere dispositivo;
+        
+        |Sistema|
+        :Completa connessione;
+        :Registra audit log;
+        
+      else (no)
+        :Annulla processo;
+      endif
+    endif
+    
+  split again
+    :Seleziona "Note";
+    
+    |Sistema|
+    :Carica note esistenti;
+    
+    |Medico|
+    :Visualizza note esistenti;
+    if (Desidera aggiungere nota?) then (si')
+      :Scrive nuova nota;
+      :Invia nota;
+      
+      |Sistema|
+      :Salva nuova nota;
+      :Registra audit log;
+      
+    else (no)
+      if (Desidera eliminare nota?) then (si')
+        :Seleziona nota da eliminare;
+        :Conferma eliminazione;
+        
+        |Sistema|
+        :Elimina nota;
+        :Registra audit log;
+        
+      else (no)
+        :Nessuna azione;
+      endif
+    endif
+    
+  split again
+    :Seleziona "Genera Report";
+    
+    |Sistema|
+    :Mostra opzioni di configurazione report;
+    
+    |Medico|
+    :Seleziona elementi da includere;
+    :Seleziona formato e opzioni di invio;
+    :Conferma generazione report;
+    
+    |Sistema|
+    :Genera report PDF;
+    if (Invio email selezionato?) then (si')
+      :Invia report via email;
+    else (no)
+      :Prepara download;
+    endif
+    :Registra audit log;
+    
+  end split
+  
+else (no)
+  if (Desidera creare nuovo paziente?) then (si')
+    :Seleziona "Nuovo Paziente";
+    
+    |Sistema|
+    :Mostra form nuovo paziente;
+    
+    |Medico|
+    :Compila dati paziente;
+    :Invia form;
+    
+    |Sistema|
+    :Valida dati;
+    if (Dati validi?) then (si')
+      :Crea nuovo paziente;
+      :Associa paziente al medico;
+      :Registra audit log;
+      :Mostra conferma;
+    else (no)
+      :Mostra errori di validazione;
+      :Richiede correzioni;
+    endif
+    
+  else (no)
+    if (Desidera importare paziente?) then (si')
+      :Seleziona "Importa Paziente";
+      
+      |Sistema|
+      :Mostra form di importazione;
+      
+      |Medico|
+      :Inserisce UUID paziente;
+      :Invia form;
+      
+      |Sistema|
+      :Verifica esistenza paziente;
+      if (Paziente esiste?) then (si')
+        :Associa paziente al medico;
+        :Registra audit log;
+        :Mostra conferma;
+      else (no)
+        :Mostra errore;
+      endif
+      
+    else (no)
+      :Torna alla dashboard;
+    endif
+  endif
+endif
+
+|Medico|
+stop
+
+@enduml
+
+\end{lstlisting}
+
+\begin{lstlisting}[basicstyle=\small\ttfamily, breaklines=true, caption={registrazione e accesso}]
+@startuml "DiagrammaAttivita-RegistrazioneAccesso"
+
+' Activity diagram for registration and login
+title Diagramma di Attivita' - Registrazione e Accesso
+
+start
+
+' Initial decision - register or login
+if (Utente registrato?) then (Si')
+  :Vai alla pagina di login;
+  :Inserisci email e password;
+  
+  if (Credenziali valide?) then (Si')
+    :Crea sessione utente;
+    :Registra accesso nel log di audit;
+    :Reindirizza alla dashboard;
+  else (No)
+    :Mostra messaggio di errore;
+    :Richiedi nuovamente le credenziali;
+    goto EndLogin;
+  endif
+  
+else (No)
+  :Vai alla pagina di registrazione;
+  :Compila form di registrazione:
+  - Email
+  - Nome
+  - Cognome
+  - Specialita'
+  - Password
+  - Conferma Password;
+  
+  if (Email gia' utilizzata?) then (Si')
+    :Mostra errore email duplicata;
+    goto EndRegistration;
+  else (No)
+    if (Password valida?) then (No)
+      :Mostra requisiti password;
+      goto EndRegistration;
+    else (Si')
+      if (Password e conferma corrispondono?) then (No)
+        :Mostra errore di corrispondenza;
+        goto EndRegistration;
+      else (Si')
+        :Crea nuovo account medico;
+        :Crittografa password;
+        :Salva dati nel database;
+        :Mostra messaggio di successo;
+        :Reindirizza alla pagina di login;
+      endif
+    endif
+  endif
+  
+endif
+
+' End markers for visual clarity
+if (Fine registrazione?) then (Si')
+  label EndRegistration
+else (No)
+  label EndLogin
+endif
+
+stop
+
+@enduml
+
+\end{lstlisting}
 \section{Diagrammi di deployment}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/uml/InfrastructureDeployment.png}
+\end{figure}
+\begin{lstlisting}[basicstyle=\small\ttfamily, breaklines=true]
+@startuml "DiagrammaDeployment-InfrastruttraVitaLink"
+
+' Deployment diagram for VitaLink infrastructure
+title Diagramma di Deployment - Infrastruttura VitaLink
+
+' Client devices
+node "Dispositivo Client" as ClientDevice {
+  component [Browser Web] as WebBrowser
+}
+
+' Development environment
+node "Ambiente di Sviluppo" as DevEnv {
+  component [Flask Development Server] as FlaskDev
+  database "SQLite DB" as SQLiteDB
+  
+  FlaskDev --> SQLiteDB : usa
+}
+
+' Production Cloud environment
+cloud "Ambiente di Produzione (Koyeb)" as ProdEnv {
+  node "Server Web" as WebServer {
+    component [Gunicorn] as Gunicorn
+    component [Flask Application] as FlaskApp
+    
+    Gunicorn --> FlaskApp : WSGI
+  }
+  
+  node "Database Server" as DBServer {
+    database "PostgreSQL" as PostgreSQL
+  }
+  
+  WebServer --> DBServer : TCP/IP
+  FlaskApp --> PostgreSQL : connessione con socket Unix
+}
+
+' Third-party services
+cloud "Servizi Esterni" as ExternalServices {
+  component [Fitbit API Services] as FitbitAPI
+  component [Google Health Connect API] as GoogleHealth
+  component [Apple Health API] as AppleHealth
+  component [SMTP Service] as SMTPService
+}
+
+' Connections
+ClientDevice --> DevEnv : HTTP (Sviluppo)
+ClientDevice --> ProdEnv : HTTPS (Produzione)
+ProdEnv --> ExternalServices : HTTPS/OAuth2
+DevEnv --> ExternalServices : HTTPS/OAuth2
+
+' Equipment needed by devices
+node "Dispositivi di Monitoraggio" as MonitoringDevices {
+  component [Fitbit] as FitbitDevice
+  component [Smart Watch] as SmartWatch
+  component [Altri Dispositivi Salute] as OtherDevices
+}
+
+MonitoringDevices --> ExternalServices : Bluetooth/WiFi
+
+' Deployment notes
+note right of ClientDevice
+  Browser web moderno con supporto a
+  HTML5, CSS3 e JavaScript ES6+
+end note
+
+note bottom of ProdEnv
+  Infrastruttura cloud scalabile
+  con supporto a high-availability
+  e backup automatici
+end note
+
+note right of DevEnv
+  SQLite per lo sviluppo locale,
+  PostgreSQL per produzione
+end note
+
+@enduml
+
+\end{lstlisting}
 \section{Diagrammi ER}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/uml/DataModel.png}
+\end{figure}
+\begin{lstlisting}[basicstyle=\small\ttfamily, breaklines=true]
+@startuml "DiagrammaER-ModelloDati"
+
+' Entity Relationship diagram for VitaLink
+title Diagramma ER - Modello Dati VitaLink
+
+' Styling
+!define TABLE_BORDER_COLOR #073B4C
+!define PRIMARY_KEY_COLOR #06D6A0
+!define FOREIGN_KEY_COLOR #EF476F
+!define ATTRIBUTE_COLOR #118AB2
+!define ENUM_COLOR #FFD166
+skinparam linetype ortho
+skinparam roundcorner 15
+
+' Enum Entities
+entity "VitalSignType" as VitalSignType << Enum >> {
+  + HEART_RATE
+  + OXYGEN_SATURATION
+  + BREATHING_RATE
+  + WEIGHT
+  + TEMPERATURE_CORE
+  + TEMPERATURE_SKIN
+  + STEPS
+  + CALORIES
+  + DISTANCE
+  + ACTIVE_MINUTES
+  + SLEEP_DURATION
+  + ...altri tipi di parametri vitali
+}
+
+entity "HealthPlatform" as HealthPlatform << Enum >> {
+  + FITBIT
+  + GOOGLE_HEALTH_CONNECT
+  + APPLE_HEALTH
+}
+
+entity "ActionType" as ActionType << Enum >> {
+  + CREATE
+  + UPDATE
+  + DELETE
+  + VIEW
+  + EXPORT
+  + GENERATE_LINK
+  + CONNECT
+  + DISCONNECT
+  + SYNC
+  + IMPORT
+}
+
+entity "EntityType" as EntityType << Enum >> {
+  + PATIENT
+  + VITAL_SIGN
+  + NOTE
+  + REPORT
+  + HEALTH_PLATFORM
+  + HEALTH_LINK
+  + OBSERVATION
+}
+
+' Main Entities
+entity "Doctor" as Doctor {
+  * id : Integer <<PK>>
+  --
+  * email : String <<unique>>
+  * password_hash : String
+  * first_name : String
+  * last_name : String
+  specialty : String
+  * created_at : DateTime
+  * updated_at : DateTime
+}
+
+entity "Patient" as Patient {
+  * id : Integer <<PK>>
+  --
+  * uuid : String <<unique>>
+  * first_name : String
+  * last_name : String
+  * date_of_birth : Date
+  gender : String
+  * contact_number : String
+  email : String
+  address : Text
+  * created_at : DateTime
+  * updated_at : DateTime
+  connected_platform : HealthPlatform <<FK>>
+  platform_access_token : String
+  platform_refresh_token : String
+  platform_token_expires_at : DateTime
+}
+
+entity "DoctorPatient" as DoctorPatient {
+  * doctor_id : Integer <<PK, FK>>
+  * patient_id : Integer <<PK, FK>>
+  * assigned_date : DateTime
+}
+
+entity "Note" as Note {
+  * id : Integer <<PK>>
+  --
+  * patient_id : Integer <<FK>>
+  * doctor_id : Integer <<FK>>
+  * content : Text
+  * created_at : DateTime
+  * updated_at : DateTime
+}
+
+entity "VitalObservation" as VitalObservation {
+  * id : Integer <<PK>>
+  --
+  * patient_id : Integer <<FK>>
+  * doctor_id : Integer <<FK>>
+  * vital_type : VitalSignType <<FK>>
+  * content : Text
+  * start_date : DateTime
+  * end_date : DateTime
+  * created_at : DateTime
+  * updated_at : DateTime
+}
+
+entity "AuditLog" as AuditLog {
+  * id : Integer <<PK>>
+  --
+  * doctor_id : Integer <<FK>>
+  * timestamp : DateTime
+  * action_type : ActionType <<FK>>
+  * entity_type : EntityType <<FK>>
+  * entity_id : Integer
+  details : Text
+  patient_id : Integer <<FK>>
+  ip_address : String
+}
+
+entity "HealthPlatformLink" as HealthPlatformLink {
+  * id : Integer <<PK>>
+  --
+  * uuid : String <<unique>>
+  * patient_id : Integer <<FK>>
+  * doctor_id : Integer <<FK>>
+  * created_at : DateTime
+  * expires_at : DateTime
+  * used : Boolean
+  * platform : HealthPlatform <<FK>>
+}
+
+' Define the relationships
+Doctor ||--o{ DoctorPatient
+Patient ||--o{ DoctorPatient
+
+Doctor ||--o{ Note
+Patient ||--o{ Note
+
+Doctor ||--o{ VitalObservation
+Patient ||--o{ VitalObservation
+VitalSignType ||--o{ VitalObservation
+
+Doctor ||--o{ AuditLog
+Patient |o--o{ AuditLog
+ActionType ||--o{ AuditLog
+EntityType ||--o{ AuditLog
+
+Doctor ||--o{ HealthPlatformLink
+Patient ||--o{ HealthPlatformLink
+HealthPlatform ||--o{ HealthPlatformLink
+
+HealthPlatform |o--o{ Patient
+
+@enduml
+
+\end{lstlisting}
+\section{Diagrammi di comunicazione}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/uml/VitalSignsVisualization.png}
+\end{figure}
+\begin{lstlisting}[basicstyle=\small\ttfamily, breaklines=true, caption={visualizzazione dei parametri vitali}]
+@startuml "DiagrammaComunicazione-ParametriVitali"
+
+' Communication diagram for vital signs visualization
+title Diagramma di Comunicazione - Visualizzazione Parametri Vitali
+
+' Define the actors and components
+actor "Medico" as Doctor
+participant "Browser" as Browser
+participant "Views Controller" as Views
+participant "Health Platform Service" as HPS
+participant "Database" as DB
+participant "Data Processor" as Processor
+
+' Communication paths for vital sign visualization
+Doctor -> Browser : 1: Richiede parametri vitali paziente
+Browser -> Views : 2: GET /patients/{id}/vitals
+Views -> DB : 3: Recupera associazione medico-paziente
+DB --> Views : 4: Verifica autorizzazioni
+
+Views -> DB : 5: Recupera stato connessione piattaforme
+DB --> Views : 6: Info piattaforma connessa
+
+alt Piattaforma Connessa
+  Views -> HPS : 7: Richiede dati parametri vitali
+  HPS -> DB : 8: Recupera token di accesso
+  DB --> HPS : 9: Token OAuth
+  
+  HPS -> "API Esterna" : 10: Richiede dati recenti
+  "API Esterna" --> HPS : 11: Dati parametri vitali grezzi
+  
+  HPS -> Processor : 12: Prepara dati per visualizzazione
+  Processor --> HPS : 13: Dati formattati
+  
+  HPS --> Views : 14: Dati parametri vitali
+else Piattaforma Non Connessa
+  Views -> DB : 7b: Recupera solo dati locali
+  DB --> Views : 8b: Dati parametri manuali
+end
+
+Views -> Browser : 15: Restituisce dati e configurazione visualizzazione
+Browser -> Doctor : 16: Visualizza dashboard parametri vitali
+
+alt Richiesta Grafico
+  Doctor -> Browser : 17: Seleziona intervallo temporale
+  Browser -> Views : 18: GET /patients/{id}/vitals/chart?range=7d&type=heart_rate
+  Views -> Processor : 19: Genera dati grafico
+  Processor -> DB : 20: Recupera dati serie temporali
+  DB --> Processor : 21: Dati storici
+  Processor --> Views : 22: Dataset grafico
+  Views --> Browser : 23: Dati JSON per grafico
+  Browser -> Doctor : 24: Visualizza grafico
+end
+
+alt Richiesta Tabella
+  Doctor -> Browser : 25: Seleziona visualizzazione tabellare
+  Browser -> Views : 26: GET /patients/{id}/vitals/table?type=all
+  Views -> DB : 27: Recupera dati tabulari
+  DB --> Views : 28: Dati formattati
+  Views --> Browser : 29: Dati tabella HTML/JSON
+  Browser -> Doctor : 30: Visualizza tabella
+end
+
+@enduml
+
+\end{lstlisting}
+\section{Diagrammi delle componenti}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/uml/SystemArchitecture.png}
+\end{figure}
+\begin{lstlisting}[basicstyle=\small\ttfamily, breaklines=true]
+@startuml "DiagrammaComponenti-ArchitetturaVitaLink"
+
+' Component diagram for VitaLink architecture
+title Diagramma dei Componenti - Architettura VitaLink
+
+' Main application package
+package "VitaLink" {
+  ' Core components
+  [Frontend] as FE
+  [Backend] as BE
+  
+  ' Application modules
+  package "Autenticazione" {
+    [auth.py] as Auth
+  }
+  
+  package "Gestione Pazienti" {
+    [views.py] as Views
+    [models.py] as Models
+  }
+  
+  package "API RESTful" {
+    [api.py] as API
+  }
+  
+  package "Gestione Audit" {
+    [audit.py] as Audit
+  }
+  
+  package "Piattaforme Salute" {
+    [health_platforms.py] as HealthPlatforms
+    [health_platforms_config.py] as HealthConfig
+  }
+  
+  package "Osservazioni" {
+    [observations.py] as Observations
+  }
+  
+  package "Report" {
+    [reports.py] as Reports
+  }
+  
+  package "Internazionalizzazione" {
+    [language.py] as Language
+    [compile_translations.py] as Translations
+  }
+  
+  package "Utilita'" {
+    [utils.py] as Utils
+    [email_utils.py] as Email
+  }
+  
+  ' Database
+  database "Database" {
+    [SQLite/PostgreSQL] as DB
+  }
+}
+
+' External systems
+cloud "Piattaforme Esterne" {
+  [Fitbit API] as FitbitAPI
+  [Google Health Connect] as GoogleHealth
+  [Apple Health] as AppleHealth
+}
+
+' Web Server
+node "Server Web" {
+  [Flask Server] as FlaskServer
+}
+
+' Email Services
+cloud "Servizi Email" {
+  [SMTP] as SMTP
+}
+
+' Relationships
+FE --> FlaskServer : HTTP/HTTPS
+FlaskServer --> BE : WSGI
+
+' Backend Components Relationships
+BE --> Auth : usa
+BE --> Views : usa
+BE --> Models : usa
+BE --> API : usa
+BE --> Audit : usa
+BE --> HealthPlatforms : usa
+BE --> HealthConfig : usa
+BE --> Observations : usa
+BE --> Reports : usa
+BE --> Language : usa
+BE --> Utils : usa
+BE --> Email : usa
+
+' External Communication
+HealthPlatforms --> FitbitAPI : OAuth2/REST
+HealthPlatforms --> GoogleHealth : OAuth2/REST
+HealthPlatforms --> AppleHealth : OAuth2/REST
+Email --> SMTP : SMTP/TLS
+
+' Database Access
+Models --> DB : ORM
+Auth --> DB : ORM
+Views --> DB : ORM
+API --> DB : ORM
+Audit --> DB : ORM
+HealthPlatforms --> DB : ORM
+Observations --> DB : ORM
+Reports --> DB : ORM
+
+@enduml
+
+\end{lstlisting}
+\section{Diagrammi degli oggetti}
+\begin{lstlisting}[basicstyle=\small\ttfamily, breaklines=true]
+@startuml "DiagrammaOggetti-EsempioIstanze"
+
+' Object diagram showing instance examples for the VitaLink application
+title Diagramma degli Oggetti - Esempio di Istanze
+
+' Doctor objects
+object "dott_rossi:Doctor" as DoctorRossi {
+  id = 1
+  email = "mario.rossi@medico.it"
+  password_hash = "hashed_password_123"
+  first_name = "Mario"
+  last_name = "Rossi"
+  specialty = "Cardiologia"
+  created_at = "2025-01-10T09:30:00"
+  updated_at = "2025-01-10T09:30:00"
+}
+
+object "dott_bianchi:Doctor" as DoctorBianchi {
+  id = 2
+  email = "laura.bianchi@medico.it"
+  password_hash = "hashed_password_456"
+  first_name = "Laura"
+  last_name = "Bianchi"
+  specialty = "Pneumologia"
+  created_at = "2025-01-15T14:20:00"
+  updated_at = "2025-01-15T14:20:00"
+}
+
+' Patient objects
+object "paziente_verdi:Patient" as PatientVerdi {
+  id = 1
+  uuid = "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+  first_name = "Giuseppe"
+  last_name = "Verdi"
+  date_of_birth = "1970-05-15"
+  gender = "Maschio"
+  contact_number = "+39 333 1234567"
+  email = "giuseppe.verdi@email.it"
+  address = "Via Roma 123, Milano"
+  created_at = "2025-02-01T10:15:00"
+  updated_at = "2025-02-01T10:15:00"
+  connected_platform = "FITBIT"
+  platform_access_token = "ya29.a0AWY_..."
+  platform_token_expires_at = "2025-05-10T10:15:00"
+}
+
+object "paziente_neri:Patient" as PatientNeri {
+  id = 2
+  uuid = "a97ac10b-12cc-8372-b567-0e02b2c3d123"
+  first_name = "Anna"
+  last_name = "Neri"
+  date_of_birth = "1985-08-22"
+  gender = "Femmina"
+  contact_number = "+39 333 7654321"
+  email = "anna.neri@email.it"
+  created_at = "2025-02-10T11:30:00"
+  updated_at = "2025-02-10T11:30:00"
+  connected_platform = null
+}
+
+' Association objects
+object "assoc_rossi_verdi:DoctorPatient" as AssocRossiVerdi {
+  doctor_id = 1
+  patient_id = 1
+  assigned_date = "2025-02-01T10:15:00"
+}
+
+object "assoc_bianchi_verdi:DoctorPatient" as AssocBianchiVerdi {
+  doctor_id = 2
+  patient_id = 1
+  assigned_date = "2025-03-15T09:20:00"
+}
+
+object "assoc_rossi_neri:DoctorPatient" as AssocRossiNeri {
+  doctor_id = 1
+  patient_id = 2
+  assigned_date = "2025-02-10T11:30:00"
+}
+
+' Note objects
+object "nota_1:Note" as Note1 {
+  id = 1
+  patient_id = 1
+  doctor_id = 1
+  content = "Paziente presenta ipertensione lieve. Consigliato monitoraggio frequente della pressione."
+  created_at = "2025-02-01T10:30:00"
+  updated_at = "2025-02-01T10:30:00"
+}
+
+object "nota_2:Note" as Note2 {
+  id = 2
+  patient_id = 1
+  doctor_id = 2
+  content = "Valori di saturazione dell'ossigeno nella norma. Nessun problema respiratorio riscontrato."
+  created_at = "2025-03-15T09:45:00"
+  updated_at = "2025-03-15T09:45:00"
+}
+
+' Vital observation objects
+object "osservazione_1:VitalObservation" as Observation1 {
+  id = 1
+  patient_id = 1
+  doctor_id = 1
+  vital_type = "HEART_RATE"
+  content = "Frequenza cardiaca elevata durante l'attivita' fisica. Valori nella norma a riposo."
+  start_date = "2025-04-01T00:00:00"
+  end_date = "2025-04-07T23:59:59"
+  created_at = "2025-04-08T09:15:00"
+  updated_at = "2025-04-08T09:15:00"
+}
+
+object "osservazione_2:VitalObservation" as Observation2 {
+  id = 2
+  patient_id = 1
+  doctor_id = 1
+  vital_type = "STEPS"
+  content = "Livello di attivita' fisica buono. Media di 8000 passi al giorno nell'ultima settimana."
+  start_date = "2025-04-01T00:00:00"
+  end_date = "2025-04-07T23:59:59"
+  created_at = "2025-04-08T09:20:00"
+  updated_at = "2025-04-08T09:20:00"
+}
+
+' Health platform link object
+object "link_piattaforma_1:HealthPlatformLink" as PlatformLink1 {
+  id = 1
+  uuid = "e47ac10b-58cc-4372-a567-0e02b2c3d480"
+  patient_id = 1
+  doctor_id = 1
+  created_at = "2025-03-01T14:30:00"
+  expires_at = "2025-03-02T14:30:00"
+  used = true
+  platform = "FITBIT"
+}
+
+' Audit log objects
+object "audit_1:AuditLog" as Audit1 {
+  id = 1
+  doctor_id = 1
+  timestamp = "2025-02-01T10:15:00"
+  action_type = "CREATE"
+  entity_type = "PATIENT"
+  entity_id = 1
+  details = "{'notes': 'Creazione nuovo paziente'}"
+  patient_id = 1
+  ip_address = "192.168.1.100"
+}
+
+object "audit_2:AuditLog" as Audit2 {
+  id = 2
+  doctor_id = 1
+  timestamp = "2025-03-01T14:30:00"
+  action_type = "GENERATE_LINK"
+  entity_type = "HEALTH_LINK"
+  entity_id = 1
+  details = "{'platform': 'FITBIT', 'expires_at': '2025-03-02T14:30:00'}"
+  patient_id = 1
+  ip_address = "192.168.1.100"
+}
+
+object "audit_3:AuditLog" as Audit3 {
+  id = 3
+  doctor_id = 1
+  timestamp = "2025-03-01T16:45:00"
+  action_type = "CONNECT"
+  entity_type = "HEALTH_PLATFORM"
+  entity_id = 1
+  details = "{'platform': 'FITBIT', 'status': 'success'}"
+  patient_id = 1
+  ip_address = "203.0.113.42"
+}
+
+' Relationships
+DoctorRossi -- AssocRossiVerdi
+PatientVerdi -- AssocRossiVerdi
+
+DoctorBianchi -- AssocBianchiVerdi
+PatientVerdi -- AssocBianchiVerdi
+
+DoctorRossi -- AssocRossiNeri
+PatientNeri -- AssocRossiNeri
+
+DoctorRossi -- Note1
+PatientVerdi -- Note1
+
+DoctorBianchi -- Note2
+PatientVerdi -- Note2
+
+DoctorRossi -- Observation1
+PatientVerdi -- Observation1
+
+DoctorRossi -- Observation2
+PatientVerdi -- Observation2
+
+DoctorRossi -- PlatformLink1
+PatientVerdi -- PlatformLink1
+
+DoctorRossi -- Audit1
+PatientVerdi -- Audit1
+
+DoctorRossi -- Audit2
+PatientVerdi -- Audit2
+
+DoctorRossi -- Audit3
+PatientVerdi -- Audit3
+
+@enduml
+
+\end{lstlisting}
+\section{Diagrammi temporali}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/uml/DataSynchronization.png}
+\end{figure}
+\begin{lstlisting}[basicstyle=\small\ttfamily, breaklines=true, caption={sincronizzatione dei dati}]
+    @startuml "DiagrammaTiming-SincronizzazioneDati"
+
+' Timing diagram for data synchronization
+title Diagramma di Timing - Sincronizzazione Dati
+
+concise "Stato Connessione" as Connection
+concise "Cache Dati" as Cache
+concise "Sincronizzazione API" as Sync
+concise "Rate Limit API" as RateLimit
+concise "Sessione Utente" as UserSession
+
+@0
+Connection is "Disconnesso"
+Cache is "Vuota"
+Sync is "Inattiva" 
+RateLimit is "Disponibile" 
+UserSession is "Attiva"
+
+@1
+Connection is "Connessione in corso"
+Sync is "Preparazione"
+
+@2
+Connection is "Connesso"
+Sync is "Prima sincronizzazione"
+RateLimit is "In uso"
+
+@3
+Sync is "Completata"
+Cache is "Dati recenti"
+RateLimit is "Disponibile"
+
+@5
+UserSession is "Interazione utente"
+Sync is "Aggiornamento dati"
+RateLimit is "In uso"
+
+@6
+Sync is "Completata"
+Cache is "Dati aggiornati"
+RateLimit is "Disponibile"
+
+@8
+UserSession is "Interazione utente"
+Sync is "Aggiornamento dati"
+RateLimit is "In uso"
+
+@9
+RateLimit is "Limite raggiunto"
+Sync is "Attesa"
+
+@12
+RateLimit is "Disponibile" 
+Sync is "Ripresa"
+
+@13
+Sync is "Completata"
+Cache is "Dati aggiornati"
+
+@15
+UserSession is "Inattiva"
+Cache is "Scaduta"
+
+@17
+UserSession is "Terminata"
+Connection is "Disconnesso"
+
+highlight 0 to 3 #lightblue : Fase iniziale connessione
+highlight 9 to 12 #lightyellow : Attesa per rate limit
+highlight 15 to 17 #lightgrey : Sessione terminata
+
+@enduml
+
+
+\end{lstlisting}
 
 % Bibliografia
 \begingroup
@@ -2146,5 +3999,7 @@ L'esperienza di sviluppo dell'applicazione VitaLink ha rappresentato un'importan
     \bibitem{code-docs} Roggeri, A. (n.d.). VitaLink Documentation. \url{https://andrearoggeri22.github.io/VitaLink/code/}
     \bibitem{tests-docs} Roggeri, A. (n.d.). VitaLink Documentation. \url{https://andrearoggeri22.github.io/VitaLink/tests/}
     \bibitem{analysis-docs} Static Analysis report. (n.d.). \url{https://andrearoggeri22.github.io/VitaLink/analysis/}
+    \bibitem{plantuml} PlantUML. (n.d.). Open-source tool that uses simple textual descriptions to draw beautiful UML diagrams. PlantUML.com. \url{https://plantuml.com/}
+    \bibitem{plantvscode} PlantUML - Visual Studio Marketplace. (n.d.). \url{https://marketplace.visualstudio.com/items?itemName=jebbs.plantuml}
 \end{thebibliography}
 \end{document}
