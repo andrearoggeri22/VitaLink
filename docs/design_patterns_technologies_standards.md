@@ -192,11 +192,6 @@ Framework di testing per Python:
 
 ### 3.1 Standard di Codifica
 
-#### PEP 8
-Guida di stile per il codice Python:
-- Convenzioni: Indentazione, lunghezza delle linee, convenzioni di denominazione
-- Strumenti: Linter per verificare la conformità
-
 #### Docstrings
 Documentazione inline nel codice secondo lo standard PEP 257:
 - Formato: Descrizione, argomenti, valori di ritorno, eccezioni

@@ -147,7 +147,6 @@ Il lavoro è stato organizzato in moduli funzionali per mantenere una struttura 
 
 ### Standard di Codifica
 
-- **Python**: Aderenza al PEP 8 (Style Guide for Python Code)
 - **JavaScript**: Utilizzo dello standard ES6+
 - **HTML/CSS**: Conformità agli standard W3C e utilizzo di Bootstrap per l'UI
 - **SQL**: Convenzioni standardizzate per query e gestione del database
