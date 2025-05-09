@@ -3,8 +3,8 @@ name: Static Code Analysis
 on:
   push:
     branches:
-      - main  # Esegui il workflow su ogni commit nel branch "main"
-  workflow_dispatch:  # Permette di avviare il workflow manualmente
+      - main
+  workflow_dispatch:
 
 jobs:
   static-analysis:
@@ -31,7 +31,7 @@ jobs:
       run: |
         pylint app > pylint-report.txt || true
 
-    # Installazione di Cloc per statistiche sulle righe di codice
+    # Installazione di Cloc
     - name: Install Cloc
       run: sudo apt-get install -y cloc
 
@@ -50,20 +50,21 @@ jobs:
       with:
         category: "/codeql"
 
-    # Generazione di un report HTML
+    # Generazione del report HTML
     - name: Generate HTML Report
       run: |
-        echo "<html><head><title>Static Analysis Report</title></head><body>" > analysis-report.html
-        echo "<h1>Static Analysis Report</h1>" >> analysis-report.html
-        echo "<h2>Pylint Report</h2><pre>" >> analysis-report.html
-        cat pylint-report.txt >> analysis-report.html
-        echo "</pre>" >> analysis-report.html
-        echo "<h2>Cloc Report</h2><pre>" >> analysis-report.html
-        cat cloc-report.txt >> analysis-report.html
-        echo "</pre>" >> analysis-report.html
-        echo "</body></html>" >> analysis-report.html
+        mkdir -p analysis
+        echo "<html><head><title>Static Analysis Report</title></head><body>" > analysis/index.html
+        echo "<h1>Static Analysis Report</h1>" >> analysis/index.html
+        echo "<h2>Pylint Report</h2><pre>" >> analysis/index.html
+        cat pylint-report.txt >> analysis/index.html
+        echo "</pre>" >> analysis/index.html
+        echo "<h2>Cloc Report</h2><pre>" >> analysis/index.html
+        cat cloc-report.txt >> analysis/index.html
+        echo "</pre>" >> analysis/index.html
+        echo "</body></html>" >> analysis/index.html
 
-    # Sposta il report nella directory analysis nel branch gh-pages
+    # Pubblicazione su GitHub Pages
     - name: Deploy Analysis to gh-pages
       uses: peaceiris/actions-gh-pages@v4
       with:
