@@ -25,7 +25,7 @@ jobs:
     # Installazione delle dipendenze
     - name: Install dependencies
       env:
-        DATABASE_URL: "sqlite:///:memory:"
+        DATABASE_URL: "sqlite:///test_healthcare.db"
         CLOUD_RUN_ENVIRONMENT: "false"
         FLASK_APP: "app:app"
         SESSION_SECRET: "noKey"
@@ -48,7 +48,7 @@ jobs:
     # Esecuzione dei test con pytest
     - name: Run tests
       env:
-        DATABASE_URL: "sqlite:///:memory:"
+        DATABASE_URL: "sqlite:///test_healthcare.db"
         CLOUD_RUN_ENVIRONMENT: "false"
         FLASK_APP: "app:app"
         SESSION_SECRET: "noKey"
