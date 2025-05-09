@@ -6,8 +6,6 @@ services:
     ports: ["${PORT}:${PORT}"]
     depends_on: [db]
     env_file: .env  
-    volumes:
-      - ./uploads:/app/uploads
     healthcheck:
       test: ["CMD", "curl", "-f", "http://${HOST}:${PORT}/"]
       interval: 30s

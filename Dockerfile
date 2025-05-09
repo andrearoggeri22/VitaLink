@@ -10,8 +10,6 @@ COPY . /app/
 RUN pip install --no-cache-dir --upgrade pip \
  && pip install --no-cache-dir .
 
-RUN mkdir -p /app/uploads && chmod 777 /app/uploads
-
 RUN dos2unix /app/docker-entrypoint.sh \
  && chmod +x /app/docker-entrypoint.sh \
  && dos2unix /app/db_migrate.sh \
