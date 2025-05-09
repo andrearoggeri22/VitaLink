@@ -37,9 +37,9 @@ jobs:
     - name: Move docs/code/site to a temporary directory
       run: |
         if [ -d "docs/code/site" ]; then
-          mv docs/code/site ../code-site
+          mv docs/code/site code-site
         else
-          echo "Directory 'site' not found in docs/code"
+          echo "Directory 'docs/code/site' not found!"
           exit 1
         fi
 
@@ -54,9 +54,9 @@ jobs:
     - name: Move docs/tests/site to a temporary directory
       run: |
         if [ -d "docs/tests/site" ]; then
-          mv docs/tests/site ../tests-site
+          mv docs/tests/site tests-site
         else
-          echo "Directory 'site' not found in docs/tests"
+          echo "Directory 'docs/tests/site' not found!"
           exit 1
         fi
 
@@ -64,8 +64,23 @@ jobs:
       run: |
         mkdir -p combined-site/code
         mkdir -p combined-site/tests
-        mv code-site/* combined-site/code/
-        mv tests-site/* combined-site/tests/
+        if [ -d "code-site" ] && [ "$(ls -A code-site)" ]; then
+          mv code-site/* combined-site/code/
+        else
+          echo "Directory 'code-site' is empty or missing!"
+          exit 1
+        fi
+        if [ -d "tests-site" ] && [ "$(ls -A tests-site)" ]; then
+          mv tests-site/* combined-site/tests/
+        else
+          echo "Directory 'tests-site' is empty or missing!"
+          exit 1
+        fi
+
+    - name: Debug after combining documentation
+      run: |
+        echo "Combined site structure:"
+        tree -L 3 combined-site
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v4
