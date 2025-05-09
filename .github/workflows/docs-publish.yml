@@ -3,7 +3,7 @@ name: Deploy Documentation to GitHub Pages
 on:
   push:
     branches:
-      - main
+      - main 
 
 jobs:
   build-and-deploy:
@@ -24,7 +24,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install mkdocs  # Assicurati che MkDocs sia installato
+        pip install mkdocs mkdocs-material mkdocstrings mkdocstrings-python mkdocs-autorefs
 
     # Compilazione della documentazione dalla cartella docs/code
     - name: Build documentation from docs/code
