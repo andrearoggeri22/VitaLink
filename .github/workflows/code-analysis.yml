@@ -42,7 +42,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install .
-        pip install pytest coverage
+        pip install pytest coverage radon pipdeptree
 
     # 4. Esecuzione dei test con Coverage.py
     - name: Run Coverage Analysis
@@ -67,7 +67,19 @@ jobs:
         coverage report > coverage-report.txt
         coverage html
 
-    # 5. Installazione di Cloc per statistiche sulle righe di codice
+    # 5. Calcolo di Complessità Ciclomatica, Halstead Metrics e Maintainability Index con Radon
+    - name: Run Radon Analysis
+      run: |
+        radon cc app -s -n B > radon-cyclomatic-report.txt
+        radon mi app > radon-maintainability-report.txt
+        radon hal app > radon-halstead-report.txt
+
+    # 6. Rilevazione delle dipendenze e conflitti con Pipdeptree
+    - name: Run Pipdeptree
+      run: |
+        pipdeptree > pipdeptree-report.txt
+
+    # 7. Installazione di Cloc per le statistiche sulle righe di codice
     - name: Install Cloc
       run: sudo apt-get install -y cloc
 
@@ -75,7 +87,7 @@ jobs:
       run: |
         cloc . --out=cloc-report.txt
 
-    # 6. Generazione del report HTML
+    # 8. Generazione del report HTML
     - name: Generate HTML Report
       run: |
         mkdir -p analysis
@@ -86,7 +98,7 @@ jobs:
         echo "nav a { color: white; margin: 0 15px; text-decoration: none; }" >> analysis/index.html
         echo ".section { margin-bottom: 20px; }" >> analysis/index.html
         echo "</style></head><body>" >> analysis/index.html
-        echo "<nav><a href='#coverage'>Coverage Report</a> | <a href='#cloc'>Cloc Report</a></nav>" >> analysis/index.html
+        echo "<nav><a href='#coverage'>Coverage Report</a> | <a href='#cloc'>Cloc Report</a> | <a href='#cyclomatic'>Cyclomatic Complexity</a> | <a href='#halstead'>Halstead Metrics</a> | <a href='#mi'>Maintainability Index</a> | <a href='#pipdeptree'>Pipdeptree</a></nav>" >> analysis/index.html
         echo "<h1>Static Analysis Report</h1>" >> analysis/index.html
         echo "<div class='section' id='coverage'><h2>Coverage Report</h2><pre>" >> analysis/index.html
         cat coverage-report.txt >> analysis/index.html
@@ -94,9 +106,21 @@ jobs:
         echo "<div class='section' id='cloc'><h2>Cloc Report</h2><pre>" >> analysis/index.html
         cat cloc-report.txt >> analysis/index.html
         echo "</pre></div>" >> analysis/index.html
+        echo "<div class='section' id='cyclomatic'><h2>Cyclomatic Complexity</h2><pre>" >> analysis/index.html
+        cat radon-cyclomatic-report.txt >> analysis/index.html
+        echo "</pre></div>" >> analysis/index.html
+        echo "<div class='section' id='halstead'><h2>Halstead Metrics</h2><pre>" >> analysis/index.html
+        cat radon-halstead-report.txt >> analysis/index.html
+        echo "</pre></div>" >> analysis/index.html
+        echo "<div class='section' id='mi'><h2>Maintainability Index</h2><pre>" >> analysis/index.html
+        cat radon-maintainability-report.txt >> analysis/index.html
+        echo "</pre></div>" >> analysis/index.html
+        echo "<div class='section' id='pipdeptree'><h2>Pipdeptree Report</h2><pre>" >> analysis/index.html
+        cat pipdeptree-report.txt >> analysis/index.html
+        echo "</pre></div>" >> analysis/index.html
         echo "</body></html>" >> analysis/index.html
 
-    # 7. Pubblicazione su GitHub Pages
+    # 9. Pubblicazione su GitHub Pages
     - name: Deploy Analysis to gh-pages
       uses: peaceiris/actions-gh-pages@v4
       with:
