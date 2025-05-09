@@ -28,6 +28,7 @@ classifiers = [
 ]
 
 dependencies = [
+  "pytest>=8.3.5",
   "mkdocstrings>=0.29.1",
   "mkdocstrings-python>=1.16.10",
   "mkdocs-material>=9.6.12", 

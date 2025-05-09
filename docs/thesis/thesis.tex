@@ -15,6 +15,7 @@
 \usepackage{listings}
 % Impostazione dei margini a 3 cm su tutti i lati
 \usepackage[a4paper,top=3cm,bottom=3cm,left=3cm,right=3cm]{geometry}
+\usepackage{spverbatim}
 
 % Impostazione interlinea 1.5
 \onehalfspacing
@@ -54,7 +55,6 @@
 \title{\Huge\textbf{Soluzione software per la raccolta dei parametri vitali da dispositivi wearable via API e per il follow‑up clinico.}}
 \author{Nome Cognome\\Matricola: 1079033}
 \date{Anno Accademico 2024/2025}
-
 \begin{document}
 
 % Frontespizio personalizzato
@@ -780,71 +780,71 @@ Vi sono poi le directory dei file static e dei template per quanto concerne il f
 Infine nella root del progetto è presente la cartella dei test. La cartella contiene inoltre un file di configurazione per la creazione di un ambiente e la fornitura di funzioni per la gestione dei test.
 \vspace{1em}
 \dirtree{%
-.1 \textbf{VitaLink}/. 
-.2 docs/ \ldots{} (documentazione).
-.2 app/. 
-.3 static/. 
-.4 css/. 
-.5 custom.css (stile dell'applicazione). 
-.5 health\_connect.css (stile pagina collegamento dispositivi). 
-.4 img/. 
-.5 fitbit-logo.png (logo Fitbit). 
-.5 apple-health-logo.png (logo Apple Health). 
-.5 health-connect-logo.png (logo Google Health Connect). 
-.4 js/. 
-.5 health\_platforms.js. 
-.5 main.js. 
-.5 observations.js. 
-.5 patients.js. 
-.5 specific\_report.js. 
-.5 translations.js. 
-.5 vital\_charts.js. 
-.5 vitals.js. 
-.3 templates/. 
-.4 audit\_logs.html. 
-.4 base-no-session.html. 
-.4 base.html. 
-.4 dashboard.html. 
-.4 health\_connect\_result.html. 
-.4 health\_connect.html. 
-.4 login.html. 
-.4 patient\_detail.html. 
-.4 patients.html. 
-.4 profile.html. 
-.4 register.html. 
-.4 specific\_report\_form.html. 
-.4 vitals.html. 
-.3 translations/. 
-.4 babel.cfg (configurazione Babel). 
-.4 messages.pot (template traduzioni). 
-.4 it/ (traduzioni in italiano).
-.3 \_\_init\_\_.py.
-.3 app.py (configurazione applicazione e database).
-.3 audit.py (gestione log di audit).
-.3 auth.py (definizione autorizzazioni).
-.3 compile\_translations.py (compilazione traduzioni).
-.3 email\_utils.py (integrazione API invio email).
-.3 health\_platforms\_config.py (definizione API piattaforme sanitarie).
-.3 health\_platforms.py (recupero dati dalle API).
-.3 language.py (gestione lingue).
-.3 main.py (punto di ingresso dell'applicazione).
-.3 migrate.py (gestione migrazione database).
-.3 models.py (definizione modelli database).
-.3 observations.py (gestione osservazioni cliniche).
-.3 reports.py (generazione report).
-.3 utils.py (funzioni di utilità).
-.3 views.py (controller viste web).
-.3 api.py (endpoint API RESTful).
-.2 tests/ (test unitari e di integrazione).
-.2 Dockerfile (configurazione immagine Docker).
-.2 docker-compose.yml (configurazione container Docker).
-.2 docker-entrypoint.sh (script avvio container).
-.2 .env.example (struttura variabili d'ambiente).
-.2 .env (configurazione locale).
-.2 db\_migrate.yml (migrazione automatica in Docker).
-.2 pyproject.toml (dipendenze e configurazione test).
-.2 .dockerignore (esclusioni per Docker).
-.2 .gitignore (esclusioni per Git).
+    .1 \textbf{VitaLink}/.
+    .2 docs/ \ldots{} (documentazione).
+    .2 app/.
+    .3 static/.
+    .4 css/.
+    .5 custom.css (stile dell'applicazione).
+    .5 health\_connect.css (stile pagina collegamento dispositivi).
+    .4 img/.
+    .5 fitbit-logo.png (logo Fitbit).
+    .5 apple-health-logo.png (logo Apple Health).
+    .5 health-connect-logo.png (logo Google Health Connect).
+    .4 js/.
+    .5 health\_platforms.js.
+    .5 main.js.
+    .5 observations.js.
+    .5 patients.js.
+    .5 specific\_report.js.
+    .5 translations.js.
+    .5 vital\_charts.js.
+    .5 vitals.js.
+    .3 templates/.
+    .4 audit\_logs.html.
+    .4 base-no-session.html.
+    .4 base.html.
+    .4 dashboard.html.
+    .4 health\_connect\_result.html.
+    .4 health\_connect.html.
+    .4 login.html.
+    .4 patient\_detail.html.
+    .4 patients.html.
+    .4 profile.html.
+    .4 register.html.
+    .4 specific\_report\_form.html.
+    .4 vitals.html.
+    .3 translations/.
+    .4 babel.cfg (configurazione Babel).
+    .4 messages.pot (template traduzioni).
+    .4 it/ (traduzioni in italiano).
+    .3 \_\_init\_\_.py.
+    .3 app.py (configurazione applicazione e database).
+    .3 audit.py (gestione log di audit).
+    .3 auth.py (definizione autorizzazioni).
+    .3 compile\_translations.py (compilazione traduzioni).
+    .3 email\_utils.py (integrazione API invio email).
+    .3 health\_platforms\_config.py (definizione API piattaforme sanitarie).
+    .3 health\_platforms.py (recupero dati dalle API).
+    .3 language.py (gestione lingue).
+    .3 main.py (punto di ingresso dell'applicazione).
+    .3 migrate.py (gestione migrazione database).
+    .3 models.py (definizione modelli database).
+    .3 observations.py (gestione osservazioni cliniche).
+    .3 reports.py (generazione report).
+    .3 utils.py (funzioni di utilità).
+    .3 views.py (viste web).
+    .3 api.py (endpoint API RESTful).
+    .2 tests/ (test unitari e di integrazione).
+    .2 Dockerfile (configurazione immagine Docker).
+    .2 docker-compose.yml (configurazione container Docker).
+    .2 docker-entrypoint.sh (script avvio container).
+    .2 .env.example (struttura variabili d'ambiente).
+    .2 .env (configurazione locale).
+    .2 db\_migrate.yml (migrazione automatica in Docker).
+    .2 pyproject.toml (dipendenze e configurazione test).
+    .2 .dockerignore (esclusioni per Docker).
+    .2 .gitignore (esclusioni per Git).
 }
 \subsection{Flusso dei dati e interazioni tra componenti}
 Il frontend interagisce con il backend mediante richieste HTTP alle API RESTful della piattaforma, ricevendo risposte in formato JSON.
@@ -905,10 +905,10 @@ Ciascuna pagina presenta un menù accessibile nella parte superiore dello scherm
     \item Visualizza i log di audit
     \item Menù a tendina con il nome dell'utente
     \item Selezione della lingua
-    \begin{itemize}
-        \item Profilo
-        \item Logout
-    \end{itemize}
+          \begin{itemize}
+              \item Profilo
+              \item Logout
+          \end{itemize}
 \end{itemize}
 Nelle pagine di generazione dei report e di concessione dell'autorizzazione di accesso ai dati dei parametri vitali (per i pazienti) questo menù è stato rimosso per motivi di design in quanto queste pagine non sono state progettate come routes accessibili permanentemente, ma solo temporaneamente per determinate task.
 \subsection{Componenti UI per la visualizzazione dei dati sanitari}
@@ -1012,12 +1012,30 @@ Le API sono completamente documentate con docstring Python dettagliate (compilab
 \end{verbatim}
 
 \subsection{Integrazione OAuth con Fitbit}
-Per l'integrazione con i dispositivi Fitbit, l'applicazione utilizza il flusso di autorizzazione OAuth 2.0. 
-Ciò consente agli utenti di autorizzare l'accesso ai propri dati sanitari senza condividere le proprie credenziali. 
+Per l'integrazione con i dispositivi Fitbit, l'applicazione utilizza il flusso di autorizzazione OAuth 2.0.
+Ciò consente agli utenti di autorizzare l'accesso ai propri dati sanitari senza condividere le proprie credenziali.
 Una volta che l'utente ha autorizzato l'accesso, l'applicazione riceve un token di accesso che può essere usato per effettuare richieste alle API di Fitbit per recuperare i dati dei parametri vitali. Viene inoltre fornito un token refresh per ottenere un nuovo token di accesso una volta che quello precedente è scaduto (di base i token di accesso per fitbit scadono dopo 8 ore).
 
 \subsection{Sistema di caching temporaneo}
 Per ottimizzare le prestazioni e ridurre il numero di chiamate API con possibile conseguente superamento del rate limit specifico di una piattaforma, è stato implementato un sistema di caching temporaneo. Questo sistema memorizza nella cache i dati recentemente recuperati, in modo da poterli riutilizzare senza dover effettuare una nuova richiesta alle API. Questo approccio aiuta a rispettare i limiti di rate imposti da alcune API.
+Il sistema di caching è implementato utilizzando una struttura dati principale chiamata \texttt{vitals\_cache} che memorizza i dati dei parametri vitali recuperati dalle API.
+Ogni voce della cache è indicizzata con una chiave univoca composta come:
+\begin{lstlisting}[basicstyle=\small\ttfamily, breaklines=true]
+cache_key = f"{patient.id}_{normalized_data_type}_{start_date}_{end_date}"
+\end{lstlisting}
+
+Il sistema implementa un meccanismo di time-to-live (TTL) configurabile attraverso il parametro \texttt{text\_duration}, impostato a 300 secondi di default. Quando viene richiesto un dato l'algoritmo:
+\begin{itemize}
+    \item Verifica se esiste una chiave corrispondente nella cache
+    \item Se esiste, controlla la validità temporale della cache tramite il comando:
+          \begin{lstlisting}[basicstyle=\small\ttfamily, breaklines=true]
+    cache_age = (datetime.utcnow() - cache_time).total_seconds()
+    if cache_age < cache_duration:
+        Cache valida, usa i dati memorizzati
+    \end{lstlisting}
+    \item Se la cache è scaduta o non esiste, esegue la chiamata API alla piattaforma esterna e aggiorna la cache con i nuovi dati ottenuti
+
+\end{itemize}
 
 \subsection{Estendibilità per future piattaforme}
 L'architettura delle API è stata progettata tenendo in considerazione l'estensione futura dei servizi offerti. Ciò significa che, in futuro, sarà possibile integrare facilmente nuove piattaforme e dispositivi semplicemente aggiungendo nuove implementazioni dei servizi e configurando le relative API, senza dover apportare modifiche all'architettura.
@@ -1029,7 +1047,7 @@ L'architettura delle API è stata progettata tenendo in considerazione l'estensi
 \subsection{Backend: Python e Flask}
 Il backend della piattaforma è stato sviluppato mediante l'uso di Python e del framework Flask relativo. Python è un linguaggio di programmazione molto flessibile e supoortato da una vasta gamma di librerie. La conoscenza pregressa e l'utilizzo Flask sono state le ragioni più rilevanti per la scelta del framwork.
 \subsection{ORM: SQLAlchemy}
-Per la gestione delle interazioni con il database, è stato utilizzato SQLAlchemy, un ORM (Object-Relational Mapping) \cite{orm} per Python. 
+Per la gestione delle interazioni con il database, è stato utilizzato SQLAlchemy, un ORM (Object-Relational Mapping) \cite{orm} per Python.
 Esso permette di interagire con il database utilizzando oggetti Python invece di scrivere direttamente query SQL, semplificando così lo sviluppo e la manutenzione del codice.
 
 
@@ -1037,7 +1055,6 @@ Esso permette di interagire con il database utilizzando oggetti Python invece di
 Il frontend dell'applicazione è stato realizzato utilizzando tecnologie web standard come HTML5, CSS3 e JavaScript. L'utilizzo del framework Bootstrap ha semplificato e velocizzato lo sviluppo di un'interfaccia utente responsive e moderna.
 Anche le funzioni JavaScript sono state implementate in moduli separati per garantire una migliore organizzazione del codice e suddivisione delle responsabilità.
 Ciascuna funzione è stata documentata con docstring dettagliate.
-\subsection{Database: PostgreSQL}
 
 \subsection{Containerizzazione: Docker}
 L'utilizzo di Docker ha permesso di creare un ambiente di sviluppo e produzione isolato facilmente replicabile.
@@ -1110,6 +1127,218 @@ Si può notare come nel file Dockerfile vengono chiamati gli script di inizializ
 Il loro utilizzo risulta fondamentale per la corretta configurazione del container e per la corretta inizializzazione del database.
 Non vengono invece chiamati nelle fasi di sviluppo locale.
 
+\subsection{Variabili d'ambiente e configurazione}
+L'uso di variabili d'ambiente permette una configurazione personalizzata e flessibile dell'applicazione in contesti differenti.
+Di seguito è possibile trovare 3 esempi di configurazione delle variabili d'ambiente per 3 situazioni differenti:
+\begin{itemize}
+    \item \textbf{.env.tests per tests:}
+          \begin{itemize}
+              \item \textbf{Connessione al database:}
+                    \begin{itemize}
+                        \item \texttt{DATABASE\_URL}: sqlite:///test\_healthcare.db
+                    \end{itemize}
+
+              \item \textbf{Configurazione dell'applicazione:}
+                    \begin{itemize}
+                        \item \texttt{FLASK\_APP}:app:app
+                        \item \texttt{SESSION\_SECRET}:chiave segreta per la firma delle sessioni utente
+                        \item \texttt{JWT\_SECRET\_KEY}:chiave per la firma dei token JWT
+                        \item \texttt{HOST}, \texttt{PORT}:0.0.0.0
+                        \item \texttt{DEBUG}:<true/false>
+                        \item \texttt{PORT}:<port>
+                        \item \texttt{LOG\_LEVEL}:<NOTSET/DEBUG/INFO/WARN/ERROR/CRITICAL>
+                    \end{itemize}
+
+              \item \textbf{Ambiente di esecuzione:}
+                    \begin{itemize}
+                        \item \texttt{CLOUD\_RUN\_ENVIRONMENT}:false
+                    \end{itemize}
+          \end{itemize}
+
+    \item \textbf{.env per sviluppo locale:}
+          \begin{itemize}
+              \item \textbf{Connessione al database:}
+                    \begin{itemize}
+                        \item \texttt{PGHOST}:<db\_host>
+                        \item \texttt{PGPORT}:<port>
+                        \item \texttt{PGUSER}:<user>
+                        \item \texttt{PGPASSWORD}:<password>
+                        \item \texttt{PGDATABASE}:<db\_name>
+                        \item \texttt{DATABASE\_URL}:sqlite:///test\_healthcare.db
+                    \end{itemize}
+
+              \item \textbf{Configurazione dell'applicazione:}
+                    \begin{itemize}
+                        \item \texttt{FLASK\_APP}:app:app
+                        \item \texttt{SESSION\_SECRET}:chiave segreta per la firma delle sessioni utente
+                        \item \texttt{JWT\_SECRET\_KEY}:chiave per la firma dei token JWT
+                        \item \texttt{HOST}, \texttt{PORT}:0.0.0.0
+                        \item \texttt{DEBUG}:<true/false>
+                        \item \texttt{LOG\_LEVEL}:<NOTSET/DEBUG/INFO/WARN/ERROR/CRITICAL>
+                        \item \texttt{PORT}:<port>
+                    \end{itemize}
+              \item \textbf{Configurazione delle API:}
+                    \begin{itemize}
+                        \item \texttt{FITBIT\_CLIENT\_ID}:<fitbit\_id>
+                        \item \texttt{FITBIT\_CLIENT\_SECRET}:<fitbit\_secret>
+                        \item \texttt{FITBIT\_REDIRECT\_URI}:<fitbit\_callback\_uri>
+                        \item \texttt{MJ\_APIKEY}:<api\_key>
+                        \item \texttt{MJ\_APIKEY\_SECRET}:<secret\_key>
+                        \item \texttt{EMAIL\_SENDER}:<email\_sender>
+                    \end{itemize}
+              \item \textbf{Ambiente di esecuzione:}
+                    \begin{itemize}
+                        \item \texttt{CLOUD\_RUN\_ENVIRONMENT}:false
+                    \end{itemize}
+          \end{itemize}
+
+    \item \textbf{.env per deploy cloud:}
+
+          \begin{itemize}
+              \item \textbf{Connessione al database:}
+                    \begin{itemize}
+                        \item \texttt{PGUSER}:<user>
+                        \item \texttt{PGPASSWORD}:<password>
+                        \item \texttt{PGDATABASE}:<db\_name>
+                        \item \texttt{INSTANCE\_UNIX\_SOCKET}:<connection\_name>
+                    \end{itemize}
+
+              \item \textbf{Configurazione dell'applicazione:}
+                    \begin{itemize}
+                        \item \texttt{FLASK\_APP}:app:app
+                        \item \texttt{SESSION\_SECRET}:chiave segreta per la firma delle sessioni utente
+                        \item \texttt{JWT\_SECRET\_KEY}:chiave per la firma dei token JWT
+                        \item \texttt{HOST}, \texttt{PORT}:0.0.0.0
+                        \item \texttt{DEBUG}:<true/false>
+                        \item \texttt{LOG\_LEVEL}:<NOTSET/DEBUG/INFO/WARN/ERROR/CRITICAL>
+                        \item \texttt{PORT}:<port>
+                    \end{itemize}
+              \item \textbf{Configurazione delle API:}
+                    \begin{itemize}
+                        \item FITBIT\_CLIENT\_ID:<fitbit\_id>
+                        \item \texttt{FITBIT\_CLIENT\_SECRET}:<fitbit\_secret>
+                        \item \texttt{FITBIT\_REDIRECT\_URI}:<fitbit\_callback\_uri>
+                        \item \texttt{MJ\_APIKEY}:<api\_key>
+                        \item \texttt{MJ\_APIKEY\_SECRET}:<secret\_key>
+                        \item \texttt{EMAIL\_SENDER}:<email\_sender>
+                    \end{itemize}
+              \item \textbf{Ambiente di esecuzione:}
+                    \begin{itemize}
+                        \item \texttt{CLOUD\_RUN\_ENVIRONMENT}: true
+                    \end{itemize}
+          \end{itemize}
+\end{itemize}
+
+\subsection{Gestione delle dipendenze con pyproject.toml}
+La gestione delle dipendenze e la configurazione del packaging di VitaLink sono affidate al file pyproject.toml.
+Questo file sostituisce \texttt{setup.py} e \texttt{requirements.txt}, fornendo un'unica fonte per le dipendenze nrcessarie e i metadati relativi al progetto:
+
+\begin{lstlisting}[basicstyle=\small\ttfamily, breaklines=true, caption={pyproject.toml}]
+[build-system]
+requires      = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name            = "vitalink"             
+version         = "1.0.0"
+description     = "Vital-sign monitoring platform for therapy analysis and evaluation."
+readme          = "README.md"
+requires-python = ">=3.11"
+
+authors = [
+  { name = "Andrea Roggeri", email = "andrearoggeri22@gmail.com" }
+]
+
+license = { file = "LICENSE" }
+
+classifiers = [
+  "Framework :: Flask",
+  "License :: OSI Approved :: Apache License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.11",
+  "Environment :: Web Environment",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Healthcare Industry",
+  "Operating System :: OS Independent",
+]
+
+dependencies = [
+  "pytest>=8.3.5",
+  "mkdocstrings>=0.29.1",
+  "mkdocstrings-python>=1.16.10",
+  "mkdocs-material>=9.6.12", 
+  "mkdocs-autorefs>=1.4.1",
+  "mailjet-rest>=1.3.4",
+  "email-validator>=2.2.0",
+  "cloud-sql-python-connector>=1.18.1",
+  "flask>=3.1.0",
+  "flask-babel>=4.0.0",
+  "flask-jwt-extended>=4.7.1",
+  "flask-login>=0.6.3",
+  "flask-migrate>=4.1.0",
+  "flask-sqlalchemy>=3.1.1",
+  "flask-wtf>=1.2.2",
+  "wtforms>=3.2.1",
+  "sqlalchemy>=2.0.40",
+  "psycopg2-binary>=2.9.10",
+  "pg8000>=1.30.5",  # Pure Python PostgreSQL driver for Cloud SQL
+  "requests>=2.32.3",
+  "python-dotenv>=1.0.0",
+  "gunicorn>=23.0.0",
+  "notifications>=0.3.2",
+  "polib>=1.2.0",
+  "reportlab>=4.4.0",
+  "werkzeug>=3.1.3",
+  "sentry-sdk>=1.39.2"  # Error tracking
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3.5",
+  "ruff",      
+  "black",       
+  "pre-commit",
+]
+
+[project.scripts]
+vitalink-flask    = "app:app"
+vitalink-gunicorn = "app:app"
+
+[tool.setuptools]
+package-dir = { "" = "." }      
+packages    = ["app"]         
+
+[tool.setuptools.package-data]
+app = [
+  "static/**/*",
+  "templates/**/*",
+  "translations/**/*",
+]
+
+[tool.setuptools.exclude-package-data]
+"*" = ["*.pyc", "__pycache__/*", ".pytest_cache/*", "*.mmd", "*.wsd", "*.md", "app/docs/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts   = "-q --import-mode=importlib"
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+
+\end{lstlisting}
+
+Sezioni di \texttt{pyproject.toml}:
+
+\begin{itemize}
+    \item \textbf{Metadati del progetto}: nome, versione, descrizione, autori e licenza
+    \item \textbf{Dipendenze di runtime}: librerie necessarie per l'esecuzione dell'applicazione
+    \item \textbf{Dipendenze di sviluppo}: strumenti per test, linting, ecc...
+    \item \textbf{Script}: comandi definiti per facilitare operazioni comuni
+    \item \textbf{Configurazione degli strumenti}: impostazioni per pytest e altri strumenti di sviluppo
+\end{itemize}
+
+Durante la build dell'immagine Docker, il file \texttt{pyproject.toml} viene utilizzato per installare il progetto e tutte le dipendenze necessarie con il comando \texttt{pip install --no-cache-dir .}
+
 \section{Controllo di versione e integrazione continua}
 \subsection{Repository GitHub}
 Lo sviluppo di VitaLink è stato gestito con Git come sistema di controllo di versione, con un repository ospitato su GitHub \cite{github}.
@@ -1119,153 +1348,603 @@ Lo strumento GitHub Desktop \cite{gitdesktop}ha permesso di gestire le operazion
 
 \begin{itemize}
     \item \textbf{Continuous Integration (CI)}: ogni pull request e commit nei rami principali innesca un workflow che:
-    \begin{itemize}
-        \item Installa le dipendenze del progetto
-        \item Esegue i test automatizzati con pytest
-        \item Verifica la corretta istanziazione dell'immagine Docker
-    \end{itemize}
-    
+          \begin{itemize}
+              \item Installa le dipendenze del progetto
+              \item Esegue i test automatizzati con pytest
+              \item Verifica la corretta istanziazione dell'immagine Docker
+          \end{itemize}
+
     \item \textbf{Continuous Deployment (CD)}: i commit nel ramo \texttt{main} attivano un workflow di deployment che:
-    \begin{itemize}
-        \item Costruisce l'immagine Docker dell'applicazione
-        \item Carica l'immagine in un registro container (Docker Hub o GitHub Container Registry)
-        \item Aggiorna automaticamente l'ambiente di staging per i test di accettazione
-    \end{itemize}
-    
-    \item \textbf{Generazione documentazione}: aggiornamenti nella documentazione o nel codice attivano un workflow che genera automaticamente la documentazione aggiornata e la pubblica su GitHub Pages.
+          \begin{itemize}
+              \item Costruisce l'immagine Docker dell'applicazione
+              \item Carica l'immagine in un registro container (GitHub Container Registry)
+          \end{itemize}
+
+    \item \textbf{Generazione documentazione}: aggiornamenti nella documentazione o nel codice attivano un workflow che genera automaticamente la documentazione aggiornata e la pubblica su GitHub Pages in un branch specifico per la documentazione e le analisi.
+          \begin{itemize}
+              \item Documentazione codice sorgente \cite{code-docs}
+              \item Documentazione tests \cite{tests-docs}
+          \end{itemize}
+    \item \textbf{Generazione analisi statica del codice}: ogni commit attiva un workflow che genera le analisi statiche del codice e le converte in formato html, visualizzabili su GitHub Pages in un branch specifico per la documentazione e le analisi.
+          \begin{itemize}
+              \item Analisi statiche del codice \cite{analysis-docs}
+          \end{itemize}
 \end{itemize}
 
 Questa automazione ha permesso di:
 \begin{itemize}
-    \item Ridurre notevolmente gli errori dovuti a procedure manuali
+    \item Ridurre gli errori dovuti a procedure manuali
     \item Accelerare il ciclo di feedback sulle modifiche al codice
-    \item Garantire che solo codice di qualità verificata venga integrato nel progetto
+    \item Garantire che solo codice funzionante venga integrato nel progetto
     \item Mantenere un registro completo di tutte le build e i test eseguiti
 \end{itemize}
 
-\subsection{Monitoraggio e miglioramento continuo}
+\section{frontend}
+\subsection{Interfaccia utente}
+Il frontend dell'applicazione è stato sviluppato utilizzando HTML5, CSS3 e JavaScript, con l'ausilio del framework Bootstrap per garantire un design responsivo e coerente. Di seguito sono presentati gli screenshot delle principali schermate dell'applicazione, che mostrano l'interfaccia utente a disposizione dei medici e degli operatori sanitari.
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/screen/dash.png}
+    \caption{Dashboard principale: pagina iniziale che mostra una panoramica dei pazienti e delle attività recenti}
+    \label{fig:dashboard}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/screen/list.png}
+    \caption{Lista dei pazienti: interfaccia per la visualizzazione e la gestione di tutti i pazienti seguiti dal medico}
+    \label{fig:patient-list}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/screen/details.png}
+    \caption{Dettaglio paziente: schermata con le informazioni dettagliate e le note mediche relative a un paziente specifico}
+    \label{fig:patient-details}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/screen/unconnected.png}
+    \caption{Parametri vitali (dispositivo non connesso): stato iniziale della pagina dei parametri vitali quando nessun dispositivo è collegato}
+    \label{fig:unconnected}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/screen/connection.png}
+    \caption{Connessione dispositivo: interfaccia per l'autorizzazione e il collegamento di dispositivi wearable}
+    \label{fig:connection}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/screen/vitals.png}
+    \caption{Visualizzazione parametri vitali: grafici e dati dei parametri vitali monitorati dal dispositivo collegato}
+    \label{fig:vitals}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/screen/report.png}
+    \caption{Generazione report: interfaccia per la creazione di report personalizzati sui parametri vitali del paziente}
+    \label{fig:report}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/screen/profile.png}
+    \caption{Profilo utente: schermata per la gestione del profilo del medico e delle impostazioni personali}
+    \label{fig:profile}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/screen/audit list.png}
+    \caption{Log di audit: lista delle attività e delle modifiche effettuate sui dati dei pazienti}
+    \label{fig:audit-list}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/screen/audit graph.png}
+    \caption{Grafici di audit: visualizzazione grafica delle attività di audit per un'analisi statistica delle operazioni effettuate}
+    \label{fig:audit-graph}
+\end{figure}
+
+\subsection{Endpoints}
+
+L'applicazione espone numerosi endpoint sia per l'interfaccia web che per le API REST. Qui sotto sono elencati i principali endpoint organizzati per categoria, con la relativa descrizione, modulo di implementazione e parametri.
+
+\subsubsection{Autenticazione}
+
+\paragraph{Registrazione Medico}
 \begin{itemize}
-    \item \textbf{CodeQL}: per l'analisi automatica della sicurezza del codice, che identifica potenziali vulnerabilità di sicurezza
-    \item \textbf{Dependabot}: per monitorare e aggiornare automaticamente le dipendenze del progetto, segnalando potenziali problemi di sicurezza
-    \item \textbf{SonarCloud}: per l'analisi statica del codice, che fornisce metriche dettagliate sulla qualità e sulla complessità del codice
+    \item \textbf{GET \texttt{/register}}
+          \begin{itemize}
+              \item \textbf{Modulo}: \texttt{app/auth.py}
+              \item \textbf{Descrizione}: Mostra il modulo di registrazione per i nuovi medici.
+              \item \textbf{Autenticazione}: Non richiesta
+              \item \textbf{Risposta}: Form HTML per la registrazione di un nuovo account medico.
+          \end{itemize}
+
+    \item \textbf{POST \texttt{/register}}
+          \begin{itemize}
+              \item \textbf{Modulo}: \texttt{app/auth.py}
+              \item \textbf{Descrizione}: Elabora il modulo di registrazione e crea un nuovo account medico.
+              \item \textbf{Parametri}:
+                    \begin{itemize}
+                        \item \texttt{email}: Indirizzo email del medico (deve essere univoco)
+                        \item \texttt{first\_name}: Nome del medico
+                        \item \texttt{last\_name}: Cognome del medico
+                        \item \texttt{specialty}: Specializzazione medica
+                        \item \texttt{password}: Password (deve soddisfare i requisiti di sicurezza)
+                        \item \texttt{confirm\_password}: Conferma della password
+                    \end{itemize}
+              \item \textbf{Risposta}: Reindirizzamento alla pagina di login in caso di successo, altrimenti visualizzazione del modulo con messaggi di errore.
+          \end{itemize}
 \end{itemize}
 
+\paragraph{Login Medico}
+\begin{itemize}
+    \item \textbf{GET \texttt{/login}}
+          \begin{itemize}
+              \item \textbf{Modulo}: \texttt{app/auth.py}
+              \item \textbf{Descrizione}: Mostra il modulo di login per i medici.
+              \item \textbf{Autenticazione}: Non richiesta
+              \item \textbf{Risposta}: Form HTML per il login.
+          \end{itemize}
 
-\section{Implementazione del backend}
-\subsection{Modelli di dati e ORM}
-I modelli di dati dell'applicazione sono stati definiti utilizzando SQLAlchemy, che consente di mappare le classi Python alle tabelle del database. Ogni modello rappresenta una entità del dominio dell'applicazione, come un paziente, un'osservazione clinica o un report. I modelli sono stati progettati per essere coerenti con le relazioni del database e per supportare le operazioni CRUD necessarie per l'applicazione.
+    \item \textbf{POST \texttt{/login}}
+          \begin{itemize}
+              \item \textbf{Modulo}: \texttt{app/auth.py}
+              \item \textbf{Descrizione}: Autentica un medico e stabilisce una sessione.
+              \item \textbf{Parametri}:
+                    \begin{itemize}
+                        \item \texttt{email}: Indirizzo email del medico
+                        \item \texttt{password}: Password dell'account medico
+                    \end{itemize}
+              \item \textbf{Risposta}: Reindirizzamento alla dashboard in caso di successo, altrimenti visualizzazione del modulo di login con messaggi di errore.
+          \end{itemize}
+\end{itemize}
 
-\subsection{Autenticazione e gestione degli utenti}
-Il sistema di autenticazione si basa su JWT (JSON Web Token), che consente di autenticare gli utenti in modo sicuro e stateless. Al momento della registrazione, gli utenti ricevono un token di accesso che deve essere incluso in ogni richiesta alle API protette. Il token viene verificato dal server per autenticare l'utente e autorizzarlo ad accedere alle risorse richieste.
+\paragraph{Logout Medico}
+\begin{itemize}
+    \item \textbf{GET \texttt{/logout}}
+          \begin{itemize}
+              \item \textbf{Modulo}: \texttt{app/auth.py}
+              \item \textbf{Descrizione}: Termina la sessione autenticata del medico.
+              \item \textbf{Autenticazione}: Richiesta
+              \item \textbf{Risposta}: Reindirizzamento alla pagina di login con messaggio di conferma.
+          \end{itemize}
+\end{itemize}
 
-\subsection{Implementazione delle API RESTful}
-Le API RESTful sono state implementate utilizzando Flask-RESTful, un'estensione di Flask che semplifica la creazione di API REST. Ogni risorsa dell'API è rappresentata da una classe che estende \texttt{Resource} di Flask-RESTful e definisce i metodi per gestire le richieste HTTP (GET, POST, PUT, DELETE). Le risorse sono collegate agli URL tramite il router di Flask, che instrada le richieste agli handler appropriati.
+\paragraph{API Login}
+\begin{itemize}
+    \item \textbf{POST \texttt{/api/login}}
+          \begin{itemize}
+              \item \textbf{Modulo}: \texttt{app/auth.py}
+              \item \textbf{Descrizione}: Endpoint API per l'autenticazione dei medici. Valida le credenziali e genera token JWT per l'accesso alle API.
+              \item \textbf{Tipo di Contenuto}: JSON
+              \item \textbf{Parametri}:
+                    \begin{verbatim}
+{
+  "email": "medico@esempio.com",
+  "password": "password_sicura"
+}
+        \end{verbatim}
+              \item \textbf{Risposta di Successo} (200 OK):
+                    \begin{verbatim}
+{
+  "message": "Login effettuato con successo",
+  "doctor": {
+    "id": 1,
+    "first_name": "Mario",
+    "last_name": "Rossi",
+    "email": "medico@esempio.com",
+    "specialty": "Cardiologia"
+  },
+  "access_token": "eyJhbGciOiJIUz...",
+  "refresh_token": "eyJhbGciOiJIUz..."
+}
+        \end{verbatim}
+              \item \textbf{Possibili Errori}:
+                    \begin{itemize}
+                        \item 400 Bad Request: Richiesta JSON mancante o credenziali incomplete
+                        \item 401 Unauthorized: Credenziali non valide
+                    \end{itemize}
+          \end{itemize}
+\end{itemize}
 
-\subsection{Sistema di audit e logging}
-Il sistema di audit tiene traccia di tutte le azioni significative eseguite dagli utenti sull'applicazione, come la creazione, modifica ed eliminazione di record. Queste informazioni sono registrate in un'apposita tabella del database e possono essere consultate dai medici per monitorare le attività sui pazienti. Il registratore di audit è attivato da un middleware che intercetta le richieste e le risposte dell'API.
+\subsubsection{Gestione Pazienti}
 
-\subsection{Integrazione con piattaforme sanitarie}
-L'integrazione con piattaforme sanitarie esterne, come Fitbit, è gestita tramite API RESTful che utilizzano OAuth 2.0 per l'autenticazione. Quando un paziente autorizza l'accesso ai propri dati, l'applicazione riceve un token di accesso che può essere utilizzato per recuperare i dati dai parametri vitali tramite le API di Fitbit. Questi dati vengono poi memorizzati nel database dell'applicazione per essere elaborati e visualizzati dai medici.
+\paragraph{Elenco Pazienti}
+\begin{itemize}
+    \item \textbf{GET \texttt{/api/patients}}
+          \begin{itemize}
+              \item \textbf{Modulo}: \texttt{app/api.py}
+              \item \textbf{Descrizione}: Recupera l'elenco di tutti i pazienti associati al medico autenticato.
+              \item \textbf{Autenticazione}: JWT richiesto
+              \item \textbf{Risposta di Successo} (200 OK):
+                    \begin{verbatim}
+{
+  "patients": [
+    {
+      "id": 1,
+      "uuid": "123e4567-e89b-12d3-a456-426614174000",
+      "first_name": "Giovanni",
+      "last_name": "Bianchi",
+      "date_of_birth": "1980-05-15",
+      "gender": "male",
+      "contact_info": "telefono: +39 123456789",
+      "created_at": "2023-05-01T14:30:00Z"
+    },
+    ...altri pazienti...
+  ]
+}
+        \end{verbatim}
+          \end{itemize}
+\end{itemize}
 
-\subsection{Gestione delle osservazioni cliniche}
-Le osservazioni cliniche sono gestite tramite un modulo dedicato che consente ai medici di creare, modificare ed eliminare osservazioni associate ai pazienti. Ogni osservazione è collegata a un paziente specifico e può includere informazioni come il tipo di parametro vitale, il valore misurato e la data e ora della misurazione. Le osservazioni possono essere visualizzate in modo cronologico per ciascun paziente, facilitando il monitoraggio dell'andamento dei parametri vitali nel tempo.
+\paragraph{Dettagli Paziente}
+\begin{itemize}
+    \item \textbf{GET \texttt{/api/patients/<string:patient\_uuid>}}
+          \begin{itemize}
+              \item \textbf{Modulo}: \texttt{app/api.py}
+              \item \textbf{Descrizione}: Ottiene informazioni dettagliate su un paziente specifico.
+              \item \textbf{Autenticazione}: JWT richiesto
+              \item \textbf{Parametri URL}: \texttt{patient\_uuid} - UUID univoco del paziente
+              \item \textbf{Risposta di Successo} (200 OK):
+                    \begin{spverbatim}
+                        {
+                        "patient": {
+                        "id": 1,
+                        "uuid": "123e4567-e89b-12d3-a456-426614174000",
+                        "first_name": "Giovanni",
+                        "last_name": "Bianchi",
+                        "date_of_birth": "1980-05-15",
+                        "gender": "male",
+                        "contact_info": "telefono: +39 123456789",
+                        "medical_history": "Ipertensione, allergia agli arachidi",
+                        "created_at": "2023-05-01T14:30:00Z"
+                        }
+                        }
+                    \end{spverbatim}
+              \item \textbf{Possibili Errori}:
+                    \begin{itemize}
+                        \item 400 Bad Request: Formato UUID non valido
+                        \item 403 Forbidden: Medico non autorizzato ad accedere a questo paziente
+                        \item 404 Not Found: Paziente non trovato
+                    \end{itemize}
+          \end{itemize}
+\end{itemize}
 
-\section{Implementazione del frontend}
-\subsection{Struttura delle pagine e componenti}
-Il frontend è composto da una serie di pagine HTML collegate tra loro tramite un sistema di routing basato su Flask. Ogni pagina è progettata per essere responsiva e adattarsi a diverse dimensioni dello schermo. I componenti dell'interfaccia utente, come intestazioni, piè di pagina e barre di navigazione, sono stati realizzati come componenti riutilizzabili per garantire coerenza e facilitare la manutenzione.
+\paragraph{Parametri Vitali del Paziente}
+\begin{itemize}
+    \item \textbf{GET \texttt{/api/patients/<string:patient\_uuid>/vitals}}
+          \begin{itemize}
+              \item \textbf{Modulo}: \texttt{app/api.py}
+              \item \textbf{Descrizione}: Recupera i parametri vitali di un paziente dalla piattaforma sanitaria collegata (ad es. Fitbit).
+              \item \textbf{Autenticazione}: JWT richiesto
+              \item \textbf{Parametri URL}: \texttt{patient\_uuid} - UUID univoco del paziente
+              \item \textbf{Parametri Query}:
+                    \begin{itemize}
+                        \item \texttt{type} (opzionale): Tipo di segno vitale da recuperare (es. 'heart\_rate', 'steps')
+                        \item \texttt{start\_date} (opzionale): Data di inizio per il range di dati in formato ISO (YYYY-MM-DD)
+                        \item \texttt{end\_date} (opzionale): Data di fine per il range di dati in formato ISO (YYYY-MM-DD)
+                    \end{itemize}
+              \item \textbf{Risposta di Successo} (200 OK, esempio per type='heart\_rate'):
+                    \begin{verbatim}
+{
+  "heart_rate": [
+    {
+      "timestamp": "2023-05-01T14:30:00Z",
+      "value": 72,
+      "unit": "bpm"
+    },
+    ...altri dati di frequenza cardiaca...
+  ]
+}
+        \end{verbatim}
+          \end{itemize}
+\end{itemize}
 
-\subsection{Visualizzazione dei parametri vitali con grafici}
-I parametri vitali sono visualizzati utilizzando grafici interattivi creati con Chart.js. Questi grafici mostrano l'andamento dei parametri nel tempo e consentono ai medici di identificare facilmente eventuali anomalie o tendenze significative. I grafici sono personalizzabili e possono essere esportati come immagini o PDF per essere inclusi nei report.
+\subsubsection{Note Mediche}
 
-\subsection{Form per la gestione dei dati}
-I form per la gestione dei dati, come l'aggiunta o la modifica di pazienti, osservazioni o note, sono stati realizzati utilizzando componenti di form di Bootstrap, che semplificano la creazione di form responsivi e accessibili. I form includono la validazione dei dati sia lato client che lato server per garantire l'integrità dei dati.
+\paragraph{Elenco Note}
+\begin{itemize}
+    \item \textbf{GET \texttt{/api/patients/<string:patient\_uuid>/notes}}
+          \begin{itemize}
+              \item \textbf{Modulo}: \texttt{app/api.py}
+              \item \textbf{Descrizione}: Recupera tutte le note mediche associate a un paziente specifico.
+              \item \textbf{Autenticazione}: JWT richiesto
+              \item \textbf{Parametri URL}: \texttt{patient\_uuid} - UUID univoco del paziente
+              \item \textbf{Risposta di Successo} (200 OK):
+                    \begin{spverbatim}
+                        {
+                        "notes": [
+                        {
+                                "id": 1,
+                                "content": "Il paziente ha riportato un miglioramento dei sintomi",
+                                "doctor_id": 2,
+                                "doctor_name": "Dott.ssa Laura Verdi",
+                                "created_at": "2023-05-01T14:30:00Z"
+                            },
+                        ...altre note...
+                        ]
+                        }
+                    \end{spverbatim}
+          \end{itemize}
+\end{itemize}
 
-\subsection{Interfaccia per la generazione di report}
-L'interfaccia per la generazione di report consente ai medici di selezionare i parametri vitali, le osservazioni e le note da includere nel report. I report possono essere generati in formato PDF e inviati via email ai pazienti. L'interfaccia guida l'utente attraverso il processo di selezione dei dati e personalizzazione del report, rendendo facile per i medici fornire ai pazienti informazioni dettagliate e consigli basati sui dati raccolti.
+\paragraph{Aggiunta Nota}
+\begin{itemize}
+    \item \textbf{POST \texttt{/api/patients/<string:patient\_uuid>/notes}}
+          \begin{itemize}
+              \item \textbf{Modulo}: \texttt{app/api.py}
+              \item \textbf{Descrizione}: Aggiunge una nuova nota medica per un paziente specifico.
+              \item \textbf{Autenticazione}: JWT richiesto
+              \item \textbf{Parametri URL}: \texttt{patient\_uuid} - UUID univoco del paziente
+              \item \textbf{Corpo Richiesta}:
+                    \begin{spverbatim}
+                        {
+                            "content": "Il paziente ha riportato un miglioramento dei sintomi dopo il cambio di terapia."
+                        }
+                    \end{spverbatim}
+              \item \textbf{Risposta di Successo} (201 Created):
+                    \begin{spverbatim}
+                        {
+                        "message": "Nota aggiunta con successo",
+                        "note": {
+                        "id": 2,
+                        "content": "Il paziente ha riportato un miglioramento dei sintomi dopo il cambio di terapia.",
+                        "doctor_id": 2,
+                        "doctor_name": "Dott.ssa Laura Verdi",
+                        "created_at": "2023-05-10T09:15:00Z"
+                        }
+                        }
+                    \end{spverbatim}
+          \end{itemize}
+\end{itemize}
 
-\section{Integrazione con API esterne}
-\subsection{Flusso OAuth 2.0 per Fitbit}
-Il flusso di autorizzazione OAuth 2.0 per Fitbit è stato implementato seguendo le linee guida ufficiali di Fitbit. Gli utenti possono collegare il proprio account Fitbit all'applicazione VitaLink autorizzando l'accesso ai propri dati tramite un processo di login sicuro. Una volta autorizzato, l'applicazione riceve un token di accesso che può essere utilizzato per recuperare i dati dei parametri vitali.
+\subsubsection{Osservazioni dei Parametri Vitali}
 
-\subsection{Gestione dei token e refresh}
-I token di accesso ricevuti da Fitbit hanno una durata limitata e devono essere rinnovati periodicamente utilizzando il token di refresh fornito durante il processo di autorizzazione. L'applicazione gestisce automaticamente il rinnovo dei token, garantendo che i dati dei pazienti siano sempre aggiornati senza richiedere interventi manuali da parte degli utenti.
+\paragraph{Elenco Osservazioni}
+\begin{itemize}
+    \item \textbf{GET \texttt{/api/patients/<int:patient\_id>/observations}}
+          \begin{itemize}
+              \item \textbf{Modulo}: \texttt{app/api.py}
+              \item \textbf{Descrizione}: Recupera le osservazioni sui parametri vitali per un paziente specifico.
+              \item \textbf{Autenticazione}: JWT richiesto
+              \item \textbf{Parametri URL}: \texttt{patient\_id} - ID del paziente
+              \item \textbf{Parametri Query}:
+                    \begin{itemize}
+                        \item \texttt{start\_date} (opzionale): Data di inizio per filtrare le osservazioni in formato ISO
+                        \item \texttt{end\_date} (opzionale): Data di fine per filtrare le osservazioni in formato ISO
+                        \item \texttt{vital\_type} (opzionale): Tipo di segno vitale per filtrare le osservazioni
+                    \end{itemize}
+          \end{itemize}
+\end{itemize}
 
-\subsection{Recupero e processamento dei dati}
-Il recupero dei dati dai dispositivi wearable avviene tramite chiamate API programmate che utilizzano i token di accesso per autenticarsi. I dati ricevuti sono in formato JSON e vengono elaborati e memorizzati nel database dell'applicazione per essere successivamente visualizzati dai medici. È stato implementato un sistema di caching per ridurre il numero di chiamate API e migliorare le prestazioni.
+\subsubsection{Piattaforme Sanitarie}
 
-\subsection{Gestione degli errori e rate limiting}
-È stata prestata particolare attenzione alla gestione degli errori e al rispetto dei limiti di rate limiting imposti da Fitbit. L'applicazione è in grado di gestire in modo elegante gli errori di rete, i timeout e le risposte di errore delle API, fornendo messaggi chiari e dettagliati agli utenti. Inoltre, sono state implementate strategie per evitare di superare i limiti di rate limiting, come l'implementazione di ritardi tra le richieste e la gestione dei token di accesso scaduti.
+\paragraph{Connessione Piattaforma}
+\begin{itemize}
+    \item \textbf{POST \texttt{/health-platforms/connect/<string:platform\_name>}}
+          \begin{itemize}
+              \item \textbf{Modulo}: \texttt{app/health\_platforms.py}
+              \item \textbf{Descrizione}: Connette un paziente a una piattaforma sanitaria esterna (es. Fitbit).
+              \item \textbf{Autenticazione}: JWT richiesto
+              \item \textbf{Parametri URL}: \texttt{platform\_name} - Nome della piattaforma sanitaria (es. 'fitbit')
+              \item \textbf{Corpo Richiesta}:
+                    \begin{verbatim}
+{
+  "patient_id": 1,
+  "access_token": "oauth-access-token",
+  "refresh_token": "oauth-refresh-token",
+  "expires_at": "2024-05-01T00:00:00Z"
+}
+        \end{verbatim}
+          \end{itemize}
+\end{itemize}
 
-\section{Sicurezza e autenticazione}
-\subsection{Protezione degli endpoint}
-Tutti gli endpoint dell'API sono protetti da autenticazione JWT, che garantisce che solo gli utenti autenticati e autorizzati possano accedere alle risorse. Inoltre, sono stati implementati controlli di autorizzazione a livello di risorsa per garantire che gli utenti possano accedere solo ai dati per i quali hanno ricevuto esplicita autorizzazione.
+\paragraph{Dati Fitbit}
+\begin{itemize}
+    \item \textbf{GET \texttt{/health-platforms/fitbit/<string:patient\_uuid>}}
+          \begin{itemize}
+              \item \textbf{Modulo}: \texttt{app/health\_platforms.py}
+              \item \textbf{Descrizione}: Recupera i dati Fitbit per un paziente specifico.
+              \item \textbf{Autenticazione}: JWT richiesto
+              \item \textbf{Parametri URL}: \texttt{patient\_uuid} - UUID del paziente
+              \item \textbf{Parametri Query}:
+                    \begin{itemize}
+                        \item \texttt{type} (opzionale): Tipo di dati Fitbit da recuperare (es. 'heart\_rate', 'sleep')
+                        \item \texttt{start\_date} (opzionale): Data di inizio in formato ISO
+                        \item \texttt{end\_date} (opzionale): Data di fine in formato ISO
+                    \end{itemize}
+          \end{itemize}
+\end{itemize}
 
-\subsection{Gestione delle sessioni}
-La gestione delle sessioni è stata implementata utilizzando le funzionalità di sessione di Flask, che consentono di memorizzare informazioni sulla sessione dell'utente sul server e di associarle a un identificatore di sessione memorizzato nel cookie del browser dell'utente. Questo approccio garantisce che le informazioni sensibili non siano mai esposte al client e che le sessioni siano sicure e difficili da manomettere.
+\subsubsection{Gestione Interfaccia Web}
 
-\subsection{JWT per autenticazione API}
-L'autenticazione delle API è basata su JSON Web Token (JWT), che consente di autenticare gli utenti in modo sicuro e stateless. Al momento della registrazione o del login, gli utenti ricevono un token di accesso che deve essere incluso in ogni richiesta alle API protette. Il token viene verificato dal server per autenticare l'utente e autorizzarlo ad accedere alle risorse richieste.
+\paragraph{Dashboard}
+\begin{itemize}
+    \item \textbf{GET \texttt{/dashboard}}
+          \begin{itemize}
+              \item \textbf{Modulo}: \texttt{app/views.py}
+              \item \textbf{Descrizione}: Visualizza la dashboard principale del medico con panoramica dei pazienti, attività recenti e statistiche.
+              \item \textbf{Autenticazione}: Login richiesto
+              \item \textbf{Risposta}: Pagina HTML della dashboard.
+          \end{itemize}
+\end{itemize}
 
-\subsection{Logging di sicurezza e audit}
-È stato implementato un sistema di logging di sicurezza che tiene traccia di tutte le operazioni di autenticazione e autorizzazione, inclusi i tentativi di accesso riusciti e falliti. Questi log sono utilizzati per monitorare attività sospette e per garantire la conformità alle politiche di sicurezza. Inoltre, tutte le azioni significative eseguite dagli utenti sono registrate in un sistema di audit, che consente di tracciare le modifiche ai dati e di identificare eventuali attività non autorizzate.
+\paragraph{Elenco Pazienti}
+\begin{itemize}
+    \item \textbf{GET \texttt{/patients}}
+          \begin{itemize}
+              \item \textbf{Modulo}: \texttt{app/views.py}
+              \item \textbf{Descrizione}: Mostra l'elenco di tutti i pazienti associati al medico autenticato.
+              \item \textbf{Autenticazione}: Login richiesto
+              \item \textbf{Risposta}: Pagina HTML con l'elenco dei pazienti.
+          \end{itemize}
+\end{itemize}
 
+\paragraph{Nuovo Paziente}
+\begin{itemize}
+    \item \textbf{GET \texttt{/patients/new}}
+          \begin{itemize}
+              \item \textbf{Modulo}: \texttt{app/views.py}
+              \item \textbf{Descrizione}: Mostra il modulo per la creazione di un nuovo paziente.
+              \item \textbf{Autenticazione}: Login richiesto
+              \item \textbf{Risposta}: Pagina HTML con il form per la creazione del paziente.
+          \end{itemize}
 
+    \item \textbf{POST \texttt{/patients/new}}
+          \begin{itemize}
+              \item \textbf{Modulo}: \texttt{app/views.py}
+              \item \textbf{Descrizione}: Processa il modulo di creazione paziente e crea un nuovo record paziente.
+              \item \textbf{Autenticazione}: Login richiesto
+              \item \textbf{Parametri}:
+                    \begin{itemize}
+                        \item \texttt{first\_name}: Nome del paziente
+                        \item \texttt{last\_name}: Cognome del paziente
+                        \item \texttt{date\_of\_birth}: Data di nascita
+                        \item \texttt{gender}: Genere
+                        \item \texttt{contact\_info}: Informazioni di contatto
+                        \item \texttt{medical\_history}: Storia clinica (opzionale)
+                    \end{itemize}
+          \end{itemize}
+\end{itemize}
+
+\paragraph{Report}
+\begin{itemize}
+    \item \textbf{GET \texttt{/reports}}
+          \begin{itemize}
+              \item \textbf{Modulo}: \texttt{app/views.py}
+              \item \textbf{Descrizione}: Mostra la pagina per la generazione di report.
+              \item \textbf{Autenticazione}: Login richiesto
+              \item \textbf{Risposta}: Pagina HTML con opzioni per la generazione di report.
+          \end{itemize}
+
+    \item \textbf{POST \texttt{/reports}}
+          \begin{itemize}
+              \item \textbf{Modulo}: \texttt{app/views.py}
+              \item \textbf{Descrizione}: Genera e scarica un report basato sui parametri specificati.
+              \item \textbf{Autenticazione}: Login richiesto
+              \item \textbf{Parametri Form}:
+                    \begin{itemize}
+                        \item \texttt{report\_type}: Tipo di report da generare
+                        \item \texttt{start\_date}: Data di inizio del report
+                        \item \texttt{end\_date}: Data di fine del report
+                        \item \texttt{patient\_id} (opzionale): ID del paziente se il report è specifico per un paziente
+                    \end{itemize}
+              \item \textbf{Risposta}: File del report (PDF, CSV, ecc.) scaricabile o messaggio di errore.
+          \end{itemize}
+\end{itemize}
+
+\subsubsection{Audit e Statistiche}
+
+\paragraph{Log di Audit}
+\begin{itemize}
+    \item \textbf{GET \texttt{/audit/logs}}
+          \begin{itemize}
+              \item \textbf{Modulo}: \texttt{app/audit.py}
+              \item \textbf{Descrizione}: Visualizza i log di audit con possibilità di filtraggio.
+              \item \textbf{Autenticazione}: Login richiesto (solo per amministratori)
+              \item \textbf{Parametri Query}:
+                    \begin{itemize}
+                        \item \texttt{start\_date} (opzionale): Data di inizio per il filtraggio
+                        \item \texttt{end\_date} (opzionale): Data di fine per il filtraggio
+                        \item \texttt{doctor\_id} (opzionale): ID del medico per filtrare le azioni
+                        \item \texttt{action\_type} (opzionale): Tipo di azione da filtrare
+                    \end{itemize}
+          \end{itemize}
+\end{itemize}
+
+\paragraph{Statistiche}
+\begin{itemize}
+    \item \textbf{GET \texttt{/audit/stats}}
+          \begin{itemize}
+              \item \textbf{Modulo}: \texttt{app/audit.py}
+              \item \textbf{Descrizione}: Visualizza le statistiche aggregate dell'uso del sistema.
+              \item \textbf{Autenticazione}: Login richiesto (solo per amministratori)
+              \item \textbf{Risposta}: Pagina HTML con grafici e tabelle statistiche.
+          \end{itemize}
+\end{itemize}
+
+\paragraph{Cambio Lingua}
+\begin{itemize}
+    \item \textbf{GET \texttt{/lang/<string:lang\_code>}}
+          \begin{itemize}
+              \item \textbf{Modulo}: \texttt{app/language.py}
+              \item \textbf{Descrizione}: Cambia la lingua dell'interfaccia utente.
+              \item \textbf{Autenticazione}: Non richiesta
+              \item \textbf{Parametri URL}: \texttt{lang\_code} - Codice della lingua (es. 'it', 'en')
+              \item \textbf{Risposta}: Reindirizzamento alla pagina precedente con la nuova lingua impostata.
+          \end{itemize}
+\end{itemize}
 
 
 \chapter{Testing e Validazione}
 \section{Strategia di testing}
 \subsection{Approccio al testing}
-L'approccio al testing per l'applicazione VitaLink si basa su una combinazione di test manuali e automatizzati, mirati a garantire la massima copertura dei requisiti e la rilevazione tempestiva di eventuali difetti o anomalie. I test sono stati progettati per verificare sia i requisiti funzionali che quelli non funzionali, assicurando che l'applicazione soddisfi gli standard di qualità attesi.
 
 \subsection{Ambienti di test}
-I test sono stati eseguiti in ambienti separati per lo sviluppo, il collaudo e la produzione, utilizzando dati di test realistici per simulare le diverse condizioni di utilizzo dell'applicazione. Gli ambienti di test sono stati configurati per rispecchiare il più possibile l'ambiente di produzione, al fine di garantire la massima validità dei risultati dei test.
 
 \subsection{Automazione dei test}
-È stata implementata un'infrastruttura di test automatizzati utilizzando strumenti come pytest e Selenium, che consentono di eseguire test automatici delle funzionalità dell'applicazione e di verificare la correttezza dei risultati. I test automatizzati vengono eseguiti regolarmente come parte del processo di integrazione continua, per garantire che eventuali modifiche al codice non introducano regressioni o nuovi difetti.
 
 \section{Unit testing}
 \subsection{Test dei modelli}
-I test dei modelli verificano la correttezza delle definizioni dei modelli di dati e delle loro relazioni, assicurando che siano conformi allo schema del database e che supportino le operazioni CRUD come previsto.
 
 \subsection{Test delle API}
-I test delle API verificano il corretto funzionamento degli endpoint dell'API, inclusa l'autenticazione, l'autorizzazione e la gestione degli errori. Viene controllato che ogni endpoint restituisca i codici di stato HTTP appropriati e che i dati restituiti siano corretti e ben formati.
 
 \subsection{Test dei servizi}
-I test dei servizi verificano la logica di business dell'applicazione, assicurando che i servizi svolgano le loro funzioni come previsto e che interagiscano correttamente con i modelli e le API.
 
 \subsection{Mock e fixture}
-Per isolare i test e semplificare la gestione dei dati di test, sono stati utilizzati mock e fixture. I mock consentono di simulare il comportamento di oggetti complessi o di terze parti, mentre le fixture forniscono dati di test predefiniti e configurazioni per i test.
+
+\subsection{Analisi statica del codice}
+
+\begin{itemize}
+    \item \textbf{Flake8}: utilizzato per verificare la conformità del codice alle convenzioni di stile PEP 8, rilevando problemi come linee troppo lunghe, errori di indentazione, problemi di importazione e altri problemi stilistici.
+
+    \item \textbf{Pylint}: impiegato per un'analisi più approfondita che va oltre gli aspetti stilistici, identificando potenziali bug, code smells e anti-pattern. Ha contribuito a mantenere un elevato livello di qualità del codice con la sua valutazione numerica dei moduli.
+
+    \item \textbf{Mypy}: utilizzato per l'analisi del type hinting in Python, assicurando che le annotazioni di tipo fossero coerenti e corrette in tutto il codice.
+
+    \item \textbf{Bandit}: specializzato nell'identificazione di problemi di sicurezza nel codice Python, ha aiutato a individuare potenziali vulnerabilità di sicurezza nella base di codice.
+\end{itemize}
+
+Questi strumenti sono stati integrati nel processo di integrazione continua tramite GitHub Actions, in modo che ogni commit e pull request venissero automaticamente analizzati. Ciò ha permesso di:
+
+\begin{itemize}
+    \item Identificare precocemente problemi e bug potenziali, prima che entrassero nel codice principale
+    \item Mantenere uno stile di codifica uniforme e leggibile in tutto il progetto
+    \item Migliorare progressivamente la qualità complessiva del codice tramite refactoring mirato
+    \item Ridurre il debito tecnico attraverso un monitoraggio costante della qualità del codice
+\end{itemize}
+
 
 \section{Integration testing}
 \subsection{Test del flusso OAuth}
-I test del flusso OAuth verificano che il processo di autorizzazione e autenticazione tramite OAuth 2.0 funzioni correttamente, inclusa la gestione dei token di accesso e refresh.
 
 \subsection{Test del sistema di report}
-I test del sistema di report verificano che i report siano generati correttamente e contengano tutte le informazioni necessarie, formattate in modo appropriato per la visualizzazione e l'esportazione.
 
 \subsection{Test dell'integrazione con il database}
-I test dell'integrazione con il database verificano che l'applicazione possa interagire correttamente con il database, inclusa la creazione, lettura, aggiornamento e cancellazione di record.
 
 \section{User testing}
 \subsection{Metodologia}
-La metodologia di user testing prevede il coinvolgimento di un gruppo di utenti rappresentativi che utilizzano l'applicazione in scenari reali o simulati. Durante il testing, gli utenti sono invitati a completare una serie di compiti mentre vengono osservati da un team di valutazione.
 
 \subsection{Raccolta feedback}
-Il feedback degli utenti viene raccolto tramite interviste, questionari e osservazioni dirette durante e dopo le sessioni di testing. Viene prestata particolare attenzione alle difficoltà incontrate dagli utenti, alle funzionalità mancanti e alle proposte di miglioramento.
 
 \subsection{Risultati e miglioramenti}
-I risultati dei test utente vengono analizzati per identificare modelli e tendenze nelle risposte degli utenti. Sulla base di questo feedback, vengono pianificati e implementati miglioramenti all'applicazione per risolvere i problemi identificati e ottimizzare l'esperienza dell'utente.
 
 \section{Validazione dei requisiti}
 \subsection{Verifica dei requisiti funzionali}
-La verifica dei requisiti funzionali prevede il controllo sistematico di ogni requisito per garantire che sia stato implementato correttamente e soddisfi le aspettative degli stakeholder.
 
 \subsection{Analisi dei requisiti non funzionali}
-L'analisi dei requisiti non funzionali valuta le prestazioni dell'applicazione, la sicurezza, l'usabilità e altri attributi qualitativi per garantire che soddisfi gli standard richiesti.
 
 \subsection{Completezza della soluzione}
-La completezza della soluzione viene valutata verificando che tutte le funzionalità richieste siano state implementate e che l'applicazione soddisfi pienamente i requisiti degli utenti e degli stakeholder.
 
 
 
@@ -1464,5 +2143,8 @@ L'esperienza di sviluppo dell'applicazione VitaLink ha rappresentato un'importan
     \bibitem{orm} Admin. (2024, February 25). Cosa è un ORM. Innovaformazione - Informatica Specialistica. \url{https://innovaformazione.net/cosa-e-un-orm/}
     \bibitem{github} andrearoggeri22/VitaLink: Piattaforma di monitoraggio dati vitali per pazienti in contesto di analisi e valutazione di terapie. (n.d.). GitHub. \url{https://github.com/andrearoggeri22/VitaLink}
     \bibitem{gitdesktop} Download GitHub Desktop. (n.d.). GitHub Desktop. \url{https://desktop.github.com/download/}
+    \bibitem{code-docs} Roggeri, A. (n.d.). VitaLink Documentation. \url{https://andrearoggeri22.github.io/VitaLink/code/}
+    \bibitem{tests-docs} Roggeri, A. (n.d.). VitaLink Documentation. \url{https://andrearoggeri22.github.io/VitaLink/tests/}
+    \bibitem{analysis-docs} Static Analysis report. (n.d.). \url{https://andrearoggeri22.github.io/VitaLink/analysis/}
 \end{thebibliography}
 \end{document}
