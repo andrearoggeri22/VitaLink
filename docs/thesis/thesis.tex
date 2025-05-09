@@ -902,15 +902,33 @@ Sono presenti 4 Enum nel database utilizzati per casi specifici per garantire l'
 \section{Architettura del database}
 È stato scelto PostgreSQL come DBMS relazionale in quanto risulta essere uno dei più diffusi e supportati dalle piattaforme per il deployment.
 Non è comunque esclusa la possibilità di poter riconfigurare il sistema per l'utilizzo di un altro DBMS relazionale, come ad esempio MySQL o Microsoft SQL Server.
-\subsection{Schema relazionale}
-Per ovvie ragioni s
 \subsection{Strategia di migrazione}
-
+Sono presenti 2 file nel progetto per le migrazioni del database:
+Lo script db\_migrate.sh è un file che viene utilizzato nelle situazioni di deployment (o comunque di istanziazione del container) per la creazione del database e delle tabelle necessarie e l'aggiornamento della struttura del database.
+Lo script migrate.py è un file che viene utilizzato per la migrazione del database in fase di sviluppo locale, per la creazione delle tabelle e per l'aggiornamento della struttura del database.
+Da notare che che per lo sviluppo locale si rende necessaria la creazione del database dall'istanza di PostgreSQL locale, mentre per il deployment è sufficiente, nel caso in cui non si sfrutti un database interno al container, specificare il nome del database nel file .env.
+Nel caso invece in cui in fase di deployment si decida di utilizzare un database esterno al container, valgono le stesse considerazioni fatte per lo sviluppo locale, ossia si rende necessaria la creazione del database sul provider del servizio database scelto.
 \section{Interfaccia utente}
-\subsection{Design responsivo e mobile-first}
+\subsection{Design responsivo}
+L'interfaccia utente è stata progettata per essere quanto più intuitiva e semplice possibile seguendo un'approccio per formulare un design responsivo, utile per facilitare la consultazione dei dati sanitari su un'ampia gamma di dispositivi.
+La decisione di utilizzare Bootstrap per il frontend ha permesso di ridurre la mole di lavoro necessaria per questo tipo di task, consentendo di focalizzare gli sforzi di sviluppo su parti più cruciali del sistema.
+Le pagine sono state sviluppate con un design moderno e intuitivo, adatto per l'uso anche da parte di personale sanitario non addestrato all'uso dello strumento.
+Ciascuna pagina presenta un menù accessibile nella parte superiore dello schermo che permette un accesso rapido a:
+\begin{itemize}
+    \item Dashboard
+    \item Visualizza tutti i pazienti
+    \item Visualizza i log di audit
+    \item Menù a tendina con il nome dell'utente
+    \item Selezione della lingua
+    \begin{itemize}
+        \item Profilo
+        \item Logout
+    \end{itemize}
+\end{itemize}
+Nelle pagine di generazione dei report e di concessione dell'autorizzazione di accesso ai dati dei parametri vitali (per i pazienti) questo menù è stato rimosso per motivi di design in quanto queste pagine non sono state progettate come routes accessibili permanentemente, ma solo temporaneamente per determinate task.
 \subsection{Componenti UI per la visualizzazione dei dati sanitari}
-\subsection{Flow di navigazione}
-
+Per la visualizzazione dei dati sanitari sono stati utilizzati grafici generati con la libreria Chart.js \cite{chartjs}, che permette di generare grafici personalizzabili e interattivi con un design accattivante.
+Inoltre i dati sanitari sono accessibili anche in formato tabellare, utile sopratutto per quei dati la cui rappresentazione grafica risulta poco utile, come ad esempio il cibo assunto o diari dell'utente.
 \section{API e integrazione con sistemi esterni}
 \subsection{RESTful API design}
 \subsection{Integrazione OAuth con Fitbit}
@@ -1128,5 +1146,6 @@ Per ovvie ragioni s
     \bibitem{werkzeug} \textit{Werkzeug — Werkzeug Documentation (3.1.x)}. (n.d.). \url{https://werkzeug.palletsprojects.com/en/stable/}
     \bibitem{oauth-image} Google Cloud. (n.d.). \textit{Flusso di autorizzazione OAuth 2.0}. Google Cloud Apigee. \url{https://cloud.google.com/static/apigee/docs/api-platform/images/oauth-abstract.png}
     \bibitem{sqlalchemy} SQLAlchemy. (n.d.). \url{https://www.sqlalchemy.org/}
+    \bibitem{chartjs} Chart.js. (n.d.). Open Source HTML5 Charts for Your Website. \url{https://www.chartjs.org/}
 \end{thebibliography}
 \end{document}
