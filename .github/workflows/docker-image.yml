@@ -38,7 +38,7 @@ jobs:
         FITBIT_REDIRECT_URI: "noKey"
         MJ_APIKEY: "noKey"
         MJ_APIKEY_SECRET: "noKey"
-        LOG_LEVEL: "LOG"
+        LOG_LEVEL: "INFO"
         EMAIL_SENDER: "test@test.com"
       run: |
         python -m pip install --upgrade pip
@@ -61,7 +61,7 @@ jobs:
         FITBIT_REDIRECT_URI: "noKey"
         MJ_APIKEY: "noKey"
         MJ_APIKEY_SECRET: "noKey"
-        LOG_LEVEL: "LOG"
+        LOG_LEVEL: "INFO"
         EMAIL_SENDER: "test@test.com"
       run: pytest
 
