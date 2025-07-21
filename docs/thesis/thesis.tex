@@ -1888,96 +1888,66 @@ L'applicazione espone numerosi endpoint sia per l'interfaccia web che per le API
 
 \chapter{Testing e Validazione}
 \section{Strategia di testing}
-\subsection{Approccio al testing}
-
-\subsection{Ambienti di test}
-
+\subsection{Approccio al testing e ambiente}
+Per il testing l'approccio ha previsto la configurazione dell'ambiente di test con un file .env.test specifico per l'ambiente di test.
+Per eseguire i test infatti è necessario avere un database e, per evitare di compromettere l'integrità del database effettivo utilizzato in produzione, è stato creato un database in-memory SQLite che ha permesso di isolare le operazioni effettuate.
 \subsection{Automazione dei test}
-
+Per automatizzare i test, è stato utilizzato un framework di testing chiamato pytest \cite{pytest}.
 \section{Unit testing}
-\subsection{Test dei modelli}
-
-\subsection{Test delle API}
-
-\subsection{Test dei servizi}
-
+Per ciascun modulo principale è stato scritto un set di test unitari per verificare il corretto funzionamento delle singole funzioni e che queste sddisfassero i requisiti specifici.
+L'obiettivo principale che ha guidato questa fase è stato cercare di raggiungere la copertura maggiore possibile.
 \subsection{Mock e fixture}
-
+Le fixture in pytest rappresentano un metodo per fornire dati, oggetti o configurazioni necessarie ai test.
+In VitaLink le fixture sono centralizzate nel file \texttt{conftest.py}, che costituisce il modulo cardine dell'infrastruttura di test.
 \subsection{Analisi statica del codice}
-
+Per l'analisi statica del codice si è deciso di utilizzare un workflow automatizzato Github Actions, in modo da poter ottenere un'analisi coerente con ciascun nuovo commit.
+I risultati dei test sono consultabili sulla Page di Github del progetto, configurata per accogliere anche la documentazione del codice sorgente e dei tests.
+Tale workflow include i seguenti strumenti per l'analisi:
 \begin{itemize}
-    \item \textbf{Flake8}: utilizzato per verificare la conformità del codice alle convenzioni di stile PEP 8, rilevando problemi come linee troppo lunghe, errori di indentazione, problemi di importazione e altri problemi stilistici.
+    \item \textbf{Pipdeptree}: Crea un albero delle dipendenze del progetto.
 
-    \item \textbf{Pylint}: impiegato per un'analisi più approfondita che va oltre gli aspetti stilistici, identificando potenziali bug, code smells e anti-pattern. Ha contribuito a mantenere un elevato livello di qualità del codice con la sua valutazione numerica dei moduli.
+    \item \textbf{coverage}: Misura quanto del codice viene eseguito durante i test.
 
-    \item \textbf{Mypy}: utilizzato per l'analisi del type hinting in Python, assicurando che le annotazioni di tipo fossero coerenti e corrette in tutto il codice.
+    \item \textbf{Radon}: Per l’analisi della complessità e manutenibilità del codice.
 
-    \item \textbf{Bandit}: specializzato nell'identificazione di problemi di sicurezza nel codice Python, ha aiutato a individuare potenziali vulnerabilità di sicurezza nella base di codice.
+    \item \textbf{Cloc}: Conta linee di codice, commenti, e file.
 \end{itemize}
-
-Questi strumenti sono stati integrati nel processo di integrazione continua tramite GitHub Actions, in modo che ogni commit e pull request venissero automaticamente analizzati. Ciò ha permesso di:
-
-\begin{itemize}
-    \item Identificare precocemente problemi e bug potenziali, prima che entrassero nel codice principale
-    \item Mantenere uno stile di codifica uniforme e leggibile in tutto il progetto
-    \item Migliorare progressivamente la qualità complessiva del codice tramite refactoring mirato
-    \item Ridurre il debito tecnico attraverso un monitoraggio costante della qualità del codice
-\end{itemize}
-
-
-\section{Integration testing}
-\subsection{Test del flusso OAuth}
-
-\subsection{Test del sistema di report}
-
-\subsection{Test dell'integrazione con il database}
-
-\section{User testing}
-\subsection{Metodologia}
-
-\subsection{Raccolta feedback}
-
-\subsection{Risultati e miglioramenti}
-
-\section{Validazione dei requisiti}
-\subsection{Verifica dei requisiti funzionali}
-
-\subsection{Analisi dei requisiti non funzionali}
-
-\subsection{Completezza della soluzione}
-
-
-
 
 \chapter{Deployment e Operations}
 \section{Ambiente di deployment}
-\subsection{Architettura dell'ambiente di produzione}
-
 \subsection{Configurazione del server}
-
-\subsection{Gestione delle variabili d'ambiente}
-
+Un server di produzione è stato configurato per testare l'effettivo funzionamento della piattaforma nel caso di deployment in un ambiente reale.
+Koyeb \cite{koyeb} ha permesso l'istanziazione di un database PostgreSQL, oltre che a un server Gunicorn per l'esecuzione del backend.
+\subsection{Gestione delle variabili d'ambiente}\sloppy
+Le variabili d'ambiente sono state configurate con i dettagli dell'implementazione cloud, andando a settare le variabili \texttt{CLOUD\_RUN\_ENVIRONMENT=true}, oltre a \texttt{INSTANCE\_UNIX\_SOCKET, DB\_USER, DB\_PASS, DB\_NAME}
+con i dettagli di accesso al database cloud e \texttt{FITBIT\_CLIENT\_ID, FITBIT\_CLIENT\_SECRET, FITBIT\_REDIRECT\_URI} con i dettagli di accesso alla piattaforma Fitbit e \texttt{MJ\_APIKEY, MJ\_APISECRET, EMAIL\_SENDER} per l'integrazione con Mailjet.
 \section{Containerizzazione e orchestrazione}
 \subsection{Docker e Docker Compose}
+Docker e Docker Compose hanno rappresentato strumenti fondamentali per la containerizzazione dell'applicazione VitaLink, garantendo un ambiente di sviluppo e produzione coerente e riproducibile. Il file \texttt{docker-compose.yml} definisce due servizi principali: \texttt{web} per l'applicazione Flask e \texttt{db} per il database PostgreSQL. Il servizio \texttt{web} si basa sull'immagine costruita a partire dal Dockerfile e include configurazioni per dipendenze, porte e controlli di salute. Il servizio \texttt{db} utilizza l'immagine ufficiale \texttt{postgres:15-alpine}, ottimizzata per dimensioni ridotte e prestazioni. La configurazione integrata garantisce che il database sia disponibile prima dell'avvio dell'applicazione grazie alla direttiva \texttt{depends\_on}, facilitando l'orchestrazione dei container.
 
 \subsection{Immagini e configurazione}
+La configurazione delle immagini Docker è stata ottimizzata per garantire un ambiente di esecuzione leggero ma completo. L'immagine dell'applicazione web si basa su \texttt{python:3.11-slim}, che offre un buon compromesso tra dimensioni e funzionalità. Nel Dockerfile sono installati solo i pacchetti essenziali (\texttt{gcc}, \texttt{libpq-dev}, \texttt{postgresql-client}, ecc.) necessari per la compilazione delle dipendenze Python e l'interazione con PostgreSQL. La configurazione prevede inoltre l'utilizzo di Gunicorn come server WSGI con tre worker per ottimizzare le prestazioni. Il parametro \texttt{FLASK\_APP} viene impostato dinamicamente attraverso variabili d'ambiente, consentendo una maggiore flessibilità di configurazione tra ambienti diversi. Inoltre, gli script di inizializzazione \texttt{docker-entrypoint.sh} e \texttt{db\_migrate.sh} vengono eseguiti all'avvio del container per garantire la corretta configurazione e migrazione del database.
 
 \subsection{Persistenza dei dati}
+La persistenza dei dati è un aspetto cruciale in un'applicazione come VitaLink che gestisce informazioni sanitarie. La soluzione adottata si basa su volumi Docker, in particolare sul volume \texttt{postgres\_data} configurato nel \texttt{docker-compose.yml}, che viene mappato sulla directory interna di PostgreSQL \texttt{/var/lib/postgresql/data}. Questo approccio garantisce che i dati sopravvivano al riavvio dei container o alla ricostruzione dell'immagine, preservando l'integrità delle informazioni dei pazienti e delle loro misurazioni. La separazione tra container e dati permette anche di semplificare le procedure di backup, poiché è possibile eseguire backup del volume indipendentemente dallo stato dei container. Questa architettura supporta inoltre scenari di disaster recovery, consentendo di ripristinare rapidamente il sistema in caso di problemi hardware o software.
 
 \section{Continuous Integration e Continuous Deployment}
 \subsection{Pipeline CI/CD}
+La pipeline di Continuous Integration e Continuous Deployment (CI/CD) di VitaLink è stata implementata utilizzando GitHub Actions, creando un processo automatizzato che accompagna il codice dalla fase di sviluppo fino al deployment. La pipeline è strutturata in diverse fasi: inizia con il checkout del codice sorgente, prosegue con la configurazione dell'ambiente Python, l'installazione delle dipendenze, l'esecuzione dei test e infine, per il ramo principale, il deployment automatico. Ogni fase è condizionata dal successo di quella precedente, garantendo che solo il codice che supera tutti i controlli di qualità raggiunga l'ambiente di produzione. Questa automazione ha ridotto significativamente il rischio di errori umani nel processo di rilascio e ha accelerato il ciclo di feedback, consentendo di identificare e risolvere i problemi più rapidamente.
 
 \subsection{Automazione dei test}
+L'automazione dei test rappresenta una componente fondamentale del workflow di CI/CD di VitaLink. Ad ogni commit o pull request, GitHub Actions esegue automaticamente la suite completa dei test per verificare che le modifiche non introducano regressioni. La configurazione prevede l'esecuzione di test unitari con pytest in un ambiente isolato, verifiche di qualità del codice con strumenti come Flake8 e Pylint, e analisi della copertura dei test con coverage. I risultati dei test vengono pubblicati direttamente nell'interfaccia di GitHub, fornendo feedback immediato agli sviluppatori. Inoltre, per i test che richiedono l'interazione con servizi esterni come l'API di Fitbit, sono stati implementati mock specifici per simulare le risposte, garantendo che i test siano deterministici e non dipendano dalla disponibilità di servizi esterni.
 
 \subsection{Deployment automatizzato}
+Il deployment automatizzato di VitaLink è configurato per attivarsi solo quando le modifiche vengono incorporate nel ramo principale (\texttt{main}) e tutti i test sono stati superati con successo. Il processo di deployment utilizza le credenziali sicure memorizzate come segreti di GitHub Actions e comprende diverse fasi: costruzione dell'immagine Docker, push al Container Registry, e deployment sull'infrastruttura cloud. La configurazione include anche meccanismi di rollback automatico in caso di problemi durante il deployment, garantendo la continuità del servizio. Un aspetto particolarmente importante è l'applicazione delle migrazioni del database, che viene gestita dallo script \texttt{db\_migrate.sh} durante l'avvio del container, assicurando che lo schema del database sia sempre sincronizzato con il codice dell'applicazione. Questo approccio garantisce deployment frequenti e sicuri, abilitando un modello di sviluppo realmente continuo.
 
-\section{Monitoraggio e logging}
+\section{Logging}
 \subsection{Strategia di logging}
+Per il backend della piattaforma è stato implementato un sistema di logging estensivo per monitorare le attività e gli errori.
 
-\subsection{Monitoraggio delle performance}
-
-\subsection{Gestione degli errori in produzione}
-
+\subsection{Gestione degli errori}
+La strategia in caso di errore ha previsto la registrazione di un messaggio dettagliato in console, includendo anche i dettagli dell'eccezione.
+Nel caso di errori critici, il workflow configurato su Github Actions ha permesso di identificare quasi istantaneamente e risolvere i problemi.
 
 
 
@@ -1986,22 +1956,6 @@ Questi strumenti sono stati integrati nel processo di integrazione continua tram
 \subsection{Funzionalità implementate}
 
 \subsection{Conformità ai requisiti}
-
-\subsection{Innovazioni apportate}
-
-\section{Metriche di performance}
-\subsection{Tempo di risposta}
-
-\subsection{Scalabilità e carico}
-
-\subsection{Efficienza nell'uso delle risorse}
-
-\section{Feedback degli utenti}
-\subsection{Metodologia di raccolta feedback}
-
-\subsection{Analisi delle risposte}
-
-\subsection{Aree di miglioramento identificate}
 
 \section{Limiti e problemi riscontrati}
 \subsection{Sfide tecniche}
@@ -2025,8 +1979,6 @@ Questi strumenti sono stati integrati nel processo di integrazione continua tram
 \subsection{Integrazione con ulteriori piattaforme sanitarie}
 
 \subsection{Funzionalità avanzate di analisi predittiva}
-
-\subsection{Espansione del sistema di reportistica}
 
 \subsection{Applicazione mobile companion}
 
@@ -4019,5 +3971,7 @@ highlight 15 to 17 #lightgrey : Sessione terminata
     \bibitem{analysis-docs} Static Analysis report. (n.d.). \url{https://andrearoggeri22.github.io/VitaLink/analysis/}
     \bibitem{plantuml} PlantUML. (n.d.). Open-source tool that uses simple textual descriptions to draw beautiful UML diagrams. PlantUML.com. \url{https://plantuml.com/}
     \bibitem{plantvscode} PlantUML - Visual Studio Marketplace. (n.d.). \url{https://marketplace.visualstudio.com/items?itemName=jebbs.plantuml}
+    \bibitem{pytest} pytest documentation. (n.d.). \url{https://docs.pytest.org/en/stable/}
+    \bibitem{koyeb} KOYEB: High-performance infrastructure for APIs, inference, and databases. (n.d.). Koyeb. \url{https://www.koyeb.com/}
 \end{thebibliography}
 \end{document}
