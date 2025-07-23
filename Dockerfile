@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+﻿FROM python:3.11-slim
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -15,7 +15,12 @@ RUN dos2unix /app/docker-entrypoint.sh \
  && dos2unix /app/db_migrate.sh \
  && chmod +x /app/db_migrate.sh
 
-EXPOSE $PORT
+EXPOSE 5000
+
+ENV HOST=0.0.0.0
+ENV PORT=5000
+ENV LOG_LEVEL=info
+ENV FLASK_APP=app:app
 
 ENTRYPOINT ["/app/docker-entrypoint.sh"]
-CMD ["sh", "-c", "/app/db_migrate.sh && gunicorn --bind $HOST:$PORT --workers 3 --access-logfile - --error-logfile - --log-level $(echo ${LOG_LEVEL} | tr '[:upper:]' '[:lower:]') $FLASK_APP"]
+CMD ["sh", "-c", "/app/db_migrate.sh && gunicorn --bind 0.0.0.0:5000 --workers 3 --access-logfile - --error-logfile - --log-level info app:app"]

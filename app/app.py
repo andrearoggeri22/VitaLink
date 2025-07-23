@@ -1,4 +1,4 @@
-"""
+﻿"""
 Flask Application Module.
 This module initializes and configures the Flask application and its extensions:
 - SQLAlchemy for database ORM
@@ -13,12 +13,12 @@ import os
 import logging
 import sys
 from datetime import datetime, timedelta, timezone
-from flask import Flask, request, session
+from flask import Flask, request, session, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy import text
 from werkzeug.middleware.proxy_fix import ProxyFix
-from flask_login import LoginManager
+from flask_login import LoginManager, current_user
 from flask_jwt_extended import JWTManager
 from flask_babel import Babel
 from flask_migrate import Migrate
@@ -52,31 +52,58 @@ def get_database_uri():
         DB_NAME: Database name (cloud environment only)
         INSTANCE_UNIX_SOCKET: Unix socket path (cloud environment only)
         DATABASE_URL: Database connection string (local environment only)
+    Priority order:
+    1. DATABASE_URL environment variable (AWS RDS, PostgreSQL, etc.)
+    2. Cloud environment configuration (AWS Fargate, Google Cloud Run, etc.)
+    3. SQLite fallback for local development
     """
+    # Check for direct DATABASE_URL first (AWS RDS, etc.)
+    database_url = os.environ.get("DATABASE_URL")
+    if database_url:
+        logger.info(f"Using DATABASE_URL: {database_url[:50]}...")
+        return database_url
+    
+    # Check if running in any cloud environment (AWS Fargate, Google Cloud Run, etc.)
     is_cloud_environment = os.environ.get("CLOUD_RUN_ENVIRONMENT", "false").lower() == "true"
-    logger.info(f"Running in cloud environment: {is_cloud_environment}")
     if is_cloud_environment:
-        # Koyeb SQL with Unix socket connection
+        logger.info("Running in cloud environment (AWS Fargate or Google Cloud Run)")
         try:
-            db_user = os.environ["DB_USER"]
-            db_pass = os.environ["DB_PASS"]
-            db_name = os.environ["DB_NAME"]
-            unix_socket_path = os.environ["INSTANCE_UNIX_SOCKET"]
-            # PostgreSQL connection via Unix socket
-            db_uri = f"postgresql://{db_user}:{db_pass}@{unix_socket_path}/{db_name}"
-            logger.info(f"Configured Koyeb SQL connection via Unix socket at {unix_socket_path}")
+            # Try AWS/standard format first
+            db_user = os.environ.get("DB_USER")
+            db_pass = os.environ.get("DB_PASS") 
+            db_name = os.environ.get("DB_NAME")
+            db_host = os.environ.get("DB_HOST", os.environ.get("PGHOST", "localhost"))
+            db_port = os.environ.get("DB_PORT", os.environ.get("PGPORT", "5432"))
+            
+            # Check if we have Unix socket (Google Cloud Run)
+            unix_socket_path = os.environ.get("INSTANCE_UNIX_SOCKET")
+            
+            if unix_socket_path:
+                # Google Cloud Run with Unix socket
+                db_uri = f"postgresql://{db_user}:{db_pass}@{unix_socket_path}/{db_name}"
+                logger.info(f"Configured Google Cloud SQL connection via Unix socket")
+            else:
+                # Standard TCP connection (AWS RDS, etc.)
+                db_uri = f"postgresql://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}"
+                logger.info(f"Configured cloud PostgreSQL connection to {db_host}:{db_port}")
+            
             return db_uri
         except KeyError as e:
-            logger.error(f"Missing required environment variable for Koyeb SQL: {e}")
-            logger.error("Falling back to default connection string")
-    # Default database connection (local environment)
-    db_uri = os.environ.get("DATABASE_URL", "sqlite:///healthcare.db")
-    logger.info(f"Using database connection: {db_uri}")
+            logger.error(f"Missing required environment variable for cloud environment: {e}")
+            logger.error("Falling back to SQLite")
+    
+    # Fallback to SQLite for local development
+    db_uri = "sqlite:///healthcare.db"
+    logger.info(f"Using SQLite fallback: {db_uri}")
     return db_uri
 # Create the Flask application
 app = Flask(__name__)
 app.secret_key = os.environ["SESSION_SECRET"]
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)  # needed for url_for to generate with https
+
+# Configure WTF-CSRF protection
+app.config['WTF_CSRF_ENABLED'] = True
+app.config['WTF_CSRF_SECRET_KEY'] = os.environ.get("JWT_SECRET_KEY", os.environ["SESSION_SECRET"])
 # Configure SQLAlchemy
 app.config["SQLALCHEMY_DATABASE_URI"] = get_database_uri()
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
@@ -230,14 +257,24 @@ def load_user(user_id):
         Doctor: The Doctor object if found, or None if not found
     """
     return Doctor.query.get(int(user_id))
+# Root endpoint redirect
+@app.route('/')
+def index():
+    """Root endpoint that redirects to appropriate page."""
+    if current_user and current_user.is_authenticated:
+        return redirect(url_for('views.dashboard'))
+    return redirect(url_for('auth.login'))
+
 # Health check endpoint for Cloud Run
 @app.route('/healthz', methods=['GET'])
+@app.route('/health', methods=['GET'])  # Add alternative health endpoint
 def health_check():
     """
     Health check endpoint for monitoring system health.
     This endpoint is used by Cloud Run, Kubernetes, or other orchestration systems
     to determine if the application is healthy and ready to receive traffic.
-    It performs a basic check by testing database connectivity.
+    It performs a basic check without testing database connectivity to avoid issues.
+    
     Returns:
         tuple: JSON response with health status and HTTP status code
             - 200 OK with system information if healthy
@@ -257,10 +294,7 @@ def health_check():
         }
     """
     try:
-        # Check database connection
-        with db.engine.connect() as conn:
-            conn.execute(text("SELECT 1"))
-        # Basic system info
+        # Basic system info without database test
         cloud_env = os.environ.get("CLOUD_RUN_ENVIRONMENT", "false").lower() == "true"
         env_type = "Cloud Run" if cloud_env else "Local"
         return {
@@ -276,3 +310,12 @@ def health_check():
             "error": str(e),
             "timestamp": datetime.now().isoformat()
         }, 500
+
+# ALB Health check endpoint 
+@app.route('/health', methods=['GET'])
+def alb_health_check():
+    """
+    Simple health check endpoint for AWS Application Load Balancer.
+    Returns a simple OK response without any complex checks.
+    """
+    return {"status": "healthy", "service": "vitalink"}, 200

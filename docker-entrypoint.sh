@@ -7,12 +7,12 @@ ip addr show
 echo "Listening ports:"
 netstat -tulpn || ss -tulpn || echo "netstat/ss command not available"
 
-# Only perform database check if not in Cloud Run environment
-if [ "${CLOUD_RUN_ENVIRONMENT}" != "true" ]; then
+# Only perform database check if not in Cloud Run environment AND PostgreSQL variables are set
+if [ "${CLOUD_RUN_ENVIRONMENT}" != "true" ] && [ ! -z "${PGHOST}" ] && [ ! -z "${PGUSER}" ]; then
   echo "Running in local/development environment, checking PostgreSQL connection..."
   
   # Maximum retries for database connection
-  MAX_RETRIES=30
+  MAX_RETRIES=5
   RETRY_COUNT=0
   
   echo "Waiting for PostgreSQL connection at ${PGHOST}:${PGPORT}..."
@@ -30,7 +30,7 @@ if [ "${CLOUD_RUN_ENVIRONMENT}" != "true" ]; then
     echo "Application will try to connect during runtime"
   fi
 else
-  echo "Running in Cloud Run environment, skipping local PostgreSQL check"
+  echo "Skipping PostgreSQL check (Cloud Run environment or no PostgreSQL config)"
 fi
 
 echo "Initializing database..."

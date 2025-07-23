@@ -36,6 +36,18 @@ Authentication module logger.
 Logger for authentication-related events such as login attempts,
 registrations, password changes, and authentication failures.
 """
+# Login form
+class LoginForm(FlaskForm):
+    """
+    Form for doctor login.
+    This form collects email and password for authentication.
+    Fields:
+        email: Doctor's email address
+        password: Doctor's password
+    """
+    email = EmailField(_('Email'), validators=[DataRequired(), Email()])
+    password = PasswordField(_('Password'), validators=[DataRequired()])
+
 # Registration form
 class RegistrationForm(FlaskForm):
     """
