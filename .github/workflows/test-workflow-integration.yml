@@ -2,11 +2,25 @@ name: Test Workflow Integration
 
 on:
   workflow_dispatch:
+    inputs:
+      test_method:
+        description: 'Test method to use'
+        required: true
+        default: 'repository_dispatch'
+        type: choice
+        options:
+        - repository_dispatch
+        - workflow_dispatch
+        - simulate_build
 
 jobs:
   test-integration:
     name: Test Workflow Integration
     runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      actions: write
     
     steps:
     - name: Checkout Repository
@@ -15,24 +29,71 @@ jobs:
     - name: Test workflow trigger
       run: |
         echo "Testing workflow integration..."
+        echo "Test method: ${{ github.event.inputs.test_method }}"
         echo "This workflow can be used to test if the CloudFormation deployment triggers correctly"
         
+    - name: Test Repository Dispatch
+      if: github.event.inputs.test_method == 'repository_dispatch'
+      run: |
+        echo "Testing repository_dispatch trigger..."
+        curl -X POST \
+          -H "Accept: application/vnd.github.v3+json" \
+          -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          -H "Content-Type: application/json" \
+          https://api.github.com/repos/${{ github.repository }}/dispatches \
+          -d '{
+            "event_type": "deploy-cloudformation",
+            "client_payload": {
+              "image_uri": "123456789.dkr.ecr.us-east-1.amazonaws.com/vitalink:test",
+              "environment": "production",
+              "desired_task_count": "1",
+              "triggered_by": "test-workflow",
+              "test": true
+            }
+          }'
+        echo "Repository dispatch sent!"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Test Workflow Dispatch
+      if: github.event.inputs.test_method == 'workflow_dispatch'
+      run: |
+        echo "Testing workflow_dispatch trigger..."
+        gh workflow run "AWS CloudFormation Deployment" \
+          --ref ${{ github.ref }} \
+          -f image_uri="123456789.dkr.ecr.us-east-1.amazonaws.com/vitalink:test" \
+          -f environment="production" \
+          -f desired_task_count="1"
+        echo "Workflow dispatch sent!"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
     - name: Simulate build completion
+      if: github.event.inputs.test_method == 'simulate_build'
       run: |
         echo "Simulating build completion..."
-        # This would normally be done by the build workflow
         mkdir -p deployment-artifacts
         echo "123456789.dkr.ecr.us-east-1.amazonaws.com/vitalink:test-tag" > deployment-artifacts/image-uri.txt
         echo "123456789.dkr.ecr.us-east-1.amazonaws.com/vitalink:latest" > deployment-artifacts/image-latest-uri.txt
         echo "${{ github.sha }}" > deployment-artifacts/git-sha.txt
         
+        echo "=== Test Artifacts Created ==="
+        ls -la deployment-artifacts/
+        echo "Image URI: $(cat deployment-artifacts/image-uri.txt)"
+        echo "Latest URI: $(cat deployment-artifacts/image-latest-uri.txt)"
+        echo "Git SHA: $(cat deployment-artifacts/git-sha.txt)"
+        
     - name: Upload test artifacts
+      if: github.event.inputs.test_method == 'simulate_build'
       uses: actions/upload-artifact@v4
       with:
         name: deployment-artifacts
         path: deployment-artifacts/
         retention-days: 1
         
-    - name: Trigger CloudFormation deployment
+    - name: Summary
       run: |
-        echo "Build completed successfully!"
+        echo "=== Test Summary ==="
+        echo "Method used: ${{ github.event.inputs.test_method }}"
+        echo "Check the Actions tab to see if the 'AWS CloudFormation Deployment' workflow starts."
+        echo "Look for the debug output in the deployment workflow to see trigger information."

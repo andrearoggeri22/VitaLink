@@ -68,14 +68,16 @@ For production deployments, consider setting up environment protection:
 The workflows are configured with these triggers:
 
 ### Build and Push (`aws-build-push.yml`)
-- Push to `main` or `CLOUD_MOBILE_PROJECT` branches
-- Pull requests to `main`
-- Manual trigger via `workflow_dispatch`
+- **Trigger automatico**: Push su `main` o `CLOUD_MOBILE_PROJECT` branches
+- **Trigger automatico**: Pull requests su `main`
+- **Trigger manuale**: Via `workflow_dispatch`
+- **Post-build**: Automaticamente triggera il CloudFormation deployment tramite `workflow_dispatch` e `repository_dispatch`
 
 ### CloudFormation Deploy (`aws-cloudformation-deploy.yml`)
-- **Trigger automatico**: Dopo successful completion del workflow "AWS ECR Build and Push"
+- **Trigger automatico**: Dopo successful completion del workflow "AWS ECR Build and Push" (via `workflow_run`)
+- **Trigger automatico**: Via `repository_dispatch` con event type `deploy-cloudformation`
 - **Trigger manuale**: Con parametri per environment e image URI
-- **Dipendenze**: Richiede artifact dal workflow di build (image URI)
+- **Dipendenze**: Richiede artifact dal workflow di build (image URI) o parametri espliciti
 - **Note**: Usa `dawidd6/action-download-artifact@v3` per scaricare artifact da workflow runs precedenti
 - Automatic after successful build
 - Manual trigger with parameters
@@ -101,7 +103,14 @@ The workflows are configured with these triggers:
    - Verify the build workflow completed successfully
    - Check that artifact upload succeeded in build workflow
    - Ensure branch matches trigger configuration (main or CLOUD_MOBILE_PROJECT)
-   - Use "Test Workflow Integration" workflow to debug
+   - The build workflow now attempts multiple trigger methods:
+     - Primary: `workflow_dispatch` to CloudFormation workflow
+     - Fallback: `repository_dispatch` with `deploy-cloudformation` event
+   - Use "Test Workflow Integration" workflow to debug:
+     - Choose `repository_dispatch` to test the fallback method
+     - Choose `workflow_dispatch` to test the primary method
+     - Choose `simulate_build` to test with artifacts
+   - Check the debug job output in CloudFormation Deploy workflow
 
 3. **CloudFormation Stack Errors**
    - Check the AWS CloudFormation console for detailed error messages
