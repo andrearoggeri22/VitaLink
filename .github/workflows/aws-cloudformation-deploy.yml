@@ -1,0 +1,278 @@
+name: AWS CloudFormation Deployment
+
+on:
+  workflow_run:
+    workflows: ["AWS ECR Build and Push"]
+    types:
+      - completed
+    branches:
+      - main
+      - CLOUD_MOBILE_PROJECT
+  workflow_dispatch:
+    inputs:
+      image_uri:
+        description: 'ECR Image URI (leave empty to use latest)'
+        required: false
+        type: string
+      environment:
+        description: 'Deployment Environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+        - development
+        - staging
+        - production
+      desired_task_count:
+        description: 'Number of ECS tasks'
+        required: true
+        default: '1'
+        type: string
+
+env:
+  AWS_REGION: us-east-1
+  STACK_NAME: VitaLink-Stack
+  ECR_REPOSITORY: vitalink
+
+jobs:
+  validate-template:
+    name: Validate CloudFormation Template
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Validate CloudFormation template
+      run: |
+        aws cloudformation validate-template \
+          --template-body file://vitalink-infrastructure.yaml
+
+    - name: Check template security
+      run: |
+        echo "Checking CloudFormation template security..."
+        
+        # Check for hardcoded secrets
+        if grep -i "password\|secret\|key" vitalink-infrastructure.yaml | grep -v "Ref\|GetAtt"; then
+          echo "Warning: Potential hardcoded secrets found in template"
+        else
+          echo "No hardcoded secrets detected"
+        fi
+        
+        # Check for encryption settings
+        if grep -i "StorageEncrypted.*false\|Encrypted.*false" vitalink-infrastructure.yaml; then
+          echo "Warning: Some resources have encryption disabled"
+        fi
+        
+        echo "Template validation completed"
+
+  deploy:
+    name: Deploy to AWS
+    runs-on: ubuntu-latest
+    needs: validate-template
+    if: github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch'
+    
+    environment: 
+      name: ${{ github.event.inputs.environment || 'production' }}
+      url: ${{ steps.deploy-stack.outputs.application-url }}
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Download deployment artifacts
+      if: github.event_name != 'workflow_dispatch' || github.event.inputs.image_uri == ''
+      uses: actions/download-artifact@v4
+      with:
+        name: deployment-artifacts
+        path: deployment-artifacts/
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        run-id: ${{ github.event.workflow_run.id }}
+
+    - name: Set image URI
+      id: set-image-uri
+      run: |
+        if [ "${{ github.event.inputs.image_uri }}" != "" ]; then
+          echo "image-uri=${{ github.event.inputs.image_uri }}" >> $GITHUB_OUTPUT
+        elif [ -f "deployment-artifacts/image-latest-uri.txt" ]; then
+          IMAGE_URI=$(cat deployment-artifacts/image-latest-uri.txt)
+          echo "image-uri=$IMAGE_URI" >> $GITHUB_OUTPUT
+        else
+          # Fallback to latest from ECR
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          IMAGE_URI="$ACCOUNT_ID.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:latest"
+          echo "image-uri=$IMAGE_URI" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Check for existing stack
+      id: check-stack
+      run: |
+        if aws cloudformation describe-stacks --stack-name ${{ env.STACK_NAME }} > /dev/null 2>&1; then
+          STACK_STATUS=$(aws cloudformation describe-stacks --stack-name ${{ env.STACK_NAME }} --query 'Stacks[0].StackStatus' --output text)
+          echo "stack-exists=true" >> $GITHUB_OUTPUT
+          echo "stack-status=$STACK_STATUS" >> $GITHUB_OUTPUT
+          echo "Existing stack found with status: $STACK_STATUS"
+        else
+          echo "stack-exists=false" >> $GITHUB_OUTPUT
+          echo "No existing stack found"
+        fi
+
+    - name: Delete existing stack if needed
+      if: steps.check-stack.outputs.stack-exists == 'true' && (contains(steps.check-stack.outputs.stack-status, 'ROLLBACK') || contains(steps.check-stack.outputs.stack-status, 'FAILED'))
+      run: |
+        echo "Deleting failed stack..."
+        aws cloudformation delete-stack --stack-name ${{ env.STACK_NAME }}
+        
+        echo "Waiting for stack deletion..."
+        aws cloudformation wait stack-delete-complete --stack-name ${{ env.STACK_NAME }}
+        echo "Stack deleted successfully"
+
+    - name: Deploy CloudFormation stack
+      id: deploy-stack
+      run: |
+        echo "Starting CloudFormation deployment..."
+        echo "Image URI: ${{ steps.set-image-uri.outputs.image-uri }}"
+        echo "Environment: ${{ github.event.inputs.environment || 'production' }}"
+        echo "Desired Task Count: ${{ github.event.inputs.desired_task_count || '1' }}"
+        
+        # Create or update stack
+        if [ "${{ steps.check-stack.outputs.stack-exists }}" == "true" ]; then
+          echo "Updating existing stack..."
+          aws cloudformation update-stack \
+            --stack-name ${{ env.STACK_NAME }} \
+            --template-body file://vitalink-infrastructure.yaml \
+            --parameters \
+              ParameterKey=ImageURI,ParameterValue="${{ steps.set-image-uri.outputs.image-uri }}" \
+              ParameterKey=DatabasePassword,ParameterValue="${{ secrets.DATABASE_PASSWORD }}" \
+              ParameterKey=Environment,ParameterValue="${{ github.event.inputs.environment || 'production' }}" \
+              ParameterKey=DesiredTaskCount,ParameterValue="${{ github.event.inputs.desired_task_count || '1' }}" \
+            --capabilities CAPABILITY_NAMED_IAM
+          
+          echo "Waiting for stack update to complete..."
+          aws cloudformation wait stack-update-complete --stack-name ${{ env.STACK_NAME }}
+        else
+          echo "Creating new stack..."
+          aws cloudformation create-stack \
+            --stack-name ${{ env.STACK_NAME }} \
+            --template-body file://vitalink-infrastructure.yaml \
+            --parameters \
+              ParameterKey=ImageURI,ParameterValue="${{ steps.set-image-uri.outputs.image-uri }}" \
+              ParameterKey=DatabasePassword,ParameterValue="${{ secrets.DATABASE_PASSWORD }}" \
+              ParameterKey=Environment,ParameterValue="${{ github.event.inputs.environment || 'production' }}" \
+              ParameterKey=DesiredTaskCount,ParameterValue="${{ github.event.inputs.desired_task_count || '1' }}" \
+            --capabilities CAPABILITY_NAMED_IAM
+          
+          echo "Waiting for stack creation to complete..."
+          aws cloudformation wait stack-create-complete --stack-name ${{ env.STACK_NAME }}
+        fi
+        
+        echo "CloudFormation deployment completed!"
+
+    - name: Get stack outputs
+      id: get-outputs
+      run: |
+        echo "Retrieving stack outputs..."
+        
+        # Get all stack outputs
+        OUTPUTS=$(aws cloudformation describe-stacks --stack-name ${{ env.STACK_NAME }} --query 'Stacks[0].Outputs')
+        
+        # Extract specific outputs
+        APP_URL=$(echo $OUTPUTS | jq -r '.[] | select(.OutputKey=="VitaLinkURL") | .OutputValue')
+        HEALTH_URL=$(echo $OUTPUTS | jq -r '.[] | select(.OutputKey=="HealthCheckURL") | .OutputValue')
+        DB_ENDPOINT=$(echo $OUTPUTS | jq -r '.[] | select(.OutputKey=="DatabaseEndpoint") | .OutputValue')
+        LB_DNS=$(echo $OUTPUTS | jq -r '.[] | select(.OutputKey=="LoadBalancerDNS") | .OutputValue')
+        VPC_ID=$(echo $OUTPUTS | jq -r '.[] | select(.OutputKey=="VPCId") | .OutputValue')
+        ECS_CLUSTER=$(echo $OUTPUTS | jq -r '.[] | select(.OutputKey=="ECSClusterName") | .OutputValue')
+        
+        # Set outputs
+        echo "application-url=$APP_URL" >> $GITHUB_OUTPUT
+        echo "health-check-url=$HEALTH_URL" >> $GITHUB_OUTPUT
+        echo "database-endpoint=$DB_ENDPOINT" >> $GITHUB_OUTPUT
+        echo "load-balancer-dns=$LB_DNS" >> $GITHUB_OUTPUT
+        echo "vpc-id=$VPC_ID" >> $GITHUB_OUTPUT
+        echo "ecs-cluster=$ECS_CLUSTER" >> $GITHUB_OUTPUT
+        
+        # Display information
+        echo "Application URL: $APP_URL"
+        echo "Health Check URL: $HEALTH_URL"
+        echo "Database Endpoint: $DB_ENDPOINT"
+        echo "Load Balancer DNS: $LB_DNS"
+        echo "VPC ID: $VPC_ID"
+        echo "ECS Cluster: $ECS_CLUSTER"
+
+    - name: Health check
+      id: health-check
+      run: |
+        echo "Performing application health check..."
+        HEALTH_URL="${{ steps.get-outputs.outputs.health-check-url }}"
+        
+        # Wait for application to be ready (max 10 minutes)
+        MAX_ATTEMPTS=30
+        ATTEMPT=1
+        
+        while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+          echo "Health check attempt $ATTEMPT of $MAX_ATTEMPTS..."
+          
+          if curl -f -s --max-time 10 "$HEALTH_URL" > /dev/null; then
+            echo "Application is healthy!"
+            HEALTH_RESPONSE=$(curl -s "$HEALTH_URL")
+            echo "Health response: $HEALTH_RESPONSE"
+            echo "health-status=healthy" >> $GITHUB_OUTPUT
+            break
+          else
+            echo "Application not ready yet, waiting 20 seconds..."
+            sleep 20
+            ATTEMPT=$((ATTEMPT + 1))
+          fi
+        done
+        
+        if [ $ATTEMPT -gt $MAX_ATTEMPTS ]; then
+          echo "Health check timeout after 10 minutes"
+          echo "health-status=timeout" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Create deployment summary
+      run: |
+        cat >> $GITHUB_STEP_SUMMARY << EOF
+        # VitaLink Deployment Summary
+        
+        ## Deployment Information
+        - **Stack Name**: \`${{ env.STACK_NAME }}\`
+        - **Environment**: \`${{ github.event.inputs.environment || 'production' }}\`
+        - **Image URI**: \`${{ steps.set-image-uri.outputs.image-uri }}\`
+        - **Desired Task Count**: \`${{ github.event.inputs.desired_task_count || '1' }}\`
+        
+        ## Application Endpoints
+        - **Application URL**: [${{ steps.get-outputs.outputs.application-url }}](${{ steps.get-outputs.outputs.application-url }})
+        - **Health Check**: [${{ steps.get-outputs.outputs.health-check-url }}](${{ steps.get-outputs.outputs.health-check-url }})
+        
+        ## Infrastructure Details
+        - **Database Endpoint**: \`${{ steps.get-outputs.outputs.database-endpoint }}\`
+        - **Load Balancer**: \`${{ steps.get-outputs.outputs.load-balancer-dns }}\`
+        - **VPC ID**: \`${{ steps.get-outputs.outputs.vpc-id }}\`
+        - **ECS Cluster**: \`${{ steps.get-outputs.outputs.ecs-cluster }}\`
+        
+        ## Health Status
+        - **Status**: ${{ steps.health-check.outputs.health-status == 'healthy' && 'Healthy' || 'Needs verification' }}
+        EOF
+
+    outputs:
+      application-url: ${{ steps.get-outputs.outputs.application-url }}
+      health-check-url: ${{ steps.get-outputs.outputs.health-check-url }}
+      health-status: ${{ steps.health-check.outputs.health-status }}

@@ -307,18 +307,18 @@ VitaLink include una documentazione completa:
 
 Il progetto include vari diagrammi UML per descrivere l'architettura e il design:
 
-- [Diagrammi ER](docs/UML/ER/image.png): Struttura del database
-- [Diagrammi delle classi](docs/UML/Class/image.png): Relazioni tra le classi
-- [Diagrammi di sequenza](docs/UML/Sequence/image.png): Flussi di interazione
-- [Diagrammi di stato](docs/UML/State/image.png): Stati del sistema
-- [Diagrammi dei casi d'uso](docs/UML/Use%20Case/image.png): Funzionalità del sistema
-- [Diagrammi di componenti](docs/UML/Component/image.png): Componenti del sistema
-- [Diagrammi di deployment](docs/UML/Deployment/image.png): Struttura di deployment
-- [Diagrammi di oggetti](docs/UML/Object/image.png): Istanze di oggetti
-- [Diagrammi di attività](docs/UML/Activity/image.png): Flussi di lavoro
-- [Diagrammi di comunicazione](docs/UML/Communication/image.png): Comunicazione tra oggetti
-- [Diagrammi di timing](docs/UML/Timing/image.png): Visualizzazione temporale
-- [Diagrammi di pacchetto](docs/UML/Package/image.png): Organizzazione dei pacchetti
+- [Diagrammi ER](docs/UML/ER/): Struttura del database
+- [Diagrammi delle classi](docs/UML/Class/): Relazioni tra le classi
+- [Diagrammi di sequenza](docs/UML/Sequence/): Flussi di interazione
+- [Diagrammi di stato](docs/UML/State/): Stati del sistema
+- [Diagrammi dei casi d'uso](docs/UML/Use%20Case/): Funzionalità del sistema
+- [Diagrammi di componenti](docs/UML/Component/): Componenti del sistema
+- [Diagrammi di deployment](docs/UML/Deployment/): Struttura di deployment
+- [Diagrammi di oggetti](docs/UML/Object/): Istanze di oggetti
+- [Diagrammi di attività](docs/UML/Activity/): Flussi di lavoro
+- [Diagrammi di comunicazione](docs/UML/Communication/): Comunicazione tra oggetti
+- [Diagrammi di timing](docs/UML/Timing/): Visualizzazione temporale
+- [Diagrammi di pacchetto](docs/UML/Package/): Organizzazione dei pacchetti
 
 ## Localizzazione
 

@@ -1,0 +1,415 @@
+# Questo script PowerShell per AWS CLI permette di eseguire il deployment di Vitalink in ambiente AWS.
+# Alcuni parametri come il nome del repository ECR, il nome dello stack CloudFormation e il percorso del template sono configurabili da questo script.
+# Per il template CloudFormation, fare riferimento al file vitalink-infrastructure.yaml presente nella directory del progetto.
+# Assicurati di avere le credenziali AWS configurate correttamente prima di eseguire questo script(aws configure).
+# Per eseguire questo script, assicurati di avere installato AWS CLI, Docker e PowerShell.
+# Avere cura di settare anche il token di sessione (aws configure set aws_session_token "<token>"), se necessario.
+
+
+
+Write-Host "`nINIZIALIZZAZIONE DEPLOYMENT VITALINK" -ForegroundColor Cyan
+Write-Host "=================================================" -ForegroundColor Cyan
+
+# Impostazione variabili globali
+$repoName = "vitalink"
+$stackName = "VitaLink-Stack"
+$templatePath = "C:\Users\andre\git\VitaLink\vitalink-infrastructure.yaml"
+$projectRoot = "C:\Users\andre\git\VitaLink"
+
+# Verifica delle credenziali AWS
+Write-Host "`nVerifica delle credenziali AWS..." -ForegroundColor Yellow
+try {
+    $identityInfo = aws sts get-caller-identity | ConvertFrom-Json
+    Write-Host "Connesso come: $($identityInfo.Arn)" -ForegroundColor Green
+    Write-Host "Account ID: $($identityInfo.Account)" -ForegroundColor Green
+} catch {
+    Write-Host "ERRORE: Credenziali AWS non valide o scadute. Esegui 'aws configure' prima di questo script." -ForegroundColor Red
+    exit 1
+}
+
+# Verifica della regione AWS corrente
+$awsRegion = aws configure get region
+Write-Host "Regione AWS: $awsRegion" -ForegroundColor Green
+
+# 1. PREPARAZIONE DELL'IMMAGINE DOCKER
+# ============================================================================
+Write-Host "`nFASE 1: PREPARAZIONE DOCKER" -ForegroundColor Cyan
+Write-Host "=================================================" -ForegroundColor Cyan
+
+# Verifica se Docker è in esecuzione
+Write-Host "Verifica che Docker sia in esecuzione..." -ForegroundColor Yellow
+try {
+    docker info | Out-Null
+    Write-Host "Docker è in esecuzione" -ForegroundColor Green
+} catch {
+    Write-Host "ERRORE: Docker non è in esecuzione. Avvia Docker Desktop e riprova." -ForegroundColor Red
+    exit 1
+}
+
+# Verifica/creazione del repository ECR
+Write-Host "Verifica del repository ECR..." -ForegroundColor Yellow
+$repoExists = $false
+try {
+    $repoCheck = aws ecr describe-repositories --repository-names $repoName 2>$null
+    if ($repoCheck) {
+        $repoExists = $true
+        $repoUri = (($repoCheck | ConvertFrom-Json).repositories | Where-Object { $_.repositoryName -eq $repoName }).repositoryUri
+        Write-Host "Repository ECR esistente: $repoUri" -ForegroundColor Green
+    }
+} catch {
+    Write-Host "Repository ECR non trovato, verrà creato..." -ForegroundColor Yellow
+}
+
+if (-not $repoExists) {
+    Write-Host "Creazione del repository ECR..." -ForegroundColor Yellow
+    try {
+        $ecrResult = aws ecr create-repository --repository-name $repoName | ConvertFrom-Json
+        $repoUri = $ecrResult.repository.repositoryUri
+        Write-Host "Repository ECR creato: $repoUri" -ForegroundColor Green
+    } catch {
+        Write-Host "ERRORE nella creazione del repository ECR: $_" -ForegroundColor Red
+        exit 1
+    }
+}
+
+# Login a ECR
+Write-Host "Login al repository ECR..." -ForegroundColor Yellow
+try {
+    $loginToken = aws ecr get-login-password --region $awsRegion
+    $loginToken | docker login --username AWS --password-stdin $repoUri.Split('/')[0]
+    Write-Host "Login a ECR completato" -ForegroundColor Green
+} catch {
+    Write-Host "ERRORE nel login a ECR: $_" -ForegroundColor Red
+    exit 1
+}
+
+# Build dell'immagine Docker
+Write-Host "Build dell'immagine Docker..." -ForegroundColor Yellow
+Set-Location $projectRoot
+try {
+    docker build -t "${repoName}:latest" .
+    Write-Host "Build Docker completato" -ForegroundColor Green
+} catch {
+    Write-Host "ERRORE nella build Docker: $_" -ForegroundColor Red
+    exit 1
+}
+
+# Tagging e push dell'immagine
+$sourceImage = "${repoName}:latest"
+$targetImage = "${repoUri}:latest"
+
+Write-Host "Tagging dell'immagine Docker..." -ForegroundColor Yellow
+docker tag $sourceImage $targetImage
+
+Write-Host "Push dell'immagine su ECR..." -ForegroundColor Yellow
+try {
+    docker push $targetImage
+    Write-Host "Push su ECR completato: $targetImage" -ForegroundColor Green
+} catch {
+    Write-Host "ERRORE nel push su ECR: $_" -ForegroundColor Red
+    exit 1
+}
+
+# 2. VERIFICA DEL TEMPLATE CLOUDFORMATION
+# ============================================================================
+Write-Host "`nFASE 2: VALIDAZIONE DEL TEMPLATE CLOUDFORMATION" -ForegroundColor Cyan
+Write-Host "=================================================" -ForegroundColor Cyan
+
+Write-Host "Verifica dell'esistenza del template..." -ForegroundColor Yellow
+if (-not (Test-Path $templatePath)) {
+    Write-Host "ERRORE: Template non trovato in $templatePath" -ForegroundColor Red
+    exit 1
+}
+Write-Host "Template trovato: $templatePath" -ForegroundColor Green
+
+Write-Host "Validazione del template CloudFormation..." -ForegroundColor Yellow
+try {
+    $validation = aws cloudformation validate-template --template-body file://$templatePath | ConvertFrom-Json
+    Write-Host "Template validato correttamente" -ForegroundColor Green
+    
+    # Mostra i parametri disponibili
+    Write-Host "Parametri del template:" -ForegroundColor Green
+    foreach ($param in $validation.Parameters) {
+        $defaultValue = if ($param.DefaultValue) { $param.DefaultValue } else { "(nessun valore predefinito)" }
+        Write-Host "  - $($param.ParameterKey): $defaultValue" -ForegroundColor White
+    }
+} catch {
+    Write-Host "ERRORE nella validazione del template: $_" -ForegroundColor Red
+    exit 1
+}
+
+# 3. PULIZIA DELL'AMBIENTE
+# ============================================================================
+Write-Host "`nFASE 3: PULIZIA DELL'AMBIENTE" -ForegroundColor Cyan
+Write-Host "=================================================" -ForegroundColor Cyan
+
+Write-Host "Verifica di stack esistenti..." -ForegroundColor Yellow
+$stackExists = $false
+$stackStatus = $null
+
+try {
+    $stackInfo = aws cloudformation describe-stacks --stack-name $stackName 2>$null
+    if ($stackInfo) {
+        $stackExists = $true
+        $stackJson = $stackInfo | ConvertFrom-Json
+        $stackStatus = $stackJson.Stacks[0].StackStatus
+        Write-Host "Stack esistente trovato: $stackName (Stato: $stackStatus)" -ForegroundColor Yellow
+    }
+} catch {
+    Write-Host "Nessuno stack esistente trovato con nome $stackName" -ForegroundColor Green
+}
+
+if ($stackExists) {
+    $deleteStack = $true
+    
+    # Verifica se lo stack è in stato di completamento
+    if ($stackStatus -eq "CREATE_COMPLETE" -or $stackStatus -eq "UPDATE_COMPLETE") {
+        Write-Host "Lo stack è in uno stato stabile. Procedo con l'eliminazione per pulizia." -ForegroundColor Yellow
+    }
+    # Verifica se lo stack è in stato di rollback
+    elseif ($stackStatus -like "*ROLLBACK*" -or $stackStatus -like "*FAILED*") {
+        Write-Host "Lo stack è in stato $stackStatus. È necessario eliminarlo prima di continuare." -ForegroundColor Yellow
+    }
+    # Verifica se lo stack è in uno stato transitorio
+    elseif ($stackStatus -like "*_IN_PROGRESS") {
+        Write-Host "Lo stack è in stato transitorio ($stackStatus). Attendo il completamento prima di eliminarlo..." -ForegroundColor Yellow
+        
+        do {
+            Start-Sleep -Seconds 20
+            try {
+                $checkStatus = aws cloudformation describe-stacks --stack-name $stackName | ConvertFrom-Json
+                $stackStatus = $checkStatus.Stacks[0].StackStatus
+                Write-Host "Stato corrente: $stackStatus" -ForegroundColor Yellow
+            } catch {
+                Write-Host "Stack non più disponibile, probabilmente già eliminato" -ForegroundColor Yellow
+                $deleteStack = $false
+                break
+            }
+        } while ($stackStatus -like "*_IN_PROGRESS")
+    }
+    
+    # Elimina lo stack se necessario
+    if ($deleteStack) {
+        Write-Host "Eliminazione dello stack $stackName..." -ForegroundColor Yellow
+        aws cloudformation delete-stack --stack-name $stackName
+        
+        Write-Host "Attendo l'eliminazione completa dello stack..." -ForegroundColor Yellow
+        do {
+            Start-Sleep -Seconds 15
+            try {
+                $check = aws cloudformation describe-stacks --stack-name $stackName 2>$null
+                if ($check) {
+                    $deleteStatus = ($check | ConvertFrom-Json).Stacks[0].StackStatus
+                    Write-Host "Stato eliminazione: $deleteStatus" -ForegroundColor Yellow
+                }
+            } catch {
+                $check = $null
+                Write-Host "Stack eliminato con successo" -ForegroundColor Green
+            }
+        } while ($check)
+    }
+}
+
+# 4. DEPLOYMENT DELLO STACK
+# ============================================================================
+Write-Host "`nFASE 4: DEPLOYMENT DELLO STACK CLOUDFORMATION" -ForegroundColor Cyan
+Write-Host "=================================================" -ForegroundColor Cyan
+
+Write-Host "Creazione del nuovo stack CloudFormation..." -ForegroundColor Yellow
+try {
+    $createResult = aws cloudformation create-stack `
+        --stack-name $stackName `
+        --template-body file://$templatePath `
+        --parameters ParameterKey=ImageURI,ParameterValue=$targetImage `
+                     ParameterKey=DatabasePassword,ParameterValue="VitaLink2025!DB#Pass" `
+                     ParameterKey=Environment,ParameterValue="production" `
+                     ParameterKey=DesiredTaskCount,ParameterValue=1 `
+        --capabilities CAPABILITY_NAMED_IAM
+
+    $stackId = ($createResult | ConvertFrom-Json).StackId
+    Write-Host "Creazione stack avviata, StackId: $stackId" -ForegroundColor Green
+} catch {
+    Write-Host "ERRORE nella creazione dello stack: $_" -ForegroundColor Red
+    exit 1
+}
+
+# 5. MONITORAGGIO DEL DEPLOYMENT
+# ============================================================================
+Write-Host "`nFASE 5: MONITORAGGIO DEL DEPLOYMENT" -ForegroundColor Cyan
+Write-Host "=================================================" -ForegroundColor Cyan
+
+Write-Host "Monitoraggio dell'avanzamento dello stack..." -ForegroundColor Yellow
+$success = $false
+$resourcesCompleted = @{}
+$resourcesTotal = 0
+$resourcesCreated = 0
+$startTime = Get-Date
+
+# Ottieni il numero totale di risorse previste
+try {
+    $template = Get-Content $templatePath -Raw
+    $resourcesTotal = ([regex]::Matches($template, "Type: AWS::")).Count
+    Write-Host "Risorse totali da creare: circa $resourcesTotal" -ForegroundColor Yellow
+} catch {
+    Write-Host "Impossibile determinare il numero totale di risorse" -ForegroundColor Yellow
+}
+
+do {
+    Start-Sleep -Seconds 30
+    try {
+        $stackStatus = aws cloudformation describe-stacks --stack-name $stackName | ConvertFrom-Json
+        $status = $stackStatus.Stacks[0].StackStatus
+        
+        # Ottieni gli eventi più recenti per mostrare l'avanzamento
+        $events = aws cloudformation describe-stack-events --stack-name $stackName | ConvertFrom-Json
+        
+        # Aggiorna il conteggio delle risorse create
+        foreach ($eventAWS in $events.StackEvents) {
+            if (($eventAWS.ResourceStatus -eq "CREATE_COMPLETE") -and (-not $resourcesCompleted.ContainsKey($eventAWS.LogicalResourceId))) {
+                $resourcesCompleted[$eventAWS.LogicalResourceId] = $true
+                $resourcesCreated = $resourcesCompleted.Count
+            }
+        }
+        
+        # Calcola il tempo trascorso
+        $elapsed = (Get-Date) - $startTime
+        $elapsedStr = "{0:hh\:mm\:ss}" -f $elapsed
+        
+        # Mostra lo stato corrente con avanzamento
+        $percentComplete = if ($resourcesTotal -gt 0) { [math]::Min(100, [math]::Round(($resourcesCreated / $resourcesTotal) * 100)) } else { "??" }
+        Write-Host "Stato: $status | Risorse create: $resourcesCreated/$resourcesTotal ($percentComplete%) | Tempo: $elapsedStr" -ForegroundColor Yellow
+        
+        # Mostra l'ultima risorsa in creazione
+        $latestEvent = $events.StackEvents | Select-Object -First 1
+        if ($latestEvent.ResourceStatus -eq "CREATE_IN_PROGRESS") {
+            Write-Host "In creazione: $($latestEvent.LogicalResourceId) - $($latestEvent.ResourceType)" -ForegroundColor Cyan
+        }
+        elseif ($latestEvent.ResourceStatus -eq "CREATE_COMPLETE") {
+            Write-Host "Completata: $($latestEvent.LogicalResourceId) - $($latestEvent.ResourceType)" -ForegroundColor Green
+        }
+        
+        # Se lo stack è in uno stato di errore, mostra gli ultimi eventi
+        if ($status -like "*FAILED*" -or $status -like "*ROLLBACK*") {
+            Write-Host "`nProblema rilevato, controllo eventi..." -ForegroundColor Red
+            $errorEvents = $events.StackEvents | Where-Object { $_.ResourceStatus -like "*FAILED*" } | Select-Object -First 3
+            
+            if ($errorEvents) {
+                Write-Host "Ultimi errori:" -ForegroundColor Red
+                foreach ($eventAWS in $errorEvents) {
+                    Write-Host "- Risorsa: $($eventAWS.LogicalResourceId), Stato: $($eventAWS.ResourceStatus)" -ForegroundColor Red
+                    Write-Host "  Motivo: $($eventAWS.ResourceStatusReason)" -ForegroundColor Red
+                }
+            }
+        }
+        
+        # Controlla se il deployment è completato con successo
+        if ($status -eq "CREATE_COMPLETE") {
+            $success = $true
+        }
+    } catch {
+        Write-Host "Errore durante il controllo dello stack: $_" -ForegroundColor Red
+    }
+} while ($status -like "*_IN_PROGRESS")
+
+# 6. RISULTATI FINALI
+# ============================================================================
+Write-Host "`nFASE 6: RISULTATI DEL DEPLOYMENT" -ForegroundColor Cyan
+Write-Host "=================================================" -ForegroundColor Cyan
+
+if ($success) {
+    Write-Host "`nDEPLOYMENT COMPLETATO CON SUCCESSO!" -ForegroundColor Green
+    
+    # Ottieni gli output dello stack
+    $outputs = $stackStatus.Stacks[0].Outputs
+    
+    $vitalinkUrl = ($outputs | Where-Object { $_.OutputKey -eq "VitaLinkURL" }).OutputValue
+    $healthCheckUrl = ($outputs | Where-Object { $_.OutputKey -eq "HealthCheckURL" }).OutputValue
+    $databaseEndpoint = ($outputs | Where-Object { $_.OutputKey -eq "DatabaseEndpoint" }).OutputValue
+    $loadBalancerDNS = ($outputs | Where-Object { $_.OutputKey -eq "LoadBalancerDNS" }).OutputValue
+    $vpcId = ($outputs | Where-Object { $_.OutputKey -eq "VPCId" }).OutputValue
+    $ecsClusterName = ($outputs | Where-Object { $_.OutputKey -eq "ECSClusterName" }).OutputValue
+    
+    Write-Host "`nENDPOINT APPLICAZIONE" -ForegroundColor Green
+    Write-Host "=================================================" -ForegroundColor Green
+    Write-Host "URL PRINCIPALE: $vitalinkUrl" -ForegroundColor White
+    Write-Host "HEALTH CHECK: $healthCheckUrl" -ForegroundColor White
+    
+    Write-Host "`nINFRASTRUTTURA" -ForegroundColor Green
+    Write-Host "=================================================" -ForegroundColor Green
+    Write-Host "DATABASE ENDPOINT: $databaseEndpoint" -ForegroundColor White
+    Write-Host "LOAD BALANCER: $loadBalancerDNS" -ForegroundColor White
+    Write-Host "VPC ID: $vpcId" -ForegroundColor White
+    Write-Host "ECS CLUSTER: $ecsClusterName" -ForegroundColor White
+    
+    # Verifica lo stato di salute dell'applicazione
+    Write-Host "`nVERIFICA STATO DI SALUTE" -ForegroundColor Green
+    Write-Host "=================================================" -ForegroundColor Green
+    Write-Host "Attendo il completamento del deployment dell'applicazione..." -ForegroundColor Yellow
+    Write-Host "Questo potrebbe richiedere alcuni minuti mentre il container si avvia e si collega al database." -ForegroundColor Yellow
+    
+    $maxRetries = 12  # 12 x 20 secondi = 4 minuti max
+    $retryCount = 0
+    $healthCheckSuccess = $false
+    
+    while (-not $healthCheckSuccess -and $retryCount -lt $maxRetries) {
+        $retryCount++
+        Write-Host "Tentativo $retryCount di $maxRetries..." -ForegroundColor Yellow
+        
+        try {
+            $response = Invoke-WebRequest -Uri $healthCheckUrl -TimeoutSec 10 -ErrorAction SilentlyContinue
+            
+            if ($response.StatusCode -eq 200) {
+                $healthCheckSuccess = $true
+                Write-Host "Applicazione online e pronta!" -ForegroundColor Green
+                Write-Host "Stato di salute: $($response.Content)" -ForegroundColor Green
+            } else {
+                Write-Host "Applicazione risponde con stato $($response.StatusCode), attendo..." -ForegroundColor Yellow
+                Start-Sleep -Seconds 20
+            }
+        } catch {
+            Write-Host "Applicazione non ancora disponibile, attendo..." -ForegroundColor Yellow
+            Start-Sleep -Seconds 20
+        }
+    }
+    
+    if (-not $healthCheckSuccess) {
+        Write-Host "Non è stato possibile verificare lo stato di salute dell'applicazione." -ForegroundColor Yellow
+        Write-Host "Controlla manualmente il link: $healthCheckUrl" -ForegroundColor Yellow
+    }
+    
+    Write-Host "`nRIEPILOGO FINALE" -ForegroundColor Green
+    Write-Host "=================================================" -ForegroundColor Green
+    Write-Host "L'infrastruttura è stata deployata con successo." -ForegroundColor Green
+    Write-Host "Per accedere all'applicazione, visita:" -ForegroundColor Green
+    Write-Host "$vitalinkUrl" -ForegroundColor White
+    
+    Write-Host "`nNOTE IMPORTANTI" -ForegroundColor Yellow
+    Write-Host "=================================================" -ForegroundColor Yellow
+    Write-Host "1. Per eliminare l'infrastruttura quando non serve più, esegui:" -ForegroundColor Yellow
+    Write-Host "   aws cloudformation delete-stack --stack-name $stackName" -ForegroundColor White
+} else {
+    Write-Host "`nDEPLOYMENT FALLITO! Stato finale: $status" -ForegroundColor Red
+    
+    Write-Host "`nDIAGNOSTICA ERRORI" -ForegroundColor Red
+    Write-Host "=================================================" -ForegroundColor Red
+    
+    # Ottieni gli eventi di errore
+    $events = aws cloudformation describe-stack-events --stack-name $stackName | ConvertFrom-Json
+    $errorEvents = $events.StackEvents | Where-Object { $_.ResourceStatus -like "*FAILED*" } | Select-Object -First 5
+    
+    if ($errorEvents) {
+        Write-Host "Dettagli errori:" -ForegroundColor Red
+        foreach ($eventAWS in $errorEvents) {
+            Write-Host "- Risorsa: $($eventAWS.LogicalResourceId) ($($eventAWS.ResourceType))" -ForegroundColor Red
+            Write-Host "  Stato: $($eventAWS.ResourceStatus)" -ForegroundColor Red
+            Write-Host "  Motivo: $($eventAWS.ResourceStatusReason)" -ForegroundColor Red
+            Write-Host "  Timestamp: $($eventAWS.Timestamp)" -ForegroundColor Red
+            Write-Host "  -----------------------------------------------" -ForegroundColor Red
+        }
+    }
+    
+    Write-Host "`nSUGGERIMENTI PER LA RISOLUZIONE" -ForegroundColor Yellow
+    Write-Host "=================================================" -ForegroundColor Yellow
+    Write-Host "1. Elimina lo stack fallito prima di ritentare:" -ForegroundColor Yellow
+    Write-Host "   aws cloudformation delete-stack --stack-name $stackName" -ForegroundColor White
+}

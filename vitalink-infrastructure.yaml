@@ -1,0 +1,494 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'VitaLink Healthcare Platform - AWS'
+
+Parameters:
+  ImageURI:
+    Type: String
+    Description: 'ECR Image URI for VitaLink (build and push first)'
+    Default: '430233177233.dkr.ecr.us-east-1.amazonaws.com/vitalink:latest'
+  
+  DatabasePassword:
+    Type: String
+    NoEcho: true
+    MinLength: 12
+    MaxLength: 64
+    Default: 'VitaLink2025!DB#Pass'
+    Description: 'PostgreSQL database password (12-64 chars)'
+  
+  Environment:
+    Type: String
+    Default: 'production'
+    AllowedValues: ['development', 'staging', 'production']
+    Description: 'Deployment environment'
+  
+  DesiredTaskCount:
+    Type: Number
+    Default: 1
+    MinValue: 1
+    MaxValue: 3
+    Description: 'Number of ECS tasks to run'
+
+Mappings:
+  EnvironmentMap:
+    development:
+      DBInstanceClass: 'db.t3.micro'
+      TaskCpu: 256
+      TaskMemory: 512
+    staging:
+      DBInstanceClass: 'db.t3.micro'
+      TaskCpu: 256
+      TaskMemory: 512
+    production:
+      DBInstanceClass: 'db.t3.micro'
+      TaskCpu: 256
+      TaskMemory: 512
+
+Resources:
+  VitaLinkVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: !Sub 'VitaLink-VPC-${Environment}'
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Project
+          Value: VitaLink
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub 'VitaLink-IGW-${Environment}'
+
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VitaLinkVPC
+      InternetGatewayId: !Ref InternetGateway
+
+  # Public Subnets
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VitaLinkVPC
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: !Select [0, !GetAZs '']
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub 'VitaLink-Public-1a-${Environment}'
+        - Key: Type
+          Value: Public
+
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VitaLinkVPC
+      CidrBlock: 10.0.2.0/24
+      AvailabilityZone: !Select [1, !GetAZs '']
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub 'VitaLink-Public-1b-${Environment}'
+        - Key: Type
+          Value: Public
+
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VitaLinkVPC
+      CidrBlock: 10.0.10.0/24
+      AvailabilityZone: !Select [0, !GetAZs '']
+      Tags:
+        - Key: Name
+          Value: !Sub 'VitaLink-Private-1a-${Environment}'
+        - Key: Type
+          Value: Private
+
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VitaLinkVPC
+      CidrBlock: 10.0.20.0/24
+      AvailabilityZone: !Select [1, !GetAZs '']
+      Tags:
+        - Key: Name
+          Value: !Sub 'VitaLink-Private-1b-${Environment}'
+        - Key: Type
+          Value: Private
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VitaLinkVPC
+      Tags:
+        - Key: Name
+          Value: !Sub 'VitaLink-RT-Public-${Environment}'
+
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: VPCGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet1
+      RouteTableId: !Ref PublicRouteTable
+
+  PublicSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet2
+      RouteTableId: !Ref PublicRouteTable
+
+  PrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VitaLinkVPC
+      Tags:
+        - Key: Name
+          Value: !Sub 'VitaLink-RT-Private-${Environment}'
+
+  PrivateSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet1
+      RouteTableId: !Ref PrivateRouteTable
+
+  PrivateSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet2
+      RouteTableId: !Ref PrivateRouteTable
+
+  ALBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Sub 'VitaLink ALB Security Group - ${Environment}'
+      VpcId: !Ref VitaLinkVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+          Description: 'HTTP access from internet'
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+          Description: 'HTTPS access from internet'
+      Tags:
+        - Key: Name
+          Value: !Sub 'VitaLink-ALB-SG-${Environment}'
+
+  ECSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Sub 'VitaLink ECS Security Group - ${Environment}'
+      VpcId: !Ref VitaLinkVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5000
+          ToPort: 5000
+          SourceSecurityGroupId: !Ref ALBSecurityGroup
+          Description: 'Allow inbound from ALB only'
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+          Description: 'HTTPS for AWS services'
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+          Description: 'HTTP for package downloads'
+      Tags:
+        - Key: Name
+          Value: !Sub 'VitaLink-ECS-SG-${Environment}'
+
+  RDSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Sub 'VitaLink RDS Security Group - ${Environment}'
+      VpcId: !Ref VitaLinkVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          SourceSecurityGroupId: !Ref ECSSecurityGroup
+          Description: 'PostgreSQL access from ECS only'
+      Tags:
+        - Key: Name
+          Value: !Sub 'VitaLink-RDS-SG-${Environment}'
+
+  ECSToRDSEgressRule:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId: !Ref ECSSecurityGroup
+      IpProtocol: tcp
+      FromPort: 5432
+      ToPort: 5432
+      DestinationSecurityGroupId: !Ref RDSSecurityGroup
+      Description: 'PostgreSQL access to RDS'
+
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: !Sub 'VitaLink RDS Subnet Group - ${Environment}'
+      SubnetIds:
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+      Tags:
+        - Key: Name
+          Value: !Sub 'VitaLink-DB-SubnetGroup-${Environment}'
+
+  PostgreSQLDatabase:
+    Type: AWS::RDS::DBInstance
+    DeletionPolicy: Delete
+    Properties:
+      DBInstanceIdentifier: !Sub 'vitalink-postgres-${Environment}'
+      DBInstanceClass: !FindInMap [EnvironmentMap, !Ref Environment, DBInstanceClass]
+      Engine: postgres
+      EngineVersion: '15.7'
+      MasterUsername: vitalink_user
+      MasterUserPassword: !Ref DatabasePassword
+      AllocatedStorage: 20
+      StorageType: gp2
+      StorageEncrypted: false
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      VPCSecurityGroups:
+        - !Ref RDSSecurityGroup
+      BackupRetentionPeriod: 0
+      MultiAZ: false
+      PubliclyAccessible: false
+      DeletionProtection: false
+      DBName: 'vitalink'
+      Tags:
+        - Key: Name
+          Value: !Sub 'VitaLink-DB-${Environment}'
+        - Key: Environment
+          Value: !Ref Environment
+
+  ApplicationLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Sub 'VitaLink-ALB-${Environment}'
+      Scheme: internet-facing
+      Type: application
+      IpAddressType: ipv4
+      Subnets:
+        - !Ref PublicSubnet1
+        - !Ref PublicSubnet2
+      SecurityGroups:
+        - !Ref ALBSecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub 'VitaLink-ALB-${Environment}'
+        - Key: Environment
+          Value: !Ref Environment
+
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub 'VitaLink-TG-${Environment}'
+      Protocol: HTTP
+      Port: 5000
+      VpcId: !Ref VitaLinkVPC
+      TargetType: ip
+      HealthCheckEnabled: true
+      HealthCheckPath: /health
+      HealthCheckProtocol: HTTP
+      HealthCheckPort: "5000"
+      HealthCheckIntervalSeconds: 30
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 3
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: '30'
+      Tags:
+        - Key: Name
+          Value: !Sub 'VitaLink-TG-${Environment}'
+
+  ALBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref TargetGroup
+      LoadBalancerArn: !Ref ApplicationLoadBalancer
+      Port: 80
+      Protocol: HTTP
+
+  ECSLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/ecs/vitalink/${Environment}'
+      RetentionInDays: 7
+      Tags:
+        - Key: Name
+          Value: !Sub 'VitaLink-Logs-${Environment}'
+
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Sub 'VitaLink-Cluster-${Environment}'
+      CapacityProviders:
+        - FARGATE
+      DefaultCapacityProviderStrategy:
+        - CapacityProvider: FARGATE
+          Weight: 1
+      Tags:
+        - Key: Name
+          Value: !Sub 'VitaLink-Cluster-${Environment}'
+
+  ECSTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub 'vitalink-task-${Environment}'
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      Cpu: !FindInMap [EnvironmentMap, !Ref Environment, TaskCpu]
+      Memory: !FindInMap [EnvironmentMap, !Ref Environment, TaskMemory]
+      ExecutionRoleArn: !Sub 'arn:aws:iam::${AWS::AccountId}:role/LabRole'
+      TaskRoleArn: !Sub 'arn:aws:iam::${AWS::AccountId}:role/LabRole'
+      ContainerDefinitions:
+        - Name: vitalink-container
+          Image: !Ref ImageURI
+          PortMappings:
+            - ContainerPort: 5000
+              Protocol: tcp
+          Essential: true
+          Environment:
+            - Name: DATABASE_URL
+              Value: !Sub 
+                - 'postgresql://vitalink_user:${Password}@${Endpoint}:5432/vitalink'
+                - Password: !Ref DatabasePassword
+                  Endpoint: !GetAtt PostgreSQLDatabase.Endpoint.Address
+            - Name: FLASK_APP
+              Value: 'app:app'
+            - Name: DEBUG
+              Value: 'False'
+            - Name: CLOUD_RUN_ENVIRONMENT
+              Value: 'true'
+            - Name: HOST
+              Value: '0.0.0.0'
+            - Name: PORT
+              Value: '5000'
+            - Name: FLASK_ENV
+              Value: !Ref Environment
+            - Name: SESSION_SECRET
+              Value: !Sub '${AWS::StackId}-session-secret'
+            - Name: JWT_SECRET_KEY
+              Value: !Sub '${AWS::StackId}-jwt-secret'
+            - Name: FITBIT_CLIENT_ID
+              Value: 'test-fitbit-client-id'
+            - Name: FITBIT_CLIENT_SECRET
+              Value: 'test-fitbit-client-secret'
+            - Name: FITBIT_REDIRECT_URI
+              Value: 'http://localhost:5000/callback'
+            - Name: MJ_APIKEY
+              Value: 'test-mailjet-api-key'
+            - Name: MJ_APIKEY_SECRET
+              Value: 'test-mailjet-secret'
+            - Name: EMAIL_SENDER
+              Value: 'test@vitalink.com'
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref ECSLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: ecs
+          HealthCheck:
+            Command:
+              - CMD-SHELL
+              - 'curl -f http://localhost:5000/health || exit 1'
+            Interval: 30
+            Timeout: 5
+            Retries: 3
+            StartPeriod: 60
+      Tags:
+        - Key: Name
+          Value: !Sub 'VitaLink-TaskDef-${Environment}'
+
+  ECSService:
+    Type: AWS::ECS::Service
+    DependsOn: 
+      - ALBListener
+      - ECSToRDSEgressRule
+    Properties:
+      ServiceName: !Sub 'vitalink-service-${Environment}'
+      Cluster: !Ref ECSCluster
+      TaskDefinition: !Ref ECSTaskDefinition
+      DesiredCount: !Ref DesiredTaskCount
+      LaunchType: FARGATE
+      PlatformVersion: LATEST
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          Subnets:
+            - !Ref PublicSubnet1
+            - !Ref PublicSubnet2
+          SecurityGroups:
+            - !Ref ECSSecurityGroup
+          AssignPublicIp: ENABLED
+      LoadBalancers:
+        - TargetGroupArn: !Ref TargetGroup
+          ContainerName: vitalink-container
+          ContainerPort: 5000
+      HealthCheckGracePeriodSeconds: 180
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 50
+      Tags:
+        - Key: Name
+          Value: !Sub 'VitaLink-Service-${Environment}'
+        - Key: Environment
+          Value: !Ref Environment
+
+Outputs:
+  VitaLinkURL:
+    Description: 'VitaLink Application URL'
+    Value: !Sub 'http://${ApplicationLoadBalancer.DNSName}'
+    Export:
+      Name: !Sub '${AWS::StackName}-URL'
+  
+  HealthCheckURL:
+    Description: 'VitaLink Health Check URL'
+    Value: !Sub 'http://${ApplicationLoadBalancer.DNSName}/health'
+    Export:
+      Name: !Sub '${AWS::StackName}-HealthURL'
+  
+  DatabaseEndpoint:
+    Description: 'RDS PostgreSQL Endpoint'
+    Value: !GetAtt PostgreSQLDatabase.Endpoint.Address
+    Export:
+      Name: !Sub '${AWS::StackName}-DBEndpoint'
+  
+  VPCId:
+    Description: 'VPC ID'
+    Value: !Ref VitaLinkVPC
+    Export:
+      Name: !Sub '${AWS::StackName}-VPC'
+  
+  ECSClusterName:
+    Description: 'ECS Cluster Name'
+    Value: !Ref ECSCluster
+    Export:
+      Name: !Sub '${AWS::StackName}-ECSCluster'
+  
+  LoadBalancerDNS:
+    Description: 'Load Balancer DNS Name'
+    Value: !GetAtt ApplicationLoadBalancer.DNSName
+    Export:
+      Name: !Sub '${AWS::StackName}-ALB-DNS'

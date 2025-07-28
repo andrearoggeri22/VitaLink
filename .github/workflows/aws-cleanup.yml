@@ -1,0 +1,139 @@
+name: AWS Infrastructure Cleanup
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: 'Type "DELETE" to confirm cleanup'
+        required: true
+        type: string
+      cleanup_ecr:
+        description: 'Also cleanup ECR repository'
+        required: true
+        default: false
+        type: boolean
+
+env:
+  AWS_REGION: us-east-1
+  STACK_NAME: VitaLink-Stack
+  ECR_REPOSITORY: vitalink
+
+jobs:
+  cleanup:
+    name: Cleanup AWS Resources
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Validate confirmation
+      run: |
+        if [ "${{ github.event.inputs.confirmation }}" != "DELETE" ]; then
+          echo "Confirmation failed. You must type 'DELETE' to proceed."
+          exit 1
+        fi
+        echo "Confirmation validated"
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Check stack existence
+      id: check-stack
+      run: |
+        if aws cloudformation describe-stacks --stack-name ${{ env.STACK_NAME }} > /dev/null 2>&1; then
+          STACK_STATUS=$(aws cloudformation describe-stacks --stack-name ${{ env.STACK_NAME }} --query 'Stacks[0].StackStatus' --output text)
+          echo "stack-exists=true" >> $GITHUB_OUTPUT
+          echo "stack-status=$STACK_STATUS" >> $GITHUB_OUTPUT
+          echo "Stack found with status: $STACK_STATUS"
+        else
+          echo "stack-exists=false" >> $GITHUB_OUTPUT
+          echo "No stack found"
+        fi
+
+    - name: Delete CloudFormation stack
+      if: steps.check-stack.outputs.stack-exists == 'true'
+      run: |
+        echo "Deleting CloudFormation stack: ${{ env.STACK_NAME }}"
+        
+        # Check if stack is in a deletable state
+        STACK_STATUS="${{ steps.check-stack.outputs.stack-status }}"
+        
+        if [[ "$STACK_STATUS" == *"IN_PROGRESS" ]]; then
+          echo "Stack is in progress state: $STACK_STATUS"
+          echo "Waiting for current operation to complete..."
+          
+          # Wait for current operation to complete
+          aws cloudformation wait stack-create-complete --stack-name ${{ env.STACK_NAME }} || \
+          aws cloudformation wait stack-update-complete --stack-name ${{ env.STACK_NAME }} || \
+          aws cloudformation wait stack-rollback-complete --stack-name ${{ env.STACK_NAME }} || true
+        fi
+        
+        # Delete the stack
+        aws cloudformation delete-stack --stack-name ${{ env.STACK_NAME }}
+        
+        echo "Waiting for stack deletion to complete..."
+        aws cloudformation wait stack-delete-complete --stack-name ${{ env.STACK_NAME }}
+        
+        echo "CloudFormation stack deleted successfully"
+
+    - name: Cleanup ECR repository
+      if: github.event.inputs.cleanup_ecr == 'true'
+      run: |
+        echo "Cleaning up ECR repository: ${{ env.ECR_REPOSITORY }}"
+        
+        # Check if repository exists
+        if aws ecr describe-repositories --repository-names ${{ env.ECR_REPOSITORY }} > /dev/null 2>&1; then
+          # Delete all images in the repository
+          echo "Deleting all images in repository..."
+          IMAGE_IDS=$(aws ecr list-images --repository-name ${{ env.ECR_REPOSITORY }} --query 'imageIds[*]' --output json)
+          
+          if [ "$IMAGE_IDS" != "[]" ]; then
+            aws ecr batch-delete-image --repository-name ${{ env.ECR_REPOSITORY }} --image-ids "$IMAGE_IDS"
+            echo "All images deleted from repository"
+          else
+            echo "No images found in repository"
+          fi
+          
+          # Delete the repository
+          aws ecr delete-repository --repository-name ${{ env.ECR_REPOSITORY }}
+          echo "ECR repository deleted successfully"
+        else
+          echo "ECR repository not found, skipping cleanup"
+        fi
+
+    - name: Verify cleanup
+      run: |
+        echo "Verifying cleanup..."
+        
+        # Check CloudFormation stack
+        if aws cloudformation describe-stacks --stack-name ${{ env.STACK_NAME }} > /dev/null 2>&1; then
+          echo "CloudFormation stack still exists"
+        else
+          echo "CloudFormation stack successfully deleted"
+        fi
+        
+        # Check ECR repository (if cleanup was requested)
+        if [ "${{ github.event.inputs.cleanup_ecr }}" == "true" ]; then
+          if aws ecr describe-repositories --repository-names ${{ env.ECR_REPOSITORY }} > /dev/null 2>&1; then
+            echo "ECR repository still exists"
+          else
+            echo "ECR repository successfully deleted"
+          fi
+        fi
+
+    - name: Create cleanup summary
+      run: |
+        cat >> $GITHUB_STEP_SUMMARY << EOF
+        # AWS Infrastructure Cleanup Summary
+        
+        ## Cleanup Actions Performed
+        - **CloudFormation Stack**: ${{ steps.check-stack.outputs.stack-exists == 'true' && 'Deleted' || 'Not found' }}
+        - **ECR Repository**: ${{ github.event.inputs.cleanup_ecr == 'true' && 'Cleanup requested' || 'Skipped' }}
+        
+        ## Stack Information
+        - **Stack Name**: \`${{ env.STACK_NAME }}\`
+        - **Initial Status**: \`${{ steps.check-stack.outputs.stack-status || 'Not found' }}\`     
+        EOF

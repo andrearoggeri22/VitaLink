@@ -1,0 +1,109 @@
+name: AWS ECR Build and Push
+
+on:
+  push:
+    branches: 
+      - main
+      - CLOUD_MOBILE_PROJECT
+  pull_request:
+    branches: 
+      - main
+  workflow_dispatch:
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: vitalink
+
+jobs:
+  build-and-push:
+    name: Build and Push to ECR
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies and run tests
+      env:
+        DATABASE_URL: "sqlite:///test_healthcare.db"
+        CLOUD_RUN_ENVIRONMENT: "false"
+        FLASK_APP: "app:app"
+        SESSION_SECRET: "test-secret"
+        PORT: "5000"
+        HOST: "0.0.0.0"
+        DEBUG: "true"
+        JWT_SECRET_KEY: "test-jwt-key"
+        FITBIT_CLIENT_ID: "test-fitbit-id"
+        FITBIT_CLIENT_SECRET: "test-fitbit-secret"
+        FITBIT_REDIRECT_URI: "http://localhost:5000/callback"
+        MJ_APIKEY: "test-mailjet-key"
+        MJ_APIKEY_SECRET: "test-mailjet-secret"
+        LOG_LEVEL: "INFO"
+        EMAIL_SENDER: "test@vitalink.com"
+      run: |
+        python -m pip install --upgrade pip
+        pip install .
+        pip install pytest
+        pytest
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Create ECR repository if it doesn't exist
+      run: |
+        aws ecr describe-repositories --repository-names $ECR_REPOSITORY || \
+        aws ecr create-repository --repository-name $ECR_REPOSITORY
+
+    - name: Build, tag, and push image to Amazon ECR
+      id: build-image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        # Build Docker image
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        
+        # Push image to ECR
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        
+        # Output image URI for use in deployment
+        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+        echo "image-latest=$ECR_REGISTRY/$ECR_REPOSITORY:latest" >> $GITHUB_OUTPUT
+
+    - name: Save deployment artifacts
+      run: |
+        mkdir -p deployment-artifacts
+        echo "${{ steps.build-image.outputs.image }}" > deployment-artifacts/image-uri.txt
+        echo "${{ steps.build-image.outputs.image-latest }}" > deployment-artifacts/image-latest-uri.txt
+        echo "${{ github.sha }}" > deployment-artifacts/git-sha.txt
+
+    - name: Upload deployment artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: deployment-artifacts
+        path: deployment-artifacts/
+        retention-days: 30
+
+    outputs:
+      image-uri: ${{ steps.build-image.outputs.image }}
+      image-latest-uri: ${{ steps.build-image.outputs.image-latest }}
