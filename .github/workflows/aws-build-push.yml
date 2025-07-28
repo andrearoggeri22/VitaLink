@@ -121,34 +121,33 @@ jobs:
       if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/CLOUD_MOBILE_PROJECT')
       run: |
         echo "Triggering CloudFormation deployment workflow..."
+        echo "Available workflows:"
+        gh workflow list
         
-        # Try workflow_dispatch first
         echo "Attempting workflow_dispatch trigger..."
-        gh workflow run "AWS CloudFormation Deployment" \
+        if gh workflow run aws-cloudformation-deploy.yml \
           --ref ${{ github.ref }} \
           -f image_uri="${{ steps.build-image.outputs.image-latest }}" \
           -f environment="production" \
-          -f desired_task_count="1" || echo "workflow_dispatch failed, trying repository_dispatch..."
-        
-        # Fallback to repository_dispatch
-        echo "Attempting repository_dispatch trigger..."
-        curl -X POST \
-          -H "Accept: application/vnd.github.v3+json" \
-          -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          -H "Content-Type: application/json" \
-          https://api.github.com/repos/${{ github.repository }}/dispatches \
-          -d '{
-            "event_type": "deploy-cloudformation",
-            "client_payload": {
-              "image_uri": "${{ steps.build-image.outputs.image-latest }}",
-              "environment": "production",
-              "desired_task_count": "1",
-              "triggered_by": "build-workflow",
-              "build_sha": "${{ github.sha }}"
-            }
-          }' || echo "repository_dispatch also failed"
-        
-        echo "Deployment trigger attempts completed"
+          -f desired_task_count="1"; then
+          echo "✅ CloudFormation deployment triggered successfully!"
+        else
+          echo "❌ Failed to trigger CloudFormation deployment"
+          echo "Trying alternative approach..."
+          
+          # Try with the full workflow name
+          if gh workflow run "AWS CloudFormation Deployment" \
+            --ref ${{ github.ref }} \
+            -f image_uri="${{ steps.build-image.outputs.image-latest }}" \
+            -f environment="production" \
+            -f desired_task_count="1"; then
+            echo "✅ CloudFormation deployment triggered with full name!"
+          else
+            echo "❌ Both trigger attempts failed"
+            echo "Manual deployment may be required"
+            exit 1
+          fi
+        fi
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
