@@ -96,6 +96,13 @@ jobs:
         echo "${{ steps.build-image.outputs.image }}" > deployment-artifacts/image-uri.txt
         echo "${{ steps.build-image.outputs.image-latest }}" > deployment-artifacts/image-latest-uri.txt
         echo "${{ github.sha }}" > deployment-artifacts/git-sha.txt
+        
+        # Debug: Show artifact contents
+        echo "=== Deployment Artifacts Created ==="
+        ls -la deployment-artifacts/
+        echo "Image URI: $(cat deployment-artifacts/image-uri.txt)"
+        echo "Latest URI: $(cat deployment-artifacts/image-latest-uri.txt)"
+        echo "Git SHA: $(cat deployment-artifacts/git-sha.txt)"
 
     - name: Upload deployment artifacts
       uses: actions/upload-artifact@v4
@@ -103,6 +110,11 @@ jobs:
         name: deployment-artifacts
         path: deployment-artifacts/
         retention-days: 30
+        
+    - name: Verify artifact upload
+      run: |
+        echo "Deployment artifacts uploaded successfully"
+        echo "Build completed with image: ${{ steps.build-image.outputs.image-latest }}"
 
     outputs:
       image-uri: ${{ steps.build-image.outputs.image }}

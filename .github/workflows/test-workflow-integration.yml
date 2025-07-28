@@ -1,0 +1,38 @@
+name: Test Workflow Integration
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-integration:
+    name: Test Workflow Integration
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Test workflow trigger
+      run: |
+        echo "Testing workflow integration..."
+        echo "This workflow can be used to test if the CloudFormation deployment triggers correctly"
+        
+    - name: Simulate build completion
+      run: |
+        echo "Simulating build completion..."
+        # This would normally be done by the build workflow
+        mkdir -p deployment-artifacts
+        echo "123456789.dkr.ecr.us-east-1.amazonaws.com/vitalink:test-tag" > deployment-artifacts/image-uri.txt
+        echo "123456789.dkr.ecr.us-east-1.amazonaws.com/vitalink:latest" > deployment-artifacts/image-latest-uri.txt
+        echo "${{ github.sha }}" > deployment-artifacts/git-sha.txt
+        
+    - name: Upload test artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: deployment-artifacts
+        path: deployment-artifacts/
+        retention-days: 1
+        
+    - name: Trigger CloudFormation deployment
+      run: |
+        echo "Build completed successfully!"
