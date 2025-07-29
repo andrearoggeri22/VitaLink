@@ -2,6 +2,8 @@
 
 VitaLink è una piattaforma per il monitoraggio dei parametri vitali e per l'analisi e la valutazione delle terapie nel contesto sanitario. Questa applicazione permette a medici e personale sanitario di monitorare i parametri vitali dei pazienti, registrare note mediche e generare report personalizzati.
 
+<!-- Workflow test: API trigger mechanism -->
+
 ## Panoramica del progetto
 
 VitaLink è una piattaforma web sviluppata con Flask che fornisce le seguenti funzionalità:
