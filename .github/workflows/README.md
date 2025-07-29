@@ -1,13 +1,147 @@
-# AWS Secrets Configuration for VitaLink GitHub Actions
+# GitHub Actions Workflows per VitaLink
 
-This document describes the required secrets and their configuration for the VitaLink CI/CD workflows.
+Questa directory contiene i workflow GitHub Actions per la CI/CD dell'applicazione VitaLink su AWS.
 
-## Required GitHub Secrets
+## 🚀 Workflow Disponibili
 
-Configure these secrets in your repository settings (Settings > Secrets and variables > Actions):
+### 1. **aws-build-push.yml** - Build e Push su ECR
+- **Trigger**: Push su `main` o `CLOUD_MOBILE_PROJECT`, PR, o manuale
+- **Funzioni**:
+  - Esegue i test dell'applicazione
+  - Builda l'immagine Docker
+  - Pusha l'immagine su Amazon ECR
+  - Esegue scan di sicurezza
+  - Triggera automaticamente il deployment
 
-### AWS Credentials
-- `AWS_ACCESS_KEY_ID`: Your AWS access key ID
+### 2. **aws-deploy.yml** - Deployment CloudFormation
+- **Trigger**: Repository dispatch dal workflow di build, o manuale
+- **Funzioni**:
+  - Valida il template CloudFormation
+  - Gestisce stack esistenti (update/delete)
+  - Deploya l'infrastruttura AWS
+  - Monitora il progresso del deployment
+  - Esegue health check dell'applicazione
+
+### 3. **aws-monitoring.yml** - Monitoraggio Infrastruttura
+- **Trigger**: Schedulato ogni 4 ore, o manuale
+- **Funzioni**:
+  - Controlla lo stato degli stack CloudFormation
+  - Monitora i servizi ECS
+  - Verifica lo stato delle istanze RDS
+  - Controlla i Load Balancer
+  - Esegue health check dell'applicazione
+  - Analizza i costi (quando disponibile)
+
+### 4. **aws-cleanup.yml** - Pulizia Risorse
+- **Trigger**: Solo manuale (con conferma)
+- **Funzioni**:
+  - Elimina stack CloudFormation
+  - Rimuove risorse orfane
+  - Pulisce repository ECR
+  - Monitora il completamento della pulizia
+
+### 5. **test-workflow-integration.yml** - Test di Integrazione
+- **Trigger**: Solo manuale
+- **Funzioni**:
+  - Testa l'intera pipeline CI/CD
+  - Valida la configurazione AWS
+  - Esegue deployment di test
+  - Verifica il funzionamento dell'applicazione
+  - Pulisce le risorse di test
+
+## 🔧 Configurazione Secrets
+
+Per utilizzare questi workflow, configura i seguenti secrets nel repository GitHub:
+
+```
+AWS_ACCESS_KEY_ID      # AWS Access Key ID per AWS Education
+AWS_SECRET_ACCESS_KEY  # AWS Secret Access Key
+AWS_SESSION_TOKEN      # AWS Session Token (per AWS Education)
+```
+
+### Come ottenere le credenziali AWS Education:
+
+1. Accedi ad AWS Academy/Learner Lab
+2. Clicca su "AWS Details"
+3. Copia le credenziali dalla sezione "AWS CLI"
+4. Aggiungile come secrets in GitHub: Settings → Secrets and variables → Actions
+
+## 🌊 Flusso CI/CD
+
+```mermaid
+graph TD
+    A[Push to main] --> B[aws-build-push.yml]
+    B --> C{Tests Pass?}
+    C -->|Yes| D[Build Docker Image]
+    C -->|No| E[❌ Stop]
+    D --> F[Push to ECR]
+    F --> G[Security Scan]
+    G --> H[Trigger Deploy]
+    H --> I[aws-deploy.yml]
+    I --> J[Deploy CloudFormation]
+    J --> K[Health Check]
+    K --> L{Deploy Success?}
+    L -->|Yes| M[✅ Complete]
+    L -->|No| N[❌ Rollback]
+```
+
+## 📋 Utilizzo dei Workflow
+
+### Deploy automatico:
+1. Fai push su `main` → deployment automatico in staging
+2. Per production: esegui manualmente il workflow `aws-deploy.yml`
+
+### Deploy manuale:
+1. Vai su Actions → "AWS CloudFormation Deploy"
+2. Clicca "Run workflow"
+3. Specifica l'URI dell'immagine e l'environment
+
+### Monitoraggio:
+- Il monitoraggio avviene automaticamente ogni 4 ore
+- Per check immediato: esegui manualmente `aws-monitoring.yml`
+
+### Pulizia:
+1. Vai su Actions → "AWS Infrastructure Cleanup"
+2. Scegli l'environment
+3. Digita "DELETE" per confermare
+4. Clicca "Run workflow"
+
+## 🔍 Test della Pipeline:
+1. Esegui `test-workflow-integration.yml`
+2. Scegli il livello di test:
+   - `basic`: Validazioni base
+   - `full`: Test completo con deployment
+   - `staging-deploy`: Deploy in ambiente di test
+
+## ⚠️ Note Importanti
+
+- **AWS Education**: I token di sessione scadono dopo alcune ore
+- **Costi**: Monitora sempre i costi AWS dopo i deployment
+- **Sicurezza**: Le password del database sono hardcoded per AWS Education
+- **Backup**: Non c'è backup automatico dei dati in AWS Education
+
+## 🆘 Troubleshooting
+
+### Errore "Credenziali scadute":
+- Aggiorna i secrets con nuove credenziali AWS Education
+
+### Errore "Stack già esistente":
+- Usa il workflow di cleanup per rimuovere stack esistenti
+
+### Errore "Health check fallito":
+- Controlla i log ECS nella console AWS
+- Verifica che il database sia inizializzato
+
+### Errore "Timeout deployment":
+- AWS Education può essere più lento
+- Riprova dopo alcuni minuti
+
+## 📚 Risorse Aggiuntive
+
+- [AWS CloudFormation Documentation](https://docs.aws.amazon.com/cloudformation/)
+- [GitHub Actions Documentation](https://docs.github.com/en/actions)
+- [AWS ECS Documentation](https://docs.aws.amazon.com/ecs/)
+- [Docker Documentation](https://docs.docker.com/)
 - `AWS_SECRET_ACCESS_KEY`: Your AWS secret access key  
 - `AWS_SESSION_TOKEN`: Your AWS session token (for AWS Education accounts)
 

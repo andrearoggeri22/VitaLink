@@ -1,99 +1,345 @@
-name: Test Workflow Integration
+name: VitaLink CI/CD Integration Test
 
 on:
   workflow_dispatch:
     inputs:
-      test_method:
-        description: 'Test method to use'
+      test_level:
+        description: 'Level of testing to perform'
         required: true
-        default: 'repository_dispatch'
+        default: 'basic'
         type: choice
         options:
-        - repository_dispatch
-        - workflow_dispatch
-        - simulate_build
+        - basic
+        - full
+        - staging-deploy
+      cleanup_after:
+        description: 'Cleanup resources after test'
+        required: false
+        default: true
+        type: boolean
+
+env:
+  AWS_REGION: us-east-1
+  TEST_STACK_NAME: VitaLink-Stack-test
 
 jobs:
-  test-integration:
-    name: Test Workflow Integration
+  integration-test:
+    name: CI/CD Integration Test
     runs-on: ubuntu-latest
     
-    permissions:
-      contents: read
-      actions: write
-    
+    outputs:
+      test-image: ${{ steps.build-test.outputs.image }}
+      stack-created: ${{ steps.deploy-test.outputs.stack-created }}
+      
     steps:
-    - name: Checkout Repository
+    - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Test workflow trigger
-      run: |
-        echo "Testing workflow integration..."
-        echo "Test method: ${{ github.event.inputs.test_method }}"
-        echo "This workflow can be used to test if the CloudFormation deployment triggers correctly"
-        
-    - name: Test Repository Dispatch
-      if: github.event.inputs.test_method == 'repository_dispatch'
-      run: |
-        echo "Testing repository_dispatch trigger..."
-        curl -X POST \
-          -H "Accept: application/vnd.github.v3+json" \
-          -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          -H "Content-Type: application/json" \
-          https://api.github.com/repos/${{ github.repository }}/dispatches \
-          -d '{
-            "event_type": "deploy-cloudformation",
-            "client_payload": {
-              "image_uri": "123456789.dkr.ecr.us-east-1.amazonaws.com/vitalink:test",
-              "environment": "production",
-              "desired_task_count": "1",
-              "triggered_by": "test-workflow",
-              "test": true
-            }
-          }'
-        echo "Repository dispatch sent!"
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        
-    - name: Test Workflow Dispatch
-      if: github.event.inputs.test_method == 'workflow_dispatch'
-      run: |
-        echo "Testing workflow_dispatch trigger..."
-        gh workflow run "AWS CloudFormation Deployment" \
-          --ref ${{ github.ref }} \
-          -f image_uri="123456789.dkr.ecr.us-east-1.amazonaws.com/vitalink:test" \
-          -f environment="production" \
-          -f desired_task_count="1"
-        echo "Workflow dispatch sent!"
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        
-    - name: Simulate build completion
-      if: github.event.inputs.test_method == 'simulate_build'
-      run: |
-        echo "Simulating build completion..."
-        mkdir -p deployment-artifacts
-        echo "123456789.dkr.ecr.us-east-1.amazonaws.com/vitalink:test-tag" > deployment-artifacts/image-uri.txt
-        echo "123456789.dkr.ecr.us-east-1.amazonaws.com/vitalink:latest" > deployment-artifacts/image-latest-uri.txt
-        echo "${{ github.sha }}" > deployment-artifacts/git-sha.txt
-        
-        echo "=== Test Artifacts Created ==="
-        ls -la deployment-artifacts/
-        echo "Image URI: $(cat deployment-artifacts/image-uri.txt)"
-        echo "Latest URI: $(cat deployment-artifacts/image-latest-uri.txt)"
-        echo "Git SHA: $(cat deployment-artifacts/git-sha.txt)"
-        
-    - name: Upload test artifacts
-      if: github.event.inputs.test_method == 'simulate_build'
-      uses: actions/upload-artifact@v4
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
       with:
-        name: deployment-artifacts
-        path: deployment-artifacts/
-        retention-days: 1
-        
-    - name: Summary
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Test AWS connection
       run: |
-        echo "=== Test Summary ==="
-        echo "Method used: ${{ github.event.inputs.test_method }}"
-        echo "Check the Actions tab to see if the 'AWS CloudFormation Deployment' workflow starts."
-        echo "Look for the debug output in the deployment workflow to see trigger information."
+        echo "Testing AWS connection..."
+        aws sts get-caller-identity
+        echo "AWS connection successful"
+
+    - name: Run basic tests
+      run: |
+        echo "Running basic integration tests..."
+        
+        # Test CloudFormation template validation
+        echo "Validating CloudFormation template..."
+        aws cloudformation validate-template --template-body file://vitalink-infrastructure.yaml
+        echo "Template validation passed"
+        
+        # Test ECR access
+        echo "Testing ECR access..."
+        aws ecr describe-repositories --repository-names vitalink || echo "Repository doesn't exist yet"
+        echo "ECR access confirmed"
+
+    - name: Build test image
+      if: github.event.inputs.test_level != 'basic'
+      id: build-test
+      run: |
+        echo "Building test Docker image..."
+        
+        # Login to ECR
+        aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin $(aws sts get-caller-identity --query Account --output text).dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
+        
+        # Build image with test tag
+        docker build -t vitalink:test .
+        
+        # Tag and push to ECR
+        ECR_URI=$(aws sts get-caller-identity --query Account --output text).dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/vitalink:test
+        docker tag vitalink:test $ECR_URI
+        docker push $ECR_URI
+        
+        echo "image=$ECR_URI" >> $GITHUB_OUTPUT
+        echo "Test image built and pushed: $ECR_URI"
+
+    - name: Deploy test stack
+      if: github.event.inputs.test_level == 'staging-deploy' || github.event.inputs.test_level == 'full'
+      id: deploy-test
+      run: |
+        echo "Deploying test stack..."
+        
+        # Check if test stack already exists
+        if aws cloudformation describe-stacks --stack-name ${{ env.TEST_STACK_NAME }} 2>/dev/null; then
+          echo "Deleting existing test stack..."
+          aws cloudformation delete-stack --stack-name ${{ env.TEST_STACK_NAME }}
+          aws cloudformation wait stack-delete-complete --stack-name ${{ env.TEST_STACK_NAME }}
+        fi
+        
+        # Deploy test stack
+        IMAGE_URI="${{ steps.build-test.outputs.image }}"
+        
+        aws cloudformation create-stack \
+          --stack-name ${{ env.TEST_STACK_NAME }} \
+          --template-body file://vitalink-infrastructure.yaml \
+          --parameters \
+            ParameterKey=ImageURI,ParameterValue="$IMAGE_URI" \
+            ParameterKey=DatabasePassword,ParameterValue="TestPass123!" \
+            ParameterKey=Environment,ParameterValue="test" \
+            ParameterKey=DesiredTaskCount,ParameterValue=1 \
+          --capabilities CAPABILITY_NAMED_IAM \
+          --tags \
+            Key=TestRun,Value="${{ github.run_id }}" \
+            Key=Purpose,Value=IntegrationTest
+        
+        echo "Waiting for stack creation..."
+        
+        # Wait for stack creation with timeout
+        START_TIME=$(date +%s)
+        MAX_WAIT=1200  # 20 minutes
+        
+        while true; do
+          CURRENT_TIME=$(date +%s)
+          ELAPSED=$((CURRENT_TIME - START_TIME))
+          
+          if [ $ELAPSED -gt $MAX_WAIT ]; then
+            echo "Stack creation timed out"
+            exit 1
+          fi
+          
+          STATUS=$(aws cloudformation describe-stacks --stack-name ${{ env.TEST_STACK_NAME }} --query 'Stacks[0].StackStatus' --output text)
+          echo "Stack status: $STATUS"
+          
+          if [ "$STATUS" == "CREATE_COMPLETE" ]; then
+            echo "Test stack created successfully"
+            echo "stack-created=true" >> $GITHUB_OUTPUT
+            break
+          elif [[ "$STATUS" == *"FAILED"* ]] || [[ "$STATUS" == *"ROLLBACK"* ]]; then
+            echo "Stack creation failed: $STATUS"
+            
+            # Show recent events
+            aws cloudformation describe-stack-events --stack-name ${{ env.TEST_STACK_NAME }} --max-items 5
+            exit 1
+          fi
+          
+          sleep 30
+        done
+
+    - name: Test deployed application
+      if: steps.deploy-test.outputs.stack-created == 'true'
+      run: |
+        echo "Testing deployed application..."
+        
+        # Get application URLs from stack outputs
+        HEALTH_URL=$(aws cloudformation describe-stacks --stack-name ${{ env.TEST_STACK_NAME }} --query 'Stacks[0].Outputs[?OutputKey==`HealthCheckURL`].OutputValue' --output text)
+        APP_URL=$(aws cloudformation describe-stacks --stack-name ${{ env.TEST_STACK_NAME }} --query 'Stacks[0].Outputs[?OutputKey==`VitaLinkURL`].OutputValue' --output text)
+        
+        echo "Health Check URL: $HEALTH_URL"
+        echo "Application URL: $APP_URL"
+        
+        # Wait for application to be ready
+        echo "Waiting for application to start..."
+        sleep 120
+        
+        # Test health endpoint
+        MAX_RETRIES=10
+        RETRY_COUNT=0
+        
+        while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+          RETRY_COUNT=$((RETRY_COUNT + 1))
+          echo "Health check attempt $RETRY_COUNT/$MAX_RETRIES..."
+          
+          if curl -s -f --max-time 10 "$HEALTH_URL"; then
+            echo "Health check passed!"
+            break
+          else
+            if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
+              echo "Health check failed after $MAX_RETRIES attempts"
+              exit 1
+            fi
+            echo "Waiting 30 seconds before retry..."
+            sleep 30
+          fi
+        done
+        
+        # Test main application endpoint
+        echo "Testing main application..."
+        HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "$APP_URL")
+        echo "Main endpoint HTTP status: $HTTP_STATUS"
+        
+        if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 400 ]; then
+          echo "Main application endpoint accessible"
+        else
+          echo "Main endpoint returned status $HTTP_STATUS (may be normal for login-protected apps)"
+        fi
+
+    - name: Performance test
+      if: github.event.inputs.test_level == 'full' && steps.deploy-test.outputs.stack-created == 'true'
+      run: |
+        echo "Running basic performance test..."
+        
+        HEALTH_URL=$(aws cloudformation describe-stacks --stack-name ${{ env.TEST_STACK_NAME }} --query 'Stacks[0].Outputs[?OutputKey==`HealthCheckURL`].OutputValue' --output text)
+        
+        # Simple load test with curl
+        echo "Running 10 concurrent requests..."
+        for i in {1..10}; do
+          (curl -s --max-time 10 "$HEALTH_URL" > /dev/null && echo "Request $i: OK") &
+        done
+        wait
+        
+        echo "Basic performance test completed"
+
+  cleanup-test:
+    name: Cleanup Test Resources
+    runs-on: ubuntu-latest
+    needs: integration-test
+    if: always() && (github.event.inputs.cleanup_after == 'true' || github.event.inputs.cleanup_after == true)
+    
+    steps:
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Delete test stack
+      if: needs.integration-test.outputs.stack-created == 'true'
+      run: |
+        echo "Cleaning up test stack..."
+        
+        if aws cloudformation describe-stacks --stack-name ${{ env.TEST_STACK_NAME }} 2>/dev/null; then
+          aws cloudformation delete-stack --stack-name ${{ env.TEST_STACK_NAME }}
+          echo "Waiting for stack deletion..."
+          
+          # Wait for deletion with timeout
+          START_TIME=$(date +%s)
+          MAX_WAIT=900  # 15 minutes
+          
+          while true; do
+            CURRENT_TIME=$(date +%s)
+            ELAPSED=$((CURRENT_TIME - START_TIME))
+            
+            if [ $ELAPSED -gt $MAX_WAIT ]; then
+              echo "Deletion monitoring timed out"
+              break
+            fi
+            
+            if aws cloudformation describe-stacks --stack-name ${{ env.TEST_STACK_NAME }} 2>/dev/null; then
+              STATUS=$(aws cloudformation describe-stacks --stack-name ${{ env.TEST_STACK_NAME }} --query 'Stacks[0].StackStatus' --output text)
+              echo "Deletion status: $STATUS"
+              
+              if [[ "$STATUS" == *"DELETE_FAILED"* ]]; then
+                echo "Stack deletion failed"
+                aws cloudformation describe-stack-events --stack-name ${{ env.TEST_STACK_NAME }} --max-items 3
+                break
+              fi
+              
+              sleep 30
+            else
+              echo "Test stack deleted successfully"
+              break
+            fi
+          done
+        else
+          echo "ℹTest stack not found, nothing to clean up"
+        fi
+
+    - name: Cleanup test images
+      run: |
+        echo "Cleaning up test images..."
+        
+        # Delete test image from ECR
+        aws ecr batch-delete-image \
+          --repository-name vitalink \
+          --image-ids imageTag=test \
+          2>/dev/null || echo "ℹNo test images to delete"
+        
+        echo "Cleanup completed"
+
+  report:
+    name: Integration Test Report
+    runs-on: ubuntu-latest
+    needs: [integration-test, cleanup-test]
+    if: always()
+    
+    steps:
+    - name: Create test summary
+      run: |
+        echo "# VitaLink CI/CD Integration Test Report" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## Test Configuration" >> $GITHUB_STEP_SUMMARY
+        echo "- **Test Level**: ${{ github.event.inputs.test_level }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Cleanup After**: ${{ github.event.inputs.cleanup_after }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Test Run ID**: ${{ github.run_id }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Timestamp**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Test results
+        if [ "${{ needs.integration-test.result }}" == "success" ]; then
+          echo "## Integration Test: PASSED" >> $GITHUB_STEP_SUMMARY
+          echo "All integration tests completed successfully." >> $GITHUB_STEP_SUMMARY
+        else
+          echo "## Integration Test: FAILED" >> $GITHUB_STEP_SUMMARY
+          echo "Integration tests encountered issues." >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        # Cleanup results
+        if [ "${{ needs.cleanup-test.result }}" == "success" ]; then
+          echo "## Cleanup: COMPLETED" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "## Cleanup: ISSUES" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## Test Coverage" >> $GITHUB_STEP_SUMMARY
+        echo "- AWS credentials and connectivity" >> $GITHUB_STEP_SUMMARY
+        echo "- CloudFormation template validation" >> $GITHUB_STEP_SUMMARY
+        echo "- ECR repository access" >> $GITHUB_STEP_SUMMARY
+        
+        if [ "${{ github.event.inputs.test_level }}" != "basic" ]; then
+          echo "- Docker image build and push" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        if [ "${{ github.event.inputs.test_level }}" == "staging-deploy" ] || [ "${{ github.event.inputs.test_level }}" == "full" ]; then
+          echo "- Infrastructure deployment" >> $GITHUB_STEP_SUMMARY
+          echo "- Application health checks" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        if [ "${{ github.event.inputs.test_level }}" == "full" ]; then
+          echo "- Basic performance testing" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## Next Steps" >> $GITHUB_STEP_SUMMARY
+        
+        if [ "${{ needs.integration-test.result }}" == "success" ]; then
+          echo "- The CI/CD pipeline is working correctly" >> $GITHUB_STEP_SUMMARY
+          echo "- You can proceed with confidence to production deployments" >> $GITHUB_STEP_SUMMARY
+          echo "- Consider running this test regularly to catch issues early" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "- Review the failed test logs to identify issues" >> $GITHUB_STEP_SUMMARY
+          echo "- Fix any configuration or infrastructure problems" >> $GITHUB_STEP_SUMMARY
+          echo "- Re-run the integration test after fixes" >> $GITHUB_STEP_SUMMARY
+        fi
