@@ -180,10 +180,20 @@ jobs:
         if [ "$HTTP_CODE" = "204" ]; then
           echo "CloudFormation deployment triggered successfully!"
         else
-          echo "Failed to trigger CloudFormation deployment"
+          echo "Failed to trigger CloudFormation deployment automatically"
           echo "HTTP Status: $HTTP_CODE"
           echo "Response: $RESPONSE_BODY"
-          exit 1
+          echo ""
+          echo "MANUAL ACTION REQUIRED:"
+          echo "Please run the deployment manually with:"
+          echo "gh workflow run aws-cloudformation-deploy.yml --ref ${{ github.ref_name }} -f image_uri='${{ steps.build-image.outputs.image-latest }}' -f environment='production' -f desired_task_count='1'"
+          echo ""
+          echo "Or go to: https://github.com/${{ github.repository }}/actions/workflows/aws-cloudformation-deploy.yml"
+          echo "And run manually with:"
+          echo "- Branch: ${{ github.ref_name }}"
+          echo "- Image URI: ${{ steps.build-image.outputs.image-latest }}"
+          echo "- Environment: production"
+          echo "- Task Count: 1"
         fi
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
