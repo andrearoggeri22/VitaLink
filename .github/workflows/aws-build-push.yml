@@ -124,25 +124,65 @@ jobs:
         echo "Using GitHub API to trigger workflow on branch: ${{ github.ref_name }}"
         
         # Use GitHub API to trigger workflow_dispatch on the current branch
-        curl -X POST \
-          -H "Accept: application/vnd.github.v3+json" \
-          -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          -H "Content-Type: application/json" \
-          https://api.github.com/repos/${{ github.repository }}/actions/workflows/aws-cloudformation-deploy.yml/dispatches \
-          -d '{
-            "ref": "${{ github.ref_name }}",
-            "inputs": {
-              "image_uri": "${{ steps.build-image.outputs.image-latest }}",
-              "environment": "production",
-              "desired_task_count": "1"
-            }
-          }'
+        echo "First, let's find the workflow ID..."
+        WORKFLOW_ID=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          "https://api.github.com/repos/${{ github.repository }}/actions/workflows" | \
+          jq -r '.workflows[] | select(.name=="AWS CloudFormation Deployment") | .id')
         
-        if [ $? -eq 0 ]; then
-          echo "✅ CloudFormation deployment triggered successfully!"
+        echo "Workflow ID: $WORKFLOW_ID"
+        
+        if [ -z "$WORKFLOW_ID" ] || [ "$WORKFLOW_ID" = "null" ]; then
+          echo "Could not find AWS CloudFormation Deployment workflow"
+          echo "Available workflows:"
+          curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows" | \
+            jq -r '.workflows[] | "\(.name) - \(.path) - ID: \(.id)"'
+          
+          # Try to trigger by filename as fallback
+          echo "Attempting direct filename approach..."
+          RESPONSE=$(curl -s -w "%{http_code}" -X POST \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            https://api.github.com/repos/${{ github.repository }}/actions/workflows/aws-cloudformation-deploy.yml/dispatches \
+            -d '{
+              "ref": "${{ github.ref_name }}",
+              "inputs": {
+                "image_uri": "${{ steps.build-image.outputs.image-latest }}",
+                "environment": "production",
+                "desired_task_count": "1"
+              }
+            }')
         else
-          echo "❌ Failed to trigger CloudFormation deployment"
-          echo "Response code: $?"
+          # Use workflow ID to trigger the deployment
+          RESPONSE=$(curl -s -w "%{http_code}" -X POST \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/$WORKFLOW_ID/dispatches" \
+            -d '{
+              "ref": "${{ github.ref_name }}",
+              "inputs": {
+                "image_uri": "${{ steps.build-image.outputs.image-latest }}",
+                "environment": "production",
+                "desired_task_count": "1"
+              }
+            }')
+        fi
+        
+        # Extract HTTP status code (last 3 characters)
+        HTTP_CODE="${RESPONSE: -3}"
+        RESPONSE_BODY="${RESPONSE%???}"
+        
+        echo "HTTP Status Code: $HTTP_CODE"
+        echo "Response Body: $RESPONSE_BODY"
+        
+        if [ "$HTTP_CODE" = "204" ]; then
+          echo "CloudFormation deployment triggered successfully!"
+        else
+          echo "Failed to trigger CloudFormation deployment"
+          echo "HTTP Status: $HTTP_CODE"
+          echo "Response: $RESPONSE_BODY"
           exit 1
         fi
       env:
