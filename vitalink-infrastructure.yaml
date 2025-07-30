@@ -5,7 +5,6 @@ Parameters:
   ImageURI:
     Type: String
     Description: 'ECR Image URI for VitaLink (build and push first)'
-    Default: '430233177233.dkr.ecr.us-east-1.amazonaws.com/vitalink:latest'
   
   DatabasePassword:
     Type: String
@@ -388,22 +387,23 @@ Resources:
               Value: '5000'
             - Name: FLASK_ENV
               Value: !Ref Environment
-            - Name: SESSION_SECRET
-              Value: !Sub '${AWS::StackId}-session-secret'
-            - Name: JWT_SECRET_KEY
-              Value: !Sub '${AWS::StackId}-jwt-secret'
+          Secrets:
             - Name: FITBIT_CLIENT_ID
-              Value: 'test-fitbit-client-id'
+              ValueFrom: !Sub '/vitalink/${Environment}/fitbit/client-id'
             - Name: FITBIT_CLIENT_SECRET
-              Value: 'test-fitbit-client-secret'
+              ValueFrom: !Sub '/vitalink/${Environment}/fitbit/client-secret'
             - Name: FITBIT_REDIRECT_URI
-              Value: 'http://localhost:5000/callback'
+              ValueFrom: !Sub '/vitalink/${Environment}/fitbit/redirect-uri'
             - Name: MJ_APIKEY
-              Value: 'test-mailjet-api-key'
+              ValueFrom: !Sub '/vitalink/${Environment}/mailjet/api-key'
             - Name: MJ_APIKEY_SECRET
-              Value: 'test-mailjet-secret'
+              ValueFrom: !Sub '/vitalink/${Environment}/mailjet/secret'
             - Name: EMAIL_SENDER
-              Value: 'test@vitalink.com'
+              ValueFrom: !Sub '/vitalink/${Environment}/email/sender'
+            - Name: SESSION_SECRET
+              ValueFrom: !Sub '/vitalink/${Environment}/session/secret'
+            - Name: JWT_SECRET_KEY
+              ValueFrom: !Sub '/vitalink/${Environment}/jwt/secret'
           LogConfiguration:
             LogDriver: awslogs
             Options:
