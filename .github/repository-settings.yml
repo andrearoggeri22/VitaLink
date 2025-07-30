@@ -1,0 +1,5 @@
+# Security policy
+security_advisories_enabled: true
+dependency_alerts_enabled: true
+token_scanning_enabled: true
+secret_scanning_enabled: true
