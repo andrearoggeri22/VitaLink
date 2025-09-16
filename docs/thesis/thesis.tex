@@ -13,6 +13,9 @@
 \usepackage[table,xcdraw]{xcolor} % Per tabelle colorate
 \usepackage{dirtree} % Per visualizzazione ad albero della struttura dei file
 \usepackage{listings}
+\usepackage{array} % Miglior controllo colonne tabelle
+\usepackage{tabularx} % Tabelle a larghezza adattiva
+\usepackage{longtable} % Tabelle multipagina
 % Impostazione dei margini a 3 cm su tutti i lati
 \usepackage[a4paper,top=3cm,bottom=3cm,left=3cm,right=3cm]{geometry}
 \usepackage{spverbatim}
@@ -52,7 +55,7 @@
 \renewcommand{\tablename}{Tabella}
 
 % Titolo, autore, data
-\title{\Huge\textbf{Soluzione software per la raccolta dei parametri vitali da dispositivi wearable via API e per il follow‑up clinico.}}
+\title{\Huge\textbf{Soluzione software per la raccolta dei parametri vitali da dispositivi wearable via API per il follow-up clinico.}}
 \author{Nome Cognome\\Matricola: 1079033}
 \date{Anno Accademico 2024/2025}
 \begin{document}
@@ -99,10 +102,10 @@
         \hfill
         \begin{minipage}[t]{0.47\textwidth}
             {\fontsize{12}{14}\selectfont\textbf{Relatore:}}\\
-            {\fontsize{14}{18}\selectfont\textit{Chiar.mo/Chiar.ma Prof. (Prof.ssa) Nome Cognome}}\\
+            {\fontsize{14}{18}\selectfont\textit{Chiar.ma Prof.ssa Silvia Bonfanti}}\\
             \vspace{0.5cm}\\
             {\fontsize{12}{14}\selectfont\textbf{Correlatore (se applicabile):}}\\
-            {\fontsize{14}{18}\selectfont\textit{Dott. (Dott.ssa) Nome Cognome}}
+            {\fontsize{14}{18}\selectfont\textit{Chiar.mo Prof. Angelo Gargantini}}
         \end{minipage}\end{flushleft}
 
     \vfill
@@ -122,11 +125,11 @@
 
 \vspace{0.5cm}
 
-Desidero ringraziare il Prof. Angelo Gargantini e la Prof.ssa. Silvia Bonfanti, relatore e correlatore di questa tesi, per la disponibilità e cortesia dimostratemi, e per tutto l'aiuto fornito durante la stesura.
+Vorrei ringraziare con affetto mia madre e mio padre per il sostegno ed il grande aiuto che mi hanno dato durante tutto il percorso universitario e per avermi permesso di perseguire i miei obiettivi.
 
-Un sentito ringraziamento ai miei colleghi ed amici, per essermi stati vicini sia nei momenti difficili, sia nei momenti felici.
+Desidero ringraziare inoltre la Prof.ssa Silvia Bonfanti e il Prof. Angelo Gargantini, relatore e correlatore di questa tesi, per la disponibilità e cortesia dimostratemi e per tutto l'aiuto fornito durante la stesura.
 
-Vorrei infine ringraziare con affetto la mia famiglia per il sostegno ed il grande aiuto che mi hanno dato durante tutto il percorso universitario e per avermi permesso di perseguire i miei obiettivi.
+Un sentito ringraziamento infine ai miei colleghi ed amici, per essermi stati vicini sia nei momenti difficili, sia nei momenti felici.
 
 \vfill
 \begin{flushright}
@@ -176,18 +179,18 @@ Questa tesi esplora la progettazione, implementazione e validazione della soluzi
 \chapter{Introduzione}
 
 \section{Contesto e motivazione}
-Negli ultimi anni, grazie all'avvento del COVID-19, si è assistito ad un'incremento della diffusione di tecnologie a distanza. In questo contesto, anche la telemedicina ha visto uno sviluppo considerevole. Si stima che la sua adozione sia raddoppiata in seguito alla pandemia nei paesi Ocse\cite{msd2025}.
-Per molti medici però, sopratutto nel contesto italiano nel quale più che in altri paesi la rottura con il passato è difficoltosa, l'adozione di tecnologie digitali per il monitoraggio dei pazienti risulta ancora poco affermata\cite{anastasio2023}.
-In molti casi, come ad esempio nel decorso post-operatorio, la rilevazione dei parametri vitali dei pazienti risulta quantomeno essenziale per una corretta formulazione di evenutali terapie e suggerimenti per una migliore guarigione.
+Negli ultimi anni, grazie all'avvento del COVID-19, si è assistito ad un incremento della diffusione di tecnologie a distanza. In questo contesto, anche la telemedicina ha visto uno sviluppo considerevole. Si stima che la sua adozione sia raddoppiata in seguito alla pandemia nei paesi OCSE \cite{msd2025}.
+Per molti medici però, soprattutto nel contesto italiano nel quale più che in altri paesi la rottura con il passato è difficoltosa, l'adozione di tecnologie digitali per il monitoraggio dei pazienti risulta ancora poco affermata\cite{anastasio2023}.
+In molti casi, come ad esempio nel decorso post-operatorio, la rilevazione dei parametri vitali dei pazienti risulta quantomeno essenziale per una corretta formulazione di eventuali terapie e suggerimenti per una migliore guarigione.
 Risulta quindi chiaro che l'implementazione nel contesto sanitario di un sistema di monitoraggio remoto dei parametri vitali dei pazienti possa essere un grande aiuto per migliori diagnosi e terapie.
 È però necessario soffermarsi su alcuni aspetti che potrebbero rendere difficile l'adozione di tali tecnologie. Infatti, nonostante la disponibilità di dispositivi wearable, esistono ancora barriere significative all'integrazione di questi dispositivi nell'uso quotidiano in ambito clinico. Tra queste barriere possiamo trovare:
 
 \begin{itemize}
-    \item Interoperabilità limitata tra dispositivi e sistemi clinici esistenti
-    \item Frammentazione dei dati su piattaforme proprietarie non facilmente accessibili
-    \item Mancanza di strumenti che facilitino l'analisi clinica dei dati raccolti
-    \item Preoccupazioni relative alla sicurezza e alla privacy dei dati sanitari
-    \item Necessità di standardizzazione nella raccolta e nell'analisi dei dati
+  \item Interoperabilità limitata tra dispositivi e sistemi clinici esistenti.
+  \item Frammentazione dei dati su piattaforme proprietarie non facilmente accessibili.
+  \item Mancanza di strumenti che facilitino l'analisi clinica dei dati raccolti.
+  \item Preoccupazioni relative alla sicurezza e alla privacy dei dati sanitari.
+  \item Necessità di standardizzazione nella raccolta e nell'analisi dei dati.
 \end{itemize}
 
 In questo scenario, emerge la necessità di una piattaforma software integrata che permetta di colmare il divario tra i dispositivi wearable attualmente in commercio e i sistemi sanitari, consentendo ai medici di accedere, analizzare e valutare efficacemente i dati dei pazienti per migliorare diagnosi, trattamenti e follow-up clinico.
@@ -197,7 +200,7 @@ Il progetto VitaLink nasce con l'obiettivo di sviluppare una piattaforma web in 
 La piattaforma si propone di affrontare le problematiche sopra menzionate, fornendo un sistema integrato e modulare per la raccolta, l'analisi e la valutazione dei dati sanitari dei pazienti.
 
 \begin{itemize}
-    \item \textbf{Raccolta e integrazione dei dati}: Sviluppare una piattaforma capace di interfacciarsi con le API di dispositivi wearable (inizialmente Fitbit nativamente) per raccogliere i dati senza la necessità di salvarli in maniera permanente, ma solo per il tempo necessario alla consultazione.
+  \item \textbf{Raccolta e integrazione dei dati}: Sviluppare una piattaforma capace di interfacciarsi con le Application Programming Interface (API) di dispositivi wearable (inizialmente Fitbit nativamente) per raccogliere i dati senza la necessità di salvarli in maniera permanente, ma solo per il tempo strettamente necessario alla consultazione.
     \item \textbf{Visualizzazione e analisi}: Creare un'interfaccia intuitiva user-friendly che permetta ai professionisti sanitari di visualizzare, analizzare e interpretare i dati raccolti, identificando possibili anomalie e permettendo di formulare diagnosi e terapie adeguate.
     \item \textbf{Follow-up clinico strutturato}: Implementare un sistema di osservazioni cliniche che consenta ai medici di documentare interpretazioni e mettere in correlazione dati analizzati e eventuali terapie in atto.
     \item \textbf{Condivisione sicura dei dati}: Realizzare un meccanismo di condivisione dei pazienti tra diversi specialisti, garantendo sicurezza e privacy.
@@ -205,7 +208,7 @@ La piattaforma si propone di affrontare le problematiche sopra menzionate, forne
     \item \textbf{Scalabilità e flessibilità}: Progettare un'architettura modulare che permetta future implementazioni di altri dispositivi e facilitino l'integrazione di nuove funzionalità.
 \end{itemize}
 
-Il progetto si propone, in ultima battuta, di sviluppare un sistema integrabile senza difficoltà in sistemi già esistenti(come ad esempio Google Cloud e Amazon AWS) in maniera da rendere il più semplice possibile l'adozione.
+Il progetto si propone, in ultima battuta, di sviluppare una soluzione integrabile senza difficoltà in ambienti già esistenti (come ad esempio Google Cloud e Amazon AWS), così da rendere il più semplice possibile l'adozione.
 
 \section{Struttura della tesi}
 La tesi è strutturata in otto capitoli principali che seguono i principi dello sviluppo dell'ingegneria del software, seguiti da appendici tecniche.
@@ -238,6 +241,40 @@ Ad oggi, nell'anno 2025, esistono numerose soluzioni che si propongono per fare 
     \item \textbf{Doccla}: \textit{"I servizi di monitoraggio clinico di Doccla offrono una supervisione continua, garantendo che qualsiasi segno di peggioramento venga rapidamente identificato e gestito. Il nostro servizio non solo migliora gli esiti clinici per i pazienti, ma riduce anche il carico clinico per i team sanitari, gestendo il monitoraggio di routine e implementando protocolli di escalation concordati. In qualità di fornitore regolamentato dal CQC, garantiamo i più elevati standard di assistenza e sicurezza."} \cite{doccla}.
 \end{itemize}
 
+\renewcommand{\arraystretch}{1.15}
+\small
+\begingroup
+\setlength{\tabcolsep}{2pt}
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1.4cm}|>{\raggedright\arraybackslash}p{1.8cm}|>{\raggedright\arraybackslash}p{3.8cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{1.8cm}|>{\raggedright\arraybackslash}p{2cm}|}
+\hline
+\rowcolor[HTML]{F2F2F2}
+	extbf{Piattaforma} & \textbf{Modello / Licenza} & \textbf{Dispositivi / Integrazioni dichiarate} & \textbf{Focus principale} & \textbf{Indicazioni di costo*} & \textbf{Limiti principali (osservati)} \\
+\hline
+\endfirsthead
+\hline
+\rowcolor[HTML]{F2F2F2}\textbf{Piattaforma} & \textbf{Modello / Licenza} & \textbf{Dispositivi / Integrazioni dichiarate} & \textbf{Focus principale} & \textbf{Indicazioni di costo*} & \textbf{Limiti principali (osservati)} \\
+\hline
+\endhead
+Validic & SaaS proprietario (integrazione EHR, API) & Ampio ecosistema wearable / medical devices, integrazione EHR (EPIC, Cerner, ecc.) & Remote Patient Monitoring (RPM) enterprise & Pricing custom enterprise (non pubblico); modello per volume pazienti & Costo elevato per piccole strutture; dipendenza contratti enterprise \\
+\hline
+Human API & Piattaforma dati sanitaria consumer-controlled (API proprietarie) & Aggrega dati da EHR, wearable, laboratori, patient portals & Accesso e portabilità dati clinici e wellness & Modello a consumo / enterprise (non list price) & Non focalizzata su dashboard clinica completa; pricing non trasparente \\
+\hline
+Withings Health Mate & App + ecosistema dispositivi proprietari (+ abbonamento Withings+) & Dispositivi Withings (bilance, BPM, ECG, sleep mat), integrazioni app terze & Wellness tracking multi-parametro & App base gratuita; Withings+ ~9,95 €/mese o ~99,5 €/anno & Limitata per uso clinico avanzato senza layer intermedio; legata a dispositivi brand \\
+\hline
+Mywellness (Technogym) & Piattaforma cloud proprietaria con API enterprise & Attrezzature Technogym, integrazioni tramite API open, alcuni wearable & Fitness performance e engagement & Licensing B2B custom (nessun list price pubblico) & Orientamento fitness più che monitoraggio clinico continuo; costi struttura \\
+\hline
+Wellmo & PaaS white-label (licenza B2B) & Centinaia di dispositivi connessi, app mobile white-label, API & Orchestrazione servizi digital health & Modello licenza + setup (custom) & Richiede configurazione e contenuti partner; costi di avvio \\
+\hline
+LiVA Healthcare & Piattaforma digitale + coaching umano (proprietaria) & Integrazione wearable comuni (Apple Watch, Garmin, ecc.) & Programmi stile di vita e cronicità & Modello B2B (NHS / assicurazioni) su contratti & Non generalista per tutti i parametri; dipendenza coaching umano \\
+\hline
+Doccla & Soluzione RPM / Virtual Wards (dispositivi forniti) & Kit dispositivi vital signs + integrazione sistemi NHS & Monitoraggio remoto pazienti e virtual wards & Contratti con sistemi sanitari (NHS) su scala & Accesso orientato a strutture grandi; meno flessibilità per piccoli studi \\
+\hline
+\caption{Confronto sintetico delle principali piattaforme di riferimento nel dominio (fonti: siti ufficiali 2025). *I costi sono indicativi, basati su informazioni pubbliche qualitative: listini completi non sempre disponibili.}\label{tab:confronto_piattaforme}
+\end{longtable}
+\endgroup
+
+\noindent\textit{Nota metodologica}: dati raccolti da descrizioni pubbliche (2025); assenza di listini completi con conseguente classificazione qualitativa dei modelli economici; dettagli economici completi richiedono accordi diretti.
+
 \subsection{Limiti delle soluzioni attuali}
 Nonostante la varietà di piattaforme disponibili, si riscontrano diverse limitazioni comuni:
 
@@ -247,7 +284,7 @@ Nonostante la varietà di piattaforme disponibili, si riscontrano diverse limita
     \item \textbf{Focus limitato}: Alcune piattaforme riducono la raccolta dati a categorie di parametri specifiche, senza offrire una visione olistica.
 \end{itemize}
 
-In questo contesto, VitaLink si pone l'obiettivo di colmare queste limitazioni e di sviluppare un sistema semplice ma efficace, in grado di gestire ogni tipo di dispositivo o di parametro vitale e sopratutto senza costi legati alla licenza.
+In questo contesto, VitaLink si pone l'obiettivo di colmare queste limitazioni e di sviluppare un sistema semplice ma efficace, in grado di gestire ogni tipo di dispositivo o di parametro vitale e soprattutto senza costi legati alla licenza.
 
 \section{Tecnologie per lo sviluppo web}
 
@@ -256,9 +293,9 @@ Esistono sul mercato molti framework per la gestione del backend; tra questi pos
 
 \begin{itemize}
     \item \textbf{Django}: Uno dei framework più popolari per lo sviluppo di applicazioni web in Python.
-    \item \textbf{Express}: Un framwork minimalista per Node.js, molto utilizzato per API RESTful.
+  \item \textbf{Express}: Un framework minimalista per Node.js, molto utilizzato per API RESTful.
     \item \textbf{Flask}: Un framework leggero per Python molto documentato e facile da usare, senza che ciò faccia mancare sicurezza e flessibilità.
-    \item \textbf{ASP.NET}: Un framwork modulare open-source scritto in C Sharp.
+  \item \textbf{ASP.NET}: Un framework modulare open-source scritto in C Sharp.
 \end{itemize}
 
 \subsection{Tecnologie frontend per la visualizzazione di dati clinici}
@@ -276,9 +313,9 @@ Dal punto di vista legislativo, in UE, è necessario rispettare le normative GDP
 Tra DBMS più comuni per la conservazione dei dati possiamo trovare:
 
 \begin{itemize}
-    \item \textbf{MySQL}: Uno dei DBMS relazionali più popolari al mondo. Progettato per massimizzare velocità, scalbilità e affidabilità. \cite{mysql}
-    \item \textbf{PostgreSQL}: Un'altro DBMS relazionale. A differenza di MySQL, supporta una maggiore flessibilità per quanto riguarda i tipi di dati, scalabilità e integrità dei dati. \cite{postgresql}
-    \item \textbf{MongoDB}: Un DBMS non relazionale(noSQL) orientato ai documenti. Permette di memorizzare in maniera efficente dati non strutturati o semi strutturati. \cite{mongodb}
+  \item \textbf{MySQL}: Uno dei DBMS relazionali più popolari al mondo. Progettato per massimizzare velocità, scalabilità e affidabilità. \cite{mysql}
+  \item \textbf{PostgreSQL}: Un altro DBMS relazionale. A differenza di MySQL, supporta una maggiore flessibilità per quanto riguarda i tipi di dati, scalabilità e integrità dei dati. \cite{postgresql}
+  \item \textbf{MongoDB}: Un DBMS non relazionale (NoSQL) orientato ai documenti. Permette di memorizzare in maniera efficiente dati non strutturati o semi strutturati. \cite{mongodb}
 
 \end{itemize}
 
@@ -289,7 +326,7 @@ I dispositivi wearable, al giorno d'oggi, nella maggioranza dei casi necessitano
 Lo standard adottato da quasi tutti i dispositivi wearable è il Bluetooth \cite{bluetooth}. A questo vanno poi ad aggiungersi standard di nuova generazione come il Bluetooth Low Energy (BLE) \cite{ble}, che permette di ridurre il consumo energetico e di aumentare la durata della batteria dei dispositivi e l'ANT+ \cite{ant}.
 
 \subsection{OAuth 2.0 e autenticazione sicura}
-Per quanto riguarda l'autorizzazione per accedere alle API dei dispositivi wearable, lo standard più utilizzato è l'OAuth 2.0, il quale permette agli utenti di fornire l'accesso ai proprio dati ad un servizio richiedente senza dover condividere i propri dati di accesso.
+Per quanto riguarda l'autorizzazione per accedere alle API dei dispositivi wearable, lo standard più utilizzato è l'OAuth 2.0 (Open Authorization), il quale permette agli utenti di fornire l'accesso ai propri dati ad un servizio richiedente senza dover condividere le proprie credenziali.
 Lo standard si basa sul concetto di token; il servizio richiedente, dopo aver ricevuto l'autorizzazione da parte dell'utente, riceve un token di accesso con il quale può richiedere i dati all'API del dispositivo wearable.
 Questo tipo di autenticazione permette di garantire la protezione dei dati sensibili ed evitare che i dati di accesso possano venire compromessi.
 \begin{figure}[H]
@@ -300,33 +337,33 @@ Questo tipo di autenticazione permette di garantire la protezione dei dati sensi
 \end{figure}
 
 \subsection{Piattaforme Fitbit e API disponibili}
-Fitbit è una marca di dispositivi wearable, aquisita nel 2019 da Google \cite{fitbit}, che comprende una vasta gamma di prodotti i quali sono in grado di rilevare una grande quantità di dati.
+Fitbit è una marca di dispositivi wearable, acquisita nel 2019 da Google \cite{fitbit}, che comprende una vasta gamma di prodotti i quali sono in grado di rilevare una grande quantità di dati.
 Una volta che l'utente ha connesso il proprio dispositivo alla piattaforma Fitbit, è possibile utilizzare una serie di API che permettono di accedere a tali dati. La piattaforma Fitbit adotta lo standard OAuth 2.0 per l'autenticazione.
 Tra i dati disponibili tramite le API Fitbit troviamo ad esempio:
 
 \begin{itemize}
-    \item Battito cardiaco
-    \item Calorie bruciate
-    \item Calorie assunte
-    \item Ossigenazione del sangue
-    \item Attività fisica
-    \item Sonno
-    \item Temperatura corporea
-    \item Temperatura della pelle
-    \item Attività respiratoria
+  \item Battito cardiaco.
+  \item Calorie bruciate.
+  \item Calorie assunte.
+  \item Ossigenazione del sangue.
+  \item Attività fisica.
+  \item Sonno.
+  \item Temperatura corporea.
+  \item Temperatura della pelle.
+  \item Attività respiratoria.
 \end{itemize}
 
 e molti altri.
-\\Una nota da precisare è che quasi tutti i dati sono disponibili in formato intraday(ossia visibuli con una frequenza che va da qualche secondo a pochi minuti), ma per accedere a questo livello di dettaglio è necessario mandare una richiesta speciale a Fitbit per entrare in possesso dell'autorizzazione necessaria alla loro consultazione \cite{fitbitapi}.
+Una nota da precisare è che quasi tutti i dati sono disponibili in formato intraday (ossia visibili con una frequenza che va da qualche secondo a pochi minuti). Per accedere a questo livello di dettaglio è però necessario inviare una richiesta speciale a Fitbit per ottenere l'autorizzazione necessaria alla consultazione \cite{fitbitapi}.
 
 \subsection{Altre piattaforme e loro integrazione}
 
 In commercio, oltre ai dispositivi Fitbit, esiste una vasta gamma di prodotti wearable per il monitoraggio dei parametri vitali con vari livelli di funzionalità: dai più economici ai più costosi. Tra questi possiamo trovare:
 
 \begin{itemize}
-    \item \textbf{Garmin Smartwatch}: Dispositivi molto avanzati dotati delle tecnologie più evolute per il monitoraggio. Molto adottati dagli sportivi. \cite{mysql}
-    \item \textbf{Apple Watch}: Orologi smart progettati per un'integrazione perfetta con l'ecosistema Apple. L'accesso ai dati di tali dispositivi risulta più difficoltosa che su altre tipologie di dispositivi in quanto per ottenere l'accesso ai dati risulta necessario un dispositivo Apple. \cite{applewatch}
-    \item \textbf{Amazfit}: Dispositivi la cui feature principale è il prezzo. Risultano infatti molto più competitivi (in linea generale) dal punto di vista economico rispetto ai dispositivi sopra citati. \cite{amazfit}
+  \item \textbf{Garmin Smartwatch}: dispositivi avanzati dotati di tecnologie evolute per il monitoraggio, molto adottati dagli sportivi. \cite{mysql}
+  \item \textbf{Apple Watch}: orologi progettati per un'integrazione completa con l'ecosistema Apple. L'accesso ai relativi dati è più restrittivo in quanto richiede un dispositivo Apple. \cite{applewatch}
+  \item \textbf{Amazfit}: dispositivi con forte competitività di prezzo rispetto alle alternative citate. \cite{amazfit}
 \end{itemize}
 
 
@@ -341,7 +378,7 @@ Per l'analisi dei requisiti (funzionali e non funzionali) è stata utilizzata la
 \begin{itemize}
     \item Il sistema deve fornire un meccanismo sicuro di registrazione per i medici e gli operatori sanitari.
     \item Gli utenti devono potersi autenticare tramite email e password.
-    \item Il sistema deve supportare l'autenticazione API tramite token JWT.
+  \item Il sistema deve supportare l'autenticazione API tramite token JWT (JSON Web Token).
     \item Le password devono essere memorizzate con crittografia sicura (libreria Werkzeug \cite{werkzeug}).
 \end{itemize}
 
@@ -629,7 +666,7 @@ I medici e gli operatori sanitari possono:
 \begin{itemize}
     \item Visualizzare i pazienti.
     \item Creare nuovi pazienti.
-    \item Importare pazienti tramite UUID.
+  \item Importare pazienti tramite UUID (Universally Unique Identifier).
     \item Visualizzare i dettagli di un paziente.
     \item Modificare i dettagli di un paziente.
     \item Eliminare un paziente(dissociandolo dal proprio account).
@@ -679,7 +716,7 @@ La piattaforma su cui sono salvati i dati può:
 I medici e gli operatori sanitari possono:
 \begin{itemize}
     \item Generare un link valido 24h per permettere all'utente di fornire l'accesso da parte della piattaforma ai suoi dati.
-    \item Reimuovere il collegamento alla della piattaforma alla piattaforma su cui sono salvati i dati.
+  \item Rimuovere il collegamento alla piattaforma su cui sono salvati i dati.
 \end{itemize}
 \subsection{Gestione delle osservazioni cliniche}
 I medici e gli operatori sanitari possono:
@@ -694,17 +731,17 @@ I medici e gli operatori sanitari possono:
 \section{User stories e scenari comuni principali}
 \subsection{Registrazione e accesso}
 \begin{itemize}
-    \item Il medico o il personale sanitario accede al sistema collegandosi tramite un browser al link fornitogli.
+  \item Accesso alla piattaforma via browser.
     \item Si presentano due opzioni: registrazione e login.
     \item Per registrarsi l'utente clicca sul collegamento "Nuovo medico? Registrati Qui"(La lingua effettiva dipende dalla localizzazione selezionata).
-    \item L'utente, seguendo le richieste specficate nella pagina, compila i campi con i propri dati, facendo attenzione a rispettare i requisiti di sicurezza della password.
+  \item L'utente, seguendo le richieste specificate nella pagina, compila i campi con i propri dati, facendo attenzione a rispettare i requisiti di sicurezza della password.
     \item Se tutto è stato inserito correttamente, non esistono altri account nel sistema con la stessa email e il sistema non ha restituito errori, dopo aver premuto il pulsante "Crea Account" l'utente viene registrato e reindirizzato alla pagina di login.
     \item L'utente può accedere al sistema inserendo la propria email e password.
     \item L'utente, se i dati sono corretti e se il sistema non ha restituito errori, dopo aver premuto il pulsante "Accedi" viene reindirizzato alla Dashboard del sistema.
 \end{itemize}
 \subsection{Importazione e gestione pazienti}
 \begin{itemize}
-    \item Il medico o il personale sanitario accede e si trova davanti alla Dashboard.
+  \item Dalla Dashboard iniziale avvia la gestione pazienti.
     \item Decide di aggiungere un paziente: clicca sulla shortcut nella Dashboard "Nuovo Paziente" nel Menù Azioni rapide(oppure va nella pagina "Visualizza tutti i pazienti" e clicca sul pulsante "Aggiungi nuovo paziente").
     \item Nel form che si apre, l'utente compila i campi obbligatori richiesti e, se desidera, quelli opzionali.
     \item Dopo aver compilato il form, se i dati inseriti sono validi e se il sistema non ha restituito errori, dopo aver cliccato il pulsante "Salva Paziente" verrà creato un nuovo account.
@@ -714,21 +751,21 @@ I medici e gli operatori sanitari possono:
 \end{itemize}
 \subsection{Collegamento dispositivi wearable}
 \begin{itemize}
-    \item Il medico o il personale sanitario accede e si trova davanti alla Dashboard.
+  \item Punto di partenza: Dashboard.
     \item Decide di collegare un dispositivo wearable al profilo di un paziente: clicca sul pulsante "Visualizza tutti i pazienti" e, sulla lista dei pazienti, clicca sul pulsante Azione "Visualizza i parametri vitali".
     \item Nella pagina che si trova davanti, l'utente clicca sul pulsante "Health Sync".
     \item Viene aperto un modale che mostra un QR Code (per permettere ad un paziente in visita al medico di collegarsi scansionandolo) ed un link testuale che può essere condiviso con il paziente tramite email o messaggio.
     \item Il paziente, una volta ricevuto il link, cliccando su di esso viene reindirizzato alla pagina di autorizzazione all'accesso ai propri dati da parte del sistema, la quale può essere raggiungibile per 24h (o comunque fino a che la procedura di autorizzazione non sarà riuscita). Se il link non dovesse essere più valido il paziente verrà informato di questo.
-    \item Il paziente clicca sul servizio relativo al dispositivo che possiede (inizialmente saranno supportati solo i dispositivi Fitvbit).
+  \item Il paziente clicca sul servizio relativo al dispositivo che possiede (inizialmente saranno supportati solo i dispositivi Fitbit).
     \item Si apre la pagina di login della piattaforma scelta, la quale dopo aver effettuato l'accesso chiede all'utente di autorizzare una certa serie di permessi al sistema richiedente.
     \item Una volta concessi, l'utente viene reindirizzato alla pagina dei servizi disponibili e gli viene comunicato l'esito dell'operazione(fallita o riuscita).
     \item Il medico è ora collegato al dispositivo del paziente e può visualizzare i dati relativi ai parametri vitali nella schermata in cui ha cliccato "Health Sync".
 \end{itemize}
 \subsection{Visualizzazione e interpretazione dei dati}
 \begin{itemize}
-    \item Il medico o il personale sanitario accede e si trova davanti alla Dashboard.
+  \item Apertura dalla Dashboard.
     \item Clicca su "Visualizza tutti i pazienti" e clicca sull'azione "Visualizza Paziente".
-    \item Qui il medico può intragire con le note relative al paziente, oltre che a visualizzare i relativi dati di registrazione.
+  \item Qui il medico può interagire con le note relative al paziente, oltre che a visualizzare i relativi dati di registrazione.
     \item Clicca sul pulsante "Visualizza i parametri vitali" e si apre la pagina con i dati relativi al parametri vitali del paziente.
     \item Il medico, dopo che è stato effettuato il collegamento al dispositivo wearable, può visualizzare i dati relativi ai parametri vitali in formato tabellare o grafico.
     \item Il medico può decidere il livello di dettaglio di visualizzazione dei dati andando a cliccare sul pulsante relativo al periodo scelto(1g, 7g, 30g, 90g).
@@ -737,22 +774,22 @@ I medici e gli operatori sanitari possono:
 
 \subsection{Generazione e invio report}
 \begin{itemize}
-    \item Il medico o il personale sanitario accede e si trova davanti alla Dashboard.
+  \item Avvio dalla Dashboard.
     \item Clicca su "Visualizza tutti i pazienti" e clicca sull'azione "Visualizza Parametri Vitali".
     \item Nella schermata che si apre, il medico visualizza i dati relativi ai parametri vitali del paziente.
-    \item Nella sezione "Reports" il medico può scegliere di aprire la pagina di generazione del report relativa a tutti i parametri o a un singolo parametro vitale specifico.
+  \item Nella sezione "Reports" il medico può scegliere di aprire la pagina di generazione del report relativa a tutti i parametri o ad un singolo parametro vitale specifico.
     \item Se si sceglie su un parametro vitale specifico, la pagina verrà aperta con selezionato in automatico il grafico da includere nel report relativo al parametro vitale che era visualizzo nella pagina precedente(e con lo stesso livello di dettaglio).
     \item Se si sceglie su "Report Completo", la pagina verrà aperta con selezionati in automatico tutti i grafici relativi ai parametri vitali presenti(con il livello di dettaglio che era selezionato).
     \item In qualsiasi caso è possibile aggiungere o rimuovere parametri vitali e/o grafici. Inoltre è possibile aggiungere o rimuovere note cliniche e osservazioni cliniche.
     \item Il medico può inserire un messaggio opzionale riepilogativo con eventuali suggerimenti per il paziente.
     \item Il medico può selezionare di inoltrare una copia del report al paziente via email(solo se questa è stata inserita nel campo opzionale del paziente al momento della registrazione).
-    \item Il medico cliccca su "Genera Report PDF" e una copia PDF del report verrà scaricata sul dispositivo.
+  \item Il medico clicca su "Genera Report PDF" e una copia PDF del report verrà scaricata sul dispositivo.
     \item Se selezionata l'opzione di invio email, il sistema invierà una copia del report anche al paziente tramite email.
 \end{itemize}
 
 \subsection{Visualizzazione degli audit}
 \begin{itemize}
-    \item Il medico o il personale sanitario accede e si trova davanti alla Dashboard.
+  \item Accesso dalla Dashboard.
     \item Clicca sul pulsante "Visualizza i Log delle Attività" e sistema si apre la pagina con gli audit.
     \item Il medico visualizza una pagina con tutte le operazioni eseguite sugli utenti che esso segue (generati o importati) organizzate per "Azione" ed "Entità".
     \item Il medico può filtrare i dati per utente, Data(inizio e fine), tipo di azione, tipo di entità, paziente.
@@ -761,7 +798,7 @@ I medici e gli operatori sanitari possono:
 
 \subsection{Modifica dati personali}
 \begin{itemize}
-    \item Il medico o il personale sanitario accede e si trova davanti alla Dashboard.
+  \item Ingresso dalla Dashboard.
     \item Clicca sul pulsante in alto a destra col proprio nome.
     \item Nella tendina che si apre clicca su "Profilo".
     \item Si apre una pagina con i suoi dati personali.
@@ -772,7 +809,7 @@ I medici e gli operatori sanitari possono:
 \chapter{Progettazione}
 \section{Architettura del sistema}
 \subsection{Architettura generale e componenti principali}
-VitaLink è strutturata come un'applicazione web progettata per essere altamente scalabile e modulabile. Essa utilizza il Framework Flask (Python) per il backend, Bootstrap per il frontend e PostgreSQL come database relazionale(ma è possibile sostiturlo facilmente con un DBMS analogamente relazionale).
+VitaLink è strutturata come un'applicazione web progettata per essere altamente scalabile e modulabile. Essa utilizza il framework Flask (Python) per il backend, Bootstrap per il frontend e PostgreSQL come database relazionale (ma è possibile sostituirlo facilmente con un DBMS analogamente relazionale).
 La piattaforma è progettata per essere inizialmente accessibile solo tramite browser web, ma sono state inserite anche delle API per permettere l'integrazione futura con possibili app mobile o altri sistemi esterni.
 \subsection{Modularità e separazione delle responsabilità}
 La piattaforma è divisa in 15 moduli principali, ai quali vanno ad affiancarsi due moduli di supporto per la gestione delle migrazioni e per la compilazione delle traduzioni al momento dell'istanziazione di un un container.
@@ -867,7 +904,7 @@ Tra i pattern architetturali adottati nel progetto possiamo citare i più rileva
     \item Decorator Pattern: permette di aggiungere responsabilità aggiuntive ad un oggetto senza modificarne la struttura.
 \end{itemize}
 \section{Modello dei dati}
-Per il modello dei dati è stato scelto un'approccio relazionale in quanto non vi è una particolare necessità di un modello noSQL, essendo i dati sanitari di tipo strutturato e relazionabile.
+Per il modello dei dati è stato scelto un approccio relazionale in quanto non vi è una particolare necessità di un modello noSQL, essendo i dati sanitari di tipo strutturato e relazionabile.
 \subsection{Entità principali e relazioni - Schema ER}
 \begin{figure}[H]
     \centering
@@ -895,7 +932,7 @@ Da notare che che per lo sviluppo locale si rende necessaria la creazione del da
 Nel caso invece in cui in fase di deployment si decida di utilizzare un database esterno al container, valgono le stesse considerazioni fatte per lo sviluppo locale, ossia si rende necessaria la creazione del database sul provider del servizio database scelto.
 \section{Interfaccia utente}
 \subsection{Design responsivo}
-L'interfaccia utente è stata progettata per essere quanto più intuitiva e semplice possibile seguendo un'approccio per formulare un design responsivo, utile per facilitare la consultazione dei dati sanitari su un'ampia gamma di dispositivi.
+L'interfaccia utente è stata progettata per essere quanto più intuitiva e semplice possibile seguendo un approccio per formulare un design responsivo, utile per facilitare la consultazione dei dati sanitari su un'ampia gamma di dispositivi.
 La decisione di utilizzare Bootstrap per il frontend ha permesso di ridurre la mole di lavoro necessaria per questo tipo di task, consentendo di focalizzare gli sforzi di sviluppo su parti più cruciali del sistema.
 Le pagine sono state sviluppate con un design moderno e intuitivo, adatto per l'uso anche da parte di personale sanitario non addestrato all'uso dello strumento.
 Ciascuna pagina presenta un menù accessibile nella parte superiore dello schermo che permette un accesso rapido a:
@@ -913,7 +950,7 @@ Ciascuna pagina presenta un menù accessibile nella parte superiore dello scherm
 Nelle pagine di generazione dei report e di concessione dell'autorizzazione di accesso ai dati dei parametri vitali (per i pazienti) questo menù è stato rimosso per motivi di design in quanto queste pagine non sono state progettate come routes accessibili permanentemente, ma solo temporaneamente per determinate task.
 \subsection{Componenti UI per la visualizzazione dei dati sanitari}
 Per la visualizzazione dei dati sanitari sono stati utilizzati grafici generati con la libreria Chart.js \cite{chartjs}, che permette di generare grafici personalizzabili e interattivi con un design accattivante.
-Inoltre i dati sanitari sono accessibili anche in formato tabellare, utile sopratutto per quei dati la cui rappresentazione grafica risulta poco utile, come ad esempio il cibo assunto o diari dell'utente.
+Inoltre i dati sanitari sono accessibili anche in formato tabellare, utile soprattutto per quei dati la cui rappresentazione grafica risulta poco utile, come ad esempio il cibo assunto o diari dell'utente.
 \section{API e integrazione con sistemi esterni}
 
 
@@ -937,7 +974,7 @@ L'API è strutturata attorno a risorse chiaramente identificate. Tra le risorse 
 \begin{itemize}
     \item \texttt{/patients}: gestione dei pazienti.
     \item \texttt{/patients/<uuid>/vitals}: parametri vitali di un paziente specifico.
-    \item \texttt{/patients/<uuid>/notes}: note mediche associate a un paziente.
+  \item \texttt{/patients/<uuid>/notes}: note mediche associate ad un paziente.
     \item \texttt{/observations}: osservazioni mediche.
 \end{itemize}
 
@@ -1045,7 +1082,7 @@ L'architettura delle API è stata progettata tenendo in considerazione l'estensi
 \chapter{Implementazione}
 \section{Stack tecnologico}
 \subsection{Backend: Python e Flask}
-Il backend della piattaforma è stato sviluppato mediante l'uso di Python e del framework Flask relativo. Python è un linguaggio di programmazione molto flessibile e supoortato da una vasta gamma di librerie. La conoscenza pregressa e l'utilizzo Flask sono state le ragioni più rilevanti per la scelta del framwork.
+Il backend della piattaforma è stato sviluppato mediante l'uso di Python e del framework Flask relativo. Python è un linguaggio di programmazione molto flessibile e supportato da una vasta gamma di librerie. La conoscenza pregressa e l'utilizzo di Flask sono state le ragioni più rilevanti per la scelta del framework.
 \subsection{ORM: SQLAlchemy}
 Per la gestione delle interazioni con il database, è stato utilizzato SQLAlchemy, un ORM (Object-Relational Mapping) \cite{orm} per Python.
 Esso permette di interagire con il database utilizzando oggetti Python invece di scrivere direttamente query SQL, semplificando così lo sviluppo e la manutenzione del codice.
@@ -1400,7 +1437,7 @@ Il frontend dell'applicazione è stato sviluppato utilizzando HTML5, CSS3 e Java
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{images/screen/details.png}
-    \caption{Dettaglio paziente: schermata con le informazioni dettagliate e le note mediche relative a un paziente specifico}
+  \caption{Dettaglio paziente: schermata con le informazioni dettagliate e le note mediche relative ad un paziente specifico}
     \label{fig:patient-details}
 \end{figure}
 
@@ -1572,7 +1609,7 @@ L'applicazione espone numerosi endpoint sia per l'interfaccia web che per le API
   "patients": [
     {
       "id": 1,
-      "uuid": "123e4567-e89b-12d3-a456-426614174000",
+      "uuid": "123e4567-e89b-12d3-a456",
       "first_name": "Giovanni",
       "last_name": "Bianchi",
       "date_of_birth": "1980-05-15",
@@ -1600,7 +1637,7 @@ L'applicazione espone numerosi endpoint sia per l'interfaccia web che per le API
                         {
                         "patient": {
                         "id": 1,
-                        "uuid": "123e4567-e89b-12d3-a456-426614174000",
+                        "uuid": "123e4567-e89b-12d3-a456",
                         "first_name": "Giovanni",
                         "last_name": "Bianchi",
                         "date_of_birth": "1980-05-15",
@@ -1657,7 +1694,7 @@ L'applicazione espone numerosi endpoint sia per l'interfaccia web che per le API
     \item \textbf{GET \texttt{/api/patients/<string:patient\_uuid>/notes}}
           \begin{itemize}
               \item \textbf{Modulo}: \texttt{app/api.py}
-              \item \textbf{Descrizione}: Recupera tutte le note mediche associate a un paziente specifico.
+              \item \textbf{Descrizione}: Recupera tutte le note mediche associate ad un paziente specifico.
               \item \textbf{Autenticazione}: JWT richiesto
               \item \textbf{Parametri URL}: \texttt{patient\_uuid} - UUID univoco del paziente
               \item \textbf{Risposta di Successo} (200 OK):
@@ -1917,7 +1954,7 @@ Tale workflow include i seguenti strumenti per l'analisi:
 \section{Ambiente di deployment}
 \subsection{Configurazione del server}
 Un server di produzione è stato configurato per testare l'effettivo funzionamento della piattaforma nel caso di deployment in un ambiente reale.
-Koyeb \cite{koyeb} ha permesso l'istanziazione di un database PostgreSQL, oltre che a un server Gunicorn per l'esecuzione del backend.
+Koyeb \cite{koyeb} ha permesso l'istanziazione di un database PostgreSQL, oltre che ad un server Gunicorn per l'esecuzione del backend.
 \subsection{Gestione delle variabili d'ambiente}\sloppy
 Le variabili d'ambiente sono state configurate con i dettagli dell'implementazione cloud, andando a settare le variabili \texttt{CLOUD\_RUN\_ENVIRONMENT=true}, oltre a \texttt{INSTANCE\_UNIX\_SOCKET, DB\_USER, DB\_PASS, DB\_NAME}
 con i dettagli di accesso al database cloud e \texttt{FITBIT\_CLIENT\_ID, FITBIT\_CLIENT\_SECRET, FITBIT\_REDIRECT\_URI} con i dettagli di accesso alla piattaforma Fitbit e \texttt{MJ\_APIKEY, MJ\_APISECRET, EMAIL\_SENDER} per l'integrazione con Mailjet.
@@ -1949,46 +1986,45 @@ Per il backend della piattaforma è stato implementato un sistema di logging est
 La strategia in caso di errore ha previsto la registrazione di un messaggio dettagliato in console, includendo anche i dettagli dell'eccezione.
 Nel caso di errori critici, il workflow configurato su Github Actions ha permesso di identificare quasi istantaneamente e risolvere i problemi.
 
-
-
 \chapter{Risultati e valutazione}
 \section{Obiettivi raggiunti}
 \subsection{Funzionalità implementate}
-
-\subsection{Conformità ai requisiti}
+Il risultato finale dell'implementazione della piattaforma VitaLink prevedere l'integrazione di tutte le funzionalità di base descritte nei requisiti iniziali.
+La struttura modulare del codice ha permesso di aggiungere funzionalità aggiuntive anche in fase di testing e deployment, qualora ciò si si fosse reso necessario.
 
 \section{Limiti e problemi riscontrati}
 \subsection{Sfide tecniche}
-
+La più grande limitazione tecnica è stata rappresentata in primis dalle API esterne, le quali (come nel caso di Fitbit) richiedono un server di callback in formato HTTPS.
+Ciò ha richiesto l'utilizzo di un server di produzione configurato opportunamente anche in fase di testing, andando a complicare leggermente il processo di sviluppo.
+Un altro problema è stato rappresentato dalla difficoltà di trovare un servizio di hosting gratuito che permettesse l'uso di tutti i componenti richiesti (database relazionale, server WSGI, ecc.), il che ha richiesto un compromesso tra costi e funzionalità (la scalabilità del servizio risulta infatti limitata ad un'istanza nel caso di utilizzo di Koyeb con la prova gratuita).
 \subsection{Limitazioni delle API esterne}
-
-\subsection{Compromessi di design}
-
-
-
+Le API esterne di Fitbit, come indicato sul sito di PublicAPI \cite{fitbit_API_rate}, presentano un rate limit piuttosto basso (150 richieste all'ora). Tale limite ha imposto un ritmo di sviluppo più lento in quanto per ciascuna funzionalità implementata, il testing correlato richiedeva delle richieste API che andavano molto rapidamente a depletare il limite orario (richiedendo quindi di creare vari account di test Fitbit per aggirare tale limite).
 
 \chapter{Conclusioni e sviluppi futuri}
 \section{Conclusioni}
-\subsection{Riepilogo del lavoro svolto}
-
 \subsection{Contributi principali}
+Tutto il lavoro è stato svolto in autonomia, dalla progettazione iniziale fino al deployment della piattaforma.
+Tutte le fonti utilizzate per per l'apprendimento e la realizzazione del progetto sono state debitamente citate.
 
 \subsection{Riflessione sul processo di sviluppo}
+Il processo di sviluppo ha seguito un approccio aderente ai principi imparati durante il corso di Ingegneria del Software, con particolare attenzione alla fase di progettazione e alla scrittura di codice manutenibile e testabile.
+L'adozione delle pratiche di CI/CD ha permesso di automatizzare alcune delle operazioni ripetitive e di ridurre il rischio di errore umano.
 
 \section{Sviluppi futuri}
 \subsection{Integrazione con ulteriori piattaforme sanitarie}
-
-\subsection{Funzionalità avanzate di analisi predittiva}
+Per il momento non si prevede l'integrazione con ulteriori piattaforme sanitarie. Ciò nonostante, la modularità del codice permette di aggiungere facilmente nuovi moduli per l'integrazione con altre piattaforme che supportino OAuth 2.0 e dispongano di API REST.
+Il progetto verrà mantenuto sul repository GitHub a tempo indefinito, in modo da permettere a chiunque di contribuire allo sviluppo futuro, oltre che a poter consultare il repository in qualunque momento.
 
 \subsection{Applicazione mobile companion}
-
+Per il futuro si potrebbe pensare di sviluppare un'applicazione mobile companion per il personale sanitario, in maniera tale da permettere l'accesso alle funzionalità principali direttamente dal proprio smartphone.
+Tale applicazione non richiederebbe sostanziali modifiche al backend in quanto sono già implementante API REST utilizzabili a tal fine. Potrebbe essere invece pensabile l'implementazione di ulteriori API REST per richieste più fine-grained, in modo da ridurre il carico di dati trasferiti.
 \section{Considerazioni personali}
-\subsection{Apprendimenti chiave}
-
 \subsection{Sfide personali}
-
+La conciliazione tra lavoro nel fine settimana, studio per completare gli ultimi esami e lo sviluppo del progetto ha rappresentato una sfida non indifferente.
+Per riuscire a portare avanti tutte le attività sopra citate, è stata necessaria un'attenta pianificazione, oltre che a una buona dose di sacrificio personale.
 \subsection{Valore aggiunto dell'esperienza}
-
+Il valore aggiunto di questa esperienza è stato rappresentato dalla possibilità di mettere in pratica le conoscenze acquisite durante il corso di Ingegneria del Software, oltre che di apprendere nuove tecnologie e metodologie di sviluppo.
+La più grande quantità di informazioni appresa è stata quella relativa al framework Flask, il quale mi tornerà sicuramente utile in futuro nel mondo lavorativo.
 % Appendici
 \appendix
 
@@ -3973,5 +4009,6 @@ highlight 15 to 17 #lightgrey : Sessione terminata
     \bibitem{plantvscode} PlantUML - Visual Studio Marketplace. (n.d.). \url{https://marketplace.visualstudio.com/items?itemName=jebbs.plantuml}
     \bibitem{pytest} pytest documentation. (n.d.). \url{https://docs.pytest.org/en/stable/}
     \bibitem{koyeb} KOYEB: High-performance infrastructure for APIs, inference, and databases. (n.d.). Koyeb. \url{https://www.koyeb.com/}
-\end{thebibliography}
+    \bibitem{fitbit_API_rate} Fitbit API - PublicAPI. (n.d.). PublicAPI. \url{https://publicapi.dev/fitbit-api}
+  \end{thebibliography}
 \end{document}
