@@ -79,7 +79,7 @@
 
         \vspace{0.5cm}
 
-        {\fontsize{14}{18} Classe n. 21-270 - Ingegneria informatica}
+        {\fontsize{14}{18} Classe n. L-8 - Ingegneria informatica}
     \end{flushleft}
 
     \vspace{2.5cm}
@@ -102,10 +102,10 @@
         \hfill
         \begin{minipage}[t]{0.47\textwidth}
             {\fontsize{12}{14}\selectfont\textbf{Relatore:}}\\
-            {\fontsize{14}{18}\selectfont\textit{Chiar.ma Prof.ssa Silvia Bonfanti}}\\
+            {\fontsize{14}{18}\selectfont\textit{Prof.ssa Silvia Bonfanti}}\\
             \vspace{0.5cm}\\
             {\fontsize{12}{14}\selectfont\textbf{Correlatore (se applicabile):}}\\
-            {\fontsize{14}{18}\selectfont\textit{Chiar.mo Prof. Angelo Gargantini}}
+            {\fontsize{14}{18}\selectfont\textit{Prof. Angelo Gargantini}}
         \end{minipage}\end{flushleft}
 
     \vfill
@@ -211,6 +211,7 @@ La piattaforma si propone di affrontare le problematiche sopra menzionate, forne
 Il progetto si propone, in ultima battuta, di sviluppare una soluzione integrabile senza difficoltà in ambienti già esistenti (come ad esempio Google Cloud e Amazon AWS), così da rendere il più semplice possibile l'adozione.
 
 \section{Struttura della tesi}
+Tutto il materiale relativo al progetto è disponibile pubblicamente sul repository GitHub \url{https://github.com/andrearoggeri22/VitaLink} \cite{github}.
 La tesi è strutturata in otto capitoli principali che seguono i principi dello sviluppo dell'ingegneria del software, seguiti da appendici tecniche.
 \begin{itemize}
     \item Il \textbf{Capitolo 1} introduce il contesto di sviluppo del progetto, le motivazioni e gli obiettivi.
@@ -1378,7 +1379,7 @@ Durante la build dell'immagine Docker, il file \texttt{pyproject.toml} viene uti
 
 \section{Controllo di versione e integrazione continua}
 \subsection{Repository GitHub}
-Lo sviluppo di VitaLink è stato gestito con Git come sistema di controllo di versione, con un repository ospitato su GitHub \cite{github}.
+Lo sviluppo di VitaLink è stato gestito con Git come sistema di controllo di versione, con un repository ospitato su GitHub \url{https://github.com/andrearoggeri22/VitaLink} \cite{github}.
 Lo strumento GitHub Desktop \cite{gitdesktop}ha permesso di gestire le operazioni di commit, push, pull e merge in maniera comoda.
 
 \subsection{GitHub Actions per CI/CD}
@@ -1925,10 +1926,8 @@ L'applicazione espone numerosi endpoint sia per l'interfaccia web che per le API
 
 \chapter{Testing e Validazione}
 \section{Strategia di testing}
-\subsection{Approccio al testing e ambiente}
 Per il testing l'approccio ha previsto la configurazione dell'ambiente di test con un file .env.test specifico per l'ambiente di test.
 Per eseguire i test infatti è necessario avere un database e, per evitare di compromettere l'integrità del database effettivo utilizzato in produzione, è stato creato un database in-memory SQLite che ha permesso di isolare le operazioni effettuate.
-\subsection{Automazione dei test}
 Per automatizzare i test, è stato utilizzato un framework di testing chiamato pytest \cite{pytest}.
 \section{Unit testing}
 Per ciascun modulo principale è stato scritto un set di test unitari per verificare il corretto funzionamento delle singole funzioni e che queste sddisfassero i requisiti specifici.
@@ -1979,50 +1978,35 @@ L'automazione dei test rappresenta una componente fondamentale del workflow di C
 Il deployment automatizzato di VitaLink è configurato per attivarsi solo quando le modifiche vengono incorporate nel ramo principale (\texttt{main}) e tutti i test sono stati superati con successo. Il processo di deployment utilizza le credenziali sicure memorizzate come segreti di GitHub Actions e comprende diverse fasi: costruzione dell'immagine Docker, push al Container Registry, e deployment sull'infrastruttura cloud. La configurazione include anche meccanismi di rollback automatico in caso di problemi durante il deployment, garantendo la continuità del servizio. Un aspetto particolarmente importante è l'applicazione delle migrazioni del database, che viene gestita dallo script \texttt{db\_migrate.sh} durante l'avvio del container, assicurando che lo schema del database sia sempre sincronizzato con il codice dell'applicazione. Questo approccio garantisce deployment frequenti e sicuri, abilitando un modello di sviluppo realmente continuo.
 
 \section{Logging}
-\subsection{Strategia di logging}
 Per il backend della piattaforma è stato implementato un sistema di logging estensivo per monitorare le attività e gli errori.
-
-\subsection{Gestione degli errori}
 La strategia in caso di errore ha previsto la registrazione di un messaggio dettagliato in console, includendo anche i dettagli dell'eccezione.
 Nel caso di errori critici, il workflow configurato su Github Actions ha permesso di identificare quasi istantaneamente e risolvere i problemi.
 
 \chapter{Risultati e valutazione}
-\section{Obiettivi raggiunti}
-\subsection{Funzionalità implementate}
 Il risultato finale dell'implementazione della piattaforma VitaLink prevedere l'integrazione di tutte le funzionalità di base descritte nei requisiti iniziali.
 La struttura modulare del codice ha permesso di aggiungere funzionalità aggiuntive anche in fase di testing e deployment, qualora ciò si si fosse reso necessario.
 
 \section{Limiti e problemi riscontrati}
-\subsection{Sfide tecniche}
 La più grande limitazione tecnica è stata rappresentata in primis dalle API esterne, le quali (come nel caso di Fitbit) richiedono un server di callback in formato HTTPS.
 Ciò ha richiesto l'utilizzo di un server di produzione configurato opportunamente anche in fase di testing, andando a complicare leggermente il processo di sviluppo.
 Un altro problema è stato rappresentato dalla difficoltà di trovare un servizio di hosting gratuito che permettesse l'uso di tutti i componenti richiesti (database relazionale, server WSGI, ecc.), il che ha richiesto un compromesso tra costi e funzionalità (la scalabilità del servizio risulta infatti limitata ad un'istanza nel caso di utilizzo di Koyeb con la prova gratuita).
-\subsection{Limitazioni delle API esterne}
 Le API esterne di Fitbit, come indicato sul sito di PublicAPI \cite{fitbit_API_rate}, presentano un rate limit piuttosto basso (150 richieste all'ora). Tale limite ha imposto un ritmo di sviluppo più lento in quanto per ciascuna funzionalità implementata, il testing correlato richiedeva delle richieste API che andavano molto rapidamente a depletare il limite orario (richiedendo quindi di creare vari account di test Fitbit per aggirare tale limite).
 
 \chapter{Conclusioni e sviluppi futuri}
 \section{Conclusioni}
-\subsection{Contributi principali}
 Tutto il lavoro è stato svolto in autonomia, dalla progettazione iniziale fino al deployment della piattaforma.
 Tutte le fonti utilizzate per per l'apprendimento e la realizzazione del progetto sono state debitamente citate.
-
-\subsection{Riflessione sul processo di sviluppo}
 Il processo di sviluppo ha seguito un approccio aderente ai principi imparati durante il corso di Ingegneria del Software, con particolare attenzione alla fase di progettazione e alla scrittura di codice manutenibile e testabile.
 L'adozione delle pratiche di CI/CD ha permesso di automatizzare alcune delle operazioni ripetitive e di ridurre il rischio di errore umano.
 
 \section{Sviluppi futuri}
-\subsection{Integrazione con ulteriori piattaforme sanitarie}
 Per il momento non si prevede l'integrazione con ulteriori piattaforme sanitarie. Ciò nonostante, la modularità del codice permette di aggiungere facilmente nuovi moduli per l'integrazione con altre piattaforme che supportino OAuth 2.0 e dispongano di API REST.
 Il progetto verrà mantenuto sul repository GitHub a tempo indefinito, in modo da permettere a chiunque di contribuire allo sviluppo futuro, oltre che a poter consultare il repository in qualunque momento.
-
-\subsection{Applicazione mobile companion}
 Per il futuro si potrebbe pensare di sviluppare un'applicazione mobile companion per il personale sanitario, in maniera tale da permettere l'accesso alle funzionalità principali direttamente dal proprio smartphone.
 Tale applicazione non richiederebbe sostanziali modifiche al backend in quanto sono già implementante API REST utilizzabili a tal fine. Potrebbe essere invece pensabile l'implementazione di ulteriori API REST per richieste più fine-grained, in modo da ridurre il carico di dati trasferiti.
 \section{Considerazioni personali}
-\subsection{Sfide personali}
 La conciliazione tra lavoro nel fine settimana, studio per completare gli ultimi esami e lo sviluppo del progetto ha rappresentato una sfida non indifferente.
 Per riuscire a portare avanti tutte le attività sopra citate, è stata necessaria un'attenta pianificazione, oltre che a una buona dose di sacrificio personale.
-\subsection{Valore aggiunto dell'esperienza}
 Il valore aggiunto di questa esperienza è stato rappresentato dalla possibilità di mettere in pratica le conoscenze acquisite durante il corso di Ingegneria del Software, oltre che di apprendere nuove tecnologie e metodologie di sviluppo.
 La più grande quantità di informazioni appresa è stata quella relativa al framework Flask, il quale mi tornerà sicuramente utile in futuro nel mondo lavorativo.
 % Appendici
@@ -2862,11 +2846,11 @@ deactivate Frontend
 
 \end{lstlisting}
 \section{Diagrammi di stato}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.85\textwidth]{images/uml/PatientLifecycle.png}
-    \caption{Grafico UML di stato per il ciclo di vita del paziente}
-    \label{fig:uml-state-graph}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth,height=0.9\textheight,keepaspectratio]{images/uml/PatientLifecycle.png}
+  \caption{Grafico UML di stato per il ciclo di vita del paziente}
+  \label{fig:uml-state-graph}
 \end{figure}
 
 \begin{lstlisting}[basicstyle=\small\ttfamily, breaklines=true, caption={ciclo di vita del paziente}]
